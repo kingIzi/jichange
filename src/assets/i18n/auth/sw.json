@@ -1,0 +1,103 @@
+{
+  "loginForm": {
+    "welcomeMessage": "Ingia kwenye akaunti yako",
+    "signInMessage": "Ingiza barua pepe yako na nenosiri kuingia",
+    "username": "Anwani ya barua pepe",
+    "password": "Nywila",
+    "placeholders": {
+      "username": "Ingiza anwani ya barua pepe",
+      "password": "Ingiza nywila"
+    },
+    "errors": {
+      "usernameError": "Tafadhali ingiza barua pepe halali",
+      "passwordError": "Tafadhali ingiza nywila yako",
+      "dialogs": {
+        "invalidFormError": "Fomu batili",
+        "missingUsername": "Tafadhali toa jina la mtumiaji",
+        "missingPassword": "Tafadhali toa nywila",
+        "usernamePasswordIncorrect": "Jina la mtumiaji au nenosiri si sahihi"
+      }
+    },
+    "forgotPassword": "Umesahau nywila?",
+    "rememberMe": "Nikumbuke",
+    "actions": {
+      "signIn": "Ingia ndani",
+      "controlNumberDetails": "Dhibiti Hakuna Maelezo",
+      "register": "Kujiandikisha"
+    }
+  },
+  "vendorRegistration": {
+    "title": "Usajili wa Vendor",
+    "form": {
+      "vendorName": "Jina la Vendor",
+      "mobileNo": "Nambari ya Simu ya Mkononi",
+      "branch": "Tawi",
+      "accountNo": "Nambari ya Akaunti",
+      "makerCheckerApproval": "Muumba - Checker kwa idhini ya ankara?",
+      "makerOptions": {
+        "yes": "Ndio",
+        "no": "Apana"
+      },
+      "placeholders": {
+        "vendorName": "Ingiza nambari ya muuzaji",
+        "branch": "Chagua maelezo ya Tawi",
+        "accountNo": "Ingiza nambari ya Akaunti"
+      },
+      "errors": {
+        "vendorName": "Tafadhali taja jina",
+        "mobileNo": "Tafadhali ongeza nambari halali ya simu",
+        "branch": "Tafadhali bainisha",
+        "accountNo": "Ingiza namba halali ya akaunti",
+        "dialogs": {
+          "invalidFormError": "Fomu batili",
+          "missingVendorName": "Tafadhali toa jina la muuzaji",
+          "missingPhoneNo": "Tafadhali toa nambari halali ya simu",
+          "missingBranchName": "Tafadhali toa jina la Tawi",
+          "missingAccountNo": "Tafadhali toa namba ya akaunti",
+          "makerChecker": "Tafadhali, taja hitaji la idhini ya ombi lako"
+        }
+      },
+      "success": {
+        "vendorAddedSuccessfully": "Vendor aliongeza kwa mafanikio!"
+      }
+    }
+  },
+  "controlNumberDetails": {
+    "title": "Maelezo ya Nambari ya Kudhibiti",
+    "form": {
+      "controlName": "Nambari ya kudhibiti",
+      "placeholders": {
+        "controlName": "Ingiza nambari ya kudhibiti"
+      },
+      "errors": {
+        "controlName": "Tafadhali ingiza nambari ya kudhibiti",
+        "dialogs": {
+          "invalidFormError": "Fomu batili",
+          "missingAccountNo": "Tafadhali toa namba ya akaunti",
+          "notFound": "Haipatikani",
+          "notFoundMessage": "Nambari ya kudhibiti {} haikupatikana."
+        }
+      }
+    }
+  },
+  "forgotPassword": {
+    "welcomeMessage": "Imesahau Nywila",
+    "forgotPasswordMessage": "Ingiza barua pepe yako na maagizo yatatumwa kwako!",
+    "form": {
+      "email": "Anwani ya barua pepe",
+      "placeholders": {
+        "email": "Ingiza anwani ya barua pepe"
+      },
+      "errors": {
+        "email": "Tafadhali toa barua pepe halali",
+        "dialogs": {
+          "invalidFormError": "Fomu batili",
+          "missingEmail": "Tafadhali toa anwani halali ya barua pepe"
+        }
+      },
+      "links": {
+        "backToLogin": "Nenda kwenye kuingia"
+      }
+    }
+  }
+}

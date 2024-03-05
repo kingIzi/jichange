@@ -1,0 +1,517 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
+<form
+  [formGroup]="companySummaryForm"
+  action=""
+  class="grid grid-cols-1 lg:grid-cols-3 p-4 gap-4 h-full overflow-y-auto"
+>
+  <h1
+    *transloco="let t; read: 'company.summary.companyForm'"
+    class="text-xl md:text-2xl p-0 col-span-full"
+  >
+    {{ t("company") }}
+  </h1>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("customer") }} <span class="text-red-600">*</span>
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      [placeholder]="t('customer')"
+      type="text"
+      formControlName="company"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="company && company.invalid && company.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-danger-700 text-xs"
+      >
+        {{ t("customer") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("mobileNo") }} <span class="text-red-600">*</span>
+    </h6>
+    <span class="relative">
+      <select
+        #phonePrefix
+        class="select select-sm select-bordered select-disabled w-20 absolute"
+      >
+        <option selected class="font-inter text-xs" value="+255">+255</option>
+      </select>
+      <input
+        type="tel"
+        placeholder="(0)"
+        formControlName="mobileNo"
+        (change)="updatePhoneNumber(phonePrefix.value, mobileNo)"
+        class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
+        pattern="[0-9]{12}"
+      />
+      <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+        <p
+          *transloco="let t; read: 'company.summary.companyForm.errors'"
+          class="text-danger-700 text-xs"
+        >
+          {{ t("mobileNo") }}
+        </p>
+      </span>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("branch") }} <span class="text-red-600">*</span>
+    </h6>
+    <select
+      formControlName="branch"
+      class="select select-sm select-bordered w-full"
+    >
+      <option
+        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+        selected
+        disabled
+        [value]="t('branch')"
+        valu
+      >
+        {{ t("branch") }}
+      </option>
+      <option value="123">123</option>
+    </select>
+    <span *ngIf="branch && branch.invalid && branch.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-danger-700 text-xs"
+      >
+        {{ t("branch") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <div class="flex flex-row items-center">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm'"
+        class="text-xs"
+      >
+        {{ t("makerChecker") }}
+      </p>
+      <div class="form-control">
+        <label
+          *transloco="let y; read: 'defaults'"
+          class="label cursor-pointer"
+        >
+          <span class="label-text text-xs font-inter">
+            {{ y("yes") }}
+          </span>
+          <input
+            type="radio"
+            name="makerChecker"
+            formControlName="makerChecker"
+            class="radio radio-xs"
+            [value]="y('yes')"
+            checked
+          />
+        </label>
+      </div>
+      <div class="form-control">
+        <label
+          *transloco="let y; read: 'defaults'"
+          class="label cursor-pointer"
+        >
+          <span class="label-text text-xs font-inter">
+            {{ y("no") }}
+          </span>
+          <input
+            formControlName="makerChecker"
+            type="radio"
+            name="makerChecker"
+            [value]="y('no')"
+            class="radio radio-xs"
+          />
+        </label>
+      </div>
+    </div>
+    <span *ngIf="makerChecker && makerChecker.invalid && makerChecker.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("makerChecker") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("faxNo") }}
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      [placeholder]="t('faxNo')"
+      type="text"
+      formControlName="faxNo"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="faxNo && faxNo.invalid && faxNo.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("faxNo") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("postBoxNo") }}
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      formControlName="poBox"
+      [placeholder]="t('postBoxNo')"
+      type="text"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="poBox && poBox.invalid && poBox.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("postBoxNo") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("address") }}
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      formControlName="address"
+      [placeholder]="t('address')"
+      type="text"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="address && address.invalid && address.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("address") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("region") }}
+    </h6>
+    <select
+      formControlName="region"
+      class="select select-sm select-bordered w-full"
+    >
+      <option
+        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+        disabled
+        selected
+        value="Select branch"
+      >
+        {{ t("region") }}
+      </option>
+    </select>
+    <span *ngIf="region && region.invalid && region.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("region") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("district") }}
+    </h6>
+    <select
+      formControlName="district"
+      class="select select-sm select-bordered w-full"
+    >
+      <option
+        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+        selected
+        disabled
+        value="Select branch"
+      >
+        {{ t("district") }}
+      </option>
+    </select>
+    <span *ngIf="district && district.invalid && district.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("district") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("ward") }}
+    </h6>
+    <select
+      formControlName="ward"
+      class="select select-sm select-bordered w-full"
+    >
+      <option
+        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+        disabled
+        selected
+        value="Select ward"
+      >
+        {{ t("ward") }}
+      </option>
+    </select>
+    <span *ngIf="ward && ward.invalid && ward.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("ward") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("tinNo") }}
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      formControlName="tinNo"
+      [placeholder]="t('tinNo')"
+      type="text"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="tinNo && tinNo.invalid && tinNo.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("tinNo") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("vatNo") }}
+    </h6>
+    <input
+      formControlName="vatNumber"
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      [placeholder]="t('vatNo')"
+      type="text"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="vatNumber && vatNumber.invalid && vatNumber.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("vatNo") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("directorName") }}
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      formControlName="directorName"
+      [placeholder]="t('directorName')"
+      type="text"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="directorName && directorName.invalid && directorName.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("directorName") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("emailId") }}
+    </h6>
+    <input
+      *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+      formControlName="emailId"
+      [placeholder]="t('emailId')"
+      type="text"
+      class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="emailId && emailId.invalid && emailId.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
+      >
+        {{ t("emailId") }}
+      </p>
+    </span>
+  </div>
+  <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("telephoneNo") }}
+    </h6>
+    <span class="relative">
+      <select
+        #phonePrefix
+        class="select select-sm select-bordered select-disabled w-20 absolute"
+      >
+        <option selected class="font-inter text-xs" value="+255">+255</option>
+      </select>
+      <input
+        type="tel"
+        (change)="updatePhoneNumber(phonePrefix.value, telphoneNumber)"
+        placeholder="(0)"
+        class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
+        formControlName="telphoneNumber"
+        pattern="[0-9]{12}"
+      />
+      <span
+        *ngIf="
+          telphoneNumber && telphoneNumber.invalid && telphoneNumber.touched
+        "
+      >
+        <p
+          *transloco="let t; read: 'company.summary.companyForm.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("telephoneNo") }}
+        </p>
+      </span>
+    </span>
+  </div>
+  <p
+    *transloco="let t; read: 'company.summary.companyForm'"
+    class="text-lg font-bold p-0 col-span-full"
+  >
+    {{ t("bankDetails") }}
+  </p>
+  <table class="min-w-full text-left text-sm font-light col-span-full py-8">
+    <thead class="border-b font-medium dark:border-neutral-500">
+      <tr *transloco="let t; read: 'tableData'">
+        <th
+          *transloco="let t; read: 'defaults'"
+          class="text-xs font-inter py-4"
+        >
+          Sno
+        </th>
+        <th
+          *transloco="let t; read: 'company.summary.companyForm'"
+          class="text-xs font-inter py-4"
+        >
+          {{ t("accountNo") }}
+        </th>
+        <th
+          *transloco="let t; read: 'defaults'"
+          class="text-xs font-inter py-4"
+        >
+          {{ t("action") }}
+        </th>
+      </tr>
+    </thead>
+    <tbody formArrayName="bankDetails">
+      <tr
+        *ngFor="let bankDetail of bankDetails.controls; index as ind"
+        formGroupName="{{ ind }}"
+      >
+        <td>
+          {{ ind + 1 }}
+        </td>
+        <td>
+          <input
+            formControlName="accountNumber"
+            type="number"
+            class="input-sm input-bordered input-ghost input w-full"
+          />
+        </td>
+        <td class="flex flex-row items-center justify-center">
+          <button
+            *ngIf="ind === bankDetails.controls.length - 1"
+            (click)="addBankDetail(ind)"
+          >
+            <span class="material-symbols-outlined text-success"> add </span>
+          </button>
+          <button (click)="removeBankDetail(ind)">
+            <span class="material-symbols-outlined text-danger-600">
+              delete
+            </span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    *transloco="let t; read: 'actions'"
+    class="col-span-full flex flex-row space-x-2 items-center w-full justify-end pt-2"
+  >
+    <button
+      (click)="closeDialog()"
+      type="button"
+      class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+    >
+      {{ t("close") }}
+    </button>
+    <button
+      (click)="submitCompanySummary()"
+      type="submit"
+      form="vendor-registration-form"
+      class="btn text-xs btn-outline font-inter btn-success w-24"
+    >
+      {{ t("submit") }}
+    </button>
+  </div>
+</form>

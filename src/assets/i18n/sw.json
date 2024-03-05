@@ -1,0 +1,113 @@
+{
+  "defaults": {
+    "yes": "Ndiyo",
+    "no": "Apana",
+    "search": "Tafutiza",
+    "action": "Vitendo",
+    "status": "Hali",
+    "active": "Amilifu",
+    "inActive": "Siamilifu",
+    "viewAll": "Tazama Yote"
+  },
+  "actions": {
+    "submit": "Wasilisha",
+    "close": "Funga",
+    "ok": "Sawa",
+    "reset": "Weka upya",
+    "download": "Pakua"
+  },
+  "errors": {
+    "errorOccured": "Kosa limetokea",
+    "verifyConnection": "Tafadhali thibitisha uhusiano wako au jaribu tena.",
+    "noInternet": "Wewe ni nje ya mtandao",
+    "connected": "Nyuma ya mtandaoni",
+    "noDataFound": "Hakuna taarifa iliyopatikana"
+  },
+  "roles": {
+    "role": "Jukumu",
+    "bank": "Benki",
+    "vendor": "Muuzaji",
+    "logout": "Ondoka"
+  },
+  "vendorHeaders": [
+    {
+      "name": "Wateja",
+      "dropdowns": []
+    },
+    {
+      "name": "Maelezo ya ankara",
+      "dropdowns": []
+    },
+    {
+      "name": "Ankara iliyotengenezwa",
+      "dropdowns": []
+    }
+  ],
+  "bankHeaders": [
+    {
+      "name": "Kampuni",
+      "dropdowns": ["Muhtasari", "Idhini ya Kikasha"]
+    },
+    {
+      "name": "Usanidi",
+      "dropdowns": [
+        "nchi",
+        "mkoa",
+        "wilaya",
+        "kata",
+        "sarafu",
+        "kutambua",
+        "tawi",
+        "jina la swali",
+        "smtp",
+        "maandishi ya barua pepe",
+        "mtumiaji wa benki",
+        "lugha",
+        "Akaunti ya Kutupilia Mbali",
+        "Akaunti ya Amana"
+      ]
+    },
+    {
+      "name": "Ripoti",
+      "dropdowns": [
+        "muhtasari",
+        "Maelezo ya Shughuli",
+        "Maelezo ya Bili",
+        "Ripoti ya Mteja",
+        "Ripoti ya Kumbukumbu za Mtumiaji",
+        "Kufuatilia Ukaguzi"
+      ]
+    }
+  ],
+  "tableData": {
+    "itemsPerPage": "Vipengee kwa kila ukurasa",
+    "filterDates": ["Mwezi uliopita", "Mwaka jana", "Tarehe ya desturi"]
+  },
+  "utilities": {
+    "today": "Leo",
+    "yesterday": "Jana",
+    "months": [
+      { "name": "Januari", "abbreviation": "Jan" },
+      { "name": "Februari", "abbreviation": "Feb" },
+      { "name": "Machi", "abbreviation": "Mac" },
+      { "name": "Aprili", "abbreviation": "Apr" },
+      { "name": "Mei", "abbreviation": "Mei" },
+      { "name": "Juni", "abbreviation": "Jun" },
+      { "name": "Julai", "abbreviation": "Jul" },
+      { "name": "Agosti", "abbreviation": "Ago" },
+      { "name": "Septemba", "abbreviation": "Sep" },
+      { "name": "Oktoba", "abbreviation": "Okt" },
+      { "name": "Novemba", "abbreviation": "Nov" },
+      { "name": "Desemba", "abbreviation": "Des" }
+    ],
+    "daysOfWeek": [
+      { "name": "Jumatatu", "abbreviation": "Jat" },
+      { "name": "Jumanne", "abbreviation": "Jnn" },
+      { "name": "Jumatano", "abbreviation": "Jtn" },
+      { "name": "Alhamisi", "abbreviation": "Alh" },
+      { "name": "Ijumaa", "abbreviation": "Ijm" },
+      { "name": "Jumamosi", "abbreviation": "Jmi" },
+      { "name": "Jumapili", "abbreviation": "Jpl" }
+    ]
+  }
+}

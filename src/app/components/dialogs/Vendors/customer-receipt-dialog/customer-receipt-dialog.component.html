@@ -1,0 +1,86 @@
+<div #receiptView class="flex flex-col w-[800px] h-full">
+  <div
+    [formGroup]="formGroup"
+    *ngFor="let formGroup of formGroups; index as ind"
+    class="w-full h-full grid grid-cols-2 bg-lightPurple"
+  >
+    <div
+      class="col-span-full flex flex-row bg-darkBlue items-center justify-between p-3"
+    >
+      <p class="text-white text-xl">Receipt</p>
+      <p class="text-white text-sm">{{ formGroup.get("receiptNo")?.value }}</p>
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3">
+      <p class="flex-none text-black font-semibold text-sm w-28">Control N°</p>
+      <input
+        type="text"
+        formControlName="controlNumber"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3">
+      <p class="flex-none text-black font-semibold text-sm w-28">Date</p>
+
+      <input
+        type="date"
+        formControlName="date"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3">
+      <p class="flex-none text-black font-semibold text-sm w-28">To</p>
+
+      <input
+        type="text"
+        formControlName="to"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3 relative">
+      <p class="flex-none text-black font-semibold text-sm w-28">Amount</p>
+
+      <input
+        type="text"
+        formControlName="amount"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3">
+      <p class="flex-none text-black font-semibold text-sm w-28">From</p>
+
+      <input
+        type="text"
+        formControlName="from"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3">
+      <p class="flex-none text-black font-semibold text-sm w-28">Method</p>
+
+      <input
+        type="text"
+        formControlName="method"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div
+      class="flex flex-row items-center space-x-2 pl-3 relative col-span-full border border-neutral-300"
+    >
+      <p class="flex-none text-black font-semibold text-sm w-28">For</p>
+
+      <input
+        type="text"
+        formControlName="for"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+    <div class="flex flex-row items-center space-x-2 pl-3 col-start-2">
+      <p class="flex-none text-black font-semibold text-sm w-28">Balance</p>
+      <input
+        type="text"
+        formControlName="balance"
+        class="text-black input input-sm rounded-none grow text-xs focus:border-none focus:outline-none"
+      />
+    </div>
+  </div>
+</div>

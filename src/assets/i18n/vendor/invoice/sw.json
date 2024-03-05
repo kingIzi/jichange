@@ -1,0 +1,69 @@
+{
+  "invoiceDetails": "Maelezo ya Bili",
+  "addInvoice": "Ongeza Bili",
+  "createInvoice": "Unda Bili",
+  "form": {
+    "invoiceNo": "Nambari ya Bili",
+    "invoiceDate": "Tarehe ya Bili",
+    "dueDate": "Tarehe ya Kulipwa",
+    "invoiceExpire": "Tarehe ya Muda wa Bili",
+    "customer": "Mteja",
+    "paymentType": "Aina ya Malipo",
+    "itemDetails": "Maelezo ya Bidhaa",
+    "description": "Maelezo",
+    "quantity": "Kiasi",
+    "unitPrice": "Bei ya Kitengo",
+    "totalPrice": "Jumla ya Bei",
+    "remarks": "Maelezo",
+    "status": "Hali",
+    "addNewCustomer": "Ongeza mteja mpya",
+    "actions": {
+      "sureToAddCustomer": "Una uhakika unataka kuongeza mteja huyu?",
+      "addInvoiceAsWell": "Je! Ungependa pia kuambatanisha ankara kwa mteja huyu?",
+      "confirm": "Thibitisha",
+      "areYouSureYouWantToAddANewCustomer": "Una uhakika unataka kuongeza mteja mpya?"
+    },
+    "placeholders": {
+      "invoiceNo": "Ingiza nambari ya bili",
+      "invoiceDate": "Ingiza tarehe ya bili",
+      "dueDate": "Ingiza tarehe ya kulipwa kwa bili",
+      "invoiceExpire": "Ingiza tarehe ya kumalizika kwa bili",
+      "customer": "Chagua mteja",
+      "paymentType": "Chagua aina ya malipo",
+      "status": "Chagua hali"
+    },
+    "errors": {
+      "invoiceNo": "Tafadhali ingiza nambari ya bili",
+      "invoiceDate": "Tafadhali eleza tarehe ya bili",
+      "dueDate": "Tafadhali eleza tarehe ya kulipwa kwa bili",
+      "invoiceExpire": "Tafadhali eleza tarehe ya kumalizika kwa bili",
+      "customer": "Tafadhali chagua mteja",
+      "paymentType": "Tafadhali chagua aina ya malipo",
+      "status": "Tafadhali chagua hali",
+      "itemDetails": {
+        "missingDescription": "Tafadhali jaza",
+        "missingQuantity": "Eleza kiasi",
+        "missingUnitPrice": "Eleza bei ya kitengo"
+      }
+    },
+    "dialog": {
+      "invalidForm": "Fomu batili",
+      "invoiceNo": "Nambari ya bili haipo",
+      "invoiceDate": "Tafadhali eleza tarehe ya bili",
+      "dueDate": "Tafadhali eleza tarehe ya kulipwa kwa bili",
+      "invoiceExpire": "Tafadhali eleza tarehe ya kumalizika kwa bili",
+      "customer": "Tafadhali eleza mteja",
+      "paymentType": "Tafadhali eleza aina ya malipo",
+      "maximumItemDetails": "Idadi kubwa ya bidhaa {} imefikiwa.",
+      "status": "Unapaswa kutoa hali."
+    }
+  },
+  "invoiceDetailsTable": [
+    "Nambari",
+    "Nambari ya Bili",
+    "Tarehe ya Bili",
+    "Jina la Mteja",
+    "Jumla ya Kiasi",
+    "Maelezo"
+  ]
+}

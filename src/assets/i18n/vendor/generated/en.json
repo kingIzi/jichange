@@ -1,0 +1,32 @@
+{
+  "generatedInvoice": "Generated Invoice",
+  "generatedInvoicesTable": [
+    "Customer name",
+    "Invoice No",
+    "Invoice Date",
+    "Payment type",
+    "Total Amount",
+    "Delivery Status"
+  ],
+  "generateInvoiceView": {
+    "viewTable": ["Description", "Quantity", "Unit Price", "Subtotal"]
+  },
+  "generateChart": {
+    "generateChart": "Generate graph",
+    "chartType": "Chart type",
+    "form": {
+      "placeholders": {
+        "chartType": "Select chart type"
+      },
+      "dialog": {
+        "specifyGraphType": "Specify graph type",
+        "specifyGraphTypeMsg": "You must specify the graph type. (Line, bar, pie)",
+        "missingAxis": "Missing axis",
+        "noXAxisFound": "Please, select the X-Axis column to continue",
+        "noYAxisFound": "Please, select the Y-Axis column to continue"
+      }
+    },
+    "xAxis": "X-Axis",
+    "yAxis": "Y-Axis"
+  }
+}

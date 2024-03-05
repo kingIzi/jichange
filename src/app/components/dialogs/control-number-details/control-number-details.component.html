@@ -1,0 +1,53 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    *transloco="let t; read: 'auth.controlNumberDetails'"
+    id="control-number-form"
+    [formGroup]="controlNumberFormGroup"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1 class="text-xl md:text-2xl p-0">
+      {{ t("title") }}
+    </h1>
+    <div class="flex flex-col space-y-1 w-full py-8">
+      <h6 class="text-left text-sm">
+        {{ t("form.controlName") }} <span class="text-red-600">*</span>
+      </h6>
+      <input
+        #controlNumber
+        formControlName="control"
+        (change)="setControlNumberValue(controlNumber.value)"
+        type="text"
+        [placeholder]="t('form.placeholders.controlName')"
+        class="input input-bordered w-full max-w-lg bg-transparent text-black"
+      />
+      <span *ngIf="control && control.invalid && control.touched">
+        <p class="text-xs text-red-600">
+          {{ t("form.errors.controlName") }}
+        </p>
+      </span>
+    </div>
+    <div
+      *transloco="let y; read: 'actions'"
+      class="flex flex-row space-x-2 items-center w-full justify-end pt-2"
+    >
+      <button
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs btn-ghost text-neutral-500 font-inter w-24"
+      >
+        {{ y("close") }}
+      </button>
+      <button
+        (click)="submitControlNumberForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ y("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,165 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="control-number-form"
+    [formGroup]="emailTextForm"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'setup.emailText'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("emailText") }}
+    </h1>
+    <div action="" class="grid grid-cols-2 gap-3 w-full py-8">
+      <div class="flex flex-col space-y-1 col-span-full">
+        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
+          {{ t("flowId") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="flowId"
+          class="select select-sm select-bordered w-1/2"
+        >
+          <option
+            *transloco="let t; read: 'setup.emailText.form.placeholders'"
+            selected
+            disabled
+          >
+            {{ t("flowId") }}
+          </option>
+        </select>
+        <span *ngIf="flowId && flowId.invalid && flowId.touched">
+          <p
+            *transloco="let t; read: 'setup.emailText.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("flowId") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
+          {{ t("subjectEnglish") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.emailText.form.placeholders'"
+          type="email"
+          [placeholder]="t('subjectEnglish')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="subjectEnglish"
+          #subjectEnglishInput
+          (change)="setControlValue(subjectEnglish, subjectEnglishInput.value)"
+        />
+        <span
+          *ngIf="
+            subjectEnglish && subjectEnglish.invalid && subjectEnglish.touched
+          "
+        >
+          <p
+            *transloco="let t; read: 'setup.emailText.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("subjectEnglish") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
+          {{ t("subjectSwahili") }}
+        </p>
+        <input
+          *transloco="let t; read: 'setup.emailText.form.placeholders'"
+          type="email"
+          [placeholder]="t('subjectSwahili')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="subjectSwahili"
+          #subjectSwahiliInput
+          (change)="setControlValue(subjectSwahili, subjectSwahiliInput.value)"
+        />
+        <span
+          *ngIf="
+            subjectSwahili && subjectSwahili.invalid && subjectSwahili.touched
+          "
+        >
+          <p
+            *transloco="let t; read: 'setup.emailText.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("subjectSwahili") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col col-span-full lg:col-span-1 space-y-1">
+        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
+          {{ t("emailText") }}<span class="text-red-600">*</span>
+        </p>
+        <textarea
+          *transloco="let t; read: 'setup.emailText.form.placeholders'"
+          formControlName="emailText"
+          [placeholder]="t('emailText')"
+          class="textarea textarea-bordered textarea-sm"
+          (change)="setControlValue(emailText, emailTextArea.value)"
+          #emailTextArea
+          id=""
+          cols="30"
+          rows="10"
+        ></textarea>
+        <span *ngIf="emailText && emailText.invalid && emailText.touched">
+          <p
+            *transloco="let t; read: 'setup.emailText.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("emailText") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col col-span-full lg:col-span-1 space-y-1">
+        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
+          {{ t("emailSwahili") }}<span class="text-red-600">*</span>
+        </p>
+        <textarea
+          *transloco="let t; read: 'setup.emailText.form.placeholders'"
+          formControlName="emailSwahili"
+          [placeholder]="t('emailSwahili')"
+          class="textarea textarea-bordered textarea-sm"
+          (change)="setControlValue(emailText, emailSwahiliTextArea.value)"
+          #emailSwahiliTextArea
+          id=""
+          cols="30"
+          rows="10"
+        ></textarea>
+        <span
+          *ngIf="emailSwahili && emailSwahili.invalid && emailSwahili.touched"
+        >
+          <p
+            *transloco="let t; read: 'setup.emailText.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("emailSwahili") }}
+          </p>
+        </span>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitEmailTextForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

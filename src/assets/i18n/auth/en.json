@@ -1,0 +1,103 @@
+{
+  "loginForm": {
+    "welcomeMessage": "Sign in to your account",
+    "signInMessage": "Enter your email & password to login",
+    "username": "Email address",
+    "password": "Password",
+    "placeholders": {
+      "username": "Enter email address",
+      "password": "Enter password"
+    },
+    "errors": {
+      "usernameError": "Please enter a valid email",
+      "passwordError": "Please enter your password",
+      "dialogs": {
+        "invalidFormError": "Invalid form",
+        "missingUsername": "Please provide a username",
+        "missingPassword": "Please provide a password",
+        "usernamePasswordIncorrect": "Username or password is incorrect"
+      }
+    },
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
+    "actions": {
+      "signIn": "Sign in",
+      "controlNumberDetails": "Control No Details",
+      "register": "Register"
+    }
+  },
+  "vendorRegistration": {
+    "title": "Vendor Registration",
+    "form": {
+      "vendorName": "Vendor name",
+      "mobileNo": "Mobile Number",
+      "branch": "Branch",
+      "accountNo": "Account Number",
+      "makerCheckerApproval": "Maker - Checker for invoice approval?",
+      "makerOptions": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "placeholders": {
+        "vendorName": "Enter vendor number",
+        "branch": "Select branch detail",
+        "accountNo": "Enter account number"
+      },
+      "errors": {
+        "vendorName": "Please specify a name",
+        "mobileNo": "Please add a valid phone number",
+        "branch": "Please specify",
+        "accountNo": "Enter valid account number",
+        "dialogs": {
+          "invalidFormError": "Invalid form",
+          "missingVendorName": "Please provide a vendor name",
+          "missingPhoneNo": "Please provide a valid mobile number",
+          "missingBranchName": "Please provide a Branch name",
+          "missingAccountNo": "Please provide an account number",
+          "makerChecker": "Please, specify a need for your request's approval"
+        }
+      },
+      "success": {
+        "vendorAddedSuccessfully": "Vendor added successfully!"
+      }
+    }
+  },
+  "controlNumberDetails": {
+    "title": "Control Number Details",
+    "form": {
+      "controlName": "Control number",
+      "placeholders": {
+        "controlName": "Enter control number"
+      },
+      "errors": {
+        "controlName": "Please enter control number",
+        "dialogs": {
+          "invalidFormError": "Invalid form",
+          "missingAccountNo": "Please provide the account number",
+          "notFound": "Not found",
+          "notFoundMessage": "Control number {} was not found."
+        }
+      }
+    }
+  },
+  "forgotPassword": {
+    "welcomeMessage": "Forgot Password",
+    "forgotPasswordMessage": "Enter your Email and instructions will be sent to you!",
+    "form": {
+      "email": "Email Address",
+      "placeholders": {
+        "email": "Enter email address"
+      },
+      "errors": {
+        "email": "Please provide valid email",
+        "dialogs": {
+          "invalidFormError": "Invalid form",
+          "missingEmail": "Please provide a valid email address"
+        }
+      },
+      "links": {
+        "backToLogin": "Go to login"
+      }
+    }
+  }
+}

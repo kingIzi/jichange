@@ -1,0 +1,140 @@
+<ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '3px' }"
+></ngx-loading>
+
+<div class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2 *transloco="let t; read: 'setup.designation'" class="text-lg font-bold">
+      {{ t("designation") }}
+    </h2>
+    <button
+      (click)="openDesignationDialog()"
+      class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
+    >
+      <span class="material-symbols-outlined text-darkPurple">
+        add_circle
+      </span>
+      <p
+        *transloco="let t; read: 'setup.designation'"
+        class="text-sm text-darkPurple"
+      >
+        {{ t("addDesignation") }}
+      </p>
+    </button>
+  </div>
+  <div class="flex flex-col bg-white shadow px-2 py-4">
+    <div class="flex flex-row items-center justify-end">
+      <div class="flex flex-row items-center space-x-2">
+        <app-table-date-filters></app-table-date-filters>
+        <div class="relative">
+          <input
+            *transloco="let t; read: 'defaults'"
+            type="search"
+            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+            id="exampleSearch"
+            [placeholder]="t('search')"
+            #searchInput
+          />
+          <span
+            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
+          >
+            search
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="overflow-y-auto">
+          <table
+            #customersTable
+            class="min-w-full text-left text-sm font-light"
+          >
+            <thead class="border-b font-medium">
+              <tr
+                class="bg-lightPurple"
+                *transloco="let t; read: 'setup.designation'"
+              >
+                <th
+                  *ngFor="let header of t('designationsTable'); index as ind"
+                  scope="col"
+                  class="px-6 font-inter text-sm"
+                  [id]="'generated-invoice-id-' + ind"
+                >
+                  <div class="flex flex-row items-center">
+                    <p class="text-sm font-extrabold text-black">
+                      {{ header }}
+                    </p>
+                    <button>
+                      <span
+                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                      >
+                        unfold_more
+                      </span>
+                    </button>
+                  </div>
+                </th>
+                <th
+                  *transloco="let t; read: 'defaults'"
+                  class="px-6 py-4 font-inter text-sm font-extrabold text-black"
+                >
+                  {{ t("action") }}
+                </th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div *transloco="let t; read: 'errors'">
+            <p
+              *ngIf="designations.length <= 0"
+              class="text-center text-sm tracking-wide pt-3 pb-1"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row items-center justify-between">
+      <div class="flex flex-row items-center space-x-1">
+        <p *transloco="let t; read: 'tableData'" class="text-xs">
+          {{ t("itemsPerPage") }}:
+        </p>
+        <select
+          name="itemsPerPage"
+          class="select select-sm select-bordered w-16 max-w-xs"
+          #itemPerPageSelect
+          (change)="itemsPerPageChanged(itemPerPageSelect.value)"
+        >
+          <option *ngFor="let option of itemsPerPage" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+      </div>
+      <div class="flex flex-row items-center">
+        <p class="text-xs">1-5 of 100</p>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            keyboard_double_arrow_left
+          </span>
+        </button>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            navigate_before
+          </span>
+        </button>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            navigate_next
+          </span>
+        </button>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            keyboard_double_arrow_right
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

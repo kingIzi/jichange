@@ -1,0 +1,32 @@
+{
+  "generatedInvoice": "Bili iliyotengenezwa",
+  "generatedInvoicesTable": [
+    "Jina la Mteja",
+    "Nambari ya Bili",
+    "Tarehe ya Bili",
+    "Aina ya Malipo",
+    "Jumla",
+    "Hali ya Uwasilishaji"
+  ],
+  "generateInvoiceView": {
+    "viewTable": ["Maelezo", "Kiasi", "Bei", "Jumla"]
+  },
+  "generateChart": {
+    "generateChart": "Jenga grafu",
+    "chartType": "Aina ya Grafu",
+    "form": {
+      "placeholders": {
+        "chartType": "Chagua aina ya grafu"
+      },
+      "dialog": {
+        "specifyGraphType": "Taja aina ya grafu",
+        "specifyGraphTypeMsg": "Lazima utaje aina ya grafu. (Mstari, mstari, mduara)",
+        "missingAxis": "Mhimili haupo",
+        "noXAxisFound": "Tafadhali, chagua safu ya Mhimili wa X ili uendelee",
+        "noYAxisFound": "Tafadhali, chagua safu ya Mhimili wa Y ili uendelee"
+      }
+    },
+    "xAxis": "Mhimili wa X",
+    "yAxis": "Mhimili wa Y"
+  }
+}

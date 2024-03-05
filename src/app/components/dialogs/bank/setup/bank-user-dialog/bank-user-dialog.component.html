@@ -1,0 +1,290 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="control-number-form"
+    [formGroup]="bankUserForm"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'setup.bankUser'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("userDetails") }}
+    </h1>
+    <div action="" class="grid grid-cols-2 gap-3 w-full py-8">
+      <div class="flex flex-col space-y-1 col-span-full lg:col-span-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("employeeId") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="text"
+          [placeholder]="t('employeeId')"
+          class="input input-sm input-bordered font-inter w-full lg:w-1/2"
+          formControlName="employeeId"
+          #employeeInput
+          (change)="setControlValue(employeeId, employeeInput.value)"
+        />
+        <span *ngIf="employeeId && employeeId.invalid && employeeId.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("employeeId") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("firstName") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="text"
+          [placeholder]="t('firstName')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="firstName"
+          #firstNameInput
+          (change)="setControlValue(firstName, firstNameInput.value)"
+        />
+        <span *ngIf="firstName && firstName.invalid && firstName.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("firstName") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("middleName") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="text"
+          [placeholder]="t('middleName')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="middleName"
+          #middleNameInput
+          (change)="setControlValue(middleName, middleNameInput.value)"
+        />
+        <span *ngIf="middleName && middleName.invalid && middleName.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("middleName") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("lastName") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="text"
+          [placeholder]="t('lastName')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="lastName"
+          #lastNameInput
+          (change)="setControlValue(lastName, lastNameInput.value)"
+        />
+        <span *ngIf="lastName && lastName.invalid && lastName.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("lastName") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("username") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="text"
+          [placeholder]="t('username')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="username"
+          #usernameInput
+          (change)="setControlValue(username, usernameInput.value)"
+        />
+        <span *ngIf="username && username.invalid && username.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("username") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("designation") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="designation"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("designation") }}
+          </option>
+        </select>
+        <span *ngIf="designation && designation.invalid && designation.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("designation") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("branch") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="branch"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("branch") }}
+          </option>
+        </select>
+        <span *ngIf="branch && branch.invalid && branch.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("branch") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("emailId") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="email"
+          [placeholder]="t('emailId')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="emailId"
+          #emailIdInput
+          (change)="setControlValue(emailId, emailIdInput.value)"
+        />
+        <span *ngIf="emailId && emailId.invalid && emailId.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("emailId") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
+          {{ t("mobileNo") }}<span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
+          type="email"
+          [placeholder]="t('mobileNo')"
+          class="input input-sm input-bordered font-inter"
+          formControlName="mobileNo"
+          #mobileNoInput
+          (change)="setControlValue(mobileNo, mobileNoInput.value)"
+        />
+        <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+          <p
+            *transloco="let t; read: 'setup.bankUser.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("mobileNo") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col w-full">
+        <p *transloco="let t; read: 'defaults'" class="text-xs">
+          {{ t("status") }}<span class="text-red-600">*</span>
+        </p>
+        <div class="flex flex-row items-center">
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span
+                *transloco="let t; read: 'defaults'"
+                class="label-text text-xs font-inter"
+              >
+                {{ t("active") }}
+              </span>
+              <input
+                type="radio"
+                formControlName="status"
+                class="radio radio-xs"
+                [value]="true"
+                checked
+              />
+            </label>
+          </div>
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span
+                *transloco="let t; read: 'defaults'"
+                class="label-text text-xs font-inter"
+              >
+                {{ t("inActive") }}
+              </span>
+              <input
+                formControlName="status"
+                type="radio"
+                [value]="false"
+                class="radio radio-xs"
+              />
+            </label>
+          </div>
+        </div>
+        <span *ngIf="status && status.invalid && status.touched">
+          <p
+            *transloco="let t; read: 'setup.regionDialog.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("missingStatus") }}
+          </p>
+        </span>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitBankUserForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

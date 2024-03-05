@@ -1,0 +1,40 @@
+{
+  "dashboard": {
+    "overview": {
+      "name": "Maelezo",
+      "transaction": "Shughuli",
+      "pendingApproval": "Inasubiri Kuidhinishwa",
+      "customers": "Wateja",
+      "users": "Watumiaji",
+      "viewMore": "Tazama zaidi"
+    },
+    "inboxApproval": {
+      "name": "Kuidhinishwa kwa kikasha pokezi",
+      "allOperations": "Uendeshaji wote",
+      "pending": "Inasubiri",
+      "errors": {
+        "emptyInbox": "Hakuna kitu kwenye kikasha chako"
+      }
+    },
+    "transaction": {
+      "name": "Shughuli",
+      "errors": {
+        "noDataFound": "Hakuna data ya manunuzi iliyopatikana"
+      }
+    },
+    "onboardCustomers": {
+      "name": "Mchuuzi wa hivi karibuni aliyeongezwa",
+      "errors": {
+        "noDataFound": "Hakuna data iliyopatikana"
+      }
+    },
+    "vendorsTable": [
+      "Sno",
+      "Jina",
+      "Anwani",
+      "Barua pepe",
+      "Nambari ya Simu",
+      "Hali"
+    ]
+  }
+}

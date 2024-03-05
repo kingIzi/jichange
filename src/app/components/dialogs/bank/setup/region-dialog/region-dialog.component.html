@@ -1,0 +1,136 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="control-number-form"
+    [formGroup]="regionForm"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'setup.regionDialog'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("region") }}
+    </h1>
+    <div class="w-full grid grid-cols-2 gap-3">
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.countryDialog'" class="text-xs">
+          {{ t("country") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="country"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'setup.regionDialog.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("country") }}
+          </option>
+        </select>
+        <span *ngIf="country && country.invalid && country.touched">
+          <p
+            *transloco="let t; read: 'setup.regionDialog.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("selectCountry") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'setup.regionDialog'"
+          class="text-left text-xs"
+        >
+          {{ t("region") }}<span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'setup.regionDialog.form.placeholders'"
+          #controlNumber
+          formControlName="region"
+          (change)="setRegionValue(controlNumber.value)"
+          type="text"
+          [placeholder]="t('name')"
+          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+        <span *ngIf="region && region.invalid && region.touched">
+          <p
+            *transloco="let t; read: 'setup.regionDialog.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("missingRegion") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col w-full">
+        <p *transloco="let t; read: 'defaults'" class="text-xs">
+          {{ t("status") }}<span class="text-red-600">*</span>
+        </p>
+        <div class="flex flex-row items-center">
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span
+                *transloco="let t; read: 'defaults'"
+                class="label-text text-xs font-inter"
+              >
+                {{ t("active") }}
+              </span>
+              <input
+                type="radio"
+                formControlName="status"
+                class="radio radio-xs"
+                [value]="true"
+                checked
+              />
+            </label>
+          </div>
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span
+                *transloco="let t; read: 'defaults'"
+                class="label-text text-xs font-inter"
+              >
+                {{ t("inActive") }}
+              </span>
+              <input
+                formControlName="status"
+                type="radio"
+                [value]="false"
+                class="radio radio-xs"
+              />
+            </label>
+          </div>
+        </div>
+        <span *ngIf="status && status.invalid && status.touched">
+          <p
+            *transloco="let t; read: 'setup.regionDialog.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("missingStatus") }}
+          </p>
+        </span>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitRegionForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

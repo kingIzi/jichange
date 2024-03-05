@@ -1,0 +1,186 @@
+<div class="flex flex-col justify-center divide-y px-6 py-4">
+  <h1
+    *transloco="let t; read: 'reports.transactionDetails'"
+    class="text-2xl font-semibold py-4"
+  >
+    {{ t("transactionReportForm") }}
+  </h1>
+  <form
+    [formGroup]="formGroup"
+    class="grid grid-cols-1 lg:grid-cols-2 gap-3 py-4"
+  >
+    <div class="flex flex-col">
+      <p
+        *transloco="let t; read: 'reports.transactionDetails'"
+        class="text-xs font-semibold"
+      >
+        {{ t("transactionNumber") }}
+      </p>
+      <input
+        *transloco="let t; read: 'reports.transactionDetails.form.placeholders'"
+        [placeholder]="t('transactionNumber')"
+        [formControl]="transactionNo"
+        class="input input-bordered input-sm"
+        type="text"
+      />
+      <span
+        class="h-4"
+        *ngIf="transactionNo && transactionNo.invalid && transactionNo.touched"
+      >
+        <p
+          *transloco="let t; read: 'reports.transactionDetails.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("transactionNumber") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col">
+      <p
+        *transloco="let t; read: 'reports.transactionDetails'"
+        class="text-xs font-semibold"
+      >
+        {{ t("date") }}
+      </p>
+      <input
+        *transloco="let t; read: 'reports.transactionDetails.form.placeholders'"
+        [placeholder]="t('date')"
+        [formControl]="date"
+        class="input input-bordered input-sm"
+        type="date"
+      />
+      <span class="h-4" *ngIf="date && date.invalid && date.touched">
+        <p
+          *transloco="let t; read: 'reports.transactionDetails.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("date") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col">
+      <p
+        *transloco="let t; read: 'reports.transactionDetails'"
+        class="text-xs font-semibold"
+      >
+        {{ t("company") }}
+      </p>
+      <select [formControl]="company" class="select select-sm select-bordered">
+        <option
+          *transloco="
+            let t;
+            read: 'reports.transactionDetails.form.placeholders'
+          "
+          disabled
+          selected
+          [value]="t('company')"
+        >
+          {{ t("company") }}
+        </option>
+        <option
+          *ngFor="let transaction of transactionsData"
+          [value]="transaction.company"
+        >
+          {{ transaction.company }}
+        </option>
+      </select>
+      <span class="h-4" *ngIf="company && company.invalid && company.touched">
+        <p
+          *transloco="let t; read: 'reports.transactionDetails.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("company") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col">
+      <p
+        *transloco="let t; read: 'reports.transactionDetails'"
+        class="text-xs font-semibold"
+      >
+        {{ t("amount") }}
+      </p>
+      <span class="relative">
+        <input
+          *transloco="
+            let t;
+            read: 'reports.transactionDetails.form.placeholders'
+          "
+          [placeholder]="t('amount')"
+          [formControl]="amount"
+          class="input input-bordered input-sm pr-14 w-full"
+          type="number"
+        />
+        <p class="right-4 absolute top-1/2 -translate-y-1/2">
+          /{{ currency.value }}
+        </p>
+      </span>
+      <span class="h-4" *ngIf="amount && amount.invalid && amount.touched">
+        <p
+          *transloco="let t; read: 'reports.transactionDetails.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("amount") }}
+        </p>
+      </span>
+    </div>
+    <!-- <div class="flex flex-col">
+      <p class="text-xs font-semibold">Company</p>
+      <select class="select select-sm select-bordered">
+        <option disabled selected [value]="'Select coompany'">
+          Select coompany
+        </option>
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <p class="text-xs font-semibold">Date</p>
+      <input class="input input-bordered input-sm" type="date" />
+    </div>
+    <div class="flex flex-col">
+      <p class="text-xs font-semibold">Depositor's name</p>
+      <input class="input input-bordered input-sm" type="text" />
+    </div>
+    <div class="flex flex-col">
+      <p class="text-xs font-semibold">Payment type</p>
+      <div class="flex flex-row items-center justify-between">
+        <div class="flex flex-row items-center">
+          <label for="fixed" class="text-sm">Fixed</label>
+          <input
+            id="fixed"
+            type="radio"
+            name="radio-1"
+            class="radio radio-xs"
+            checked
+          />
+        </div>
+        <div class="flex flex-row items-center">
+          <label for="flexible" class="text-sm">Flexible</label>
+          <input
+            id="flexible"
+            type="radio"
+            name="radio-1"
+            class="radio radio-xs"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col">
+      <p class="text-xs font-semibold">Amount</p>
+      <input class="input input-bordered input-sm" type="text" />
+    </div>
+    <div class="flex flex-col">
+      <p class="text-xs font-semibold">Purpose of transaction</p>
+      <input class="input input-bordered input-sm" type="text" />
+    </div>
+    <div class="flex flex-col">
+      <p class="text-xs font-semibold">NAME OF BENEFICIARY:</p>
+      <input class="input input-bordered input-sm" type="text" />
+    </div> -->
+    <button
+      *transloco="let t; read: 'actions'"
+      class="col-start-1 col-span-full btn btn-sm btn-ghost bg-lightPurple text-darkPurple"
+    >
+      {{ t("submit") }}
+    </button>
+  </form>
+</div>

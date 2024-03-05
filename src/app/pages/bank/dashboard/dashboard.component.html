@@ -1,0 +1,316 @@
+<div class="px-6 py-2 w-full grid grid-cols-12 gap-3 lg:gap-x-3 lg:gap-y-6">
+  <div
+    id="over-view"
+    class="w-full col-span-full lg:col-span-8 flex flex-col space-y-2"
+  >
+    <p
+      *transloco="let t; read: 'panel.dashboard.overview'"
+      class="text-black font-bold tracking-wide text-lg"
+    >
+      {{ t("name") }}
+    </p>
+    <div
+      class="flex flex-row py-2 items-center overflow-x-auto scroll-smooth space-x-2 lg:space-x-3 lg:justify-between"
+    >
+      <ng-container *ngFor="let overviewCard of overviewCards; index as i">
+        <app-dashboard-overview-card
+          [imgUrl]="overviewCard.imgUrl"
+          [label]="overviewCard.label"
+          [viewMoreLink]="overviewCard.link"
+          [statistic]="overviewCard.statistic"
+          [increase]="overviewCard.increase"
+          [lang]="overviewCard.lang"
+        ></app-dashboard-overview-card>
+      </ng-container>
+    </div>
+  </div>
+  <div class="col-span-full lg:col-span-4 lg:row-span-12">
+    <div class="flex flex-col space-y-4">
+      <div class="flex flex-col space-y-1">
+        <div class="flex flex-row justify-between w-full">
+          <!-- <p
+            *transloco="let t; read: 'panel.dashboard.inboxApproval'"
+            class="text-black font-bold tracking-wide text-lg"
+          >
+            {{ t("name") }}
+          </p> -->
+          <div class="relative">
+            <p
+              *transloco="let t; read: 'panel.dashboard.inboxApproval'"
+              class="text-black font-bold tracking-wide text-lg"
+            >
+              {{ t("name") }}
+            </p>
+            <div
+              class="badge absolute -right-6 -top-2 badge-warning badge-sm text-white"
+            >
+              0
+            </div>
+          </div>
+          <a
+            [routerLink]="'/main/company/inbox'"
+            *transloco="let t; read: 'panel.dashboard.inboxApproval'"
+            class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+          >
+            {{ t("allOperations") }}
+          </a>
+        </div>
+        <div *ngIf="inboxApprovals.length === 0" class="bg-white py-10 rounded">
+          <p
+            class="text-sm text-center"
+            *transloco="let t; read: 'panel.dashboard.inboxApproval.errors'"
+          >
+            {{ t("emptyInbox") }}
+          </p>
+        </div>
+        <ul
+          *ngIf="inboxApprovals.length > 0"
+          id="inbox-approval"
+          class="bg-white p-2 rounded flex flex-col space-y-4 divide-y overflow-y-auto max-h-52"
+        >
+          <li class="py-2" *ngFor="let info of inboxApprovals; index as i">
+            <a class="flex flex-row items-center justify-between">
+              <div class="flex flex-col">
+                <p class="text-xs">Izidore ltd</p>
+                <p class="text-xs font-bold">255742536542</p>
+              </div>
+              <button
+                *transloco="let t; read: 'panel.dashboard.inboxApproval'"
+                class="btn btn-xs bg-lightYellow tracking-wide px-4"
+              >
+                {{ t("pending") }}
+              </button>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="flex flex-col space-y-1 relative w-full">
+        <div class="flex flex-row justify-between w-full">
+          <div class="relative">
+            <p
+              *transloco="let t; read: 'panel.dashboard.transaction'"
+              class="text-black font-bold tracking-wide text-lg"
+            >
+              {{ t("name") }}
+            </p>
+            <div
+              class="badge absolute -right-6 -top-2 badge-warning badge-sm text-white"
+            >
+              3
+            </div>
+          </div>
+          <a
+            [routerLink]="'/main/reports/transactions'"
+            *transloco="let t; read: 'defaults'"
+            class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+          >
+            {{ t("viewAll") }}
+          </a>
+        </div>
+        <div
+          class="w-full h-[32-rem] min-h-32 max-h-[32rem] overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white"
+        >
+          <ng-container *ngIf="transactions.length > 0">
+            <div
+              *ngFor="let transaction of transactions; index as i"
+              class="flex flex-col space-y-2 py-2"
+            >
+              <ul class="flex flex-col">
+                <li>
+                  <a
+                    [routerLink]="'/main/reports/transactions/' + i"
+                    class="btn btn-lg text-left flex flex-row items-center justify-between"
+                  >
+                    <div class="flex flex-row items-center space-x-2">
+                      <div
+                        class="w-14 h-14 bg-success relative spiky-invoice-number"
+                      >
+                        <p
+                          class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                        >
+                          PAID
+                        </p>
+                      </div>
+                      <div class="flex flex-col">
+                        <p class="text-sm">{{ transaction.company }}</p>
+                        <p class="text-xs text-neutral-500">
+                          {{ transaction.name }}
+                        </p>
+                        <p class="text-xs capitalize font-light">
+                          {{
+                            determineDate(
+                              convertDotNetJSONDate(transaction.date.toString())
+                            )
+                          }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex flex-col">
+                      <p class="text-xs text-success">
+                        {{
+                          moneyFormat(transaction.amount.toString()) +
+                            " " +
+                            transaction.currency
+                        }}
+                      </p>
+                      <p class="text-xs text-neutral-500">11:36AM</p>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="transactions.length <= 0">
+            <p
+              *transloco="let t; read: 'panel.dashboard.transaction.errors'"
+              class="text-sm text-center pt-4 absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="col-span-full lg:col-span-8 lg:row-span-12 flex flex-col space-y-2"
+  >
+    <div class="flex flex-row items-center justify-between">
+      <p
+        *transloco="let t; read: 'panel.dashboard.onboardCustomers'"
+        class="text-black font-bold tracking-wide text-lg"
+      >
+        {{ t("name") }}
+      </p>
+    </div>
+    <div class="flex flex-col bg-white shadow px-2 py-4">
+      <div class="flex flex-row items-center justify-end">
+        <div class="flex flex-row items-center space-x-2">
+          <app-table-date-filters></app-table-date-filters>
+          <div class="relative">
+            <input
+              *transloco="let t; read: 'defaults'"
+              type="search"
+              class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+              id="exampleSearch"
+              [placeholder]="t('search')"
+              #searchInput
+            />
+            <span
+              class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
+            >
+              search
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="max-h-72 overflow-y-auto">
+            <table class="min-w-full text-left text-sm font-light">
+              <thead class="border-b font-medium">
+                <tr
+                  class="bg-lightPurple"
+                  *transloco="let t; read: 'panel.dashboard'"
+                >
+                  <th
+                    *ngFor="
+                      let header of t('vendorsTable') | slice : 1;
+                      index as ind
+                    "
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                  >
+                    <div class="flex flex-row items-center">
+                      <p class="text-sm font-extrabold text-black">
+                        {{ header }}
+                      </p>
+                      <button>
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                  <!-- <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 py-4 font-inter text-sm font-extrabold text-black"
+                  >
+                    {{ t("action") }}
+                  </th> -->
+                </tr>
+              </thead>
+              <tbody
+                *ngFor="let customer of customers | slice : 0 : itemPerPage"
+              >
+                <tr class="border-b hover:bg-neutral-100">
+                  <td class="px-6 py-4">{{ customer.Name }}</td>
+                  <td class="px-6 py-4">{{ customer.Address }}</td>
+                  <td class="px-6 py-4">{{ customer.Email }}</td>
+                  <td class="px-6 py-4">{{ customer["Mobile No"] }}</td>
+                  <td class="px-6 py-4">{{ customer.Status }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div
+              *transloco="
+                let t;
+                read: 'panel.dashboard.onboardCustomers.errors'
+              "
+            >
+              <p
+                *ngIf="customers.length <= 0"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-row items-center justify-between">
+        <div class="flex flex-row items-center space-x-1">
+          <p *transloco="let t; read: 'tableData'" class="text-xs">
+            {{ t("itemsPerPage") }}:
+          </p>
+          <select
+            name="itemsPerPage"
+            class="select select-sm select-bordered w-16 max-w-xs"
+            #itemPerPageSelect
+            (change)="itemsPerPageChanged(itemPerPageSelect.value)"
+          >
+            <option *ngFor="let option of itemsPerPage" [value]="option">
+              {{ option }}
+            </option>
+          </select>
+        </div>
+        <div class="flex flex-row items-center">
+          <p class="text-xs">1-5 of 100</p>
+          <button class="btn btn-sm lg:btn-lg btn-ghost">
+            <span class="material-symbols-outlined text-sm lg:text-lg">
+              keyboard_double_arrow_left
+            </span>
+          </button>
+          <button class="btn btn-sm lg:btn-lg btn-ghost">
+            <span class="material-symbols-outlined text-sm lg:text-lg">
+              navigate_before
+            </span>
+          </button>
+          <button class="btn btn-sm lg:btn-lg btn-ghost">
+            <span class="material-symbols-outlined text-sm lg:text-lg">
+              navigate_next
+            </span>
+          </button>
+          <button class="btn btn-sm lg:btn-lg btn-ghost">
+            <span class="material-symbols-outlined text-sm lg:text-lg">
+              keyboard_double_arrow_right
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

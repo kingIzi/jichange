@@ -1,0 +1,114 @@
+{
+  "defaults": {
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "action": "Action",
+    "status": "Status",
+    "active": "Active",
+    "inActive": "InActive",
+    "cancelled": "Cancelled",
+    "viewAll": "View All"
+  },
+  "actions": {
+    "submit": "Submit",
+    "close": "Close",
+    "ok": "Ok",
+    "reset": "Reset",
+    "download": "Download"
+  },
+  "errors": {
+    "errorOccured": "Error occured",
+    "verifyConnection": "Please, verify your connection or try again.",
+    "noInternet": "You are offline",
+    "connected": "Back online",
+    "noDataFound": "No data found"
+  },
+  "bankHeaders": [
+    {
+      "name": "Company",
+      "dropdowns": ["Summary", "Inbox Approval"]
+    },
+    {
+      "name": "Setup",
+      "dropdowns": [
+        "country",
+        "region",
+        "district",
+        "ward",
+        "currency",
+        "designation",
+        "branch",
+        "questionName",
+        "smtp",
+        "emailText",
+        "bankUser",
+        "language",
+        "Suspense account",
+        "Deposit account"
+      ]
+    },
+    {
+      "name": "Reports",
+      "dropdowns": [
+        "overview",
+        "Transaction Details",
+        "Invoice Details",
+        "Customer Report",
+        "User Log Report",
+        "Audit Trails"
+      ]
+    }
+  ],
+  "vendorHeaders": [
+    {
+      "name": "Customers",
+      "dropdowns": []
+    },
+    {
+      "name": "Invoice details",
+      "dropdowns": []
+    },
+    {
+      "name": "Generated invoice",
+      "dropdowns": []
+    }
+  ],
+  "roles": {
+    "role": "Role",
+    "bank": "Bank",
+    "vendor": "Vendor",
+    "logout": "Logout"
+  },
+  "tableData": {
+    "itemsPerPage": "Items per page",
+    "filterDates": ["Last 30 days", "Last year", "Custom date"]
+  },
+  "utilities": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "months": [
+      { "name": "January", "abbreviation": "Jan" },
+      { "name": "February", "abbreviation": "Feb" },
+      { "name": "March", "abbreviation": "Mar" },
+      { "name": "April", "abbreviation": "Apr" },
+      { "name": "May", "abbreviation": "May" },
+      { "name": "June", "abbreviation": "Jun" },
+      { "name": "July", "abbreviation": "Jul" },
+      { "name": "August", "abbreviation": "Aug" },
+      { "name": "September", "abbreviation": "Sep" },
+      { "name": "October", "abbreviation": "Oct" },
+      { "name": "November", "abbreviation": "Nov" },
+      { "name": "December", "abbreviation": "Dec" }
+    ],
+    "daysOfWeek": [
+      { "name": "Monday", "abbreviation": "Mon" },
+      { "name": "Tuesday", "abbreviation": "Tue" },
+      { "name": "Wednesday", "abbreviation": "Wed" },
+      { "name": "Thursday", "abbreviation": "Thu" },
+      { "name": "Friday", "abbreviation": "Fri" },
+      { "name": "Saturday", "abbreviation": "Sat" },
+      { "name": "Sunday", "abbreviation": "Sun" }
+    ]
+  }
+}

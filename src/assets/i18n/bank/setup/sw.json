@@ -1,0 +1,361 @@
+{
+  "countryDialog": {
+    "country": "Nchi",
+    "addCountry": "Ongeza Nchi",
+    "form": {
+      "placeholders": {
+        "name": "Ingiza nchi"
+      },
+      "errors": {
+        "missingCountry": "Tafadhali jaza"
+      },
+      "dialog": {
+        "missingCountry": "Tafadhali toa jina la nchi",
+        "invalidForm": "Fomu Batili"
+      }
+    },
+    "countriesTable": ["Nambari", "Nchi"]
+  },
+  "regionDialog": {
+    "addRegion": "Ongeza mkoa",
+    "region": "Mkoa",
+    "form": {
+      "placeholders": {
+        "name": "Ingiza mkoa",
+        "country": "Chagua nchi"
+      },
+      "errors": {
+        "selectCountry": "Tafadhali chagua counry",
+        "missingRegion": "Tafadhali jaza"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingCountry": "Tafadhali chagua nchi",
+        "missingRegion": "Tafadhali toa jina la mkoa",
+        "missingStatus": "Tafadhali chagua hali"
+      }
+    },
+    "regionsTable": ["Sno", "Nchi", "Mkoa", "Hali"]
+  },
+  "districtDialog": {
+    "addDistrict": "Ongeza Wilaya",
+    "district": "Wilaya",
+    "form": {
+      "placeholders": {
+        "name": "Wilaya ya Ingiza",
+        "region": "Teua mkoa"
+      },
+      "errors": {
+        "selectRegion": "Tafadhali chagua mkoa",
+        "missingDistrict": "Tafadhali jaza",
+        "missingStatus": "Tafadhali chagua hali"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingRegion": "Tafadhali chagua mkoa",
+        "missingDistrict": "Tafadhali toa jina la wilaya",
+        "missingStatus": "Tafadhali chagua hali"
+      }
+    },
+    "districtsTable": ["Sno", "Mkoa", "Wilaya", "Hali"]
+  },
+  "wardDialog": {
+    "addWard": "Ongeza Kata",
+    "ward": "Kata",
+    "form": {
+      "placeholders": {
+        "name": "Ingiza kata",
+        "district": "Wilaya ya Chagua"
+      },
+      "errors": {
+        "selectDistrict": "Tafadhali chagua wilaya",
+        "missingWard": "Tafadhali jaza",
+        "missingStatus": "Tafadhali chagua hali"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingDistrict": "Tafadhali chagua wilaya",
+        "missingWard": "Tafadhali toa jina la kata",
+        "missingStatus": "Tafadhali chagua hali"
+      }
+    },
+    "wardsTable": ["Sno", "Wilaya", "Kata", "Hali"]
+  },
+  "currency": {
+    "addCurrency": "Ongeza Fedha",
+    "currency": "Fedha",
+    "currencyName": "Fedha",
+    "code": "Msimbo",
+    "form": {
+      "placeholders": {
+        "code": "Ingiza msimbo wa sarafu",
+        "name": "Ingiza jina la sarafu"
+      },
+      "errors": {
+        "code": "Tafadhali jaza",
+        "name": "Tafadhali jaza"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingCode": "Tafadhali toa msimbo wa sarafu",
+        "missingName": "Tafadhali toa jina la fedha"
+      }
+    },
+    "currenciesTable": ["Sno", "Msimbo", "Jina"]
+  },
+  "designation": {
+    "addDesignation": "Ongeza Uteuzi",
+    "designation": "Uteuzi",
+    "form": {
+      "placeholders": {
+        "name": "Ingiza majina"
+      },
+      "errors": {
+        "name": "Tafadhali jaza"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingDesignation": "Tafadhali toa jina la jina"
+      }
+    },
+    "designationsTable": ["Sno", "Uteuzi"]
+  },
+  "branch": {
+    "addBranch": "Ongeza tawi",
+    "branch": "Tawi",
+    "location": "Mahali",
+    "form": {
+      "placeholders": {
+        "branch": "Ingiza jina la tawi",
+        "location": "Ingiza mahali"
+      },
+      "errors": {
+        "branch": "Tafadhali jaza",
+        "location": "Tafadhali jaza",
+        "missingStatus": "Tafadhali chagua hali"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingBranch": "Tafadhali toa jina la tawi",
+        "missingLocation": "Tafadhali toa mahali",
+        "missingStatus": "Tafadhali chagua hali"
+      }
+    },
+    "branchesTable": ["Sno", "Tawi", "Mahali", "Hali"]
+  },
+  "questionName": {
+    "addQuestionName": "Ongeza swali",
+    "questionName": "Swali",
+    "form": {
+      "placeholders": {
+        "questionName": "Ingiza jina la swali"
+      },
+      "errors": {
+        "questionName": "Tafadhali jaza",
+        "missingStatus": "Tafadhali chagua hali"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "missingQuestionName": "Tafadhali toa jina la swali",
+        "missingStatus": "Tafadhali chagua hali"
+      }
+    },
+    "questionNamesTable": ["Sno", "Jina la swali", "Hali"]
+  },
+  "smtp": {
+    "addSmtp": "Ongeza Smtp",
+    "smtp": "Itifaki ya Uhamisho wa Barua Rahisi",
+    "form": {
+      "fromAddress": "Kutoka kwa Anwani",
+      "address": "Anwani",
+      "portNumber": "Namba ya bandari",
+      "username": "Jina la mtumiaji",
+      "password": "Nywila",
+      "sslEnable": "Wezesha SSL",
+      "enabled": "Kuwezeshwa",
+      "disabled": "Walemavu",
+      "placeholders": {
+        "fromAddress": "Ingiza barua pepe ya mtumaji",
+        "address": "Ingiza anwani",
+        "portNumber": "Ingiza namba ya bandari",
+        "username": "Ingiza jina la mtumiaji",
+        "password": "Ingiza nywila"
+      },
+      "errors": {
+        "fromAddress": "Tafadhali ingiza anwani halali ya barua pepe",
+        "address": "Tafadhali jaza",
+        "portNumber": "Tafadhali jaza",
+        "username": "Tafadhali jaza",
+        "password": "Tafadhali jaza",
+        "sslEnable": "Tafadhali chagua hali ya ssl"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "fromAddress": "Tafadhali toa barua pepe ya mtumaji",
+        "address": "Tafadhali toa anwani",
+        "portNumber": "Tafadhali toa namba ya bandari",
+        "username": "Tafadhali toa jina la mtumiaji",
+        "password": "Tafadhali toa nywila",
+        "sslEnable": "Lazima uchague Njia ya SSL"
+      }
+    },
+    "smtpTable": [
+      "Sno",
+      "Kutoka kwa Anwani",
+      "Wezesha SSL",
+      "Anwani",
+      "Namba ya bandari",
+      "Jina la mtumiaji"
+    ]
+  },
+  "emailText": {
+    "addEmailText": "Ongeza maandishi ya barua pepe",
+    "emailText": "Matini ya Barua pepe",
+    "form": {
+      "flowId": "Id ya Mtiririko",
+      "subjectEnglish": "Kiingereza cha somo",
+      "subjectSwahili": "Mada ya Kiswahili",
+      "emailText": "Matini ya Barua pepe",
+      "emailSwahili": "Barua pepe Maandishi ya Kiswahili",
+      "placeholders": {
+        "flowId": "Chagua mtiririko wa Id",
+        "subjectEnglish": "Ingiza mada kwa Kiingereza",
+        "subjectSwahili": "Ingiza somo kwa Kiswahili",
+        "emailText": "Ingiza maandishi yako ya barua pepe katika enlish",
+        "emailSwahili": "Ingiza barua pepe yako kwa Kiswahili"
+      },
+      "errors": {
+        "flowId": "Tafadhali chagua kitambulisho cha mtiririko",
+        "subjectEnglish": "Tafadhali, ingiza mada ya barua pepe kwa Kiingereza",
+        "subjectSwahili": "Tafadhali, ingiza mada ya barua pepe kwa Kiswahili",
+        "emailText": "Tafadhali, ingiza maandishi yako ya barua pepe katika enlish",
+        "emailSwahili": "Tafadhali, ingiza maandishi yako ya barua pepe kwa Kiswahili"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "flowId": "Tafadhali chagua kitambulisho cha mtiririko",
+        "subjectEnglish": "Tafadhali, toa mada ya barua pepe kwa Kiingereza",
+        "subjectSwahili": "Tafadhali, toa somo la barua pepe kwa Kiswahili",
+        "emailText": "Tafadhali, ingiza maandishi yako ya barua pepe katika enlish",
+        "emailSwahili": "Tafadhali, ingiza maandishi yako ya barua pepe kwa Kiswahili"
+      }
+    },
+    "emailTextsTable": [
+      "Sno",
+      "Id ya Mtiririko",
+      "Kiingereza cha somo",
+      "Mada ya Kiswahili",
+      "Matini ya barua pepe",
+      "Barua pepe matini ya Kiswahili"
+    ]
+  },
+  "bankUser": {
+    "userDetails": "Maelezo ya mtumiaji",
+    "addBankUser": "Ongeza Mtumiaji",
+    "bankUser": "Mtumiaji wa benki",
+    "form": {
+      "employeeId": "Id ya Mfanyakazi",
+      "firstName": "Jina la kwanza",
+      "middleName": "Jina la kati",
+      "lastName": "Jina la mwisho",
+      "username": "Jina la mtumiaji",
+      "designation": "Uteuzi",
+      "branch": "Tawi",
+      "emailId": "Barua pepe",
+      "mobileNo": "Nambari ya simu",
+      "placeholders": {
+        "employeeId": "Ingiza mfanyakazi",
+        "firstName": "Ingiza jina la kwanza",
+        "middleName": "Ingiza jina la kati",
+        "lastName": "Ingiza jina la mwisho",
+        "username": "Ingiza jina la mtumiaji",
+        "designation": "Chagua uteuzi",
+        "branch": "Chagua tawi",
+        "emailId": "Ingiza barua pepe",
+        "mobileNo": "+255"
+      },
+      "errors": {
+        "employeeId": "Tafadhali, ingiza mfanyakazi",
+        "firstName": "Tafadhali jaza",
+        "middleName": "Tafadhali jaza",
+        "lastName": "Tafadhali jaza",
+        "username": "Tafadhali jaza",
+        "designation": "Tafadhali chagua jina",
+        "branch": "Chagua Tawi",
+        "emailId": "Tafadhali toa barua pepe halali",
+        "mobileNo": "Tafadhali toa nambari ya simu"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "employeeId": "Tafadhali, toa mfanyakazi",
+        "firstName": "Tafadhali toa jina la kwanza",
+        "middleName": "Tafadhali toa jina la kati",
+        "lastName": "Tafadhali toa jina la mwisho",
+        "username": "Tafadhali toa jina la mtumiaji",
+        "designation": "Tafadhali toa jina",
+        "branch": "Tafadhali toa tawi",
+        "emailId": "Tafadhali tuma barua pepe",
+        "mobileNo": "Tafadhali toa nambari ya simu"
+      }
+    },
+    "bankUserTable": [
+      "Sno",
+      "Id ya Mfanyakazi",
+      "Full name",
+      "Jina kamili",
+      "Barua pepe",
+      "Hali"
+    ]
+  },
+  "language": {
+    "language": "Lugha",
+    "form": {
+      "language": "Lugha",
+      "placeholders": {
+        "language": "Chagua lugha"
+      }
+    }
+  },
+  "suspenseAccount": {
+    "addSuspenseAccount": "Ongeza Akaunti ya Suspense",
+    "suspenseAccount": "Akaunti ya Suspense",
+    "form": {
+      "placeholders": {
+        "suspenseAccount": "Ingiza akaunti ya mashaka"
+      },
+      "errors": {
+        "suspenseAccount": "Tafadhali ingiza nambari ya akaunti ya mashaka"
+      },
+      "dialog": {
+        "suspenseAccount": "Lazima utoe nambari ya akaunti ya mashaka"
+      }
+    },
+    "suspenseAccountsTable": ["Sno", "Nambari ya Akaunti ya Suspense", "Hali"]
+  },
+  "depositAccount": {
+    "addDepositAccount": "Ongeza akaunti ya amana",
+    "depositAccount": "Akaunti ya amana",
+    "form": {
+      "vendor": "Muuzaji",
+      "account": "Akaunti",
+      "reason": "Sababu",
+      "placeholders": {
+        "vendor": "Chagua muuzaji",
+        "account": "Teua akaunti",
+        "reason": "Ingiza sababu"
+      },
+      "errors": {
+        "vendor": "Tafadhali chagua muuzaji",
+        "account": "Tafadhali chagua akaunti",
+        "reason": "Tafadhali jaza"
+      },
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "vendor": "Lazima ubainishe muuzaji",
+        "account": "Lazima ubainishe akaunti",
+        "reason": "Tafadhali toa sababu"
+      }
+    },
+    "depositAccountTable": ["Sno", "Muuzaji", "Akaunti", "Sababu"]
+  }
+}

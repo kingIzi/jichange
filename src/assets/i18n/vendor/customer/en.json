@@ -1,0 +1,50 @@
+{
+  "customer": "Customer(s)",
+  "addCustomer": "Add Customer",
+  "customersTable": ["Customer name", "Email Id", "Mobile No"],
+  "form": {
+    "customerName": "Customer name",
+    "mobileNo": "Mobile No",
+    "emailId": "Email Id",
+    "addNewCustomer": "Add new customer",
+    "actions": {
+      "sureToAddCustomer": "Are you sure you want to add this customer?",
+      "addInvoiceAsWell": "Would you also want to attach an invoice to this customer?",
+      "confirm": "Confirm",
+      "areYouSureYouWantToAddANewCustomer": "Are you sure you want to add a new customer?"
+    },
+    "placeholders": {
+      "customerName": "Enter customer name",
+      "mobileNo": "+255",
+      "emailId": "Enter email address"
+    },
+    "errors": {
+      "customerName": "Please enter customer name",
+      "mobileNo": "Please enter mobile number",
+      "emailId": "Please enter a valid email address"
+    },
+    "dialog": {
+      "invalidForm": "Invalid form",
+      "customerName": "Please provide a customer name",
+      "mobileNo": "Please provide a valid mobile number",
+      "emailId": "Please provide a valid email Id"
+    }
+  },
+  "customerView": {
+    "customerProfileTransaction": "Customer Profile & Transactions",
+    "customerDetails": {
+      "customerDetails": "Customer details",
+      "name": "Name",
+      "email": "Email",
+      "mobile": "Mobile"
+    },
+    "customerViewTableTitle": "Transactions",
+    "customerInvoicesTable": [
+      "Invoice N°",
+      "Date",
+      "Item Name",
+      "Amount",
+      "status"
+    ]
+  }
+}

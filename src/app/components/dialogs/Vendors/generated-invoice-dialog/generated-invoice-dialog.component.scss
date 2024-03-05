@@ -1,0 +1,31 @@
+table {
+  display: block;
+  white-space: nowrap;
+  width: 100%;
+}
+td,
+th {
+  border-collapse: collapse;
+}
+thead {
+  float: left;
+  width: 20%;
+}
+thead tr {
+  width: 100%;
+  float: left;
+}
+thead th {
+  display: block;
+}
+tbody {
+  float: left;
+  width: 80%;
+}
+tbody tr {
+  display: inline-block;
+}
+tbody td {
+  float: left;
+  width: 100%;
+}

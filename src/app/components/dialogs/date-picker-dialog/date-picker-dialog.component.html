@@ -1,0 +1,45 @@
+<dialog #dialogPicker class="modal">
+  <form [formGroup]="formGroup" class="modal-box flex flex-col space-y-4">
+    <h3 class="font-bold text-lg">Select date range</h3>
+    <div class="flex flex-row items-center justify-between">
+      <div class="flex flex-row items-center space-x-1">
+        <p>From</p>
+        <div class="flex flex-col">
+          <input
+            formControlName="start"
+            type="date"
+            class="input-sm input input-bordered"
+          />
+          <span *ngIf="start && start.invalid && start.touched">
+            <p class="text-xs text-red-600">Pick a starting date</p>
+          </span>
+        </div>
+      </div>
+      <div class="flex flex-row items-center space-x-1">
+        <p>To</p>
+        <div class="flex flex-col">
+          <input
+            formControlName="end"
+            type="date"
+            class="input-sm input input-bordered"
+          />
+          <span *ngIf="end && end.invalid && end.touched">
+            <p class="text-xs text-red-600">Pick an end date</p>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row items-center justify-end">
+      <button
+        (click)="submitForm()"
+        type="button"
+        class="btn btn-sm bg-lightPurple text-darkPurple"
+      >
+        Submit
+      </button>
+    </div>
+  </form>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

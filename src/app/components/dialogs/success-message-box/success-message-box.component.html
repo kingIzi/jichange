@@ -1,0 +1,13 @@
+<dialog #successMessageBox class="modal">
+  <div class="modal-box">
+    <!-- <h3 class="font-bold text-lg">{{ title }}</h3>
+      <p class="py-4">{{ message }}</p> -->
+    <div class="flex flex-row items-center py-2 space-x-2">
+      <span class="material-symbols-outlined text-success"> check_circle </span>
+      <p class="text-sm text-success">{{ title }}</p>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

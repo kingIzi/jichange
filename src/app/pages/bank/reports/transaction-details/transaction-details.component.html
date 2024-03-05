@@ -1,0 +1,321 @@
+<ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '3px' }"
+></ngx-loading>
+
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="px-6 py-8 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.transactionDetails'"
+      class="text-lg font-bold"
+    >
+      {{ t("transactionDetails") }}
+    </h2>
+    <a
+      (click)="openTransactionCharts()"
+      class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
+    >
+      <span class="material-symbols-outlined text-warning"> bar_chart </span>
+    </a>
+  </div>
+  <div
+    [formGroup]="headersFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4 space-y-2"
+  >
+    <div class="flex flex-row items-center justify-end">
+      <div class="flex flex-row items-center space-x-2">
+        <div class="dropdown">
+          <button
+            tabindex="0"
+            role="button"
+            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+          >
+            <span class="material-symbols-outlined text-sm"> label </span>
+            <p
+              *transloco="let t; read: 'tableData.vendor'"
+              class="lg:block hidden"
+            >
+              {{ headers.at(headersMap.STATUS).get("label")?.value }}
+            </p>
+            <span class="material-symbols-outlined lg:block hidden">
+              arrow_drop_down
+            </span>
+          </button>
+          <ul
+            tabindex="0"
+            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+          >
+            <li
+              *ngFor="let control of getValueArray(headersMap.STATUS)?.controls"
+            >
+              <label class="label cursor-pointer">
+                <span class="label-text text-xs font-normal">{{
+                  control.get("name")?.value
+                }}</span>
+                <input
+                  type="checkbox"
+                  [formControl]="getFormControl(control, 'isActive')"
+                  class="checkbox checkbox-xs"
+                />
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div class="dropdown">
+          <button
+            tabindex="0"
+            role="button"
+            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+          >
+            <span class="material-symbols-outlined text-sm"> apartment </span>
+            <p
+              *transloco="let t; read: 'tableData.vendor'"
+              class="lg:block hidden"
+            >
+              {{ headers.at(headersMap.COMPANY).get("label")?.value }}
+            </p>
+            <span class="material-symbols-outlined hidden lg:block">
+              arrow_drop_down
+            </span>
+          </button>
+          <ul
+            tabindex="0"
+            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+          >
+            <li
+              *ngFor="
+                let control of getValueArray(headersMap.COMPANY)?.controls
+              "
+            >
+              <label class="label cursor-pointer">
+                <span class="label-text text-xs font-normal">{{
+                  control.get("name")?.value
+                }}</span>
+                <input
+                  type="checkbox"
+                  [formControl]="getFormControl(control, 'isActive')"
+                  class="checkbox checkbox-xs"
+                />
+              </label>
+            </li>
+          </ul>
+        </div>
+        <app-table-date-filters></app-table-date-filters>
+        <div class="relative">
+          <input
+            *transloco="let t; read: 'defaults'"
+            type="search"
+            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+            id="exampleSearch"
+            [placeholder]="t('search')"
+            #searchInput
+            (keyup)="searchTable(searchInput.value)"
+          />
+          <span
+            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
+          >
+            search
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 relative">
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="overflow-y-auto">
+          <table
+            #transactioinDetailsTable
+            class="min-w-full text-left text-sm font-light"
+          >
+            <thead class="border-b font-medium dark:border-neutral-500">
+              <ng-container formArrayName="headers">
+                <tr
+                  *transloco="let t; read: 'tableData.vendor'"
+                  class="bg-lightPurple"
+                >
+                  <th
+                    *ngFor="let header of headers.controls; index as ind"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div
+                      class="flex items-center"
+                      [class]="ind === headersMap.AMOUNT ? 'float-right' : ''"
+                    >
+                      <p>
+                        {{ headers.controls.at(ind)?.get("label")?.value }}
+                      </p>
+                      <button (click)="sortColumnClicked(ind)">
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 py-4 font-inter text-sm font-extrabold text-black float-right"
+                  >
+                    {{ t("action") }}
+                  </th>
+                </tr>
+              </ng-container>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="
+                  let transaction of transactions | slice : 0 : itemPerPage;
+                  index as i
+                "
+                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+              >
+                <td
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{
+                    convertDotNetJSONDate(
+                      transaction.date.toString()
+                    ).toLocaleDateString()
+                  }}
+                </td>
+                <td
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                >
+                  {{ transaction.company }}
+                </td>
+                <td
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                >
+                  {{ transaction.transactionNumber }}
+                </td>
+                <td
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{ transaction.description }}
+                </td>
+                <td
+                  class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{
+                    moneyFormat(transaction.amount.toString()) +
+                      " /" +
+                      transaction.currency
+                  }}
+                </td>
+                <td
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  <button
+                    class="bg-base-200 rounded-full flex flex-row items-center py-1 px-2 space-x-1"
+                  >
+                    <div
+                      *ngIf="
+                        transaction.status.toLocaleLowerCase() ===
+                        'pending'.toLocaleLowerCase()
+                      "
+                      class="w-2 h-2 rounded-full bg-warning"
+                    ></div>
+                    <div
+                      *ngIf="
+                        transaction.status.toLocaleLowerCase() ===
+                        'finalized'.toLocaleLowerCase()
+                      "
+                      class="w-2 h-2 rounded-full bg-success"
+                    ></div>
+                    <div
+                      *ngIf="
+                        transaction.status.toLocaleLowerCase() ===
+                        'in-progress'.toLocaleLowerCase()
+                      "
+                      class="w-2 h-2 rounded-full bg-info"
+                    ></div>
+                    <p class="capitalize">{{ transaction.status }}</p>
+                  </button>
+                </td>
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                  <app-remove-item-dialog
+                    #removeItemDialog
+                  ></app-remove-item-dialog>
+                  <div class="flex flex-row items-center justify-end space-x-2">
+                    <button [routerLink]="'/main/reports/transactions/' + i">
+                      <span class="material-symbols-outlined text-warning">
+                        visibility
+                      </span>
+                    </button>
+                    <button
+                      (click)="
+                        downloadPdf(i, '/main/reports/transactions/' + i)
+                      "
+                    >
+                      <span class="material-symbols-outlined text-linkBlue">
+                        download
+                      </span>
+                    </button>
+                    <button (click)="removeItem(i, removeItemDialog)">
+                      <span class="material-symbols-outlined text-danger-600">
+                        delete
+                      </span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *transloco="let t; read: 'errors'">
+            <p
+              *ngIf="transactions.length <= 0"
+              class="text-center text-sm tracking-wide pt-3 pb-1"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row items-center justify-between">
+      <div class="flex flex-row items-center space-x-1">
+        <p *transloco="let t; read: 'tableData'" class="text-xs">
+          {{ t("itemsPerPage") }}:
+        </p>
+        <select
+          name="itemsPerPage"
+          class="select select-sm select-bordered w-16 max-w-xs"
+          #itemPerPageSelect
+          (change)="itemsPerPageChanged(itemPerPageSelect.value)"
+        >
+          <option *ngFor="let option of itemsPerPage" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+      </div>
+      <div class="flex flex-row items-center">
+        <p class="text-xs">1-5 of 100</p>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            keyboard_double_arrow_left
+          </span>
+        </button>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            navigate_before
+          </span>
+        </button>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            navigate_next
+          </span>
+        </button>
+        <button class="btn btn-sm lg:btn-lg btn-ghost">
+          <span class="material-symbols-outlined text-sm lg:text-lg">
+            keyboard_double_arrow_right
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,156 @@
+<div class="navbar bg-base-100 shadow-4">
+  <div class="navbar-start">
+    <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50">
+      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h8m-8 6h16"
+          />
+        </svg>
+      </div>
+      <ul
+        tabindex="0"
+        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-72"
+        *transloco="let t"
+        formArrayName="headers"
+      >
+        <li *ngFor="let header of headers.controls; index as ind">
+          <a
+            [class]="
+              verifyCurrentRoute(header.get('rootLink')?.value)
+                ? 'text-darkPurple bg-lightPurple'
+                : 'text-black bg-transparent'
+            "
+            class="capitalize"
+            formGroupName="{{ ind }}"
+            >{{ header.get("label")?.value }}</a
+          >
+          <ul class="p-2 grid grid-cols-2">
+            <li
+              *ngFor="
+                let dropdown of getHeaderDropdownArray(ind).controls;
+                index as i
+              "
+            >
+              <a
+                [routerLink]="dropdown.get('routerLink')?.value"
+                [routerLinkActive]="'text-darkPurple'"
+                class="capitalize"
+                >{{ dropdown.get("label")?.value }}</a
+              >
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <!-- <a [routerLink]="'/main'" class="text-xl cursor-pointer">
+      <img
+        class="w-20 lg:w-28"
+        src="assets/img/jichangelogo.png"
+        alt="TE Logo"
+        loading="lazy"
+      />
+    </a> -->
+    <a [routerLink]="'/main'" class="btn btn-ghost text-xl"
+      >Dream<span class="text-success">ville</span>
+    </a>
+  </div>
+  <div [formGroup]="formGroup" class="navbar-center hidden lg:flex">
+    <ul
+      *transloco="let t"
+      formArrayName="headers"
+      class="menu menu-horizontal px-1"
+    >
+      <li
+        formGroupName="{{ ind }}"
+        *ngFor="let header of headers.controls; index as ind"
+        class="dropdown dropdown-bottom dropdown-end"
+      >
+        <button
+          tabindex="0"
+          role="button"
+          class="flex flex-row items-center m-1"
+          [class]="
+            verifyCurrentRoute(header.get('rootLink')?.value)
+              ? 'text-darkPurple bg-lightPurple'
+              : 'text-black bg-transparent'
+          "
+        >
+          <p class="font-extrabold capitalize">
+            {{ header.get("label")?.value }}
+          </p>
+          <span class="material-symbols-outlined"> expand_more </span>
+        </button>
+        <ul
+          tabindex="0"
+          class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+        >
+          <li
+            *ngFor="
+              let dropdown of getHeaderDropdownArray(ind).controls;
+              index as i
+            "
+          >
+            <a
+              [routerLink]="dropdown.get('routerLink')?.value"
+              [routerLinkActive]="'text-darkPurple'"
+              class="capitalize"
+              >{{ dropdown.get("label")?.value }}</a
+            >
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div class="navbar-end">
+    <div class="flex flex-row items-center">
+      <div>
+        <app-language-selector></app-language-selector>
+      </div>
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="avatar placeholder">
+            <div
+              class="bg-neutral text-neutral-content rounded-full w-8 md:w-10"
+            >
+              <span class="text-xs">UI</span>
+            </div>
+          </div>
+        </div>
+        <ul
+          *transloco="let t; read: 'roles'"
+          tabindex="0"
+          class="menu flex flex-col space-y-1 menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+        >
+          <li>
+            <a class="flex flex-row items-center">
+              <span class="material-symbols-outlined"> account_circle </span>
+              <p>
+                {{ t("role") }}:
+                <span *transloco="let y; read: 'roles'">{{ y("bank") }}</span>
+              </p>
+            </a>
+          </li>
+          <li>
+            <a
+              [routerLink]="'/auth'"
+              class="flex flex-row items-center text-red-600"
+            >
+              <span class="material-symbols-outlined"> logout </span>
+              <p>{{ t("logout") }}</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

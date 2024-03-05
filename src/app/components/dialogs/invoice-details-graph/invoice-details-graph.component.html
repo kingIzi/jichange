@@ -1,0 +1,82 @@
+<div class="flex flex-col p-8 w-full space-y-8">
+  <p class="text-center text-2xl tracking-wide">Generate graph</p>
+  <div class="flex flex-col space-y-4">
+    <div class="flex flex-col">
+      <button class="btn btn-xs btn-ghost btn-outline w-fit">
+        Reset X-Axis
+      </button>
+      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="max-h-56 overflow-y-auto">
+            <table class="min-w-full text-left text-sm font-light">
+              <thead class="border-b font-medium dark:border-neutral-500">
+                <tr *transloco="let t; read: 'tableData.vendor'">
+                  <th
+                    *ngFor="let header of t('generatedInvoices'); index as ind"
+                    scope="col"
+                    class="px-6 py-4 font-inter text-sm cursor-pointer"
+                  >
+                    {{ header }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col">
+      <button class="btn btn-xs btn-ghost btn-outline w-fit">
+        Reset Y-Axis
+      </button>
+      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="max-h-56 overflow-y-auto">
+            <table class="min-w-full text-left text-sm font-light">
+              <thead class="border-b font-medium dark:border-neutral-500">
+                <tr *transloco="let t; read: 'tableData.vendor'">
+                  <th
+                    *ngFor="let header of t('generatedInvoices'); index as ind"
+                    scope="col"
+                    class="px-6 py-4 font-inter text-sm cursor-pointer"
+                  >
+                    {{ header }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-row space-x-1">
+    <table class="w-1/6">
+      <thead>
+        <tr class="bg-gray-300 rounded-tl-sm rounded-tr-sm">
+          <th class="px-6 py-1 font-inter text-sm">Date</th>
+          <th class="px-6 py-1 font-inter text-sm">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border border-gray-50">
+          <td
+            class="text-xs font-inter whitespace-nowrap px-6 py-1 font-medium"
+          >
+            11/02/2024
+          </td>
+          <td
+            class="text-xs font-inter whitespace-nowrap px-6 py-1 font-medium"
+          >
+            24
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="w-full h-full">
+      <canvas #chartCanvas id="chart-mixed-example"></canvas>
+    </div>
+  </div>
+</div>

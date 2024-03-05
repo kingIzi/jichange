@@ -1,0 +1,33 @@
+<ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '3px' }"
+></ngx-loading>
+
+<div class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2 *transloco="let t; read: 'setup.language'" class="text-lg font-bold">
+      {{ t("language") }}
+    </h2>
+  </div>
+  <div class="flex flex-col bg-white shadow p-4">
+    <div class="grid grid-cols-4">
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'setup.language.form'" class="text-xs">
+          {{ t("language") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="country"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'setup.language.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("language") }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "name": "Muhtasari",
+    "actions": {
+      "addCompany": "Ongeza Kampuni"
+    },
+    "companySummary": [
+      "Sno",
+      "Jina",
+      "Anwani",
+      "Barua pepe",
+      "Simu",
+      "Simu ya nyumbani",
+      "Hali"
+    ],
+    "companyForm": {
+      "company": "Kampuni",
+      "customer": "Mteja",
+      "mobileNo": "Nambari ya Simu",
+      "branch": "Tawi",
+      "makerChecker": "Muumba/Chunguzi",
+      "faxNo": "Nambari ya FAX",
+      "postBoxNo": "Nambari ya Sanduku la Posta",
+      "address": "Anwani",
+      "region": "Mkoa",
+      "district": "Wilaya",
+      "ward": "Kata",
+      "tinNo": "Nambari ya TIN",
+      "vatNo": "Nambari ya VAT",
+      "directorName": "Jina la Mkurugenzi",
+      "emailId": "Anwani ya Barua pepe",
+      "telephoneNo": "Nambari ya Simu",
+      "bankDetails": "Maelezo ya Benki",
+      "accountNo": "Nambari ya Akaunti",
+      "placeholders": {
+        "customer": "Ingiza jina la kampuni",
+        "branch": "Chagua tawi",
+        "faxNo": "Ingiza nambari ya FAX",
+        "postBoxNo": "Ingiza nambari ya sanduku la posta",
+        "address": "Ingiza anwani ya makazi",
+        "region": "Chagua mkoa",
+        "district": "Chagua wilaya",
+        "ward": "Chagua kata",
+        "tinNo": "Ingiza nambari ya TIN",
+        "vatNo": "Ingiza nambari ya VAT",
+        "directorName": "Ingiza jina la mkurugenzi",
+        "emailId": "Ingiza anwani ya barua pepe"
+      },
+      "errors": {
+        "customer": "Tafadhali ingiza jina la kampuni",
+        "mobileNo": "Tafadhali ingiza nambari ya simu yenye sahihi",
+        "branch": "Tafadhali chagua jina la tawi",
+        "makerChecker": "Taja mahitaji ya Muumba/Chunguzi",
+        "faxNo": "Tafadhali ingiza nambari ya FAX",
+        "postBoxNo": "Tafadhali ingiza nambari ya sanduku la posta",
+        "address": "Tafadhali ingiza anwani",
+        "region": "Tafadhali chagua mkoa",
+        "district": "Tafadhali chagua wilaya",
+        "ward": "Tafadhali chagua kata",
+        "tinNo": "Tafadhali ingiza nambari ya TIN",
+        "vatNo": "Tafadhali ingiza nambari ya VAT",
+        "directorName": "Tafadhali ingiza jina la mkurugenzi",
+        "emailId": "Tafadhali ingiza anwani ya barua pepe",
+        "telephoneNo": "Tafadhali ingiza nambari ya simu yenye sahihi"
+      },
+      "dialogs": {
+        "invalidForm": "Fomu Batili",
+        "customer": "Tafadhali toa jina la kampuni",
+        "mobileNo": "Tafadhali toa nambari ya simu yenye sahihi",
+        "branch": "Tafadhali eleza tawi",
+        "makerChecker": "Tafadhali eleza thamani ya Muumba/Chunguzi",
+        "faxNo": "Tafadhali toa nambari ya FAX",
+        "postBoxNo": "Tafadhali toa nambari ya Sanduku la Posta",
+        "vatNo": "Tafadhali toa nambari ya VAT",
+        "address": "Tafadhali toa anwani ya makazi",
+        "region": "Tafadhali chagua mkoa",
+        "district": "Tafadhali chagua wilaya",
+        "ward": "Tafadhali chagua kata",
+        "tinNo": "Tafadhali toa nambari ya TIN",
+        "directorName": "Tafadhali toa jina la mkurugenzi",
+        "telephoneNo": "Tafadhali toa nambari ya simu",
+        "emailId": "Tafadhali toa anwani ya barua pepe sahihi"
+      }
+    }
+  },
+  "inboxApproval": {
+    "name": "Idhini ya Kikasha",
+    "inboxApprovalTable": [
+      "Nambari",
+      "Jina",
+      "Anwani",
+      "Barua pepe",
+      "Nambari ya Simu",
+      "Hali"
+    ]
+  }
+}

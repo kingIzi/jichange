@@ -1,0 +1,413 @@
+<form
+  [formGroup]="formGroup"
+  #invoiceView
+  *ngIf="!data.forDownload"
+  class="flex flex-col py-6 px-6 w-full h-full space-y-4 relative"
+>
+  <img
+    *ngIf="data.invoice.approval_status === '0'"
+    src="assets/img/Cancelled.png"
+    class="absolute z-0 w-[80%] h-full object-cover top-0 bottom-0 left-0 right-0"
+    alt=""
+    srcset=""
+  />
+  <!-- <canvas #cancelledCanvas class="absolute z-50 top-0 left-0 right-0 bottom-0">
+  </canvas> -->
+
+  <header class="flex flex-col space-y-4 z-10">
+    <div class="flex flex-row justify-between w-full">
+      <div class="flex flex-col space-y-1">
+        <h4 class="font-bold text-sm lg:text-2xl">Invoice</h4>
+        <h6 class="text-xs lg:text-sm font-normal">
+          {{ invoiceNo.value }}
+        </h6>
+        <h6 class="text-xs lg:text-sm font-bold">
+          Control N°: <span class="font-normal">{{ controlNo.value }}</span>
+        </h6>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <h4 class="font-bold text-sm lg:text-lg text-right">Date issued</h4>
+        <div>
+          <h6
+            #textTag
+            class="text-xs lg:text-sm font-normal text-right cursor-default"
+          >
+            {{ formatDate(dateIssued.value, "dd MMM yyyy") }}
+          </h6>
+        </div>
+        <p
+          [class]="
+            paymentType.value.toLocaleLowerCase() ===
+            'Fixed'.toLocaleLowerCase()
+              ? 'text-teal-600'
+              : 'text-blue-600'
+          "
+          class="text-xs lg:text-sm font-extrabold text-right"
+        >
+          {{ paymentType.value }}
+        </p>
+      </div>
+    </div>
+    <div class="flex flex-row justify-between w-full">
+      <div [formGroup]="issuedTo" class="flex flex-col">
+        <h4 class="font-bold text-sm lg:text-lg text-left">Issued to</h4>
+        <h6 class="text-xs lg:text-sm font-normal text-left">
+          {{ issuedTo.get("fullName")?.value }}
+        </h6>
+        <div class="flex flex-col">
+          <h6 class="text-xs text-left font-normal">
+            {{ issuedTo.get("address")?.value }}
+          </h6>
+          <h6 class="text-xs text-left font-normal">
+            {{ issuedTo.get("city")?.value }}
+          </h6>
+        </div>
+        <h6 class="text-xs text-left font-normal">
+          {{ issuedTo.get("phone")?.value }}
+        </h6>
+      </div>
+      <div [formGroup]="issuedBy" class="flex flex-col">
+        <h4 class="font-bold text-sm lg:text-lg text-right">Issued by</h4>
+        <h6 class="text-xs lg:text-sm font-normal text-right">
+          {{ issuedBy.get("fullName")?.value }}
+        </h6>
+        <div class="flex flex-col">
+          <h6 class="text-xs text-right font-normal">
+            {{ issuedBy.get("address")?.value }}
+          </h6>
+          <h6 class="text-xs text-right font-normal">
+            {{ issuedBy.get("city")?.value }}
+          </h6>
+        </div>
+        <h6 class="text-xs text-right font-normal">
+          {{ issuedBy.get("phone")?.value }}
+        </h6>
+      </div>
+    </div>
+  </header>
+  <div
+    class="flex p-2 flex-row items-center justify-between w-full bg-orange-400 z-10"
+  >
+    <p class="text-black text-xs font-bold">Discount(s)</p>
+    <p class="text-black text-xs font-bold">{{ discount.value }}</p>
+  </div>
+  <div
+    formArrayName="items"
+    class="relative w-full grid lg:hidden grid-cols-2 gap-3 z-10"
+  >
+    <div
+      *ngFor="let item of items.controls; index as ind"
+      formGroupName="{{ ind }}"
+      class="shadow bg-white flex flex-col space-y-1 justify-center p-2 rounded h-24"
+    >
+      <div class="flex flex-row flex-wrap items-center justify-between">
+        <p class="text-sm text-black">
+          {{ item.get("description")?.value }}
+        </p>
+        <p class="text-sm text-black">
+          {{ item.get("quantity")?.value }}
+        </p>
+      </div>
+      <div class="flex flex-row flex-wrap items-center justify-between">
+        <p class="text-xs text-black">
+          <strong>Price:</strong>
+          {{
+            moneyFormat(item.get("price")?.value.toString()) +
+              " " +
+              data.invoice.Currency_Code
+          }}
+        </p>
+        <p class="text-xs text-black">
+          <strong>Subtotal:</strong>
+          {{
+            moneyFormat(
+              (
+                item.get("price")?.value * item.get("quantity")?.value
+              ).toString()
+            ) +
+              " " +
+              data.invoice.Currency_Code
+          }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="overflow-x-auto hidden lg:block z-10">
+    <table class="table table-xs">
+      <thead>
+        <tr
+          class="bg-lightPurple"
+          *transloco="let t; read: 'generated.generateInvoiceView'"
+        >
+          <th></th>
+          <th
+            class="font-bold font-inter text-black"
+            *ngFor="let header of t('viewTable'); index as ind"
+            [class]="ind !== 0 ? 'text-right' : ''"
+          >
+            {{ header }}
+          </th>
+        </tr>
+      </thead>
+      <tbody formArrayName="items">
+        <tr
+          *ngFor="let item of items.controls; index as ind"
+          formGroupName="{{ ind }}"
+        >
+          <td class="font-inter text-black">{{ ind + 1 }}</td>
+          <td class="font-inter text-black">
+            {{ item.get("description")?.value }}
+          </td>
+          <td class="text-right font-inter text-black">
+            {{ item.get("quantity")?.value }}
+          </td>
+          <td class="text-right font-inter text-black">
+            {{
+              moneyFormat(item.get("price")?.value.toString()) +
+                " " +
+                data.invoice.Currency_Code
+            }}
+          </td>
+          <td class="text-right font-inter text-black">
+            {{
+              moneyFormat(
+                (
+                  item.get("price")?.value * item.get("quantity")?.value
+                ).toString()
+              ) +
+                " " +
+                data.invoice.Currency_Code
+            }}
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr
+          class="bg-lightPurple"
+          *transloco="let t; read: 'generated.generateInvoiceView'"
+        >
+          <th></th>
+          <th
+            class="font-bold font-inter text-black"
+            *ngFor="let header of t('viewTable'); index as ind"
+            [class]="ind !== 0 ? 'text-right' : ''"
+          >
+            {{ header }}
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <div
+    class="flex p-2 flex-row items-center justify-end w-full bg-transparent z-10"
+  >
+    <p class="text-black text-sm lg:text-xl font-bold">
+      Total: {{ accumulateTotal() }} {{ data.invoice.Currency_Code }}
+    </p>
+  </div>
+  <div class="w-full flex flex-row justify-between relative z-10">
+    <div class="flex flex-col">
+      <h4 class="font-bold text-sm lg:text-lg text-black">Note</h4>
+      <p class="text-black text-xs font-bold capitalize">
+        Remark:
+        <span class="font-normal">{{ remark.value }}</span>
+      </p>
+      <h6 class="text-xs font-bold text-black">
+        Bank name: <span class="font-normal">{{ bankName.value }}</span>
+      </h6>
+      <h6 class="text-xs font-bold text-black">
+        Account N°: <span class="font-normal">{{ accountNo.value }}</span>
+      </h6>
+    </div>
+    <h6
+      class="text-xs text-black font-normal text-center absolute bottom-0 right-0 w-20 lg:w-full"
+    >
+      Generated by Biz Logic Solutions
+    </h6>
+  </div>
+</form>
+
+<form
+  [formGroup]="formGroup"
+  #invoiceView
+  *ngIf="data.forDownload"
+  class="flex flex-col py-6 px-6 w-[800px] h-full space-y-4 relative"
+>
+  <img
+    *ngIf="data.invoice.approval_status === '0'"
+    src="assets/img/Cancelled.png"
+    class="absolute z-0 w-full h-full object-cover top-0 bottom-0 left-0 right-0"
+    alt=""
+    srcset=""
+  />
+  <!-- <canvas
+    #cancelledCanvas
+    class="absolute bg-transparent z-50 top-0 left-0 right-0 bottom-0"
+  >
+  </canvas> -->
+  <header class="flex flex-col space-y-4 w-full z-10">
+    <div class="flex flex-row justify-between w-full">
+      <div class="flex flex-col">
+        <h4 class="font-bold text-sm lg:text-2xl">Invoice</h4>
+        <h6 class="text-xs lg:text-sm font-normal">
+          {{ invoiceNo.value }}
+        </h6>
+        <h6 class="text-xs lg:text-sm font-bold">
+          Control N°: <span class="font-normal">{{ controlNo.value }}</span>
+        </h6>
+      </div>
+      <div class="flex flex-col">
+        <h4 class="font-bold text-sm lg:text-lg text-right">Date issued</h4>
+        <h6 class="text-xs lg:text-sm font-normal text-right">
+          {{ dateIssued.value.toDateString() }}
+        </h6>
+        <p
+          [class]="
+            paymentType.value.toLocaleLowerCase() ===
+            'Fixed'.toLocaleLowerCase()
+              ? 'text-teal-600'
+              : 'text-blue-600'
+          "
+          class="text-xs lg:text-sm font-extrabold text-right"
+        >
+          {{ paymentType.value }}
+        </p>
+      </div>
+    </div>
+    <div class="flex flex-row justify-between w-full">
+      <div [formGroup]="issuedTo" class="flex flex-col">
+        <h4 class="font-bold text-sm lg:text-lg text-left">Issued to</h4>
+        <h6 class="text-xs lg:text-sm font-normal text-left">
+          {{ issuedTo.get("fullName")?.value }}
+        </h6>
+        <div class="flex flex-col">
+          <h6 class="text-xs text-left font-normal">
+            {{ issuedTo.get("address")?.value }}
+          </h6>
+          <h6 class="text-xs text-left font-normal">
+            {{ issuedTo.get("city")?.value }}
+          </h6>
+        </div>
+        <h6 class="text-xs text-left font-normal">
+          {{ issuedTo.get("phone")?.value }}
+        </h6>
+      </div>
+      <div [formGroup]="issuedBy" class="flex flex-col">
+        <h4 class="font-bold text-sm lg:text-lg text-right">Issued by</h4>
+        <h6 class="text-xs lg:text-sm font-normal text-right">
+          {{ issuedBy.get("fullName")?.value }}
+        </h6>
+        <div class="flex flex-col">
+          <h6 class="text-xs text-right font-normal">
+            {{ issuedBy.get("address")?.value }}
+          </h6>
+          <h6 class="text-xs text-right font-normal">
+            {{ issuedBy.get("city")?.value }}
+          </h6>
+        </div>
+        <h6 class="text-xs text-right font-normal">
+          {{ issuedBy.get("phone")?.value }}
+        </h6>
+      </div>
+    </div>
+  </header>
+  <div
+    class="flex p-2 flex-row items-center justify-between w-full bg-orange-400 z-10"
+  >
+    <p class="text-black text-xs font-bold">Discount(s)</p>
+    <p class="text-black text-xs font-bold">{{ discount.value }}</p>
+  </div>
+  <div class="overflow-x-auto w-full z-10">
+    <table class="table table-xs w-full">
+      <thead>
+        <tr
+          class="bg-lightPurple"
+          *transloco="let t; read: 'generated.generateInvoiceView'"
+        >
+          <th></th>
+          <th
+            class="font-bold font-inter text-black"
+            *ngFor="let header of t('viewTable'); index as ind"
+            [class]="ind !== 0 ? 'text-right' : ''"
+          >
+            {{ header }}
+          </th>
+        </tr>
+      </thead>
+      <tbody formArrayName="items">
+        <tr
+          *ngFor="let item of items.controls; index as ind"
+          formGroupName="{{ ind }}"
+        >
+          <td class="font-inter text-black">{{ ind + 1 }}</td>
+          <td class="font-inter text-black">
+            {{ item.get("description")?.value }}
+          </td>
+          <td class="text-right font-inter text-black">
+            {{ item.get("quantity")?.value }}
+          </td>
+          <td class="text-right font-inter text-black">
+            {{
+              moneyFormat(item.get("price")?.value.toString()) +
+                " " +
+                data.invoice.Currency_Code
+            }}
+          </td>
+          <td class="text-right font-inter text-black">
+            {{
+              moneyFormat(
+                (
+                  item.get("price")?.value * item.get("quantity")?.value
+                ).toString()
+              ) +
+                " " +
+                data.invoice.Currency_Code
+            }}
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr
+          class="bg-lightPurple"
+          *transloco="let t; read: 'generated.generateInvoiceView'"
+        >
+          <th></th>
+          <th
+            class="font-bold font-inter text-black"
+            *ngFor="let header of t('viewTable'); index as ind"
+            [class]="ind !== 0 ? 'text-right' : ''"
+          >
+            {{ header }}
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <div
+    class="flex p-2 flex-row items-center justify-end w-full bg-transparent z-10"
+  >
+    <p class="text-black text-sm lg:text-xl font-bold">
+      Total: {{ accumulateTotal() }} {{ data.invoice.Currency_Code }}
+    </p>
+  </div>
+  <div class="w-full flex flex-row justify-between relative z-10">
+    <div class="flex flex-col">
+      <h4 class="font-bold text-sm lg:text-lg text-black">Note</h4>
+      <p class="text-black text-xs font-bold capitalize">
+        Remark:
+        <span class="font-normal">{{ remark.value }}</span>
+      </p>
+      <h6 class="text-xs font-bold text-black">
+        Bank name: <span class="font-normal">{{ bankName.value }}</span>
+      </h6>
+      <h6 class="text-xs font-bold text-black">
+        Account N°: <span class="font-normal">{{ accountNo.value }}</span>
+      </h6>
+    </div>
+    <h6
+      class="text-xs text-black font-normal text-center absolute bottom-0 right-0 w-20 lg:w-full"
+    >
+      Generated by Biz Logic Solutions
+    </h6>
+  </div>
+</form>

@@ -1,0 +1,281 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="control-number-form"
+    [formGroup]="companyUsersForm"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'vendors.companyUsers'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("companyUsers") }}
+    </h1>
+    <div class="grid grid-cols-2 w-full py-8 gap-3">
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'vendors.companyUsers.form'"
+          class="text-xs"
+        >
+          {{ t("role") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="role"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'vendors.companyUsers.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("role") }}
+          </option>
+          <option value="123">123</option>
+        </select>
+        <span *ngIf="role && role.invalid && role.touched">
+          <p
+            *transloco="let t; read: 'vendors.companyUsers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("role") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'vendors.companyUsers.form'"
+          class="text-left text-xs"
+        >
+          {{ t("username") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.companyUsers.form.placeholders'"
+          #usernameInput
+          formControlName="username"
+          (change)="setControlValue(username, usernameInput.value)"
+          type="text"
+          [placeholder]="t('username')"
+          class="input input-sm input-bordered w-full bg-transparent text-black"
+        />
+        <span *ngIf="username && username.invalid && username.touched">
+          <p
+            *transloco="let t; read: 'vendors.companyUsers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("username") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'vendors.companyUsers.form'"
+          class="text-left text-xs"
+        >
+          {{ t("fullName") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.companyUsers.form.placeholders'"
+          #usernameInput
+          formControlName="fullName"
+          (change)="setControlValue(fullName, usernameInput.value)"
+          type="text"
+          [placeholder]="t('fullName')"
+          class="input input-sm input-bordered w-full bg-transparent text-black"
+        />
+        <span *ngIf="fullName && fullName.invalid && fullName.touched">
+          <p
+            *transloco="let t; read: 'vendors.companyUsers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("fullName") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'vendors.companyUsers.form'"
+          class="text-left text-xs"
+        >
+          {{ t("mobileNo") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.companyUsers.form.placeholders'"
+          #mobileNoInput
+          formControlName="mobileNo"
+          (change)="setControlValue(mobileNo, mobileNoInput.value)"
+          type="text"
+          [placeholder]="t('mobileNo')"
+          class="input input-sm input-bordered w-full bg-transparent text-black"
+        />
+        <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+          <p
+            *transloco="let t; read: 'vendors.companyUsers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("mobileNo") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'vendors.companyUsers.form'"
+          class="text-left text-xs"
+        >
+          {{ t("emailId") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.customers.form.placeholders'"
+          #emailInput
+          formControlName="emailId"
+          (change)="setControlValue(emailId, emailInput.value)"
+          type="email"
+          [placeholder]="t('emailId')"
+          class="input input-sm font-inter input-bordered w-full bg-transparent text-black"
+        />
+        <span *ngIf="emailId && emailId.invalid && emailId.touched">
+          <p
+            *transloco="let t; read: 'vendors.customers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("emailId") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'vendors.companyUsers.form'"
+          class="text-left text-xs"
+        >
+          {{ t("userPosition") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.companyUsers.form.placeholders'"
+          #userPositionInput
+          formControlName="userPosition"
+          (change)="setControlValue(userPosition, userPositionInput.value)"
+          type="email"
+          [placeholder]="t('userPosition')"
+          class="input input-sm font-inter input-bordered w-full bg-transparent text-black"
+        />
+        <span
+          *ngIf="userPosition && userPosition.invalid && userPosition.touched"
+        >
+          <p
+            *transloco="let t; read: 'vendors.companyUsers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("userPosition") }}
+          </p>
+        </span>
+      </div>
+      <!-- <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
+        <h6
+          *transloco="let t; read: 'vendors.customers.form'"
+          class="text-left text-sm"
+        >
+          {{ t("customerName") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.customers.form.placeholders'"
+          #controlNumber
+          formControlName="customerName"
+          (change)="setControlValue(customerName, controlNumber.value)"
+          type="text"
+          [placeholder]="t('customerName')"
+          class="input input-bordered w-full bg-transparent text-black"
+        />
+        <span
+          *ngIf="customerName && customerName.invalid && customerName.touched"
+        >
+          <p
+            *transloco="let t; read: 'vendors.customers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("customerName") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col col-span-full lg:col-span-1 space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'vendors.customers.form'"
+          class="text-left text-sm"
+        >
+          {{ t("mobileNo") }} <span class="text-red-600">*</span>
+        </h6>
+        <span class="relative">
+          <select
+            #phonePrefix
+            class="select select-bordered select-disabled w-24 absolute"
+          >
+            <option selected class="font-inter text-xs" value="+255">
+              +255
+            </option>
+          </select>
+          <input
+            *transloco="let t; read: 'vendors.customers.form.placeholders'"
+            type="tel"
+            placeholder="(0)"
+            (change)="updatePhoneNumberPrefix(phonePrefix.value)"
+            class="input input-bordered w-full pl-[6.2rem] bg-transparent text-black font-inter"
+            formControlName="mobileNo"
+            pattern="[0-9]{12}"
+          />
+        </span>
+        <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+          <p
+            *transloco="let t; read: 'vendors.customers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("mobileNo") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
+        <h6
+          *transloco="let t; read: 'vendors.customers.form'"
+          class="text-left text-sm"
+        >
+          {{ t("emailId") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'vendors.customers.form.placeholders'"
+          #emailInput
+          formControlName="emailId"
+          (change)="setControlValue(emailId, emailInput.value)"
+          type="email"
+          [placeholder]="t('emailId')"
+          class="input font-inter input-bordered w-full bg-transparent text-black"
+        />
+        <span *ngIf="emailId && emailId.invalid && emailId.touched">
+          <p
+            *transloco="let t; read: 'vendors.customers.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("emailId") }}
+          </p>
+        </span>
+      </div> -->
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs btn-outline font-inter btn-warning w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitCompanyUsersForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

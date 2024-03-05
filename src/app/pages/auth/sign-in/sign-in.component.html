@@ -1,0 +1,134 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
+<ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '3px' }"
+></ngx-loading>
+
+<form
+  id="sign-in-form"
+  [formGroup]="formGroup"
+  class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-4 md:w-[30rem]"
+>
+  <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
+  <div class="w-full flex flex-col">
+    <h6 class="text-center text-xl" *transloco="let t; read: 'auth.loginForm'">
+      {{ t("welcomeMessage") }}
+    </h6>
+    <h6 *transloco="let t; read: 'auth.loginForm'" class="text-center text-sm">
+      {{ t("signInMessage") }}
+    </h6>
+  </div>
+  <div class="flex flex-col w-full py-4 space-y-4">
+    <div class="flex flex-col space-y-1 w-full">
+      <h6 class="text-left text-sm" *transloco="let t; read: 'auth.loginForm'">
+        {{ t("username") }}
+      </h6>
+      <span class="relative">
+        <input
+          *transloco="let t; read: 'auth.loginForm.placeholders'"
+          type="email"
+          formControlName="uname"
+          [placeholder]="t('username')"
+          class="input font-inter input-bordered w-full max-w-lg bg-transparent text-black pl-6"
+        />
+        <span
+          class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-neutral-content"
+        >
+          person
+        </span>
+      </span>
+      <span *ngIf="uname && uname.invalid && uname.touched">
+        <p
+          *transloco="let t; read: 'auth.loginForm.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("usernameError") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <h6 class="text-left text-sm" *transloco="let t; read: 'auth.loginForm'">
+        {{ t("password") }}
+      </h6>
+      <span class="relative">
+        <input
+          *transloco="let t; read: 'auth.loginForm.placeholders'"
+          type="password"
+          formControlName="pwd"
+          [placeholder]="t('password')"
+          class="input input-bordered w-full max-w-lg bg-transparent text-black pl-6 font-inter"
+        />
+        <span
+          class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-neutral-content"
+        >
+          lock
+        </span>
+      </span>
+      <span *ngIf="pwd && pwd.invalid && pwd.touched">
+        <p
+          *transloco="let t; read: 'auth.loginForm.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("passwordError") }}
+        </p>
+      </span>
+    </div>
+  </div>
+  <div class="flex flex-row justify-between items-center w-full">
+    <a
+      [routerLink]="'/auth/reset'"
+      *transloco="let t; read: 'auth.loginForm'"
+      class="text-linkBlue cursor-pointer text-sm hover:underline"
+    >
+      {{ t("forgotPassword") }}
+    </a>
+    <div class="form-control">
+      <label class="label cursor-pointer">
+        <input
+          id="remember-me-checkbox"
+          type="checkbox"
+          checked
+          disabled
+          class="checkbox-xs"
+        />
+        <label
+          *transloco="let t; read: 'auth.loginForm'"
+          for="remember-me-checkbox"
+          class="label-text font-inter text-black"
+        >
+          {{ t("rememberMe") }}
+        </label>
+      </label>
+    </div>
+  </div>
+  <div class="flex flex-col w-full space-y-2">
+    <button
+      (click)="submitSignInForm()"
+      type="action"
+      form="sign-in-form"
+      *transloco="let t; read: 'auth.loginForm.actions'"
+      class="btn btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
+    >
+      {{ t("signIn") }}
+    </button>
+    <div class="flex flex-row items-center justify-between w-full space-x-2">
+      <button
+        type="button"
+        *transloco="let t; read: 'auth.loginForm.actions'"
+        (click)="openControlNumberDetailsDialog()"
+        class="btn text-xs btn-outline font-inter border-contactDetails hover:bg-contactDetails basis-1/2 text-contactDetails hover:text-white"
+      >
+        {{ t("controlNumberDetails") }}
+      </button>
+      <button
+        *transloco="let t; read: 'auth.loginForm.actions'"
+        type="button"
+        (click)="openVendorRegistrationDialog()"
+        class="btn text-xs btn-outline font-inter border-loginRegister hover:bg-loginRegister text-loginRegister basis-1/2 hover:text-white"
+      >
+        {{ t("register") }}
+      </button>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,33 @@
+{
+  "dashboard": {
+    "overview": {
+      "name": "Overview",
+      "transaction": "Transaction(s)",
+      "pendingApproval": "Pending Approval",
+      "customers": "Customers",
+      "users": "Users",
+      "viewMore": "View more"
+    },
+    "inboxApproval": {
+      "name": "Inbox Approval",
+      "allOperations": "All Operations",
+      "pending": "Pending",
+      "errors": {
+        "emptyInbox": "Nothing in your inbox"
+      }
+    },
+    "transaction": {
+      "name": "Transaction",
+      "errors": {
+        "noDataFound": "No transaction data found"
+      }
+    },
+    "onboardCustomers": {
+      "name": "Latest added vendor(s)",
+      "errors": {
+        "noDataFound": "No data found"
+      }
+    },
+    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"]
+  }
+}

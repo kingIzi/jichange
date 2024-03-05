@@ -1,0 +1,114 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+<app-submit-message-box #submitMessagBox></app-submit-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="control-number-form"
+    [formGroup]="customerForm"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1 *transloco="let t; read: 'customer'" class="text-xl md:text-2xl p-0">
+      {{ t("customer") }}
+    </h1>
+    <div class="grid grid-cols-2 w-full py-8 gap-3">
+      <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
+        <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
+          {{ t("customerName") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'customer.form.placeholders'"
+          #controlNumber
+          formControlName="customerName"
+          (change)="setControlValue(customerName, controlNumber.value)"
+          type="text"
+          [placeholder]="t('customerName')"
+          class="input input-bordered w-full bg-transparent text-black"
+        />
+        <span
+          *ngIf="customerName && customerName.invalid && customerName.touched"
+        >
+          <p
+            *transloco="let t; read: 'customer.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("customerName") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col col-span-full lg:col-span-1 space-y-1 w-full">
+        <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
+          {{ t("mobileNo") }} <span class="text-red-600">*</span>
+        </h6>
+        <span class="relative">
+          <select
+            #phonePrefix
+            class="select select-bordered select-disabled w-24 absolute"
+          >
+            <option selected class="font-inter text-xs" value="+255">
+              +255
+            </option>
+          </select>
+          <input
+            *transloco="let t; read: 'customer.form.placeholders'"
+            type="tel"
+            placeholder="(0)"
+            (change)="updatePhoneNumberPrefix(phonePrefix.value, mobileNo)"
+            class="input input-bordered w-full pl-[6.2rem] bg-transparent text-black font-inter"
+            formControlName="mobileNo"
+            pattern="[0-9]{12}"
+          />
+        </span>
+        <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+          <p
+            *transloco="let t; read: 'customer.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("mobileNo") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
+        <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
+          {{ t("emailId") }}
+        </h6>
+        <input
+          *transloco="let t; read: 'customer.form.placeholders'"
+          #emailInput
+          formControlName="emailId"
+          (change)="setControlValue(emailId, emailInput.value)"
+          type="email"
+          [placeholder]="t('emailId')"
+          class="input font-inter input-bordered w-full bg-transparent text-black"
+        />
+        <span *ngIf="emailId && emailId.invalid && emailId.touched">
+          <p
+            *transloco="let t; read: 'customer.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("emailId") }}
+          </p>
+        </span>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitCountryForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

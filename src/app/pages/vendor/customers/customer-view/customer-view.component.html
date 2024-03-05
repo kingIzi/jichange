@@ -1,0 +1,292 @@
+<ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '3px' }"
+></ngx-loading>
+
+<div class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'customer.customerView'"
+      class="text-lg font-bold"
+    >
+      {{ t("customerProfileTransaction") }}
+    </h2>
+  </div>
+  <div class="bg-white w-full shadow grid grid-cols-4 gap-3 p-4">
+    <div class="col-span-full lg:col-span-1">
+      <div class="flex flex-col">
+        <div class="card bg-transparent shadow-xl">
+          <div class="card-body">
+            <h2
+              *transloco="let t; read: 'customer.customerView.customerDetails'"
+              class="card-title"
+            >
+              {{ t("customerDetails") }}
+            </h2>
+            <div class="flex flex-row items-center justify-between">
+              <div class="avatar placeholder">
+                <div class="bg-neutral text-neutral-content rounded-full w-16">
+                  <span class="text-xl">AI</span>
+                </div>
+              </div>
+              <div
+                *transloco="
+                  let t;
+                  read: 'customer.customerView.customerDetails'
+                "
+                class="flex flex-col space-y-1"
+              >
+                <p class="text-xs">
+                  <b>{{ t("name") }}:</b> Customer name
+                </p>
+                <p class="text-xs">
+                  <b>{{ t("email") }}:</b> customer@name.com
+                </p>
+                <p class="text-xs">
+                  <b>{{ t("mobile") }}:</b> 255766373833
+                </p>
+              </div>
+            </div>
+            <div class="card-actions justify-end"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-full lg:col-span-3">
+      <div class="flex flex-col">
+        <h2
+          *transloco="let t; read: 'customer.customerView'"
+          class="text-sm font-bold"
+        >
+          {{ t("customerViewTableTitle") }}
+        </h2>
+        <div class="flex flex-col bg-white shadow px-2 py-4">
+          <div class="flex flex-row items-center justify-end">
+            <div class="flex flex-row items-center space-x-2">
+              <app-table-date-filters></app-table-date-filters>
+              <div class="relative">
+                <input
+                  *transloco="let t; read: 'defaults'"
+                  type="search"
+                  class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+                  id="exampleSearch"
+                  [placeholder]="t('search')"
+                  #searchInput
+                />
+                <span
+                  class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
+                >
+                  search
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 relative">
+            <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+              <div class="overflow-y-auto">
+                <table
+                  #customersTable
+                  class="min-w-full text-left text-sm font-light"
+                >
+                  <thead
+                    [formGroup]="headerFormGroup"
+                    class="border-b font-medium dark:border-neutral-500"
+                  >
+                    <tr
+                      *transloco="let t; read: 'tableData.vendor'"
+                      class="bg-lightPurple"
+                    >
+                      <th
+                        *ngFor="let header of headers.controls; index as ind"
+                        scope="col"
+                        class="px-6 font-inter text-sm"
+                        [id]="'generated-invoice-id-' + ind"
+                      >
+                        <div class="flex flex-row items-center">
+                          <p class="text-sm font-extrabold text-black">
+                            {{ header.get("label")?.value }}
+                          </p>
+                          <button>
+                            <span
+                              class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                            >
+                              unfold_more
+                            </span>
+                          </button>
+                        </div>
+                      </th>
+                      <th
+                        *transloco="let t; read: 'defaults'"
+                        class="px-6 py-4 font-inter text-sm font-extrabold text-black"
+                      >
+                        {{ t("action") }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      *ngFor="
+                        let customer of customerInvoices
+                          | slice : 0 : itemPerPage;
+                        index as i
+                      "
+                      class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                    >
+                      <td class="whitespace-nowrap px-6 py-4">
+                        <div class="flex flex-row items-center">
+                          <p
+                            class="text-black font-semibold text-sm font-inter"
+                          >
+                            {{ customer.invoiceNo }}
+                          </p>
+                          <div class="dropdown">
+                            <div
+                              tabindex="0"
+                              role="button"
+                              class="btn btn-xs btn-ghost m-1"
+                            >
+                              <span class="material-symbols-outlined">
+                                arrow_drop_down
+                              </span>
+                            </div>
+                            <ul
+                              tabindex="0"
+                              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                            >
+                              <li
+                                *ngFor="
+                                  let receipt of customer.receipts;
+                                  index as ind
+                                "
+                              >
+                                <a
+                                  (click)="openCustomerReceipt(receipt)"
+                                  class="flex flex-row items-center justify-between"
+                                >
+                                  <p class="text-xs text-black font-bold">
+                                    {{ receipt.receiptNo }}
+                                  </p>
+                                  <p class="text-xs text-black">
+                                    {{
+                                      convertDate(
+                                        receipt.date.toString()
+                                      ).toLocaleDateString()
+                                    }}
+                                  </p>
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                      >
+                        {{
+                          convertDate(
+                            customer.date.toString()
+                          ).toLocaleDateString()
+                        }}
+                      </td>
+                      <td
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                      >
+                        {{ customer.itemName }}
+                      </td>
+                      <td
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                      >
+                        {{ moneyFormat(customer.amount) }} TZS
+                      </td>
+                      <td
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                      >
+                        <button
+                          class="px-6 text-black text-xs rounded-full shadow p-2 w-full"
+                          [class]="
+                            customer.status === 'Done'
+                              ? 'bg-green-200'
+                              : 'bg-orange-200'
+                          "
+                        >
+                          {{ customer.status }}
+                        </button>
+                      </td>
+
+                      <td
+                        class="text-sm font-inter whitespace-nowrap px-6 py-3"
+                      >
+                        <app-remove-item-dialog
+                          #removeItemDialog
+                        ></app-remove-item-dialog>
+                        <div class="flex flex-row items-center justify-between">
+                          <button
+                            (click)="downloadAllRecipts(customer.receipts)"
+                          >
+                            <span
+                              class="material-symbols-outlined text-linkBlue"
+                            >
+                              download
+                            </span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div *transloco="let t; read: 'errors'">
+                  <p
+                    *ngIf="customerInvoices.length <= 0"
+                    class="text-center text-sm tracking-wide pt-3 pb-1"
+                  >
+                    {{ t("noDataFound") }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-row items-center justify-between">
+            <div class="flex flex-row items-center space-x-1">
+              <p *transloco="let t; read: 'tableData'" class="text-xs">
+                {{ t("itemsPerPage") }}:
+              </p>
+              <select
+                name="itemsPerPage"
+                class="select select-sm select-bordered w-16 max-w-xs"
+                #itemPerPageSelect
+                (change)="itemsPerPageChanged(itemPerPageSelect.value)"
+              >
+                <option *ngFor="let option of itemsPerPage" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+            </div>
+            <div class="flex flex-row items-center">
+              <p class="text-xs">1-5 of 100</p>
+              <button class="btn btn-sm lg:btn-lg btn-ghost">
+                <span class="material-symbols-outlined text-sm lg:text-lg">
+                  keyboard_double_arrow_left
+                </span>
+              </button>
+              <button class="btn btn-sm lg:btn-lg btn-ghost">
+                <span class="material-symbols-outlined text-sm lg:text-lg">
+                  navigate_before
+                </span>
+              </button>
+              <button class="btn btn-sm lg:btn-lg btn-ghost">
+                <span class="material-symbols-outlined text-sm lg:text-lg">
+                  navigate_next
+                </span>
+              </button>
+              <button class="btn btn-sm lg:btn-lg btn-ghost">
+                <span class="material-symbols-outlined text-sm lg:text-lg">
+                  keyboard_double_arrow_right
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

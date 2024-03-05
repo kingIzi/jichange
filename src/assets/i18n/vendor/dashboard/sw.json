@@ -1,0 +1,29 @@
+{
+  "dashboard": {
+    "overview": {
+      "overview": "Muhtasari",
+      "paidInvoice": "Bili Iliyolipwa",
+      "dueInvoice": "Bili Inayotarajiwa",
+      "invoiceExpire": "Bili Zilizopita Muda",
+      "customers": "Wateja",
+      "viewMore": "Ona zaidi",
+      "createInvoice": "Unda bili"
+    },
+    "transaction": {
+      "transaction": "Miamala"
+    },
+    "allOperations": {
+      "allOperations": "Operesheni Zote"
+    },
+    "latestTransactionsTitle": "Miamala ya Hivi Karibuni",
+    "latestTransactionsTable": [
+      "Nambari",
+      "Nambari ya Bili",
+      "Tarehe ya Bili",
+      "Mteja",
+      "Nambari ya Udhibiti",
+      "Jumla ya Kiasi",
+      "Maelezo"
+    ]
+  }
+}

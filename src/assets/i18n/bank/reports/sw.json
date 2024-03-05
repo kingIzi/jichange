@@ -1,0 +1,128 @@
+{
+  "overview": {
+    "overview": "Muhtasari",
+    "summary": "Muhtasari",
+    "vendorsTableTitle": "Wauzaji Wapya Walioongezwa",
+    "transactions": "Miamala",
+    "vendorsTable": [
+      "Nambari",
+      "Jina",
+      "Anwani",
+      "Barua pepe",
+      "Nambari ya Simu",
+      "Hali"
+    ]
+  },
+  "transactionDetails": {
+    "transaction": "Shughuli",
+    "transactionDetails": "Maelezo ya Shughuli",
+    "transactionNumber": "Nambari ya Uhamisho",
+    "description": "Maelezo",
+    "amount": "Kiasi",
+    "currency": "Sarafu",
+    "company": "Kampuni",
+    "date": "Tarehe",
+    "method": "Mbinu",
+    "status": "Hali",
+    "transactionType": "Aina ya Uhamisho",
+    "attachment": "Viambatanisho",
+    "note": "Maelezo",
+    "transactionDetailsTable": [
+      "Tarehe",
+      "Kampuni",
+      "Nambari ya Muamala",
+      "Maelezo",
+      "Kiasi",
+      "Hali"
+    ],
+    "statusOptions": {
+      "pending": "Inasubiri",
+      "In Progress": "katika-maendeleo",
+      "finalized": "Imekamilishwa"
+    },
+    "approvalDetails": {
+      "approvalDetails": "Maelezo ya Idhini",
+      "approvedBy": "Imeidhinishwa na",
+      "method": "Njia ya Malipo",
+      "comment": "Maoni",
+      "location": "Mahali",
+      "contact": "Mawasiliano"
+    },
+    "history": {
+      "history": "Historia"
+    }
+  },
+  "invoiceDetails": {
+    "invoiceDetails": "Maelezo ya Bili",
+    "form": {
+      "company": "Kampuni",
+      "customer": "Mteja",
+      "startDate": "Tarehe ya Kuanzia",
+      "endDate": "Tarehe ya Mwisho",
+      "placeholders": {
+        "all": "yote"
+      }
+    },
+    "invoiceDetailsTable": [
+      "Nambari",
+      "Nambari ya Bili",
+      "Tarehe",
+      "Mteja",
+      "Kiasi cha Bili"
+    ]
+  },
+  "customerDetailReport": {
+    "customerDetailReport": "Ripoti ya Maelezo ya Mteja",
+    "form": {
+      "company": "Kampuni",
+      "region": "Mkoa",
+      "district": "Wilaya",
+      "placeholders": {
+        "all": "Yote"
+      }
+    },
+    "customerDetailReportTable": [
+      "Nambari",
+      "Jukumu",
+      "Sanduku la Posta",
+      "Anwani",
+      "Mtu wa Mawasiliano"
+    ]
+  },
+  "userLogReport": {
+    "userLogReport": "Ripoti ya Kumbukumbu za Mtumiaji",
+    "form": {
+      "startDate": "Tarehe ya Kuanzia",
+      "endDate": "Tarehe ya Mwisho"
+    },
+    "userLogReportTable": [
+      "Nambari",
+      "Jina la Mtumiaji",
+      "Anwani ya IP",
+      "Kikundi cha Mtumiaji",
+      "Wakati wa Kuingia",
+      "Wakati wa Kutoka"
+    ]
+  },
+  "auditTrails": {
+    "auditTrails": "Kufuatilia Ukaguzi",
+    "form": {
+      "company": "Kampuni",
+      "actions": "Hatua",
+      "startDate": "Tarehe ya Kuanzia",
+      "endDate": "Tarehe ya Mwisho",
+      "placeholders": {
+        "all": "Zote"
+      }
+    },
+    "auditTrailsTable": [
+      "Nambari",
+      "Hatua",
+      "Jina la Safu",
+      "Thamani ya Zamani",
+      "Thamani Mpya",
+      "Imetumwa",
+      "Tarehe ya Ukaguzi"
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="control-number-form"
+    [formGroup]="depositAccountForm"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'setup.depositAccount'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("depositAccount") }}
+    </h1>
+    <div class="w-full grid grid-cols-2 gap-3 py-8">
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'setup.depositAccount.form'"
+          class="text-xs"
+        >
+          {{ t("vendor") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="vendor"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'setup.depositAccount.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("vendor") }}
+          </option>
+          <option value="123">123</option>
+        </select>
+        <span *ngIf="vendor && vendor.invalid && vendor.touched">
+          <p
+            *transloco="let t; read: 'setup.depositAccount.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("vendor") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'setup.depositAccount.form'"
+          class="text-xs"
+        >
+          {{ t("account") }}<span class="text-red-600">*</span>
+        </p>
+        <select
+          formControlName="account"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'setup.depositAccount.form.placeholders'"
+            disabled
+            selected
+          >
+            {{ t("account") }}
+          </option>
+          <option value="123">123</option>
+        </select>
+        <span *ngIf="account && account.invalid && account.touched">
+          <p
+            *transloco="let t; read: 'setup.depositAccount.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("account") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'setup.depositAccount.form'"
+          class="text-left text-xs"
+        >
+          {{ t("reason") }}<span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'setup.depositAccount.form.placeholders'"
+          #controlNumber
+          formControlName="reason"
+          (change)="setControlValue(reason, controlNumber.value)"
+          type="text"
+          [placeholder]="t('reason')"
+          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+        <span *ngIf="reason && reason.invalid && reason.touched">
+          <p
+            *transloco="let t; read: 'setup.depositAccount.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("reason") }}
+          </p>
+        </span>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitDepositForm()"
+        type="submit"
+        form="control-number-form"
+        class="btn text-xs btn-outline font-inter btn-success w-24"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

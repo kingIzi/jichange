@@ -1,0 +1,136 @@
+{
+  "overview": {
+    "overview": "Overview",
+    "summary": "Summary",
+    "vendorsTableTitle": "Latest added Vendors",
+    "transactions": "Transactions",
+    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"]
+  },
+  "transactionDetails": {
+    "transaction": "Transaction",
+    "transactionDetails": "Transaction Details",
+    "transactionNumber": "Transaction Number",
+    "description": "Description",
+    "amount": "Amount",
+    "currency": "Currency",
+    "company": "Company",
+    "date": "Date",
+    "method": "Method",
+    "status": "Status",
+    "transactionType": "Transaction type",
+    "attachment": "Attachment(s)",
+    "note": "Note(s)",
+    "transactionReportForm": "Transaction Report form",
+    "transactionDetailsTable": [
+      "Date",
+      "Company",
+      "Transaction N°",
+      "Description",
+      "Amount",
+      "Status"
+    ],
+    "statusOptions": {
+      "pending": "pending",
+      "In Progress": "in-progress",
+      "finalized": "finalized"
+    },
+    "approvalDetails": {
+      "approvalDetails": "Approval details",
+      "approvedBy": "Approved by",
+      "method": "Payment Method",
+      "comment": "Comment",
+      "location": "Location",
+      "contact": "Contact(s)"
+    },
+    "history": {
+      "history": "History"
+    },
+    "form": {
+      "placeholders": {
+        "transactionNumber": "Enter transaction number",
+        "date": "Enter transaction date",
+        "company": "Select company",
+        "amount": "Enter amount"
+      },
+      "errors": {
+        "transactionNumber": "Please enter the transaction number",
+        "date": "Please enter date of tansaction",
+        "company": "Please select a company",
+        "amount": "Please enter transaction amount"
+      }
+    }
+  },
+  "invoiceDetails": {
+    "invoiceDetails": "Invoice details",
+    "form": {
+      "company": "Company",
+      "customer": "Customer",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "placeholders": {
+        "all": "all"
+      }
+    },
+    "invoiceDetailsTable": [
+      "Sno",
+      "Invoice No",
+      "Date",
+      "Customer",
+      "Invoice amount"
+    ]
+  },
+  "customerDetailReport": {
+    "customerDetailReport": "Customer detail report",
+    "form": {
+      "company": "Company",
+      "region": "region",
+      "district": "district",
+      "placeholders": {
+        "all": "All"
+      }
+    },
+    "customerDetailReportTable": [
+      "Sno",
+      "Role",
+      "PostBox No",
+      "Address",
+      "Contact person"
+    ]
+  },
+  "userLogReport": {
+    "userLogReport": "User log report",
+    "form": {
+      "startDate": "Start date",
+      "endDate": "End date"
+    },
+    "userLogReportTable": [
+      "Sno",
+      "User Name",
+      "Ip Address",
+      "User Group",
+      "Login Time",
+      "Logout Time"
+    ]
+  },
+  "auditTrails": {
+    "auditTrails": "Audit Trails",
+    "form": {
+      "company": "Company",
+      "actions": "actions",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "placeholders": {
+        "all": "All"
+      }
+    },
+    "auditTrailsTable": [
+      "Sno",
+      "Actions",
+      "Column Name",
+      "Old value",
+      "New value",
+      "Posted",
+      "Audit Date"
+    ]
+  }
+}

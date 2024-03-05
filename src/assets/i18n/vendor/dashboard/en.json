@@ -1,0 +1,29 @@
+{
+  "dashboard": {
+    "overview": {
+      "overview": "Overview",
+      "paidInvoice": "Paid Invoice",
+      "dueInvoice": "Invoice due",
+      "invoiceExpire": "Invoice(s) Expired",
+      "customers": "Customer(s)",
+      "viewMore": "View more",
+      "createInvoice": "Create invoice"
+    },
+    "transaction": {
+      "transaction": "Transaction"
+    },
+    "allOperations": {
+      "allOperations": "All operations"
+    },
+    "latestTransactionsTitle": "Latest transactions",
+    "latestTransactionsTable": [
+      "Sno",
+      "Invoice No",
+      "Invoice Date",
+      "Customer",
+      "Control No",
+      "Totoal amount",
+      "Remarks"
+    ]
+  }
+}

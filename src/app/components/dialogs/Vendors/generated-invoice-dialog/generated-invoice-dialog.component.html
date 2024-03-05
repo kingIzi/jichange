@@ -1,0 +1,163 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
+<form [formGroup]="formGroup" class="flex flex-col p-8 w-full space-y-8">
+  <p
+    *transloco="let t; read: 'generated.generateChart'"
+    class="text-center text-2xl tracking-wide"
+  >
+    {{ t("generateChart") }}
+  </p>
+  <div class="flex flex-col space-y-4">
+    <div class="flex flex-col space-y-1">
+      <p
+        *transloco="let t; read: 'generated.generateChart'"
+        class="text-black text-lg"
+      >
+        {{ t("chartType") }}
+      </p>
+      <select
+        #graphTypeSelect
+        (change)="graphTypeChanged(graphTypeSelect.value)"
+        class="select select-sm select-bordered w-full max-w-xs"
+      >
+        <option
+          *transloco="let t; read: 'generated.generateChart.form.placeholders'"
+          disabled
+          selected
+        >
+          {{ t("chartType") }}
+        </option>
+        <option
+          *ngFor="let chartType of chartTypes; index as ind"
+          [value]="chartType"
+        >
+          {{ chartType }}
+        </option>
+      </select>
+    </div>
+    <div class="w-full grid grid-cols-2 gap-x-1 gap-y-3">
+      <div class="grid grid-cols-3 gap-3 p-1 col-span-full lg:col-span-1">
+        <p
+          *transloco="let t; read: 'generated.generateChart'"
+          class="text-black text-lg col-span-full bg-lightPurple"
+        >
+          {{ t("xAxis") }}
+        </p>
+        <button
+          scope="col"
+          class="btn btn-md btn-outline btn-ghost"
+          *ngFor="let header of data.headers; index as i"
+          (click)="updateGraphXAxis(i)"
+          [class]="
+            xAxis.value === header
+              ? 'bg-lightPurple text-darkPurple'
+              : 'bg-transparent text-black'
+          "
+        >
+          {{ header }}
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-3 p-1 col-span-full lg:col-span-1">
+        <p
+          *transloco="let t; read: 'generated.generateChart'"
+          class="text-black text-lg col-span-full bg-lightYellow"
+        >
+          {{ t("yAxis") }}
+        </p>
+        <button
+          scope="col"
+          class="btn btn-md btn-outline btn-ghost"
+          *ngFor="let header of data.headers; index as i"
+          (click)="updateGraphYAxis(i)"
+          [class]="
+            yAxis.value === header
+              ? 'bg-lightYellow text-yellow-600'
+              : 'bg-transparent text-black'
+          "
+        >
+          {{ header }}
+        </button>
+      </div>
+    </div>
+    <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="max-h-56 min-w-full">
+          <table class="font-light w-full">
+            <thead>
+              <tr class="bg-neutral-50">
+                <th
+                  *ngIf="xAxis.valid"
+                  scope="col"
+                  class="px-6 py-4 font-inter text-sm text-center text-black cursor-pointer block"
+                >
+                  {{ xAxis.value }}
+                </th>
+                <th
+                  *ngIf="yAxis.valid"
+                  scope="col"
+                  class="px-6 py-4 font-inter text-sm text-black text-center cursor-pointer block"
+                >
+                  {{ yAxis.value }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="border-l border-r border-t"
+                *ngFor="let set of dataset.controls; index as ind"
+              >
+                <td class="py-4 text-sm text-center border-b">
+                  {{
+                    xAxis.value === data.headers[data.headersMap.invoiceDate]
+                      ? labels.controls.at(ind)?.value.toLocaleDateString()
+                      : labels.controls.at(ind)?.value
+                  }}
+                </td>
+                <td class="py-4 text-sm text-center border-b">
+                  {{ moneyFormat(dataset.controls.at(ind)?.value.toString()) }}
+                  {{
+                    yAxis.value === data.headers[data.headersMap.totalAmount]
+                      ? data.generatedInvoices[ind].Currency_Code
+                      : ""
+                  }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <button
+      *transloco="let t; read: 'generated.generateChart'"
+      (click)="generateGraph()"
+      class="btn btn-xs btn-ghost btn-outline w-full my-4"
+    >
+      {{ t("generateChart") }}
+    </button>
+    <div #graphContainer class="flex-col space-y-4 w-full hidden">
+      <h4 class="text-lg text-black text-center">
+        {{ this.xAxis.value }} - {{ this.yAxis.value }}
+      </h4>
+      <div
+        class="flex flex-row items-center space-x-2 justify-between px-4 w-full"
+      >
+        <div class="flex flex-col w-full">
+          <p class="text-xs font-bold">Start date</p>
+          <input
+            type="date"
+            [formControl]="startDate"
+            class="input input-sm input-bordered w-full"
+          />
+        </div>
+        <div class="flex flex-col w-full">
+          <p class="text-xs font-bold">End date</p>
+          <input
+            [formControl]="endDate"
+            type="date"
+            class="input input-sm input-bordered w-full"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

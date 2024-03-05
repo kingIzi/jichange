@@ -1,0 +1,36 @@
+<div class="card w-72 bg-base-100 shadow relative">
+  <div class="card-body">
+    <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
+      {{ statistic }}
+    </h2>
+    <p
+      *transloco="let t; read: 'panel.dashboard.overview'"
+      class="text-sm font-bold"
+    >
+      {{ t(lang) }}
+    </p>
+    <a
+      [routerLink]="viewMoreLink"
+      class="card-action flex flex-row items-center cursor-pointer group"
+    >
+      <span
+        [class]="increase ? 'text-success' : 'text-warning'"
+        class="material-symbols-outlined text-sm mb-0.5"
+      >
+        {{ increase ? "arrow_upward" : "arrow_downward" }}
+      </span>
+      <p
+        *transloco="let t; read: 'panel.dashboard.overview'"
+        class="text-xs text-darkPurple font-inter group-hover:underline"
+      >
+        {{ t("viewMore") }}
+      </p>
+    </a>
+  </div>
+  <img
+    [src]="imgUrl"
+    class="w-20 absolute right-1 top-1/2 -translate-y-1/2 rounded-full"
+    alt=""
+    srcset=""
+  />
+</div>

@@ -1,0 +1,364 @@
+{
+  "countryDialog": {
+    "country": "Country",
+    "addCountry": "Add Country",
+    "form": {
+      "placeholders": {
+        "name": "Enter country"
+      },
+      "errors": {
+        "missingCountry": "Please fill"
+      },
+      "dialog": {
+        "missingCountry": "Please provide a country name",
+        "invalidForm": "Invalid form"
+      }
+    },
+    "countriesTable": ["Sno", "Country"]
+  },
+  "regionDialog": {
+    "region": "Region",
+    "addRegion": "Add region",
+    "form": {
+      "placeholders": {
+        "name": "Enter region",
+        "country": "Select country"
+      },
+      "errors": {
+        "selectCountry": "Please select a counry",
+        "missingRegion": "Please fill",
+        "missingStatus": "Please select status"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingCountry": "Please select a country",
+        "missingRegion": "Please provide a region name",
+        "missingStatus": "Please select a status"
+      }
+    },
+    "regionsTable": ["Sno", "Country", "Region", "Status"]
+  },
+  "districtDialog": {
+    "addDistrict": "Add District",
+    "district": "District",
+    "form": {
+      "placeholders": {
+        "name": "Enter district",
+        "region": "Select region"
+      },
+      "errors": {
+        "selectRegion": "Please select region",
+        "missingDistrict": "Please fill",
+        "missingStatus": "Please select status"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingRegion": "Please select a region",
+        "missingDistrict": "Please provide a district name",
+        "missingStatus": "Please select a status"
+      }
+    },
+    "districtsTable": ["Sno", "Region", "District", "Status"]
+  },
+  "wardDialog": {
+    "addWard": "Add Ward",
+    "ward": "Ward",
+    "form": {
+      "placeholders": {
+        "name": "Enter ward",
+        "district": "Select district"
+      },
+      "errors": {
+        "selectDistrict": "Please select district",
+        "missingWard": "Please fill",
+        "missingStatus": "Please select status"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingDistrict": "Please select a district",
+        "missingWard": "Please provide a ward name",
+        "missingStatus": "Please select a status"
+      }
+    },
+    "wardsTable": ["Sno", "District", "Ward", "Status"]
+  },
+  "currency": {
+    "addCurrency": "Add Currency",
+    "currency": "Currency",
+    "currencyName": "Name",
+    "code": "Code",
+    "form": {
+      "placeholders": {
+        "code": "Enter currency code",
+        "name": "Enter currency name"
+      },
+      "errors": {
+        "code": "Please fill",
+        "name": "Please fill"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingCode": "Please provide a currency code",
+        "missingName": "Please provide the currency name"
+      }
+    },
+    "currenciesTable": ["Sno", "Code", "Name"]
+  },
+  "designation": {
+    "addDesignation": "Add Designation",
+    "designation": "Designation",
+    "form": {
+      "placeholders": {
+        "name": "Enter designation"
+      },
+      "errors": {
+        "name": "Please fill"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingDesignation": "Please provide a designation name"
+      }
+    },
+    "designationsTable": ["Sno", "Designation"]
+  },
+  "branch": {
+    "addBranch": "Add branch",
+    "branch": "Branch",
+    "location": "Location",
+    "form": {
+      "placeholders": {
+        "branch": "Enter branch name",
+        "location": "Enter location"
+      },
+      "errors": {
+        "branch": "Please fill",
+        "location": "Please fill",
+        "missingStatus": "Please select status"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingBranch": "Please provide a branch name",
+        "missingLocation": "Please provide a location",
+        "missingStatus": "Please select a status"
+      }
+    },
+    "branchesTable": ["Sno", "Branch", "Location", "Status"]
+  },
+  "questionName": {
+    "addQuestionName": "Add question",
+    "questionName": "Question name",
+    "form": {
+      "placeholders": {
+        "questionName": "Enter question name"
+      },
+      "errors": {
+        "questionName": "Please fill",
+        "missingStatus": "Please select status"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "missingQuestionName": "Please provide a question name",
+        "missingStatus": "Please select a status"
+      }
+    },
+    "questionNamesTable": ["Sno", "Question name", "Status"]
+  },
+  "smtp": {
+    "addSmtp": "Add Smtp",
+    "smtp": "Simple Mail Transfer Protocol",
+    "form": {
+      "fromAddress": "From Address",
+      "address": "Address",
+      "portNumber": "Port number",
+      "username": "Username",
+      "password": "Password",
+      "sslEnable": "SSL Enable",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "placeholders": {
+        "fromAddress": "Enter from email ID",
+        "address": "Enter address",
+        "portNumber": "Enter port number",
+        "username": "Enter username",
+        "password": "Enter password"
+      },
+      "errors": {
+        "fromAddress": "Please enter a valid email address",
+        "address": "Please fill",
+        "portNumber": "Please fill",
+        "username": "Please fill",
+        "password": "Please fill",
+        "sslEnable": "Please select ssl mode"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "fromAddress": "Please provide sender's email",
+        "address": "Please provide an address",
+        "portNumber": "Please provide a port number",
+        "username": "Please provide a username",
+        "password": "Please provide a password",
+        "sslEnable": "You must select a SSL Mode"
+      }
+    },
+    "smtpTable": [
+      "Sno",
+      "From Address",
+      "SSL Enable",
+      "Address",
+      "Port number",
+      "Username"
+    ]
+  },
+  "emailText": {
+    "addEmailText": "Add email text",
+    "emailText": "Email Text",
+    "form": {
+      "flowId": "Flow Id",
+      "subjectEnglish": "Subject English",
+      "subjectSwahili": "Subject Swahili",
+      "emailText": "Email Text",
+      "emailSwahili": "Email Swahili Text",
+      "placeholders": {
+        "flowId": "Select flow Id",
+        "subjectEnglish": "Enter subject in english",
+        "subjectSwahili": "Enter subject in swahili",
+        "emailText": "Enter your email text in enlish",
+        "emailSwahili": "Enter your email in swahili"
+      },
+      "errors": {
+        "flowId": "Please, select a flow Id",
+        "subjectEnglish": "Please, enter email's subject in english",
+        "subjectSwahili": "Please, enter email's subject in swahili",
+        "emailText": "Please, enter your email text in enlish",
+        "emailSwahili": "Please, enter your email text in swahili"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "flowId": "Please select a flow Id",
+        "subjectEnglish": "Please, provide the email's subject in english",
+        "subjectSwahili": "Please, provide the email's subject in swahili",
+        "emailText": "Please, enter your email text in enlish",
+        "emailSwahili": "Please, enter your email text in swahili"
+      }
+    },
+    "emailTextsTable": [
+      "Sno",
+      "Flow Id",
+      "Subject English",
+      "Subject Swahili",
+      "Email text",
+      "Email Swahili text"
+    ]
+  },
+  "bankUser": {
+    "userDetails": "User details",
+    "addBankUser": "Add User",
+    "bankUser": "Bank user",
+    "form": {
+      "employeeId": "Employee Id",
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "username": "Username",
+      "designation": "Designation",
+      "branch": "Branch",
+      "emailId": "Email Id",
+      "mobileNo": "Mobile No",
+      "placeholders": {
+        "employeeId": "Enter employee Id",
+        "firstName": "Enter first name",
+        "middleName": "Enter middle name",
+        "lastName": "Enter last name",
+        "username": "Enter user name",
+        "designation": "Select designation",
+        "branch": "Select branch",
+        "emailId": "Enter email Id",
+        "mobileNo": "+255"
+      },
+      "errors": {
+        "employeeId": "Pleae, enter employee Id",
+        "firstName": "Please fill",
+        "middleName": "Please fill",
+        "lastName": "Please fill",
+        "username": "Please fill",
+        "designation": "Please select a designation",
+        "branch": "Select select a branch",
+        "emailId": "Please provide a valid email Id",
+        "mobileNo": "Please provide a mobile number"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "employeeId": "Pleae, provide an employee Id",
+        "firstName": "Please provide a first name",
+        "middleName": "Please provide a middle name",
+        "lastName": "Please provide a last name",
+        "username": "Please provide a user name",
+        "designation": "Please provide a designation",
+        "branch": "Please provide a branch",
+        "emailId": "Please provide a email Id",
+        "mobileNo": "Please provide a mobile number"
+      }
+    },
+    "bankUserTable": [
+      "Sno",
+      "Employee Id",
+      "Full name",
+      "Designation",
+      "Email Id",
+      "Status"
+    ]
+  },
+  "language": {
+    "language": "Language",
+    "form": {
+      "language": "Language",
+      "placeholders": {
+        "language": "Select language"
+      }
+    }
+  },
+  "suspenseAccount": {
+    "addSuspenseAccount": "Add Suspense Account",
+    "suspenseAccount": "Suspense Account",
+    "form": {
+      "placeholders": {
+        "suspenseAccount": "Enter suspense account"
+      },
+      "errors": {
+        "suspenseAccount": "Please enter suspense account number"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "suspenseAccount": "You must provide a suspense account number",
+        "missingStatus": "Please select a status"
+      }
+    },
+    "suspenseAccountsTable": ["Sno", "Suspense Account No", "Status"]
+  },
+  "depositAccount": {
+    "addDepositAccount": "Add deposit",
+    "depositAccount": "Deposit Account",
+    "form": {
+      "vendor": "Vendor",
+      "account": "Account",
+      "reason": "Reason",
+      "placeholders": {
+        "vendor": "Select vendor",
+        "account": "Select account",
+        "reason": "Enter reason"
+      },
+      "errors": {
+        "vendor": "Please select a vendor",
+        "account": "Please select an account",
+        "reason": "Please fill"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "vendor": "You must specify a vendor",
+        "account": "You must specify an account",
+        "reason": "Please provide a reason"
+      }
+    },
+    "depositAccountTable": ["Sno", "Vendor", "Account", "Reason"]
+  }
+}

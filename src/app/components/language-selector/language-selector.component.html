@@ -1,0 +1,20 @@
+<div class="dropdown dropdown-end">
+  <div tabindex="0" role="button" class="btn btn-sm btn-ghost m-1">
+    <img class="w-8" [src]="getActiveLang()" alt="" srcset="" />
+    <span class="material-symbols-outlined"> expand_more </span>
+  </div>
+  <ul
+    tabindex="0"
+    class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+  >
+    <li *ngFor="let language of languages; index as ind">
+      <button
+        (click)="changeLanguage(language.code)"
+        class="flex flex-row items-center w-full"
+      >
+        <img [src]="language.imgUrl" class="w-8" alt="" srcset="" />
+        <p>{{ language.shorthand }}</p>
+      </button>
+    </li>
+  </ul>
+</div>

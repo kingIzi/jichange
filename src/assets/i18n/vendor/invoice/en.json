@@ -1,0 +1,69 @@
+{
+  "invoiceDetails": "Invoice details",
+  "addInvoice": "Add Invoice",
+  "createInvoice": "Create Invoice",
+  "form": {
+    "invoiceNo": "Invoice number",
+    "invoiceDate": "Invoice date",
+    "dueDate": "Invoice due date",
+    "invoiceExpire": "Invoice expiry date",
+    "customer": "Customer",
+    "paymentType": "Payment type",
+    "itemDetails": "Item details",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "totalPrice": "Total price",
+    "remarks": "Remarks",
+    "status": "Status",
+    "addNewCustomer": "Add new customer",
+    "actions": {
+      "sureToAddCustomer": "Are you sure you want to add this customer?",
+      "addInvoiceAsWell": "Would you also want to attach an invoice to this customer?",
+      "confirm": "Confirm",
+      "areYouSureYouWantToAddANewCustomer": "Are you sure you want to add a new customer?"
+    },
+    "placeholders": {
+      "invoiceNo": "Enter invoice number",
+      "invoiceDate": "Enter invoice date",
+      "dueDate": "Enter invoice due date",
+      "invoiceExpire": "enter the invoice's expiry date",
+      "customer": "Select a customer",
+      "paymentType": "Select a payment type",
+      "status": "Select a status"
+    },
+    "errors": {
+      "invoiceNo": "Please enter invoice number",
+      "invoiceDate": "Please specify invoice date",
+      "dueDate": "Please specify the invoice's due date",
+      "invoiceExpire": "Please specify the invoice expiry date",
+      "customer": "Please select a customer",
+      "paymentType": "Please select a payment type",
+      "status": "Please select a status",
+      "itemDetails": {
+        "missingDescription": "Please fill",
+        "missingQuantity": "Specify a quantity",
+        "missingUnitPrice": "Specify a unit price"
+      }
+    },
+    "dialog": {
+      "invalidForm": "Invalid form",
+      "invoiceNo": "Missing invoice number",
+      "invoiceDate": "Please specify the invoice date",
+      "dueDate": "Please specify the invoice due date",
+      "invoiceExpire": "Please specify the invoice expiry date",
+      "customer": "Please specify a customer",
+      "paymentType": "Please specify a payment type",
+      "maximumItemDetails": "Maximum number of items {} reached.",
+      "status": "You must specify a status."
+    }
+  },
+  "invoiceDetailsTable": [
+    "Sno",
+    "Invoice No",
+    "Invoice Date",
+    "Customer name",
+    "Total amount",
+    "Remarks"
+  ]
+}

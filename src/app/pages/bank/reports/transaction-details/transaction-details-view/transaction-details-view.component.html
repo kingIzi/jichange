@@ -1,0 +1,563 @@
+<div #rootElement class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.transactionDetails'"
+      class="text-lg font-bold"
+    >
+      {{ t("transaction") + " #" + detail.transactionNumber }}
+    </h2>
+    <button
+      #downloadBtn
+      (click)="downloadPdf()"
+      class="inline-flex group w-40 h-14 relative transform active:scale-x-75 transition-transform"
+    >
+      <div
+        class="h-full w-14 rounded-full grid place-items-center p-2 bg-transparent relative"
+      >
+        <span class="material-symbols-outlined text-white z-50 duration-200">
+          download
+        </span>
+        <div
+          class="absolute w-full group-hover:w-40 duration-200 h-full left-0 top-0 right-0 bottom-0 rounded-full bg-[#282936]"
+        ></div>
+      </div>
+      <div class="h-full w-fit grid place-items-center">
+        <p
+          *transloco="let t; read: 'actions'"
+          class="text-lg group-hover:text-white z-50 duration-200"
+        >
+          {{ t("download") }}
+        </p>
+      </div>
+    </button>
+  </div>
+  <div class="bg-white w-full shadow flex flex-col p-4">
+    <div id="accordionExample">
+      <div class="rounded-t-lg border border-neutral-200 bg-white">
+        <h2 class="mb-0" id="headingOne">
+          <button
+            class="group relative flex w-full items-center rounded-t-[15px] border-0 bg-white px-5 py-4 text-left text-base text-neutral-800 transition [overflow-anchor:none] hover:z-[2] focus:z-[3] focus:outline-none [&:not([data-te-collapse-collapsed])]:bg-white [&:not([data-te-collapse-collapsed])]:text-black [&:not([data-te-collapse-collapsed])]:font-extrabold [&:not([data-te-collapse-collapsed])]:[box-shadow:inset_0_-1px_0_rgba(229,231,235)]"
+            type="button"
+            data-te-collapse-init
+            data-te-target="#collapseOne"
+            [attr.aria-expanded]="true"
+            aria-controls="collapseOne"
+          >
+            <h1
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-2xl"
+            >
+              {{ t("transactionDetails") }}
+            </h1>
+            <span
+              class="material-symbols-outlined -mr-1 ml-auto h-5 w-5 shrink-0 rotate-[-180deg] fill-[#336dec] transition-transform duration-200 ease-in-out group-[[data-te-collapse-collapsed]]:mr-0 group-[[data-te-collapse-collapsed]]:rotate-0 group-[[data-te-collapse-collapsed]]:fill-[#212529] motion-reduce:transition-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24"
+                viewBox="0 -960 960 960"
+                width="24"
+              >
+                <path
+                  d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"
+                />
+              </svg>
+            </span>
+          </button>
+        </h2>
+        <div
+          id="collapseOne"
+          class="!visible"
+          data-te-collapse-item
+          data-te-collapse-show
+          aria-labelledby="headingOne"
+          data-te-parent="#accordionExample"
+        >
+          <div
+            class="px-5 py-4 grid grid-cols-3 lg:grid-cols-5 w-full gap-y-4 gap-x-3"
+          >
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("transactionNumber") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ detail.transactionNumber }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("description") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ detail.description }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("amount") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ moneyFormat(detail.amount.toString()) }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("currency") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ detail.currency }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("company") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ detail.company }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("date") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{
+                  convertDotNetJSONDate(detail.date.toString()).toDateString()
+                }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("method") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">FIXED</p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("status") }}
+              </p>
+              <p
+                *ngIf="
+                  detail.status.toLocaleLowerCase() ===
+                  'pending'.toLocaleLowerCase()
+                "
+                class="capitalize text-xs font-semibold text-warning"
+              >
+                {{ detail.status }}
+              </p>
+              <p
+                *ngIf="
+                  detail.status.toLocaleLowerCase() ===
+                  'finalized'.toLocaleLowerCase()
+                "
+                class="capitalize text-xs font-semibold text-success"
+              >
+                {{ detail.status }}
+              </p>
+              <p
+                *ngIf="
+                  detail.status.toLocaleLowerCase() ===
+                  'in-progress'.toLocaleLowerCase()
+                "
+                class="capitalize text-xs font-semibold text-info"
+              >
+                {{ detail.status }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("transactionType") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">Refund</p>
+            </div>
+            <div
+              class="grid grid-cols-2 lg:grid-cols-3 col-start-1 col-span-3 gap-y-3 gap-x-2"
+            >
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase col-span-full"
+              >
+                {{ t("attachment") }}
+              </p>
+              <div
+                *ngFor="let receipt of detail.receipts; index as i"
+                class="flex flex-row items-center border justify-between py-2"
+              >
+                <div class="flex flex-row items-center">
+                  <span>
+                    <img
+                      src="assets/img/icons/description_FILL0_wght400_GRAD0_opsz24.png"
+                      alt=""
+                    />
+                  </span>
+                  <div class="flex flex-col">
+                    <p class="text-black text-xs capitalize font-semibold">
+                      {{ i === 0 ? "receipt.pdf" : "receipt_" + i + ".pdf" }}
+                    </p>
+                    <div class="flex flex-col lg:hidden">
+                      <p
+                        class="text-xs capitalize font-semibold text-neutral-500"
+                      >
+                        {{
+                          convertDotNetJSONDate(
+                            detail.date.toString()
+                          ).toLocaleDateString()
+                        }}
+                      </p>
+                      <p
+                        class="text-xs capitalize font-semibold text-neutral-500"
+                      >
+                        9:52AM
+                      </p>
+                    </div>
+                    <div
+                      class="hidden lg:flex flex-col lg:flex-row items-center lg:space-x-4"
+                    >
+                      <p
+                        class="text-xs capitalize font-semibold text-neutral-500"
+                      >
+                        {{
+                          convertDotNetJSONDate(
+                            detail.date.toString()
+                          ).toLocaleDateString()
+                        }}
+                      </p>
+                      <p
+                        class="text-xs capitalize font-semibold text-neutral-500"
+                      >
+                        9:52AM
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <!-- <button class="btn btn-ghost btn-xs lg:btn-sm">
+                  <img
+                    src="assets/img/icons/more_vert_FILL0_wght400_GRAD0_opsz24.png"
+                    alt=""
+                    srcset=""
+                  />
+                </button> -->
+                <div class="dropdown">
+                  <div tabindex="0" role="button" class="btn m-1">
+                    <img
+                      src="assets/img/icons/more_vert_FILL0_wght400_GRAD0_opsz24.png"
+                      alt=""
+                      srcset=""
+                    />
+                  </div>
+                  <ul
+                    tabindex="0"
+                    class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                  >
+                    <li>
+                      <a
+                        (click)="downloadCustomerReceipt()"
+                        class="flex flex-row items-center"
+                      >
+                        <img
+                          src="assets/img/icons/download_FILL0_wght400_GRAD0_opsz24.png"
+                          alt=""
+                        />
+                        <p>Download</p>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col col-span-2">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("note") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border border-t-0 border-neutral-200 bg-white">
+        <h2 class="mb-0" id="headingTwo">
+          <button
+            class="group relative flex w-full items-center rounded-none border-0 bg-white px-5 py-4 text-left text-base text-neutral-800 transition [overflow-anchor:none] hover:z-[2] focus:z-[3] focus:outline-none [&:not([data-te-collapse-collapsed])]:bg-white [&:not([data-te-collapse-collapsed])]:text-black [&:not([data-te-collapse-collapsed])]:font-extrabold [&:not([data-te-collapse-collapsed])]:[box-shadow:inset_0_-1px_0_rgba(229,231,235)]"
+            type="button"
+            data-te-collapse-init
+            data-te-collapse-collapsed
+            data-te-target="#collapseTwo"
+            [attr.aria-expanded]="false"
+            aria-controls="collapseTwo"
+          >
+            <h1
+              *transloco="
+                let t;
+                read: 'reports.transactionDetails.approvalDetails'
+              "
+              class="text-2xl"
+            >
+              {{ t("approvalDetails") }}
+            </h1>
+            <span
+              class="material-symbols-outlined -mr-1 ml-auto h-5 w-5 shrink-0 rotate-[-180deg] fill-[#336dec] transition-transform duration-200 ease-in-out group-[[data-te-collapse-collapsed]]:mr-0 group-[[data-te-collapse-collapsed]]:rotate-0 group-[[data-te-collapse-collapsed]]:fill-[#212529] motion-reduce:transition-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24"
+                viewBox="0 -960 960 960"
+                width="24"
+              >
+                <path
+                  d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"
+                />
+              </svg>
+            </span>
+          </button>
+        </h2>
+        <div
+          id="collapseTwo"
+          class="!visible hidden"
+          data-te-collapse-item
+          aria-labelledby="headingTwo"
+          data-te-parent="#accordionExample"
+        >
+          <div
+            class="px-5 py-4 grid grid-cols-3 lg:grid-cols-5 w-full gap-y-4 gap-x-3"
+          >
+            <div class="flex flex-col">
+              <p
+                *transloco="
+                  let t;
+                  read: 'reports.transactionDetails.approvalDetails'
+                "
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("approvedBy") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                CRDB Bank PLC
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="
+                  let t;
+                  read: 'reports.transactionDetails.approvalDetails'
+                "
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("method") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                MasterCard
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="
+                  let t;
+                  read: 'reports.transactionDetails.approvalDetails'
+                "
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("comment") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">-</p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="
+                  let t;
+                  read: 'reports.transactionDetails.approvalDetails'
+                "
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("location") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                Dar es Salaam, tanzania
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="
+                  let t;
+                  read: 'reports.transactionDetails.approvalDetails'
+                "
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("contact") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                +255 742536676
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-b-lg border border-t-0 border-neutral-200 bg-white">
+        <h2 class="accordion-header mb-0" id="headingThree">
+          <button
+            class="group relative flex w-full items-center rounded-none border-0 bg-white px-5 py-4 text-left text-base text-neutral-800 transition [overflow-anchor:none] hover:z-[2] focus:z-[3] focus:outline-none [&:not([data-te-collapse-collapsed])]:bg-white [&:not([data-te-collapse-collapsed])]:text-black [&:not([data-te-collapse-collapsed])]:font-extrabold [&:not([data-te-collapse-collapsed])]:[box-shadow:inset_0_-1px_0_rgba(229,231,235)]"
+            type="button"
+            data-te-collapse-init
+            data-te-collapse-collapsed
+            data-te-target="#collapseThree"
+            [attr.aria-expanded]="false"
+            aria-controls="collapseThree"
+          >
+            <h1
+              *transloco="let t; read: 'reports.transactionDetails.history'"
+              class="text-2xl"
+            >
+              {{ t("history") }}
+            </h1>
+            <span
+              class="material-symbols-outlined -mr-1 ml-auto h-5 w-5 shrink-0 rotate-[-180deg] fill-[#336dec] transition-transform duration-200 ease-in-out group-[[data-te-collapse-collapsed]]:mr-0 group-[[data-te-collapse-collapsed]]:rotate-0 group-[[data-te-collapse-collapsed]]:fill-[#212529] motion-reduce:transition-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24"
+                viewBox="0 -960 960 960"
+                width="24"
+              >
+                <path
+                  d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"
+                />
+              </svg>
+            </span>
+          </button>
+        </h2>
+        <div
+          id="collapseThree"
+          class="!visible hidden"
+          data-te-collapse-item
+          aria-labelledby="headingThree"
+          data-te-parent="#accordionExample"
+        >
+          <div class="px-5 py-4">
+            <ol
+              class="border-l border-neutral-300 md:flex md:justify-between md:gap-6 md:border-l-0 md:border-t"
+            >
+              <li>
+                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
+                  <div
+                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
+                  ></div>
+                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
+                </div>
+                <div class="ml-4 mt-2 pb-5 md:ml-0">
+                  <h4 class="mb-1.5 text-xl font-semibold">
+                    Transaction created
+                  </h4>
+                  <div class="flex flex-row items-center">
+                    <p
+                      class="capitalize text-sm font-semibold text-neutral-500"
+                    >
+                      New
+                    </p>
+                    <span>
+                      <img
+                        src="assets/img/icons/arrow_right_alt_FILL0_wght400_GRAD0_opsz24.png"
+                        alt=""
+                        srcset=""
+                      />
+                    </span>
+
+                    <p class="capitalize text-sm font-semibold text-info">
+                      In Progress
+                    </p>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
+                  <div
+                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
+                  ></div>
+                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
+                </div>
+                <div class="ml-4 mt-2 pb-5 md:ml-0">
+                  <h4 class="mb-1.5 text-xl font-semibold">Status Changed</h4>
+                  <div class="flex flex-row items-center">
+                    <p
+                      class="capitalize text-sm font-semibold text-neutral-500"
+                    >
+                      In Progress
+                    </p>
+                    <span>
+                      <img
+                        src="assets/img/icons/arrow_right_alt_FILL0_wght400_GRAD0_opsz24.png"
+                        alt=""
+                        srcset=""
+                      />
+                    </span>
+                    <p class="capitalize text-sm font-semibold text-warning">
+                      Pending
+                    </p>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
+                  <div
+                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
+                  ></div>
+                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
+                </div>
+                <div class="ml-4 mt-2 pb-5 md:ml-0">
+                  <h4 class="mb-1.5 text-xl font-semibold">
+                    Transaction Finalized
+                  </h4>
+                  <div class="flex flex-row items-center">
+                    <p
+                      class="capitalize text-sm font-semibold text-neutral-500"
+                    >
+                      Pending
+                    </p>
+                    <span>
+                      <img
+                        src="assets/img/icons/arrow_right_alt_FILL0_wght400_GRAD0_opsz24.png"
+                        alt=""
+                        srcset=""
+                      />
+                    </span>
+                    <p class="capitalize text-sm font-semibold text-success">
+                      Finalized
+                    </p>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
