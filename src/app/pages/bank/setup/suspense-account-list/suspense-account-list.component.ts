@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { SuspenseAccountDialogComponent } from 'src/app/components/dialogs/bank/setup/suspense-account-dialog/suspense-account-dialog.component';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -25,12 +26,13 @@ import { SuspenseAccountDialogComponent } from 'src/app/components/dialogs/bank/
     },
   ],
 })
-export class SuspenseAccountListComponent {
+export class SuspenseAccountListComponent implements OnInit {
   public startLoading: boolean = false;
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];
   public suspenseAccounts: any[] = [];
   constructor(private dialog: MatDialog) {}
+  ngOnInit(): void {}
   openAddSuspenseAccountDialog() {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
       width: '600px',

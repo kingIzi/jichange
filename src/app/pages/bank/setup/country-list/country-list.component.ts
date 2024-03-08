@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { CountryDialogComponent } from 'src/app/components/dialogs/bank/setup/country-dialog/country-dialog.component';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-country-list',
@@ -25,12 +26,13 @@ import { CountryDialogComponent } from 'src/app/components/dialogs/bank/setup/co
     },
   ],
 })
-export class CountryListComponent {
+export class CountryListComponent implements OnInit {
   public startLoading: boolean = false;
   public countries: any[] = [];
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];
   constructor(private dialog: MatDialog) {}
+  ngOnInit(): void {}
   openAddCountryDialog() {
     let dialogRef = this.dialog.open(CountryDialogComponent, {
       width: '600px',

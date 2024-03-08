@@ -8,6 +8,7 @@ import {
 } from '@ngneat/transloco';
 import { Ripple, initTE } from 'tw-elements';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-inbox-approval',

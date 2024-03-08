@@ -8,6 +8,7 @@ import * as json from 'src/assets/temp/data.json';
 import { CompanySummaryDialogComponent } from 'src/app/components/dialogs/bank/company/company-summary-dialog/company-summary-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-summary',
@@ -37,10 +38,10 @@ export class SummaryComponent implements OnInit {
   constructor(private dialog: MatDialog) {}
   ngOnInit(): void {
     initTE({ Ripple });
+
     let data = JSON.parse(JSON.stringify(json));
     this.companiesData = data.companies;
     this.companies = this.companiesData;
-    //this.openCompanySummaryDialog();
   }
   openCompanySummaryDialog() {
     let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {

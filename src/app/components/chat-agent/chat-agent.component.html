@@ -1,0 +1,106 @@
+<details class="dropdown dropdown-end">
+  <summary class="m-1 btn">
+    <span class="material-symbols-outlined"> headset_mic </span>
+  </summary>
+  <form
+    (keydown.enter)="$event.preventDefault()"
+    tabindex="0"
+    class="menu flex flex-col justify-center space-y-8 menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-80 lg:w-96"
+  >
+    <div class="flex flex-row items-center shadow-2xl bg-white">
+      <div class="flex-grow bg bg-gray-300 h-0.5"></div>
+      <div class="flex-grow-0 mx-5 text-black tracking-wide text-sm">
+        Got a question?
+      </div>
+      <div class="flex-grow bg bg-gray-300 h-0.5"></div>
+    </div>
+    <!-- <ul
+      #serviceUl
+      tabindex="0"
+      class="flex flex-col overflow-y-auto max-h-96 bg-base-200"
+    >
+      <li>
+        <div class="chat chat-start">
+          <div class="chat-image avatar">
+            <div class="w-10 rounded-full">
+              <img
+                alt="Tailwind CSS chat bubble component"
+                src="assets/img/jichangelogo.png"
+              />
+            </div>
+          </div>
+          <div class="chat-header tex-sm">
+            Customer service
+            <time class="text-xs opacity-50">12:45</time>
+          </div>
+          <div
+            class="chat-bubble text-sxs bg-lightPurple text-black font-normal"
+          >
+            Hello I am customer service! Ask me anything
+          </div>
+        </div>
+      </li>
+      <ng-container *ngFor="let serviceText of serviceTexts; index as ind">
+        <li>
+          <div class="chat chat-end">
+            <div class="chat-image avatar">
+              <div class="w-10 rounded-full">
+                <img
+                  alt="Tailwind CSS chat bubble component"
+                  src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                />
+              </div>
+            </div>
+            <div class="chat-header">
+              {{ serviceText.text }}
+              <time class="text-xs opacity-50">12:46</time>
+            </div>
+            <div class="chat-bubble">{{ serviceText.text }}</div>
+            <div class="chat-footer opacity-50">Seen at 12:46</div>
+          </div>
+          <div *ngIf="serviceText.response" class="chat chat-start">
+            <div class="chat-image avatar">
+              <div class="w-10 rounded-full">
+                <img
+                  alt="Tailwind CSS chat bubble component"
+                  src="assets/img/jichangelogo.png"
+                />
+              </div>
+            </div>
+            <div class="chat-header tex-sm">
+              Customer service
+              <time class="text-xs opacity-50">12:45</time>
+            </div>
+            <div
+              class="chat-bubble text-sxs bg-lightPurple text-black font-normal"
+            >
+              {{ serviceText.response.text }}
+            </div>
+          </div>
+        </li>
+      </ng-container>
+    </ul>
+    <div class="flex flex-row items-center space-x-2">
+      <button
+        (click)="openQuestionFileDialog()"
+        type="button"
+        class="btn btn-sm w-12 h-12 rounded-full flex-none"
+      >
+        <span class="material-symbols-outlined"> photo_camera </span>
+      </button>
+      <input
+        #textInput
+        type="text"
+        class="grow w-full input input-sm input-bordered text-xs"
+        placeholder="Start typing..."
+      />
+      <button
+        type="button"
+        (click)="sendServiceText(textInput.value)"
+        class="btn btn-sm w-12 h-12 rounded-full flex-none bg-lightPurple btn-ghost"
+      >
+        <span class="material-symbols-outlined text-darkPurple"> near_me </span>
+      </button>
+    </div> -->
+  </form>
+</details>

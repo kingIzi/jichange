@@ -18,6 +18,8 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { ChatAgentComponent } from '../../chat-agent/chat-agent.component';
+import { ChatbotService } from 'src/app/core/services/chatbot.service';
 
 @Component({
   selector: 'app-header',
@@ -30,6 +32,7 @@ import {
     TranslocoModule,
     CommonModule,
     ReactiveFormsModule,
+    ChatAgentComponent,
   ],
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
@@ -71,34 +74,37 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   constructor(
     private translocoService: TranslocoService,
     private fb: FormBuilder,
-    private router: Router
+    private chatbot: ChatbotService //private chatbot: ChatbotService
   ) {}
   private createHeaders() {
-    let bankHeaders: any[] = this.translocoService.translate('bankHeaders');
+    // let bankHeaders: any[] = this.translocoService.translate('en.bankHeaders');
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    bankHeaders.forEach((bankHeader, bankHeaderIndex) => {
-      let header = this.fb.group({
-        label: this.fb.control(bankHeader.name, []),
-        dropdowns: this.fb.array([], []),
-        rootLink: this.fb.control(
-          this.switchHeaderRootLink(bankHeaderIndex),
-          []
-        ),
-      });
-      (bankHeader.dropdowns as any[]).forEach((e, dropdownIndex) => {
-        let dropdown = this.fb.group({
-          label: this.fb.control(e, []),
-          routerLink: this.fb.control(
-            this.getHeaderRouterLink(bankHeaderIndex, dropdownIndex),
+    this.translocoService.selectTranslation('en').subscribe((headers) => {
+      let bankHeaders: any[] = headers['bankHeaders'];
+      bankHeaders.forEach((bankHeader, bankHeaderIndex) => {
+        let header = this.fb.group({
+          label: this.fb.control(bankHeader.name, []),
+          dropdowns: this.fb.array([], []),
+          rootLink: this.fb.control(
+            this.switchHeaderRootLink(bankHeaderIndex),
             []
           ),
-          isActive: this.fb.control(false, []),
         });
-        (header.get('dropdowns') as FormArray).push(dropdown);
+        (bankHeader.dropdowns as any[]).forEach((e, dropdownIndex) => {
+          let dropdown = this.fb.group({
+            label: this.fb.control(e, []),
+            routerLink: this.fb.control(
+              this.getHeaderRouterLink(bankHeaderIndex, dropdownIndex),
+              []
+            ),
+            isActive: this.fb.control(false, []),
+          });
+          (header.get('dropdowns') as FormArray).push(dropdown);
+        });
+        this.headers.push(header);
       });
-      this.headers.push(header);
     });
   }
   private switchHeaderRootLink(index: number) {
@@ -193,6 +199,7 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     initTE({ Collapse, Dropdown, Ripple });
     this.createHeaders();
+    this.chatbot.testConnection();
   }
   switchRouterLinks(ind: number) {
     return '';
@@ -206,6 +213,9 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   isActiveHeader(index: number) {
     let dropdowns = this.headers.at(index).get('dropdowns') as FormArray;
     return dropdowns.controls.find((e) => e.get('isActive')?.value);
+  }
+  routerClicked(ahref: HTMLAnchorElement) {
+    ahref.blur();
   }
   get headers() {
     return this.formGroup.get('headers') as FormArray;

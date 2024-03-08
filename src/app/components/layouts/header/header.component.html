@@ -42,8 +42,10 @@
               "
             >
               <a
+                #ahref
                 [routerLink]="dropdown.get('routerLink')?.value"
                 [routerLinkActive]="'text-darkPurple'"
+                (click)="routerClicked(ahref)"
                 class="capitalize"
                 >{{ dropdown.get("label")?.value }}</a
               >
@@ -52,16 +54,16 @@
         </li>
       </ul>
     </div>
-    <!-- <a [routerLink]="'/main'" class="text-xl cursor-pointer">
+    <a class="flex flex-row items-center">
       <img
-        class="w-20 lg:w-28"
+        class="w-20 lg:w-32"
         src="assets/img/jichangelogo.png"
         alt="TE Logo"
         loading="lazy"
       />
-    </a> -->
-    <a [routerLink]="'/main'" class="btn btn-ghost text-xl"
-      >Dream<span class="text-success">ville</span>
+      <p [routerLink]="'/main'" class="btn btn-ghost text-sm">
+        Dream<span class="text-success">ville</span>
+      </p>
     </a>
   </div>
   <div [formGroup]="formGroup" class="navbar-center hidden lg:flex">
@@ -101,8 +103,10 @@
             "
           >
             <a
+              #ahref
               [routerLink]="dropdown.get('routerLink')?.value"
               [routerLinkActive]="'text-darkPurple'"
+              (click)="routerClicked(ahref)"
               class="capitalize"
               >{{ dropdown.get("label")?.value }}</a
             >
@@ -112,10 +116,8 @@
     </ul>
   </div>
   <div class="navbar-end">
-    <div class="flex flex-row items-center">
-      <div>
-        <app-language-selector></app-language-selector>
-      </div>
+    <div class="flex flex-row items-center space-x-4">
+      <app-chat-agent></app-chat-agent>
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="avatar placeholder">

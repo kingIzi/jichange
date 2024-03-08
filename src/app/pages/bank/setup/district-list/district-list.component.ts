@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { DistrictDialogComponent } from 'src/app/components/dialogs/bank/setup/district-dialog/district-dialog.component';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-district-list',
@@ -25,12 +26,13 @@ import { DistrictDialogComponent } from 'src/app/components/dialogs/bank/setup/d
     },
   ],
 })
-export class DistrictListComponent {
+export class DistrictListComponent implements OnInit {
   public startLoading: boolean = false;
   public districts: any[] = [];
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];
   constructor(private dialog: MatDialog) {}
+  ngOnInit(): void {}
   openDistrictForm() {
     let dialogRef = this.dialog.open(DistrictDialogComponent, {
       width: '600px',

@@ -21,5 +21,6 @@ import { environment } from 'src/environments/environment';
       loader: TranslocoHttpLoader,
     }),
   ],
+  declarations: [],
 })
 export class TranslocoRootModule {}

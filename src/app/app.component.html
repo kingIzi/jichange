@@ -30,4 +30,26 @@
   </form>
 </dialog>
 
-<router-outlet></router-outlet>
+<div
+  class="flex flex-col h-screen w-screen overflow-x-hidden bg-jichangeDefault"
+>
+  <ng-container *ngIf="!isAuthRoute() && !isBankRoute()">
+    <div class="flex-none z-50">
+      <app-header></app-header>
+    </div>
+  </ng-container>
+  <div class="grow flex flex-col pb-4">
+    <div *ngIf="!isAuthRoute() && !isBankRoute()" class="px-6 py-2">
+      <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
+      <ng-template #iconTemplate>
+        <span class="material-symbols-outlined"> chevron_right </span>
+      </ng-template>
+    </div>
+    <div class="relative">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+  <div class="flex-none">
+    <app-footer></app-footer>
+  </div>
+</div>

@@ -15,6 +15,7 @@ import { CustomerReceiptDialogComponent } from 'src/app/components/dialogs/Vendo
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import * as json from 'src/assets/temp/data.json';
 import { Collapse, initTE } from 'tw-elements';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-transaction-details-view',
@@ -39,34 +40,6 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
     private fileHandler: FileHandlerService,
     private dialog: MatDialog
   ) {}
-  ngAfterViewInit(): void {
-    this.activatedRoute.queryParams.subscribe((q) => {
-      if (q['download']) {
-        this.downloading = q['download'];
-        let divs = this.rootElement.nativeElement as HTMLDivElement;
-        let items = divs.querySelectorAll('[data-te-collapse-item]');
-        items.forEach((item) => {
-          item.classList.remove('hidden');
-        });
-        this.downloadPdf();
-      }
-    });
-  }
-  downloadPdf() {
-    let btn = this.downloadBtn.nativeElement as HTMLButtonElement;
-    btn.classList.add('hidden');
-    this.fileHandler
-      .downloadPdf(
-        this.rootElement.nativeElement as HTMLDivElement,
-        'transaction.pdf'
-      )
-      .then(() => {
-        btn.classList.remove('hidden');
-      })
-      .catch((err) => {
-        btn.classList.remove('hidden');
-      });
-  }
   ngOnInit(): void {
     initTE({ Collapse });
     let data = JSON.parse(JSON.stringify(json));
@@ -84,6 +57,39 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
         this.downloading = q['download'];
       }
     });
+  }
+  ngAfterViewInit(): void {
+    this.activatedRoute.queryParams.subscribe((q) => {
+      if (q['download']) {
+        this.downloading = q['download'];
+        let divs = this.rootElement.nativeElement as HTMLDivElement;
+        let items = divs.querySelectorAll('[data-te-collapse-item]');
+        items.forEach((item) => {
+          item.classList.remove('hidden');
+        });
+        this.downloadPdf();
+      }
+    });
+  }
+  downloadPdf() {
+    let btn = this.downloadBtn.nativeElement as HTMLButtonElement;
+    btn.classList.add('hidden');
+    let divs = this.rootElement.nativeElement as HTMLDivElement;
+    let items = divs.querySelectorAll('[data-te-collapse-item]');
+    items.forEach((item) => {
+      item.classList.remove('hidden');
+    });
+    this.fileHandler
+      .downloadPdf(
+        this.rootElement.nativeElement as HTMLDivElement,
+        'transaction.pdf'
+      )
+      .then(() => {
+        btn.classList.remove('hidden');
+      })
+      .catch((err) => {
+        btn.classList.remove('hidden');
+      });
   }
   moneyFormat(value: string) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');

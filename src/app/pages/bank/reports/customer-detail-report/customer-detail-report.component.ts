@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 
@@ -16,7 +16,9 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
     },
   ],
 })
-export class CustomerDetailReportComponent {
+export class CustomerDetailReportComponent implements OnInit {
+  constructor() {}
+  ngOnInit(): void {}
   public customerDetailReports: any[] = [];
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];

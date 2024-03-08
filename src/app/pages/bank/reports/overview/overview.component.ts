@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { ChartType, GoogleChartsModule } from 'angular-google-charts';
@@ -25,7 +31,7 @@ import { Chart } from 'tw-elements';
     },
   ],
 })
-export class OverviewComponent implements AfterViewInit {
+export class OverviewComponent implements OnInit, AfterViewInit {
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];
   @ViewChild('transactionsChart') transactionsChart!: ElementRef;
@@ -227,6 +233,8 @@ export class OverviewComponent implements AfterViewInit {
       optionsDarkModeChartFunnelExample
     );
   }
+  constructor() {}
+  ngOnInit(): void {}
   ngAfterViewInit(): void {
     this.createOverviewChart();
     this.createSummaryChart();

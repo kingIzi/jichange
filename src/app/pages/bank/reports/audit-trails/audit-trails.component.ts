@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 
 @Component({
@@ -15,7 +15,9 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
     },
   ],
 })
-export class AuditTrailsComponent {
+export class AuditTrailsComponent implements OnInit {
+  constructor() {}
+  ngOnInit(): void {}
   public auditTrails: any[] = [];
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];

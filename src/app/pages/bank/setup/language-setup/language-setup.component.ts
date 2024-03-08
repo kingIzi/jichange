@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
+import { BreadcrumbService } from 'xng-breadcrumb';
 
 @Component({
   selector: 'app-language-setup',
@@ -17,6 +18,8 @@ import { NgxLoadingModule } from 'ngx-loading';
     },
   ],
 })
-export class LanguageSetupComponent {
+export class LanguageSetupComponent implements OnInit {
+  constructor() {}
+  ngOnInit(): void {}
   public startLoading: boolean = false;
 }

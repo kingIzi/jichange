@@ -14,7 +14,7 @@ const routes: Routes = [
   },
   {
     path: 'main',
-    data: { breadcrumb: { skip: false } },
+    data: { breadcrumb: { alias: 'Home', skip: false } },
     loadChildren: () =>
       import('./components/layouts/main/main.module').then((m) => m.MainModule),
   },
