@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,8 +20,12 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { RequestClientService } from 'src/app/core/services/request-client.service';
+import { Branch } from 'src/app/core/models/bank/branch';
 
 @Component({
   selector: 'app-branch-dialog',
@@ -28,6 +38,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -38,7 +49,11 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 })
 export class BranchDialogComponent implements OnInit {
   public branchForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public startLoading: boolean = false;
+  public addedBranch = new EventEmitter<Branch>();
+  private userProfile = JSON.parse(
+    localStorage.getItem('userProfile') as string
+  ) as LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -46,40 +61,29 @@ export class BranchDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
-    private translocoService: TranslocoService
-  ) {}
-  ngOnInit(): void {
-    this.createForm();
-  }
-  setControlValue(control: FormControl, value: string) {
-    control.setValue(value.trim());
-  }
-  closeDialog() {
-    this.dialogRef.close({ data: 'Dialog closed' });
-  }
-  submitBranchForm() {
-    if (this.branchForm.valid) {
-      this.isLoading.emit(this.branchForm.value);
+    private translocoService: TranslocoService,
+    private client: RequestClientService,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      branch: Branch;
     }
-    this.branchForm.markAllAsTouched();
-    this.formErrors();
-  }
+  ) {}
   private formErrors(errorsPath: string = 'setup.branch.form.dialog') {
-    if (this.branch.invalid) {
+    if (this.Name.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.translocoService.translate(`${errorsPath}.invalidForm`),
         this.translocoService.translate(`${errorsPath}.missingBranch`)
       );
     }
-    if (this.location.invalid) {
+    if (this.Location.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.translocoService.translate(`${errorsPath}.invalidForm`),
         this.translocoService.translate(`${errorsPath}.missingLocation`)
       );
     }
-    if (this.status.invalid) {
+    if (this.Status.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.translocoService.translate(`${errorsPath}.invalidForm`),
@@ -89,18 +93,72 @@ export class BranchDialogComponent implements OnInit {
   }
   private createForm() {
     this.branchForm = this.fb.group({
-      branch: this.fb.control('', [Validators.required]),
-      location: this.fb.control('', [Validators.required]),
-      status: this.fb.control(false, [Validators.required]),
+      Name: this.fb.control('', [Validators.required]),
+      Location: this.fb.control('', [Validators.required]),
+      Status: this.fb.control('', [Validators.required]),
+      AuditBy: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      Branch_Sno: this.fb.control(0, [Validators.required]),
     });
   }
-  get branch() {
-    return this.branchForm.get('branch') as FormControl;
+  private createEditForm(branch: Branch) {
+    this.branchForm = this.fb.group({
+      Name: this.fb.control(branch.Name, [Validators.required]),
+      Location: this.fb.control(branch.Location, [Validators.required]),
+      Status: this.fb.control(branch.Status, [Validators.required]),
+      AuditBy: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      Branch_Sno: this.fb.control(branch.Branch_Sno, [Validators.required]),
+    });
   }
-  get location() {
-    return this.branchForm.get('location') as FormControl;
+  private addNewBranch(value: any) {
+    this.startLoading = true;
+    this.client.performPost(`/api/Branch/AddBranch`, value).subscribe({
+      next: (result: any) => {
+        this.startLoading = false;
+        this.addedBranch.emit(value);
+      },
+      error: (err) => {
+        this.startLoading = false;
+        AppUtilities.openDisplayMessageBox(
+          this.displayMessageBox,
+          this.translocoService.translate(`defaults.failed`),
+          this.translocoService.translate(
+            `setup.branch.form.dialog.failedToAddBranch`
+          )
+        );
+        throw err;
+      },
+    });
   }
-  get status() {
-    return this.branchForm.get('status') as FormControl;
+  ngOnInit(): void {
+    if (this.data && this.data.branch) {
+      this.createEditForm(this.data.branch);
+    } else {
+      this.createForm();
+    }
+  }
+  setControlValue(control: FormControl, value: string) {
+    control.setValue(value.trim());
+  }
+  closeDialog() {
+    this.dialogRef.close({ data: 'Dialog closed' });
+  }
+  submitBranchForm() {
+    if (this.branchForm.valid) {
+      this.addNewBranch(this.branchForm.value);
+    }
+    this.branchForm.markAllAsTouched();
+    this.formErrors();
+  }
+  get Name() {
+    return this.branchForm.get('Name') as FormControl;
+  }
+  get Location() {
+    return this.branchForm.get('Location') as FormControl;
+  }
+  get Status() {
+    return this.branchForm.get('Status') as FormControl;
+  }
+  get AuditBy() {
+    return this.branchForm.get('AuditBy') as FormControl;
   }
 }

@@ -8,7 +8,8 @@
     "active": "Active",
     "inActive": "InActive",
     "cancelled": "Cancelled",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "failed": "Failed"
   },
   "actions": {
     "submit": "Submit",
@@ -22,7 +23,8 @@
     "verifyConnection": "Please, verify your connection or try again.",
     "noInternet": "You are offline",
     "connected": "Back online",
-    "noDataFound": "No data found"
+    "noDataFound": "No data found",
+    "validDate": "Please select a valid date"
   },
   "bankHeaders": [
     {
@@ -81,7 +83,7 @@
     "logout": "Logout"
   },
   "tableData": {
-    "itemsPerPage": "Items per page",
+    "itemsPerPage": "Showing",
     "filterDates": ["Last 30 days", "Last year", "Custom date"]
   },
   "utilities": {

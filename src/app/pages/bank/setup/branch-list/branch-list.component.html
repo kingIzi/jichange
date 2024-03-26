@@ -1,10 +1,9 @@
-<ngx-loading
-  [show]="startLoading"
-  [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
+<app-display-message-box #diplayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
-<div class="px-6 py-2 w-full flex flex-col space-y-2">
-  <div class="flex flex-row items-center justify-between">
+<div class="px-6 py-2 w-full flex flex-col space-y-2 relative">
+  <div class="flex flex-row items-center justify-between relative">
     <h2 *transloco="let t; read: 'setup.branch'" class="text-lg font-bold">
       {{ t("branch") }}
     </h2>
@@ -35,6 +34,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
+            (keyup)="searchTable(searchInput.value)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -51,39 +51,96 @@
             #customersTable
             class="min-w-full text-left text-sm font-light"
           >
-            <thead class="border-b font-medium">
-              <tr
-                class="bg-lightPurple"
-                *transloco="let t; read: 'setup.branch'"
-              >
-                <th
-                  *ngFor="let header of t('branchesTable'); index as ind"
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
+            <thead [formGroup]="branchHeadersForm" class="border-b font-medium">
+              <ng-container formArrayName="headers">
+                <tr
+                  class="bg-lightPurple"
+                  *transloco="let t; read: 'setup.branch'"
                 >
-                  <div class="flex flex-row items-center">
-                    <p class="text-sm font-extrabold text-black">
-                      {{ header }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                      >
-                        unfold_more
+                  <th
+                    *ngFor="let header of headers.controls; index as ind"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ headers.controls.at(ind)?.get("label")?.value }}
+                      </p>
+                      <button (click)="sortColumnClicked(ind)">
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 font-inter text-sm font-extrabold text-black"
+                  >
+                    {{ t("action") }}
+                  </th>
+                </tr>
+              </ng-container>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="
+                  let branch of branches | slice : 0 : itemPerPage;
+                  index as i
+                "
+                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+              >
+                <td
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                >
+                  {{ branch.Name }}
+                </td>
+                <td
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                >
+                  {{ branch.Location }}
+                </td>
+                <td
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                >
+                  <button [class]="getActiveStatusStyles(branch.Status)">
+                    {{ branch.Status }}
+                  </button>
+                  <!-- <button>
+                    {{ branch.status }}
+                  </button> -->
+                </td>
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                  <app-remove-item-dialog
+                    #removeItemDialog
+                  ></app-remove-item-dialog>
+                  <div
+                    class="flex flex-row items-center justify-start space-x-2"
+                  >
+                    <button
+                      class="btn btn-sm btn-ghost"
+                      (click)="openEditBranchForm(branch)"
+                    >
+                      <span class="material-symbols-outlined text-info">
+                        edit
+                      </span>
+                    </button>
+                    <button
+                      (click)="openRemoveDialog(branch, removeItemDialog)"
+                      class="btn btn-sm btn-ghost"
+                    >
+                      <span class="material-symbols-outlined text-danger-600">
+                        delete
                       </span>
                     </button>
                   </div>
-                </th>
-                <th
-                  *transloco="let t; read: 'defaults'"
-                  class="px-6 py-4 font-inter text-sm font-extrabold text-black"
-                >
-                  {{ t("action") }}
-                </th>
+                </td>
               </tr>
-            </thead>
-            <tbody></tbody>
+            </tbody>
           </table>
           <div *transloco="let t; read: 'errors'">
             <p
@@ -98,7 +155,10 @@
     </div>
     <div class="flex flex-row items-center justify-between">
       <div class="flex flex-row items-center space-x-1">
-        <p *transloco="let t; read: 'tableData'" class="text-xs">
+        <p
+          *transloco="let t; read: 'tableData'"
+          class="text-xs lg:block hidden"
+        >
           {{ t("itemsPerPage") }}:
         </p>
         <select
@@ -138,3 +198,13 @@
     </div>
   </div>
 </div>
+<!-- <div
+  #alertMsg
+  class="absolute -bottom-12 hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded w-96 mx-6"
+  role="alert"
+>
+  <strong class="font-bold">Holy smokes!</strong>
+  <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+    <span class="material-symbols-outlined"> close </span>
+  </span>
+</div> -->

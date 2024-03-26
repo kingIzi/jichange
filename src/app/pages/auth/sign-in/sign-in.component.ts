@@ -25,6 +25,13 @@ import {
 } from '@angular/forms';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import { toggle } from '../auth-animations';
+import { timer } from 'rxjs';
+import { UserRoles } from 'src/app/core/enums/bank/user-roles';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 
 @Component({
   selector: 'app-sign-in',
@@ -40,6 +47,8 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
     RouterModule,
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
+    SuccessMessageBoxComponent,
+    LoaderRainbowComponent,
   ],
 })
 export class SignInComponent implements OnInit {
@@ -47,6 +56,8 @@ export class SignInComponent implements OnInit {
   public formGroup!: FormGroup;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('successMessageBox')
+  successMessageBox!: SuccessMessageBoxComponent;
   constructor(
     private dialog: MatDialog,
     private requestService: RequestClientService,
@@ -54,15 +65,97 @@ export class SignInComponent implements OnInit {
     private translocoService: TranslocoService,
     private router: Router
   ) {}
+  private createForm() {
+    this.formGroup = this.fb.group({
+      userName: this.fb.control('', [Validators.required]),
+      password: this.fb.control('', Validators.required),
+    });
+  }
+  private formErrors(errorsPath: string = 'auth.loginForm.errors.dialogs') {
+    if (this.userName.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.translocoService.translate(`${errorsPath}.invalidFormError`),
+        this.translocoService.translate(`${errorsPath}.missingUsername`)
+      );
+    } else if (this.password.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.translocoService.translate(`${errorsPath}.invalidFormError`),
+        this.translocoService.translate(`${errorsPath}.missingPassword`)
+      );
+    }
+  }
+  private toRoute(response: LoginResponse, route: string) {
+    localStorage.setItem('userProfile', JSON.stringify(response));
+    this.router.navigate([route]);
+  }
+  private switchUserLogin(response: LoginResponse) {
+    switch (response.role.toLocaleLowerCase()) {
+      case UserRoles.COMPANYS.toLocaleLowerCase():
+        this.toRoute(response, '/vendor');
+        break;
+      case UserRoles.BANK.toLocaleLowerCase():
+        this.toRoute(response, '/main');
+        break;
+      default:
+        this.toRoute(response, '/main');
+        break;
+    }
+  }
+  private signIn(value: { uname: string; pwd: string }) {
+    this.startLoading = true;
+    this.requestService
+      .performPost(`/api/LoginUser/AddLogins`, value)
+      .subscribe({
+        next: (result) => {
+          this.startLoading = false;
+          let res = result as HttpDataResponse<LoginResponse>;
+          if (!res.response.Usno) {
+            AppUtilities.openDisplayMessageBox(
+              this.displayMessageBox,
+              this.translocoService.translate(
+                `auth.loginForm.errors.dialogs.loginFailed`
+              ),
+              this.translocoService.translate(
+                `auth.loginForm.errors.dialogs.usernamePasswordIncorrect`
+              )
+            );
+            return;
+          }
+          this.switchUserLogin(res.response);
+        },
+        error: (err) => {
+          this.startLoading = false;
+          AppUtilities.noInternetError(
+            this.displayMessageBox,
+            this.translocoService
+          );
+          throw err;
+        },
+      });
+  }
+  private verifyControlNumber(
+    result: { control: string },
+    dialogRef: MatDialogRef<ControlNumberDetailsComponent>
+  ) {
+    this.startLoading = true;
+    this.requestService.performPost(`/Invoice/getControl`, result).subscribe({
+      next: (result) => {
+        this.startLoading = false;
+        dialogRef.componentInstance.controlNumberNotFound();
+      },
+      error: (err) => {
+        this.startLoading = false;
+        dialogRef.componentInstance.submitFailed();
+        console.error(err);
+        throw err;
+      },
+    });
+  }
   ngOnInit(): void {
     initTE({ Popover, Ripple });
     this.createForm();
-  }
-  private createForm() {
-    this.formGroup = this.fb.group({
-      uname: this.fb.control('', [Validators.required]),
-      pwd: this.fb.control('', Validators.required),
-    });
   }
   openControlNumberDetailsDialog() {
     let dialogRef = this.dialog.open(ControlNumberDetailsComponent, {
@@ -93,82 +186,19 @@ export class SignInComponent implements OnInit {
       console.log(`Vendor registration closed: ${result}`);
     });
   }
-  private formErrors(errorsPath: string = 'auth.loginForm.errors.dialogs') {
-    if (this.uname.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidFormError`),
-        this.translocoService.translate(`${errorsPath}.missingUsername`)
-      );
-    } else if (this.pwd.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidFormError`),
-        this.translocoService.translate(`${errorsPath}.missingPassword`)
-      );
-    }
-  }
   submitSignInForm() {
-    if (this.formGroup.valid) {
-      if (this.uname.value === 'bank' && this.pwd.value === 'bank') {
-        this.router.navigate(['/main']);
-      } else if (this.uname.value === 'vendor' && this.pwd.value === 'vendor') {
-        this.router.navigate(['/vendor']);
-      } else {
-        AppUtilities.openDisplayMessageBox(
-          this.displayMessageBox,
-          this.translocoService.translate(
-            `auth.loginForm.errors.dialogs.invalidFormError`
-          ),
-          this.translocoService.translate(
-            'auth.loginForm.errors.dialogs.usernamePasswordIncorrect'
-          )
-        );
-      }
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
+      this.formErrors();
+      return;
     }
-    this.formGroup.markAllAsTouched();
-    this.formErrors();
+    this.signIn(this.formGroup.value);
   }
-  private signIn(value: { uname: string; pwd: string }) {
-    this.startLoading = true;
-    this.requestService.performPost(`/Loginnew/addLogin`, value).subscribe({
-      next: (result) => {
-        this.startLoading = false;
-      },
-      error: (err) => {
-        this.startLoading = false;
-        AppUtilities.noInternetError(
-          this.displayMessageBox,
-          this.translocoService
-        );
-        throw err;
-      },
-    });
-  }
-  private verifyControlNumber(
-    result: { control: string },
-    dialogRef: MatDialogRef<ControlNumberDetailsComponent>
-  ) {
-    this.startLoading = true;
-    this.requestService.performPost(`/Invoice/getControl`, result).subscribe({
-      next: (result) => {
-        this.startLoading = false;
-        dialogRef.componentInstance.controlNumberNotFound();
-      },
-      error: (err) => {
-        this.startLoading = false;
-        dialogRef.componentInstance.submitFailed();
-        console.log(err);
-        throw err;
-      },
-    });
+  get userName() {
+    return this.formGroup.get('userName') as FormControl;
   }
 
-  get uname() {
-    return this.formGroup.get('uname') as FormControl;
-  }
-
-  get pwd() {
-    return this.formGroup.get('pwd') as FormControl;
+  get password() {
+    return this.formGroup.get('password') as FormControl;
   }
 }

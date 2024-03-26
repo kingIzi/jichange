@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { TranslocoService } from '@ngneat/transloco';
 import { Dropdown, Ripple, initTE } from 'tw-elements';
 
@@ -25,6 +25,7 @@ export class LanguageSelectorComponent implements OnInit {
       shorthand: 'SWA',
     },
   ];
+  @Input() dropdownDirection: string = 'dropdown-end';
   constructor(private translocoService: TranslocoService) {}
   ngOnInit(): void {
     //initTE({ Dropdown, Ripple });

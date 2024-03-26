@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { DatePickerDialogComponent } from '../../dialogs/date-picker-dialog/date-picker-dialog.component';
 import { TranslocoModule } from '@ngneat/transloco';
 
@@ -11,6 +11,7 @@ import { TranslocoModule } from '@ngneat/transloco';
   imports: [CommonModule, DatePickerDialogComponent, TranslocoModule],
 })
 export class TableDateFiltersComponent {
+  @Input() dropdownPosition: string = '';
   public currentIndex: number = 0;
   openDatePickerDialog(datePicker: DatePickerDialogComponent) {
     datePicker.openDialog();

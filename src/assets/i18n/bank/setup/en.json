@@ -11,7 +11,12 @@
       },
       "dialog": {
         "missingCountry": "Please provide a country name",
-        "invalidForm": "Invalid form"
+        "invalidForm": "Invalid form",
+        "removeCountry": "Remove country",
+        "sureDelete": "Are you sure you want to delete this?",
+        "removedSuccessfully": "Country deleted successfully!",
+        "addedSuccessfully": "Country added successfully!",
+        "modifiedSuccessfully": "Country modified successfully!"
       }
     },
     "countriesTable": ["Sno", "Country"]
@@ -139,7 +144,14 @@
         "invalidForm": "Invalid form",
         "missingBranch": "Please provide a branch name",
         "missingLocation": "Please provide a location",
-        "missingStatus": "Please select a status"
+        "missingStatus": "Please select a status",
+        "failedToAddBranch": "Failed to add new branch",
+        "addedSuccessfully": "Branch Added successfully!",
+        "updated": "Branch modified successfully!",
+        "retrieveBranchError": "Failed to retrieve branch list",
+        "removeBranch": "Remove branch",
+        "sureDelete": "Are you sure you want to delete this?",
+        "removedSuccessfully": "Branch deleted successfully!"
       }
     },
     "branchesTable": ["Sno", "Branch", "Location", "Status"]

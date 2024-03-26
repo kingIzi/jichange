@@ -197,6 +197,15 @@
               </p>
               <p class="text-black text-sm capitalize font-semibold">Refund</p>
             </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("balance") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">400.0</p>
+            </div>
             <div
               class="grid grid-cols-2 lg:grid-cols-3 col-start-1 col-span-3 gap-y-3 gap-x-2"
             >
@@ -257,13 +266,6 @@
                     </div>
                   </div>
                 </div>
-                <!-- <button class="btn btn-ghost btn-xs lg:btn-sm">
-                  <img
-                    src="assets/img/icons/more_vert_FILL0_wght400_GRAD0_opsz24.png"
-                    alt=""
-                    srcset=""
-                  />
-                </button> -->
                 <div class="dropdown">
                   <div tabindex="0" role="button" class="btn m-1">
                     <img
@@ -461,9 +463,12 @@
           aria-labelledby="headingThree"
           data-te-parent="#accordionExample"
         >
-          <div class="px-5 py-4">
-            <ol
+          <div class="px-5 py-4 flex flex-col">
+            <!-- <ol
               class="border-l border-neutral-300 md:flex md:justify-between md:gap-6 md:border-l-0 md:border-t"
+            > -->
+            <ol
+              class="border-l border-neutral-300 grid grid-cols-1 md:grid-cols-4 md:gap-6 md:border-l-0 md:border-t"
             >
               <li>
                 <div class="flex-start flex items-center pt-2 md:block md:pt-0">
@@ -524,6 +529,50 @@
                   </div>
                 </div>
               </li>
+              <li>
+                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
+                  <div
+                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
+                  ></div>
+                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
+                </div>
+                <div class="ml-4 mt-2 pb-5 md:ml-0">
+                  <h4 class="mb-1.5 text-xl font-semibold">
+                    Payment completed
+                  </h4>
+                  <div class="flex flex-row items-center">
+                    <p
+                      class="capitalize text-sm font-semibold text-black hover:underline cursor-pointer"
+                    >
+                      Payment made to CRDB Bank
+                    </p>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
+                  <div
+                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
+                  ></div>
+                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
+                </div>
+                <div class="ml-4 mt-2 pb-5 md:ml-0">
+                  <h4 class="mb-1.5 text-xl font-semibold">
+                    Payment completed
+                  </h4>
+                  <div class="flex flex-row items-center">
+                    <p
+                      class="capitalize text-sm font-semibold text-black hover:underline cursor-pointer"
+                    >
+                      Payment made to CRDB Bank
+                    </p>
+                  </div>
+                </div>
+              </li>
+            </ol>
+            <ol
+              class="border-l border-neutral-300 grid grid-cols-1 md:grid-cols-4 md:gap-6 md:border-l-0 md:border-t"
+            >
               <li>
                 <div class="flex-start flex items-center pt-2 md:block md:pt-0">
                   <div

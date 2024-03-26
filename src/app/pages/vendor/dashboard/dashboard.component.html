@@ -37,23 +37,33 @@
     class="col-span-full flex flex-col space-y-6 lg:col-span-4 lg:row-span-12"
   >
     <div class="flex flex-col space-y-1 relative w-full">
-      <p
-        *transloco="let t; read: 'panel.dashboard.transaction'"
-        class="text-black font-bold tracking-wide text-lg"
-      >
-        {{ t("transaction") }}
-      </p>
+      <div class="flex flex-row items-center justify-between">
+        <p
+          *transloco="let t; read: 'panel.dashboard.transaction'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("transaction") }}
+        </p>
+        <app-table-date-filters
+          [dropdownPosition]="'dropdown-end'"
+        ></app-table-date-filters>
+      </div>
       <div class="w-full relative bg-white">
         <canvas #transactionChart id="chart-double-y-axis-example"></canvas>
       </div>
     </div>
     <div class="flex flex-col space-y-1 relative w-full">
-      <p
-        *transloco="let t; read: 'panel.dashboard.allOperations'"
-        class="text-black font-bold tracking-wide text-lg"
-      >
-        {{ t("allOperations") }}
-      </p>
+      <div class="flex flex-row items-center justify-between">
+        <p
+          *transloco="let t; read: 'panel.dashboard.allOperations'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("allOperations") }}
+        </p>
+        <app-table-date-filters
+          [dropdownPosition]="'dropdown-end'"
+        ></app-table-date-filters>
+      </div>
       <div class="w-full relative bg-white">
         <canvas #operationsChart></canvas>
       </div>

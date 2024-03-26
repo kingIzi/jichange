@@ -1,5 +1,9 @@
 <app-date-picker-dialog #datePicker></app-date-picker-dialog>
-<div *transloco="let t; read: 'tableData'" class="dropdown">
+<div
+  *transloco="let t; read: 'tableData'"
+  class="dropdown"
+  [class]="dropdownPosition"
+>
   <button
     tabindex="0"
     role="button"

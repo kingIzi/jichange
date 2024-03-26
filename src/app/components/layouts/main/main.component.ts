@@ -11,7 +11,6 @@ import { FooterComponent } from '../footer/footer.component';
 import { CommonModule } from '@angular/common';
 import { BreadcrumbService, BreadcrumbModule } from 'xng-breadcrumb';
 import { fader } from './router-transition-animations';
-import { MainRoutingModule } from './main-routing.module';
 
 @Component({
   selector: 'app-main',
@@ -20,7 +19,13 @@ import { MainRoutingModule } from './main-routing.module';
   standalone: true,
   providers: [BreadcrumbService],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HeaderComponent, RouterModule, FooterComponent, CommonModule],
+  imports: [
+    HeaderComponent,
+    RouterModule,
+    FooterComponent,
+    CommonModule,
+    BreadcrumbModule,
+  ],
   animations: [fader],
 })
 export class MainComponent implements OnInit {

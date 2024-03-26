@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { LanguageSelectorComponent } from 'src/app/components/language-selector/language-selector.component';
 import { FooterComponent } from 'src/app/components/layouts/footer/footer.component';
+import { fader } from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-auth',
@@ -15,5 +16,13 @@ import { FooterComponent } from 'src/app/components/layouts/footer/footer.compon
     LanguageSelectorComponent,
     FooterComponent,
   ],
+  animations: [fader],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuthComponent {}
+export class AuthComponent {
+  prepareRoute(outlet: RouterOutlet, animate: string): boolean {
+    return (
+      outlet && outlet.activatedRouteData && outlet.activatedRouteData[animate]
+    );
+  }
+}

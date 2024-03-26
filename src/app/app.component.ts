@@ -27,8 +27,16 @@ export class AppComponent implements OnInit {
   @ViewChild('noInternetModal') noInternetModal!: ElementRef;
   @ViewChild('connectedModal') connectedModal!: ElementRef;
   constructor(private breadcrumbService: BreadcrumbService) {}
+  private verifyInternet() {
+    window.addEventListener('online', () => {
+      (this.connectedModal.nativeElement as HTMLDialogElement).showModal();
+    });
+    window.addEventListener('offline', () => {
+      (this.noInternetModal.nativeElement as HTMLDialogElement).showModal();
+    });
+  }
   private prepareReportsRoutes() {
-    this.breadcrumbService.set('@overview', 'Overview');
+    this.breadcrumbService.set('@overview', 'Report(s)');
     this.breadcrumbService.set('@invoice', 'Invoice(s)');
     this.breadcrumbService.set('@userLog', 'User Log(s)');
     this.breadcrumbService.set('@customer', 'Customer(s)');
@@ -62,20 +70,12 @@ export class AppComponent implements OnInit {
     this.breadcrumbService.set('@inbox', 'Vendor approvals');
   }
   private prepareBreadcrumbs() {
+    this.breadcrumbService.set('@home', 'Home');
     this.prepareReportsRoutes();
     this.prepareSetupRoutes();
     this.prepareCompanyRoutes();
   }
-  private verifyInternet() {
-    window.addEventListener('online', () => {
-      (this.connectedModal.nativeElement as HTMLDialogElement).showModal();
-    });
-    window.addEventListener('offline', () => {
-      (this.noInternetModal.nativeElement as HTMLDialogElement).showModal();
-    });
-  }
   ngOnInit(): void {
-    this.breadcrumbService.set('@Home', 'Home');
     this.prepareBreadcrumbs();
     this.verifyInternet();
   }

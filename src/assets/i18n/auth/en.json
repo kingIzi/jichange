@@ -8,6 +8,9 @@
       "username": "Enter email address",
       "password": "Enter password"
     },
+    "success": {
+      "loginSuccess": "Logged in successfully"
+    },
     "errors": {
       "usernameError": "Please enter a valid email",
       "passwordError": "Please enter your password",
@@ -15,7 +18,8 @@
         "invalidFormError": "Invalid form",
         "missingUsername": "Please provide a username",
         "missingPassword": "Please provide a password",
-        "usernamePasswordIncorrect": "Username or password is incorrect"
+        "usernamePasswordIncorrect": "Username or password is incorrect",
+        "loginFailed": "Login Failed"
       }
     },
     "forgotPassword": "Forgot password?",

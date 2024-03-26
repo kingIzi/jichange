@@ -18,6 +18,7 @@
     "method": "Method",
     "status": "Status",
     "transactionType": "Transaction type",
+    "balance": "Balance",
     "attachment": "Attachment(s)",
     "note": "Note(s)",
     "transactionReportForm": "Transaction Report form",
@@ -115,12 +116,24 @@
   "auditTrails": {
     "auditTrails": "Audit Trails",
     "form": {
+      "selectPage": "Select page",
       "company": "Company",
       "actions": "actions",
       "startDate": "Start date",
       "endDate": "End date",
       "placeholders": {
-        "all": "All"
+        "all": "All",
+        "pleaseSelect": "Please, select"
+      },
+      "errors": {
+        "selectPage": "Please select a page",
+        "action": "Please select a user action",
+        "dialog": {
+          "invalidForm": "Invalid form",
+          "selectPage": "No page selected",
+          "action": "No user action selected",
+          "validDate": "Please select a valid starting date"
+        }
       }
     },
     "auditTrailsTable": [

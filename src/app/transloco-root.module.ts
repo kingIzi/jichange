@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { TranslocoHttpLoader } from './transloco-loader';
 //import { environment } from '../../Users/scott/Documents/DEV/nodejs/angular-web/jichange/src/environments/environment';
 import { environment } from 'src/environments/environment';
+import { TablePaginationComponent } from './components/table-pagination/table-pagination.component';
 
 @NgModule({
   exports: [TranslocoModule],

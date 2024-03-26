@@ -23,13 +23,15 @@
       <input
         *transloco="let t; read: 'setup.countryDialog.form.placeholders'"
         #controlNumber
-        formControlName="country"
+        [formControl]="country_name"
         (change)="setCountryValue(controlNumber.value)"
         type="text"
         [placeholder]="t('name')"
         class="input input-bordered w-full max-w-lg bg-transparent text-black"
       />
-      <span *ngIf="country && country.invalid && country.touched">
+      <span
+        *ngIf="country_name && country_name.invalid && country_name.touched"
+      >
         <p
           *transloco="let t; read: 'setup.countryDialog.form.errors'"
           class="text-xs text-red-600"

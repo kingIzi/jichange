@@ -1,6 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
 
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+
 <div class="flex flex-col w-full h-full">
   <form
     id="control-number-form"
@@ -13,21 +15,21 @@
     >
       {{ t("branch") }}
     </h1>
-    <div action="" class="grid grid-cols-2 gap-3 w-full">
-      <div class="flex flex-col space-y-1 w-full py-8">
+    <div action="" class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full py-8">
+      <div class="flex flex-col space-y-1 w-full">
         <h6 *transloco="let t; read: 'setup.branch'" class="text-left text-sm">
           {{ t("branch") }} <span class="text-red-600">*</span>
         </h6>
         <input
           *transloco="let t; read: 'setup.branch.form.placeholders'"
           #currencyNumber
-          formControlName="branch"
-          (change)="setControlValue(branch, currencyNumber.value)"
+          [formControl]="Name"
+          (change)="setControlValue(Name, currencyNumber.value)"
           type="text"
           [placeholder]="t('branch')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"
         />
-        <span *ngIf="branch && branch.invalid && branch.touched">
+        <span *ngIf="Name && Name.invalid && Name.touched">
           <p
             *transloco="let t; read: 'setup.branch.form.errors'"
             class="text-xs text-red-600"
@@ -36,20 +38,20 @@
           </p>
         </span>
       </div>
-      <div class="flex flex-col space-y-1 w-full py-8">
+      <div class="flex flex-col space-y-1 w-full">
         <h6 *transloco="let t; read: 'setup.branch'" class="text-left text-sm">
           {{ t("location") }} <span class="text-red-600">*</span>
         </h6>
         <input
           *transloco="let t; read: 'setup.branch.form.placeholders'"
           #currencyNumber
-          formControlName="location"
-          (change)="setControlValue(location, currencyNumber.value)"
+          [formControl]="Location"
+          (change)="setControlValue(Location, currencyNumber.value)"
           type="text"
           [placeholder]="t('location')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"
         />
-        <span *ngIf="location && location.invalid && location.touched">
+        <span *ngIf="Location && Location.invalid && Location.touched">
           <p
             *transloco="let t; read: 'setup.branch.form.errors'"
             class="text-xs text-red-600"
@@ -65,39 +67,41 @@
         <div class="flex flex-row items-center">
           <div class="form-control">
             <label class="label cursor-pointer">
+              <input
+                *transloco="let t; read: 'defaults'"
+                type="radio"
+                [formControl]="Status"
+                class="radio radio-xs"
+                [value]="t('active')"
+                checked
+              />
               <span
                 *transloco="let t; read: 'defaults'"
                 class="label-text text-xs font-inter"
               >
                 {{ t("active") }}
               </span>
-              <input
-                type="radio"
-                formControlName="status"
-                class="radio radio-xs"
-                [value]="true"
-                checked
-              />
             </label>
           </div>
           <div class="form-control">
             <label class="label cursor-pointer">
+              <input
+                *transloco="let t; read: 'defaults'"
+                [formControl]="Status"
+                type="radio"
+                [value]="t('inActive')"
+                class="radio radio-xs"
+              />
               <span
                 *transloco="let t; read: 'defaults'"
                 class="label-text text-xs font-inter"
               >
                 {{ t("inActive") }}
               </span>
-              <input
-                formControlName="status"
-                type="radio"
-                [value]="false"
-                class="radio radio-xs"
-              />
             </label>
           </div>
         </div>
-        <span *ngIf="status && status.invalid && status.touched">
+        <span *ngIf="Status && Status.invalid && Status.touched">
           <p
             *transloco="let t; read: 'setup.wardDialog.form.errors'"
             class="text-xs text-red-600"

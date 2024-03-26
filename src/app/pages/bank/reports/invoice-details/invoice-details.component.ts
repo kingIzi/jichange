@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
+import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { GeneratedInvoiceDialogComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-dialog/generated-invoice-dialog.component';
 import { InvoiceDetailsGraphComponent } from 'src/app/components/dialogs/invoice-details-graph/invoice-details-graph.component';
 import { Datepicker, Input, initTE } from 'tw-elements';
@@ -11,7 +12,12 @@ import { Datepicker, Input, initTE } from 'tw-elements';
   templateUrl: './invoice-details.component.html',
   styleUrls: ['./invoice-details.component.scss'],
   standalone: true,
-  imports: [TranslocoModule, CommonModule, MatDialogModule],
+  imports: [
+    TranslocoModule,
+    CommonModule,
+    MatDialogModule,
+    TableDateFiltersComponent,
+  ],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,

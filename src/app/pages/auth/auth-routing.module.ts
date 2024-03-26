@@ -16,6 +16,9 @@ const routes: Routes = [
         path: 'login',
         loadComponent: () =>
           import('./sign-in/sign-in.component').then((m) => m.SignInComponent),
+        data: {
+          animationState: 'isLeft',
+        },
       },
       {
         path: 'reset',
@@ -23,6 +26,9 @@ const routes: Routes = [
           import('./forgot-password/forgot-password.component').then(
             (m) => m.ForgotPasswordComponent
           ),
+        data: {
+          animationState: 'isRight',
+        },
       },
     ],
   },

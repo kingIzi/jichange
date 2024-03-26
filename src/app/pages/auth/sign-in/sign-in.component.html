@@ -1,9 +1,12 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
 
-<ngx-loading
+<!-- <ngx-loading
   [show]="startLoading"
   [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
+></ngx-loading> -->
+
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <form
   id="sign-in-form"
@@ -28,7 +31,7 @@
         <input
           *transloco="let t; read: 'auth.loginForm.placeholders'"
           type="email"
-          formControlName="uname"
+          [formControl]="userName"
           [placeholder]="t('username')"
           class="input font-inter input-bordered w-full max-w-lg bg-transparent text-black pl-6"
         />
@@ -38,7 +41,7 @@
           person
         </span>
       </span>
-      <span *ngIf="uname && uname.invalid && uname.touched">
+      <span *ngIf="userName && userName.invalid && userName.touched">
         <p
           *transloco="let t; read: 'auth.loginForm.errors'"
           class="text-xs text-red-600"
@@ -55,7 +58,7 @@
         <input
           *transloco="let t; read: 'auth.loginForm.placeholders'"
           type="password"
-          formControlName="pwd"
+          [formControl]="password"
           [placeholder]="t('password')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black pl-6 font-inter"
         />
@@ -65,7 +68,7 @@
           lock
         </span>
       </span>
-      <span *ngIf="pwd && pwd.invalid && pwd.touched">
+      <span *ngIf="password && password.invalid && password.touched">
         <p
           *transloco="let t; read: 'auth.loginForm.errors'"
           class="text-xs text-red-600"

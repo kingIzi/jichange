@@ -10,7 +10,8 @@ import { RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
-import { Chart } from 'tw-elements';
+//import { Chart } from 'tw-elements';
+import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-overview',
@@ -34,24 +35,16 @@ import { Chart } from 'tw-elements';
 export class OverviewComponent implements OnInit, AfterViewInit {
   public itemsPerPage: number[] = [5, 10, 20];
   public itemPerPage: number = this.itemsPerPage[0];
-  @ViewChild('transactionsChart') transactionsChart!: ElementRef;
-  @ViewChild('summaryChart') summaryChart!: ElementRef;
   @ViewChild('overviewChart') overviewChart!: ElementRef;
-  title = 'Transactions made last year';
-  bar = ChartType.BarChart;
-  pie = ChartType.PieChart;
-  line = ChartType.Line;
-  data = [
-    ['Jan-Mar', 45.0],
-    ['Apr-Jul', 26.8],
-    ['Aug-Oct', 12.8],
-    ['Nov-Dec', 8.5],
-  ];
-  columnNames = ['Months', 'Amount'];
-  options = {};
+  @ViewChild('invoiceSummary') invoiceSummary!: ElementRef;
+  @ViewChild('transactionsChart') transactionsChart!: ElementRef;
   public customers: any[] = [];
+  public overviewChartData: any;
+  public invoiceSummaryData: any;
+  public transactionsChartData: any;
   private createOverviewChart() {
-    const dataChartTooltipsFormattingExample = {
+    let canvas = this.overviewChart.nativeElement as HTMLCanvasElement;
+    this.overviewChartData = new Chart(canvas, {
       type: 'line',
       data: {
         labels: [
@@ -65,43 +58,66 @@ export class OverviewComponent implements OnInit, AfterViewInit {
         ],
         datasets: [
           {
-            label: 'Sales',
+            label: 'ABC Company',
             data: [2112, 2343, 2545, 3423, 2365, 1985, 987],
+          },
+          {
+            label: 'XYZ Entreprises',
+            data: [4321, 2343, 5432, 2312, 2483, 1223, 2334],
+          },
+          {
+            label: 'DEF Technologies',
+            data: [4325, 2132, 5430, 1987, 2678, 1432, 2789],
+          },
+          {
+            label: 'GHI Solutions',
+            data: [3123, 1654, 4332, 2789, 3210, 1876, 2567],
+          },
+          {
+            label: 'JKL Innovations',
+            data: [4323, 2543, 5645, 2198, 2897, 1678, 2890],
           },
         ],
       },
-    };
-
-    // Options
-    const optionsChartTooltipsFormattingExample = {
       options: {
+        responsive: true,
+        aspectRatio: 2.5,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function (value, index, ticks) {
+                return value + ' TZS';
+              },
+              autoSkip: true,
+              maxTicksLimit: 1000,
+            },
+          },
+        },
         plugins: {
           tooltip: {
             callbacks: {
               label: function (context: any) {
-                return ' $' + context.formattedValue;
+                return context.formattedValue + ' /TZS';
               },
             },
           },
         },
       },
-    };
-
-    new Chart(
-      this.overviewChart.nativeElement as HTMLCanvasElement,
-      dataChartTooltipsFormattingExample,
-      optionsChartTooltipsFormattingExample
-    );
+    });
   }
   private createSummaryChart() {
-    const dataChartDataLabelsExample = {
-      type: 'pie',
+    let canvas = this.invoiceSummary.nativeElement as HTMLCanvasElement;
+    this.invoiceSummaryData = new Chart(canvas, {
+      type: 'doughnut',
       data: {
-        labels: ['January', 'February', 'March', 'April', 'May'],
+        labels: ['Paid', 'Pending', 'In-Progress', 'Cancelled'],
         datasets: [
           {
-            label: 'Traffic',
-            data: [30, 45, 62, 65, 61],
+            label: 'My First Dataset',
+            data: [300, 50, 438, 653],
+            hoverOffset: 4,
             backgroundColor: [
               'rgba(63, 81, 181, 0.5)',
               'rgba(77, 182, 172, 0.5)',
@@ -112,126 +128,32 @@ export class OverviewComponent implements OnInit, AfterViewInit {
           },
         ],
       },
-    };
-
-    // Options
-    const optionsChartDataLabelsExample = {
-      dataLabelsPlugin: true,
       options: {
-        plugins: {
-          datalabels: {
-            formatter: (value: any, ctx: any) => {
-              let sum = 0;
-              // Assign the data to the variable and format it according to your needs
-              let dataArr = dataChartDataLabelsExample.data.datasets[0].data;
-              dataArr.map((data) => {
-                sum += data;
-              });
-              let percentage = ((value * 100) / sum).toFixed(2) + '%';
-              return percentage;
-            },
-            color: 'white',
-            labels: {
-              title: {
-                font: {
-                  size: '14',
-                },
-              },
-            },
-          },
-        },
+        responsive: true,
+        aspectRatio: 2.5,
+        maintainAspectRatio: false,
       },
-    };
-
-    new Chart(
-      this.summaryChart.nativeElement as HTMLCanvasElement,
-      dataChartDataLabelsExample,
-      optionsChartDataLabelsExample
-    );
+    });
   }
   private createTransactionChart() {
-    const dataChartFunnelExample = {
+    let canvas = this.transactionsChart.nativeElement as HTMLCanvasElement;
+    this.transactionsChartData = new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: ['Product views', 'Checkout', 'Purchases'],
+        //labels: ['Pending', 'In-Progress', 'Approved', 'Paid'],
+        labels: ['Inclusive', 'Exclusive'],
         datasets: [
           {
-            data: [2112, 343, 45],
-            barPercentage: 1.24,
+            label: 'Debit',
+            data: [100, 83],
+          },
+          {
+            label: 'Credit',
+            data: [21, 12],
           },
         ],
       },
-    };
-
-    // Options
-    const optionsChartFunnelExample = {
-      dataLabelsPlugin: true,
-      options: {
-        indexAxis: 'y',
-        scales: {
-          x: {
-            grid: {
-              offsetGridLines: true,
-            },
-          },
-        },
-        plugins: {
-          legend: {
-            display: false,
-          },
-          datalabels: {
-            formatter: (value: any, ctx: any) => {
-              let sum = 0;
-              let dataArr = dataChartFunnelExample.data.datasets[0].data;
-              dataArr.map((data) => {
-                sum += data;
-              });
-              let percentage = ((value * 100) / sum).toFixed(2) + '%';
-              return percentage;
-            },
-            color: '#4f4f4f',
-            labels: {
-              title: {
-                font: {
-                  size: '13',
-                },
-                anchor: 'end',
-                align: 'right',
-              },
-            },
-          },
-        },
-      },
-    };
-
-    const optionsDarkModeChartFunnelExample = {
-      options: {
-        scales: {
-          y: {
-            ticks: {
-              color: '#fff',
-            },
-          },
-          x: {
-            ticks: {
-              color: '#fff',
-            },
-          },
-        },
-        plugins: {
-          datalabels: {
-            color: '#fff',
-          },
-        },
-      },
-    };
-
-    new Chart(
-      this.transactionsChart.nativeElement as HTMLCanvasElement,
-      dataChartFunnelExample,
-      optionsChartFunnelExample,
-      optionsDarkModeChartFunnelExample
-    );
+    });
   }
   constructor() {}
   ngOnInit(): void {}

@@ -10,7 +10,7 @@
       {{ t("name") }}
     </p>
     <div
-      class="flex flex-row py-2 items-center overflow-x-auto scroll-smooth space-x-2 lg:space-x-3 lg:justify-between"
+      class="flex flex-row py-2 items-center overflow-x-auto scroll-smooth space-x-2 lg:space-x-3 lg:justify-between bg-white shadow"
     >
       <ng-container *ngFor="let overviewCard of overviewCards; index as i">
         <app-dashboard-overview-card
@@ -36,9 +36,9 @@
               {{ t("name") }}
             </p>
             <div
-              class="badge absolute -right-6 -top-2 badge-warning badge-sm text-white"
+              class="badge absolute -right-7 -top-3 badge-warning badge-sm text-white"
             >
-              0
+              3
             </div>
           </div>
           <a
@@ -49,7 +49,10 @@
             {{ t("allOperations") }}
           </a>
         </div>
-        <div *ngIf="inboxApprovals.length === 0" class="bg-white py-10 rounded">
+        <div
+          *ngIf="inboxApprovals.length === 0"
+          class="bg-white py-10 rounded shadow"
+        >
           <p
             class="text-sm text-center"
             *transloco="let t; read: 'panel.dashboard.inboxApproval.errors'"
@@ -102,65 +105,59 @@
           </a>
         </div>
         <div
-          class="w-full h-[32-rem] min-h-32 max-h-[32rem] overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white"
+          class="w-full min-h-[27rem] max-h-[27rem] overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
         >
           <ng-container *ngIf="transactions.length > 0">
-            <div
-              *ngFor="let transaction of transactions; index as i"
+            <ul
+              *ngFor="let arr of transactionsLatest(); index as i"
               class="flex flex-col space-y-2 py-2"
             >
-              <ul class="flex flex-col">
-                <li>
-                  <a
-                    [routerLink]="'/main/reports/transactions/' + i"
-                    class="btn btn-lg text-left flex flex-row items-center justify-between"
+              <li>
+                <div class="flex flex-col space-y-2">
+                  <h6 class="font-semibold">
+                    {{
+                      convertDotNetJSONDate(
+                        arr.at(0).date.toString()
+                      ).toDateString()
+                    }}
+                  </h6>
+                  <div
+                    class="flex flex-col space-y-1 px-4"
+                    *ngFor="let trans of arr; index as ind"
                   >
-                    <div class="flex flex-row items-center space-x-2">
-                      <div
-                        class="w-14 h-14 bg-success relative spiky-invoice-number"
-                      >
-                        <p
-                          class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    <button
+                      [routerLink]="'/main/reports/transactions/' + i"
+                      class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
+                    >
+                      <div class="flex flex-row items-center space-x-1">
+                        <div
+                          class="w-14 h-14 bg-success relative spiky-invoice-number"
                         >
-                          PAID
-                        </p>
+                          <p
+                            class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                          >
+                            PAID
+                          </p>
+                        </div>
+                        <div class="flex flex-col">
+                          <p class="text-sm text-left">{{ trans.company }}</p>
+                          <p class="text-xs text-neutral-500 text-left">
+                            {{ trans.name }}
+                          </p>
+                        </div>
                       </div>
-                      <div class="flex flex-col">
-                        <p class="text-sm">{{ transaction.company }}</p>
-                        <p class="text-xs text-neutral-500">
-                          {{ transaction.name }}
-                        </p>
-                        <p class="text-xs capitalize font-light">
-                          {{
-                            determineDate(
-                              convertDotNetJSONDate(transaction.date.toString())
-                            )
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="flex flex-col">
                       <p class="text-xs text-success">
                         {{
-                          moneyFormat(transaction.amount.toString()) +
+                          moneyFormat(trans.amount.toString()) +
                             " " +
-                            transaction.currency
+                            trans.currency
                         }}
                       </p>
-                      <p class="text-xs text-neutral-500">11:36AM</p>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="transactions.length <= 0">
-            <p
-              *transloco="let t; read: 'panel.dashboard.transaction.errors'"
-              class="text-sm text-center pt-4 absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            >
-              {{ t("noDataFound") }}
-            </p>
+                    </button>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </ng-container>
         </div>
       </div>

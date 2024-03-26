@@ -11,7 +11,12 @@
       },
       "dialog": {
         "missingCountry": "Tafadhali toa jina la nchi",
-        "invalidForm": "Fomu Batili"
+        "invalidForm": "Fomu Batili",
+        "removeCountry": "Ondoa nchi",
+        "sureDelete": "Je, una uhakika unataka kufuta hii?",
+        "removedSuccessfully": "Nchi imefutwa kwa mafanikio!",
+        "addedSuccessfully": "Nchi imeongezwa kwa mafanikio!",
+        "modifiedSuccessfully": "Nchi iliyobadilishwa kwa mafanikio!"
       }
     },
     "countriesTable": ["Nambari", "Nchi"]
@@ -138,7 +143,14 @@
         "invalidForm": "Fomu batili",
         "missingBranch": "Tafadhali toa jina la tawi",
         "missingLocation": "Tafadhali toa mahali",
-        "missingStatus": "Tafadhali chagua hali"
+        "missingStatus": "Tafadhali chagua hali",
+        "failedToAddBranch": "Imeshindwa kuongeza tawi jipya",
+        "addedSuccessfully": "Tawi limeongezwa kwa mafanikio!",
+        "updated": "Tawi limebadilishwa kwa mafanikio!",
+        "retrieveBranchError": "Imeshindwa kurejesha orodha ya tawi",
+        "removeBranch": "Ondoa tawi",
+        "sureDelete": "Una uhakika unataka kufuta hii?",
+        "removedSuccessfully": "Tawi lilifutwa kwa mafanikio!"
       }
     },
     "branchesTable": ["Sno", "Tawi", "Mahali", "Hali"]

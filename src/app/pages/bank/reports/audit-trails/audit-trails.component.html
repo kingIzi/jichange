@@ -1,24 +1,50 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <h2 *transloco="let t; read: 'reports.auditTrails'" class="text-lg font-bold">
     {{ t("auditTrails") }}
   </h2>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
-    <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
+    <form
+      [formGroup]="formGroup"
+      class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
+    >
       <div class="flex flex-col space-y-1">
         <p
           *transloco="let t; read: 'reports.auditTrails.form'"
           class="text-xs capitalize"
         >
-          {{ t("company") }}
+          {{ t("selectPage") }}
         </p>
-        <select class="select select-sm select-bordered w-full">
-          <option
+        <select
+          [formControl]="tbname"
+          class="select select-sm select-bordered w-full"
+        >
+          <!-- <option
             *transloco="let t; read: 'reports.auditTrails.form.placeholders'"
+            disabled
             selected
+            class="text-xs font-inter font-normal capitalize"
           >
-            {{ t("all") }}
+            {{ t("pleaseSelect") }}
+          </option> -->
+          <option
+            *ngFor="let selectPageOption of selectPageOptions; index as ind"
+            [value]="selectPageOption"
+          >
+            {{ selectPageOption }}
           </option>
         </select>
+        <span *ngIf="tbname && tbname.invalid && tbname.touched">
+          <p
+            *transloco="let t; read: 'reports.auditTrails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("selectPage") }}
+          </p>
+        </span>
       </div>
       <div class="flex flex-col space-y-1">
         <p
@@ -27,14 +53,30 @@
         >
           {{ t("actions") }}
         </p>
-        <select class="select select-sm select-bordered w-full">
-          <option
+        <select
+          [formControl]="act"
+          class="select select-sm select-bordered w-full"
+        >
+          <!-- <option
             *transloco="let t; read: 'reports.auditTrails.form.placeholders'"
+            disabled
             selected
+            class="text-xs font-inter font-normal capitalize"
           >
-            {{ t("all") }}
+            {{ t("pleaseSelect") }}
+          </option> -->
+          <option *ngFor="let action of actions; index as i" [value]="action">
+            {{ action }}
           </option>
         </select>
+        <span *ngIf="act && act.invalid && act.touched">
+          <p
+            *transloco="let t; read: 'reports.auditTrails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("action") }}
+          </p>
+        </span>
       </div>
       <div class="flex flex-col space-y-1">
         <p
@@ -43,16 +85,35 @@
         >
           {{ t("startDate") }}
         </p>
-        <input type="date" class="input input-sm input-bordered" />
+        <input
+          [formControl]="Startdate"
+          type="date"
+          class="input input-sm input-bordered"
+        />
+        <span *ngIf="Startdate && Startdate.invalid && Startdate.touched">
+          <p *transloco="let t" class="text-danger-700 text-xs">
+            {{ t("errors.validDate") }}
+          </p>
+        </span>
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'reports.auditTrails.form'" class="text-xs">
           {{ t("endDate") }}
         </p>
-        <input type="date" class="input input-sm input-bordered" />
+        <input
+          [formControl]="Enddate"
+          type="date"
+          class="input input-sm input-bordered"
+        />
+        <span *ngIf="Enddate && Enddate.invalid && Enddate.touched">
+          <p *transloco="let t" class="text-danger-700 text-xs">
+            {{ t("errors.validDate") }}
+          </p>
+        </span>
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button
+          (click)="submitFilter()"
           *transloco="let t; read: 'actions'"
           class="btn btn-sm text-darkPurple bg-lightPurple"
         >
@@ -71,6 +132,7 @@
               id="exampleSearch"
               [placeholder]="t('search')"
               #searchInput
+              (keyup)="searchTable(searchInput.value)"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -84,42 +146,74 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto">
             <table class="min-w-full text-left text-sm font-light">
-              <thead class="border-b font-medium dark:border-neutral-500">
-                <tr
-                  class="bg-lightPurple"
-                  *transloco="let t; read: 'reports.auditTrails'"
-                >
-                  <th
-                    *ngFor="
-                      let header of t('auditTrailsTable') | slice : 1;
-                      index as ind
-                    "
-                    scope="col"
-                    class="px-6 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
+              <thead
+                [formGroup]="headersFormGroup"
+                class="border-b font-medium dark:border-neutral-500"
+              >
+                <ng-container formArrayName="headers">
+                  <tr
+                    *transloco="let t; read: 'tableData.vendor'"
+                    class="bg-lightPurple"
                   >
-                    <div class="flex flex-row items-center">
-                      <p class="text-sm font-extrabold text-black">
-                        {{ header }}
-                      </p>
-                      <button>
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
-                        </span>
-                      </button>
-                    </div>
-                  </th>
-                  <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 py-4 font-inter text-sm font-extrabold text-black"
-                  >
-                    {{ t("action") }}
-                  </th>
-                </tr>
+                    <th
+                      *ngFor="let header of headers.controls; index as ind"
+                      scope="col"
+                      class="px-6 font-inter text-sm"
+                      [id]="'generated-invoice-id-' + ind"
+                      formGroupName="{{ ind }}"
+                    >
+                      <div class="flex items-center">
+                        <p>
+                          {{ headers.controls.at(ind)?.get("label")?.value }}
+                        </p>
+                        <button (click)="sortColumnClicked(ind)">
+                          <span
+                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                          >
+                            unfold_more
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </tr>
+                </ng-container>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let auditTrail of auditTrails
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    index as i
+                  "
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                >
+                  <td
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-bold"
+                  >
+                    {{ auditTrail.atype }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                    {{ auditTrail.colname }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                    {{ auditTrail.ovalue ? auditTrail.ovalue : "-" }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                    {{ auditTrail.nvalue ? auditTrail.nvalue : "-" }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                    {{ auditTrail.aby }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                    {{ dateStringToDate(auditTrail.adate).toDateString() }}
+                  </td>
+                </tr>
+              </tbody>
             </table>
             <div *transloco="let t; read: 'errors'">
               <p
@@ -132,46 +226,14 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-row items-center justify-between">
-        <div class="flex flex-row items-center space-x-1">
-          <p *transloco="let t; read: 'tableData'" class="text-xs">
-            {{ t("itemsPerPage") }}:
-          </p>
-          <select
-            name="itemsPerPage"
-            class="select select-sm select-bordered w-16 max-w-xs"
-            #itemPerPageSelect
-            (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-          >
-            <option *ngFor="let option of itemsPerPage" [value]="option">
-              {{ option }}
-            </option>
-          </select>
-        </div>
-        <div class="flex flex-row items-center">
-          <p class="text-xs">1-5 of 100</p>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              keyboard_double_arrow_left
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              navigate_before
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              navigate_next
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              keyboard_double_arrow_right
-            </span>
-          </button>
-        </div>
-      </div>
+      <mat-paginator
+        #paginator
+        [length]="auditTrails.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+      >
+      </mat-paginator>
     </div>
   </div>
 </div>

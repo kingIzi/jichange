@@ -75,10 +75,10 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
     let btn = this.downloadBtn.nativeElement as HTMLButtonElement;
     btn.classList.add('hidden');
     let divs = this.rootElement.nativeElement as HTMLDivElement;
-    let items = divs.querySelectorAll('[data-te-collapse-item]');
-    items.forEach((item) => {
-      item.classList.remove('hidden');
-    });
+    // let items = divs.querySelectorAll('[data-te-collapse-item]');
+    // items.forEach((item) => {
+    //   item.classList.remove('hidden');
+    // });
     this.fileHandler
       .downloadPdf(
         this.rootElement.nativeElement as HTMLDivElement,

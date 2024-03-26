@@ -3,18 +3,23 @@
     id="over-view"
     class="w-full col-span-full lg:col-span-8 flex flex-col space-y-2"
   >
-    <p
-      *transloco="let t; read: 'reports.overview'"
-      class="text-black font-bold tracking-wide text-lg"
+    <div class="flex flex-row items-center justify-between">
+      <p
+        *transloco="let t; read: 'reports.overview'"
+        class="text-black font-bold tracking-wide text-lg"
+      >
+        Number of sales
+      </p>
+      <div class="flex flex-row items-center">
+        <app-table-date-filters
+          [dropdownPosition]="'dropdown-end'"
+        ></app-table-date-filters>
+      </div>
+    </div>
+    <div
+      class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
     >
-      {{ t("overview") }}
-    </p>
-    <div class="bg-white py-2">
-      <canvas
-        class="max-h-60"
-        #overviewChart
-        id="chart-tooltips-formatting-example"
-      ></canvas>
+      <canvas #overviewChart></canvas>
     </div>
   </div>
   <div class="col-span-full lg:col-span-4 lg:row-span-12">
@@ -25,26 +30,34 @@
             *transloco="let t; read: 'reports.overview'"
             class="text-black font-bold tracking-wide text-lg"
           >
-            {{ t("summary") }}
+            Invoice status
           </p>
+          <app-table-date-filters
+            [dropdownPosition]="'dropdown-end'"
+          ></app-table-date-filters>
         </div>
-        <div class="bg-white py-2">
-          <canvas
-            class="max-h-60"
-            #summaryChart
-            id="chart-data-mdb-labels-example"
-          ></canvas>
+        <div
+          class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
+        >
+          <canvas #invoiceSummary></canvas>
         </div>
       </div>
       <div class="flex flex-col space-y-1 relative w-full">
-        <p
-          *transloco="let t; read: 'reports.overview'"
-          class="text-black font-bold tracking-wide text-lg"
+        <div class="flex flex-row justify-between w-full">
+          <p
+            *transloco="let t; read: 'reports.overview'"
+            class="text-black font-bold tracking-wide text-lg"
+          >
+            VAT-Category Invoices
+          </p>
+          <app-table-date-filters
+            [dropdownPosition]="'dropdown-end'"
+          ></app-table-date-filters>
+        </div>
+        <div
+          class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
         >
-          {{ t("transactions") }}
-        </p>
-        <div class="w-full h-full relative bg-white">
-          <canvas #transactionsChart id="chart-funnel-example"></canvas>
+          <canvas #transactionsChart></canvas>
         </div>
       </div>
     </div>

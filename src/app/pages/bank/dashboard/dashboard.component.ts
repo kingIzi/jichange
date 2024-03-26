@@ -78,10 +78,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       lang: 'users',
     },
   ];
-  public inboxApprovals: any[] = [];
+  public inboxApprovals: any[] = [1, 2, 3];
   public customers: any[] = [];
   public transactions: any[] = [];
-  //@ViewChild('chartCanvas') chartCanvas!: ElementRef;
   constructor(
     private translocoService: TranslocoService,
     private breadcrumbService: BreadcrumbService
@@ -94,6 +93,26 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit(): void {
     //this.buildOperationsChart();
+  }
+  transactionsLatest(): any[] {
+    let groupedByDate = this.transactions.reduce((acc, obj) => {
+      let jsDate = AppUtilities.convertDotNetJsonDateToDate(obj.date);
+      let date = AppUtilities.dateToFormat(jsDate, 'yyyy-MM-dd');
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(obj);
+      return acc;
+    }, {});
+    let results = Object.values(groupedByDate);
+    results.forEach((arr: any) => {
+      return arr.sort((a: any, b: any) => {
+        let a1 = AppUtilities.convertDotNetJsonDateToDate(a.date.toString());
+        let b1 = AppUtilities.convertDotNetJsonDateToDate(b.date.toString());
+        return a1 < b1;
+      });
+    });
+    return results;
   }
   itemsPerPageChanged(value: string) {
     if (this.itemsPerPage.indexOf(+value) !== -1) {

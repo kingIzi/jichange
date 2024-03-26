@@ -25,6 +25,7 @@
     "method": "Mbinu",
     "status": "Hali",
     "transactionType": "Aina ya Uhamisho",
+    "balance": "Usawa",
     "attachment": "Viambatanisho",
     "note": "Maelezo",
     "transactionDetailsTable": [
@@ -107,12 +108,24 @@
   "auditTrails": {
     "auditTrails": "Kufuatilia Ukaguzi",
     "form": {
+      "selectPage": "Chagua ukarasa",
       "company": "Kampuni",
       "actions": "Hatua",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
       "placeholders": {
-        "all": "Zote"
+        "all": "Zote",
+        "pleaseSelect": "Tafadahli, chagua"
+      },
+      "errors": {
+        "selectPage": "Tafadhali chagua ukurasa",
+        "action": "Tafadhali chagua hatua ya mtumiaji",
+        "dialog": {
+          "invalidForm": "Fomu Batili",
+          "selectPage": "Hakuna ukurasa ulioteuliwa",
+          "action": "Hakuna kitendo cha mtumiaji kilichoteuliwa",
+          "validDate": "Tafadhali chagua tarehe ya mwisho halali"
+        }
       }
     },
     "auditTrailsTable": [

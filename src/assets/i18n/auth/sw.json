@@ -15,7 +15,8 @@
         "invalidFormError": "Fomu batili",
         "missingUsername": "Tafadhali toa jina la mtumiaji",
         "missingPassword": "Tafadhali toa nywila",
-        "usernamePasswordIncorrect": "Jina la mtumiaji au nenosiri si sahihi"
+        "usernamePasswordIncorrect": "Jina la mtumiaji au nenosiri si sahihi",
+        "loginFailed": "Kuingia Imeshindwa"
       }
     },
     "forgotPassword": "Umesahau nywila?",

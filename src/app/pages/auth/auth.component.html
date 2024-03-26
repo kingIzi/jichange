@@ -1,11 +1,14 @@
 <div class="h-screen w-screen overflow-hiden bg-jichangeDefault relative">
-  <div class="absolute right-0">
+  <div class="absolute right-4">
     <app-language-selector></app-language-selector>
   </div>
-  <div class="h-full w-full flex flex-col justify-center items-center">
-    <router-outlet></router-outlet>
+  <div
+    [@triggerName]="prepareRoute(outlet, 'animationState')"
+    class="h-full w-full flex flex-col justify-center items-center"
+  >
+    <router-outlet #outlet="outlet"></router-outlet>
   </div>
-  <!-- <div class="absolute bottom-0 left-0 right-0">
+  <div class="absolute bottom-0 left-0 right-0">
     <app-footer></app-footer>
-  </div> -->
+  </div>
 </div>

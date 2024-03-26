@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
+import { Observable } from 'rxjs';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { RequestClientService } from 'src/app/core/services/request-client.service';
 
 @Component({
   selector: 'app-chat-agent',
@@ -7,10 +15,22 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
   styleUrls: ['./chat-agent.component.scss'],
   standalone: true,
   imports: [CommonModule],
+  //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatAgentComponent {
   public serviceTexts: any[] = [];
   @ViewChild('serviceUl') serviceUl!: ElementRef;
+  constructor(private client: RequestClientService) {}
+  private sendRequest(text: string): Observable<any> {
+    let response = localStorage.getItem('userProfile');
+    if (!response) {
+      throw Error(`Failed to find user object`);
+    }
+    let res = JSON.parse(response) as LoginResponse;
+    //let payload = this.createChatPayload(res.usno, text);
+    let payload = { userId: res.Usno, text: text };
+    return this.client.performPostChat(`/chat`, payload);
+  }
   openQuestionFileDialog() {
     let input = document.createElement('input') as HTMLInputElement;
     input.setAttribute('type', 'file');
@@ -23,15 +43,27 @@ export class ChatAgentComponent {
       }
     });
   }
+  getCurrentTime(date = new Date()) {
+    return date.toLocaleTimeString('en-US', { hour12: false });
+  }
   sendServiceText(text: string) {
     if (text && text.trim().length !== 0) {
-      let response = {
+      let tempRes = {
         text: text.trim(),
-        response: { text: 'reply goes here' },
+        response: null,
       };
-      this.serviceTexts.push(response);
-      let ul = this.serviceUl.nativeElement as HTMLUListElement;
-      ul.scrollTo(0, ul.scrollHeight);
+      this.serviceTexts.push(tempRes);
+      this.sendRequest(text).subscribe({
+        next: (res) => {
+          this.serviceTexts[this.serviceTexts.indexOf(tempRes)].response = {
+            text: res.text,
+            time: new Date(),
+          };
+          let ul = this.serviceUl.nativeElement as HTMLUListElement;
+          ul.scrollTo(0, ul.scrollHeight);
+        },
+        error: (err) => {},
+      });
     }
   }
 }

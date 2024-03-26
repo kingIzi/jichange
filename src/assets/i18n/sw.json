@@ -7,7 +7,8 @@
     "status": "Hali",
     "active": "Amilifu",
     "inActive": "Siamilifu",
-    "viewAll": "Tazama Yote"
+    "viewAll": "Tazama Yote",
+    "failed": "Imeshindwa "
   },
   "actions": {
     "submit": "Wasilisha",
@@ -21,7 +22,8 @@
     "verifyConnection": "Tafadhali thibitisha uhusiano wako au jaribu tena.",
     "noInternet": "Wewe ni nje ya mtandao",
     "connected": "Nyuma ya mtandaoni",
-    "noDataFound": "Hakuna taarifa iliyopatikana"
+    "noDataFound": "Hakuna taarifa iliyopatikana",
+    "validDate": "Tafadhali chagua tarehe halali"
   },
   "roles": {
     "role": "Jukumu",

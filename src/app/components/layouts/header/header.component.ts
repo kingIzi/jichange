@@ -19,7 +19,8 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ChatAgentComponent } from '../../chat-agent/chat-agent.component';
-import { ChatbotService } from 'src/app/core/services/chatbot.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { BankUserProfileComponent } from '../../dialogs/bank-user-profile/bank-user-profile.component';
 
 @Component({
   selector: 'app-header',
@@ -33,6 +34,7 @@ import { ChatbotService } from 'src/app/core/services/chatbot.service';
     CommonModule,
     ReactiveFormsModule,
     ChatAgentComponent,
+    MatDialogModule,
   ],
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
@@ -74,14 +76,15 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   constructor(
     private translocoService: TranslocoService,
     private fb: FormBuilder,
-    private chatbot: ChatbotService //private chatbot: ChatbotService
+    private dialog: MatDialog
   ) {}
   private createHeaders() {
     // let bankHeaders: any[] = this.translocoService.translate('en.bankHeaders');
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    this.translocoService.selectTranslation('en').subscribe((headers) => {
+    let activeLang = this.translocoService.getActiveLang().toLocaleLowerCase();
+    this.translocoService.selectTranslation(activeLang).subscribe((headers) => {
       let bankHeaders: any[] = headers['bankHeaders'];
       bankHeaders.forEach((bankHeader, bankHeaderIndex) => {
         let header = this.fb.group({
@@ -195,11 +198,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit(): void {
     //let div = this.desktopSetupDropdown.nativeElement;
+    //this.openProfileDialog();
   }
   ngOnInit(): void {
     initTE({ Collapse, Dropdown, Ripple });
     this.createHeaders();
-    this.chatbot.testConnection();
   }
   switchRouterLinks(ind: number) {
     return '';
@@ -216,6 +219,11 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   routerClicked(ahref: HTMLAnchorElement) {
     ahref.blur();
+  }
+  openProfileDialog() {
+    let dialogRef = this.dialog.open(BankUserProfileComponent, {
+      width: '400px',
+    });
   }
   get headers() {
     return this.formGroup.get('headers') as FormArray;

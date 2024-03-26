@@ -60,7 +60,10 @@
                 *transloco="let t; read: 'setup.regionDialog'"
               >
                 <th
-                  *ngFor="let header of t('regionsTable'); index as ind"
+                  *ngFor="
+                    let header of t('regionsTable') | slice : 1;
+                    index as ind
+                  "
                   scope="col"
                   class="px-6 font-inter text-sm"
                   [id]="'generated-invoice-id-' + ind"
@@ -80,7 +83,7 @@
                 </th>
                 <th
                   *transloco="let t; read: 'defaults'"
-                  class="px-6 py-4 font-inter text-sm font-extrabold text-black"
+                  class="px-6 font-inter text-sm font-extrabold text-black"
                 >
                   {{ t("action") }}
                 </th>

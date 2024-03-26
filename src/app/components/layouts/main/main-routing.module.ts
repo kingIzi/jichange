@@ -9,14 +9,20 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        data: {
-          breadcrumb: { alias: 'dashboard', skip: false },
-          animationState: 'dashboard',
-        },
-        loadComponent: () =>
-          import('../../../pages/bank/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent
-          ),
+        data: { breadcrumb: { skip: true } },
+        children: [
+          {
+            path: '',
+            data: {
+              breadcrumb: { alias: 'dashboard', skip: false },
+              animationState: 'dashboard',
+            },
+            loadComponent: () =>
+              import('../../../pages/bank/dashboard/dashboard.component').then(
+                (m) => m.DashboardComponent
+              ),
+          },
+        ],
       },
       {
         path: 'company',

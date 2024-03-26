@@ -1,0 +1,36 @@
+<div class="flex flex-row-reverse items-center justify-between">
+  <div class="flex flex-row items-center">
+    <p class="text-xs">
+      {{ startAt }} - {{ startAt + itemPerPage - 1 }} of {{ totalItems }}
+    </p>
+    <div class="join">
+      <button
+        (click)="prevPage()"
+        class="join-item btn btn-sm btn-outline hover:bg-darkPurple font-inter"
+      >
+        Prev
+      </button>
+      <button
+        (click)="nextPage()"
+        class="join-item btn btn-sm btn-outline hover:bg-darkPurple font-inter"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+  <div class="flex flex-row items-center space-x-1">
+    <p *transloco="let t; read: 'tableData'" class="text-xs">
+      {{ t("itemsPerPage") }}:
+    </p>
+    <select
+      name="itemsPerPage"
+      class="select select-sm select-bordered w-16 max-w-xs"
+      #itemPerPageSelect
+      (change)="itemsPerPageChanged(itemPerPageSelect.value)"
+    >
+      <option *ngFor="let option of itemsPerPage" [value]="option">
+        {{ option }}
+      </option>
+    </select>
+  </div>
+</div>
