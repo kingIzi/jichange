@@ -137,7 +137,6 @@
       }
     },
     "auditTrailsTable": [
-      "Sno",
       "Actions",
       "Column Name",
       "Old value",

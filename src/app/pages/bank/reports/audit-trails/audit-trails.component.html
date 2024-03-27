@@ -159,7 +159,7 @@
                       *ngFor="let header of headers.controls; index as ind"
                       scope="col"
                       class="px-6 font-inter text-sm"
-                      [id]="'generated-invoice-id-' + ind"
+                      [id]="'auditTrail-table-header-' + ind"
                       formGroupName="{{ ind }}"
                     >
                       <div class="flex items-center">
@@ -232,6 +232,7 @@
         [pageSize]="5"
         [pageSizeOptions]="[5, 10, 20]"
         aria-label="Select page"
+        [showFirstLastButtons]="auditTrails.length > 20"
       >
       </mat-paginator>
     </div>

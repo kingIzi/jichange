@@ -51,6 +51,17 @@ export class AppUtilities {
     );
   }
 
+  static unexpectedErrorOccured(
+    dialog: DisplayMessageBoxComponent,
+    transloco: TranslocoService
+  ) {
+    AppUtilities.openDisplayMessageBox(
+      dialog,
+      transloco.translate(`errors.errorOccured`),
+      transloco.translate(`errors.contactSupport`)
+    );
+  }
+
   static updatePhoneNumberPrefix(control: FormControl, prefix: string) {
     prefix = prefix.substring(1);
     if (control.value.startsWith('0')) {

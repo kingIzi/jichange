@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -28,6 +29,8 @@ import { RequestClientService } from 'src/app/core/services/request-client.servi
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { formatDate } from '@angular/common';
+import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
 
 @Component({
   selector: 'app-audit-trails',
@@ -65,7 +68,7 @@ export class AuditTrailsComponent implements OnInit {
     'Email Text',
     'Smtp Settings',
     'Bank User',
-    'Question',
+    'Questions',
     'Vat Percentage',
     'Company',
   ];
@@ -101,49 +104,54 @@ export class AuditTrailsComponent implements OnInit {
       .subscribe((labels: string[]) => {
         if (labels && labels.length > 0) {
           labels.forEach((label, index) => {
-            if (index !== 0) {
-              let header = this.fb.group({
-                label: this.fb.control(label, []),
-                search: this.fb.control('', []),
-                sortAsc: this.fb.control(false, []),
-                values: this.fb.array([], []),
-              });
-              header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-                if (value === true) {
-                  this.sortTableAsc(index);
-                } else {
-                  this.sortTableDesc(index);
-                }
-              });
-              this.headers.push(header);
-            }
+            let header = this.fb.group({
+              label: this.fb.control(label, []),
+              search: this.fb.control('', []),
+              sortAsc: this.fb.control(false, []),
+              values: this.fb.array([], []),
+            });
+            header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
+              if (value === true) {
+                this.sortTableAsc(index);
+              } else {
+                this.sortTableDesc(index);
+              }
+            });
+            this.headers.push(header);
           });
           this.submitFilter();
         }
       });
   }
   private sortTableAsc(ind: number): void {
-    // this.auditTrails.sort((a: any, b: any) => a.atype - b.atype);
     switch (ind) {
       case this.headersMap.ACTIONS:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
-          a.atype > b.atype ? -1 : 1
+          a.atype.toLocaleLowerCase() > b.atype.toLocaleLowerCase() ? 1 : -1
         );
         break;
       case this.headersMap.COLUMN_NAME:
-        this.auditTrails.sort((a, b) => (a.colname > b.colname ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.colname.toLocaleLowerCase() > b.colname.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.OLD_VALUE:
-        this.auditTrails.sort((a, b) => (a.ovalue > b.ovalue ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.ovalue?.toLocaleLowerCase() > b.ovalue?.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.NEW_VALUE:
-        this.auditTrails.sort((a, b) => (a.nvalue > b.nvalue ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.nvalue?.toLocaleLowerCase() > b.nvalue?.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.POSTED:
-        this.auditTrails.sort((a, b) => (a.aby > b.aby ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.aby?.toLocaleLowerCase() > b.aby?.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.AUDIT_DATE:
-        this.auditTrails.sort((a, b) =>
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           new Date(a.adate) > new Date(b.adate) ? 1 : -1
         );
         break;
@@ -152,27 +160,34 @@ export class AuditTrailsComponent implements OnInit {
     }
   }
   private sortTableDesc(ind: number): void {
-    // this.auditTrails.sort((a: any, b: any) => a.atype - b.atype);
     switch (ind) {
       case this.headersMap.ACTIONS:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
-          a.atype < b.atype ? -1 : 1
+          a.atype.toLocaleLowerCase() < b.atype.toLocaleLowerCase() ? 1 : -1
         );
         break;
       case this.headersMap.COLUMN_NAME:
-        this.auditTrails.sort((a, b) => (a.colname < b.colname ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.colname.toLocaleLowerCase() < b.colname.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.OLD_VALUE:
-        this.auditTrails.sort((a, b) => (a.ovalue < b.ovalue ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.ovalue?.toLocaleLowerCase() < b.ovalue?.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.NEW_VALUE:
-        this.auditTrails.sort((a, b) => (a.nvalue < b.nvalue ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.nvalue?.toLocaleLowerCase() < b.nvalue?.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.POSTED:
-        this.auditTrails.sort((a, b) => (a.aby < b.aby ? 1 : -1));
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
+          a.aby?.toLocaleLowerCase() < b.aby?.toLocaleLowerCase() ? 1 : -1
+        );
         break;
       case this.headersMap.AUDIT_DATE:
-        this.auditTrails.sort((a, b) =>
+        this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           new Date(a.adate) < new Date(b.adate) ? 1 : -1
         );
         break;
@@ -255,10 +270,11 @@ export class AuditTrailsComponent implements OnInit {
       },
       error: (err) => {
         this.startLoading = false;
-        AppUtilities.noInternetError(
+        AppUtilities.unexpectedErrorOccured(
           this.displayMessageBox,
           this.translocoService
         );
+        this.cdf.detectChanges();
         throw err;
       },
     });
@@ -278,7 +294,7 @@ export class AuditTrailsComponent implements OnInit {
   }
   submitFilter() {
     if (this.formGroup.valid) {
-      let value = this.formGroup.value;
+      let value = { ...this.formGroup.value };
       value.Startdate = this.reformatDate(
         this.formGroup.value.Startdate.split('-')
       );

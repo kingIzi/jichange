@@ -24,7 +24,8 @@
     "noInternet": "You are offline",
     "connected": "Back online",
     "noDataFound": "No data found",
-    "validDate": "Please select a valid date"
+    "validDate": "Please select a valid date",
+    "contactSupport": "An unexpected error occurred, please try again or contact support."
   },
   "bankHeaders": [
     {

@@ -23,7 +23,8 @@
     "noInternet": "Wewe ni nje ya mtandao",
     "connected": "Nyuma ya mtandaoni",
     "noDataFound": "Hakuna taarifa iliyopatikana",
-    "validDate": "Tafadhali chagua tarehe halali"
+    "validDate": "Tafadhali chagua tarehe halali",
+    "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano."
   },
   "roles": {
     "role": "Jukumu",
