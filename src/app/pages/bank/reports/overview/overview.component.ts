@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
-import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 //import { Chart } from 'tw-elements';
 import Chart from 'chart.js/auto';
@@ -22,7 +21,6 @@ import Chart from 'chart.js/auto';
     TranslocoModule,
     CommonModule,
     RouterModule,
-    GoogleChartsModule,
     TableDateFiltersComponent,
   ],
   providers: [

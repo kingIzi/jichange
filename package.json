@@ -25,7 +25,6 @@
     "@langchain/google-genai": "^0.0.10",
     "@langchain/openai": "^0.0.18",
     "@ngneat/transloco": "^6.0.4",
-    "angular-google-charts": "^2.2.3",
     "chart.js": "^4.4.2",
     "daisyui": "^3.5.0",
     "dom-to-image": "^2.6.0",

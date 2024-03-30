@@ -9,7 +9,6 @@ import {
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
-import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { VendorDashboardOverviewCardComponent } from 'src/app/components/cards/vendor-dashboard-overview-card/vendor-dashboard-overview-card.component';
 import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
@@ -24,7 +23,6 @@ import { Chart } from 'tw-elements';
     CommonModule,
     RouterModule,
     VendorDashboardOverviewCardComponent,
-    GoogleChartsModule,
     TranslocoModule,
     MatDialogModule,
     TableDateFiltersComponent,

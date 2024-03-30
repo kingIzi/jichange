@@ -13,7 +13,6 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { DashboardOverviewCardComponent } from 'src/app/components/cards/dashboard-overview-card/dashboard-overview-card.component';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -31,7 +30,6 @@ import * as json from 'src/assets/temp/data.json';
     RouterModule,
     DashboardOverviewCardComponent,
     TranslocoModule,
-    GoogleChartsModule,
     TableDateFiltersComponent,
   ],
   providers: [

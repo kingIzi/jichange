@@ -11,7 +11,6 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import * as json from 'src/assets/temp/data.json';
 import { Chart } from 'tw-elements';
@@ -35,7 +34,6 @@ import {
   imports: [
     CommonModule,
     TranslocoModule,
-    GoogleChartsModule,
     DisplayMessageBoxComponent,
     ReactiveFormsModule,
   ],
@@ -50,11 +48,7 @@ export class GeneratedInvoiceDialogComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   public generatedInvoicesData: GeneratedInvoice[] = [];
-  public chartTypes = [
-    ChartType.BarChart,
-    ChartType.LineChart,
-    ChartType.PieChart,
-  ];
+  public chartTypes = ['BarChart', 'LineChart', 'PieChart '];
   public formGroup!: FormGroup;
   public invoices: any[][] = [];
   @ViewChild('graphContainer') graphContainer!: ElementRef;
@@ -279,13 +273,13 @@ export class GeneratedInvoiceDialogComponent implements OnInit {
   }
   graphTypeChanged(value: any) {
     switch (value) {
-      case ChartType.LineChart:
+      case 'LineChart':
         this.type.setValue('line');
         break;
-      case ChartType.BarChart:
+      case 'BarChart':
         this.type.setValue('bar');
         break;
-      case ChartType.PieChart:
+      case 'PieChart':
         this.type.setValue('pie');
         break;
       default:
