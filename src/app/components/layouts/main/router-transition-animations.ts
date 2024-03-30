@@ -224,3 +224,14 @@ export const fader = trigger('triggerName', [
   transition(nestedRouteStates('isLeft', setupModules).join(','), stepper()),
   transition(nestedRouteStates('isLeft', reportsModules).join(','), fadeEase()),
 ]);
+
+export const vendorAnimations = trigger('vendorAnimate', [
+  transition('isLeft => isRight', slideTo('right')),
+  transition('isRight => isLeft', slideTo('left')),
+  transition('dashboard => *', slideTo('right')),
+  transition('* => dashboard', slideTo('left')),
+  transition(
+    'generated-invoice <=> invoice-details, isLeft <=> generated-invoice, isRight <=> generated-invoice,isLeft <=> invoice-details, isRight <=> invoice-details',
+    stepper()
+  ),
+]);

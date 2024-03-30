@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { Popover, Ripple, initTE } from 'tw-elements';
 import {
   MatDialog,
@@ -50,6 +57,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
     SuccessMessageBoxComponent,
     LoaderRainbowComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInComponent implements OnInit {
   public startLoading: boolean = false;
@@ -63,7 +71,8 @@ export class SignInComponent implements OnInit {
     private requestService: RequestClientService,
     private fb: FormBuilder,
     private translocoService: TranslocoService,
-    private router: Router
+    private router: Router,
+    private cdf: ChangeDetectorRef
   ) {}
   private createForm() {
     this.formGroup = this.fb.group({
@@ -123,6 +132,7 @@ export class SignInComponent implements OnInit {
             );
             return;
           }
+          this.cdf.detectChanges();
           this.switchUserLogin(res.response);
         },
         error: (err) => {
@@ -131,6 +141,7 @@ export class SignInComponent implements OnInit {
             this.displayMessageBox,
             this.translocoService
           );
+          this.cdf.detectChanges();
           throw err;
         },
       });

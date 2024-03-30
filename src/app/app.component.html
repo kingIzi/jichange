@@ -38,8 +38,19 @@
       <app-header></app-header>
     </div>
   </ng-container>
+  <ng-container *ngIf="!isAuthRoute() && isVendorRoute()">
+    <div class="flex-none z-50">
+      <app-vendor-header></app-vendor-header>
+    </div>
+  </ng-container>
   <div class="grow flex flex-col pb-4">
-    <div *ngIf="!isAuthRoute() && !isBankRoute()" class="px-6 py-2">
+    <!-- <div *ngIf="!isAuthRoute() && !isBankRoute()" class="px-6 py-2">
+      <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
+      <ng-template #iconTemplate>
+        <span class="material-symbols-outlined"> chevron_right </span>
+      </ng-template>
+    </div> -->
+    <div *ngIf="!isAuthRoute()" class="px-6 py-2">
       <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
       <ng-template #iconTemplate>
         <span class="material-symbols-outlined"> chevron_right </span>

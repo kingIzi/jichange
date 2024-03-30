@@ -8,6 +8,7 @@ import { BreadcrumbModule, BreadcrumbService } from 'xng-breadcrumb';
 import { HeaderComponent } from './components/layouts/header/header.component';
 import { FooterComponent } from './components/layouts/footer/footer.component';
 import { CommonModule } from '@angular/common';
+import { VendorHeaderComponent } from './components/layouts/vendor-header/vendor-header.component';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ import { CommonModule } from '@angular/common';
     HeaderComponent,
     FooterComponent,
     CommonModule,
+    VendorHeaderComponent,
   ],
 })
 export class AppComponent implements OnInit {
@@ -69,14 +71,25 @@ export class AppComponent implements OnInit {
     this.breadcrumbService.set('@summary', 'Companies list');
     this.breadcrumbService.set('@inbox', 'Vendor approvals');
   }
-  private prepareBreadcrumbs() {
+  private prepareBankBreadcrumbs() {
     this.breadcrumbService.set('@home', 'Home');
     this.prepareReportsRoutes();
     this.prepareSetupRoutes();
     this.prepareCompanyRoutes();
   }
+  private prepareVendorRoutes() {
+    this.breadcrumbService.set('@vendor', 'Home');
+    this.breadcrumbService.set('@customers', 'Customers');
+    this.breadcrumbService.set('@view-customer', 'Details');
+    this.breadcrumbService.set('@invoice-details', 'Invoice(s)');
+    this.breadcrumbService.set('@generated-invoice', 'Generated Invoice(s)');
+  }
   ngOnInit(): void {
-    this.prepareBreadcrumbs();
+    if (this.isVendorRoute()) {
+      this.prepareVendorRoutes();
+    } else {
+      this.prepareBankBreadcrumbs();
+    }
     this.verifyInternet();
   }
   isAuthRoute() {
@@ -84,5 +97,8 @@ export class AppComponent implements OnInit {
   }
   isBankRoute() {
     return location.pathname.startsWith('/vendor');
+  }
+  isVendorRoute() {
+    return location.pathname.includes('/vendor');
   }
 }

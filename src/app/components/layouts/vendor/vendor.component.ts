@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -7,9 +13,11 @@ import {
   NavigationStart,
   Router,
   RouterModule,
+  RouterOutlet,
 } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { VendorHeaderComponent } from '../vendor-header/vendor-header.component';
+import { vendorAnimations } from '../main/router-transition-animations';
 
 @Component({
   selector: 'app-vendor',
@@ -17,6 +25,8 @@ import { VendorHeaderComponent } from '../vendor-header/vendor-header.component'
   styleUrls: ['./vendor.component.scss'],
   standalone: true,
   imports: [CommonModule, RouterModule, VendorHeaderComponent, FooterComponent],
+  animations: [vendorAnimations],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VendorComponent implements OnInit, AfterViewInit {
   private initialRoute: string = '/vendor';
@@ -30,7 +40,7 @@ export class VendorComponent implements OnInit, AfterViewInit {
     });
   }
   ngAfterViewInit(): void {
-    this.routeLoaderListener();
+    //this.routeLoaderListener();
   }
   private routeLoaderListener() {
     this.router.events.subscribe((event) => {
@@ -58,5 +68,10 @@ export class VendorComponent implements OnInit, AfterViewInit {
       default:
         return '';
     }
+  }
+  prepareRoute(outlet: RouterOutlet, animate: string): boolean {
+    return (
+      outlet && outlet.activatedRouteData && outlet.activatedRouteData[animate]
+    );
   }
 }

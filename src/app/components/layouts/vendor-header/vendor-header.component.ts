@@ -49,15 +49,18 @@ export class VendorHeaderComponent implements OnInit {
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    let bankHeaders: any[] = this.translocoService.translate('vendorHeaders');
-    bankHeaders.forEach((header, index) => {
-      let group = this.fb.group({
-        label: this.fb.control(header.name, []),
-        dropdowns: this.fb.array([], []),
-        rootLink: this.fb.control(this.switchRouterLinks(index), []),
+    this.translocoService
+      .selectTranslate('vendorHeaders')
+      .subscribe((headers: any[]) => {
+        headers.forEach((header, index) => {
+          let group = this.fb.group({
+            label: this.fb.control(header.name, []),
+            dropdowns: this.fb.array([], []),
+            rootLink: this.fb.control(this.switchRouterLinks(index), []),
+          });
+          this.headers.push(group);
+        });
       });
-      this.headers.push(group);
-    });
   }
   get headers() {
     return this.formGroup.get('headers') as FormArray;

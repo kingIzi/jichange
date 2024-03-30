@@ -20,6 +20,7 @@ const routes: Routes = [
   },
   {
     path: 'vendor',
+    data: { breadcrumb: { alias: 'vendor', skip: false } },
     loadChildren: () =>
       import('./components/layouts/vendor/vendor.module').then(
         (m) => m.VendorModule
