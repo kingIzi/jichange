@@ -1,0 +1,57 @@
+{
+  "overview": {
+    "overview": "Overview",
+    "summary": "Summary",
+    "vendorsTableTitle": "Latest added Vendors",
+    "transactions": "Transactions",
+    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"]
+  },
+  "transactionDetails": {
+    "transactionDetails": "Transaction Details",
+    "transactionDetailsTable": [
+      "Date",
+      "Company",
+      "Transaction N°",
+      "Description",
+      "Amount",
+      "Status"
+    ]
+  },
+  "invoiceDetails": {
+    "invoiceDetails": "Invoice details",
+    "form": {
+      "company": "Company",
+      "customer": "Customer",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "placeholders": {
+        "all": "all"
+      }
+    },
+    "invoiceDetailsTable": [
+      "Sno",
+      "Invoice No",
+      "Date",
+      "Customer",
+      "Invoice amount"
+    ]
+  },
+  "customerDetailReport": {
+    "customerDetailReport": "Customer detail report",
+    "form": {
+      "company": "Company",
+      "region": "region",
+      "district": "district",
+      "placeholders": {
+        "all": "All"
+      }
+    },
+    "customerDetailReportTable": [
+      "Sno",
+      "Role",
+      "PostBox No",
+      "Address",
+      "Contact person"
+    ]
+  }
+}

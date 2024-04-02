@@ -1,0 +1,116 @@
+<ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '3px' }"
+></ngx-loading>
+
+<app-success-message-box #successMessageBox></app-success-message-box>
+
+<div class="px-6 py-8 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.transactionDetails'"
+      class="text-lg font-bold"
+    >
+      {{ t("transactionDetails") }}
+    </h2>
+    <a
+      class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
+    >
+      <span class="material-symbols-outlined text-warning"> bar_chart </span>
+    </a>
+  </div>
+  <div
+    [formGroup]="formGroup"
+    class="flex flex-col bg-white shadow px-2 py-4 space-y-2"
+  >
+    <div class="flex flex-row items-center justify-end">
+      <div class="flex flex-row items-center space-x-2">
+        <app-table-date-filters></app-table-date-filters>
+        <div class="relative">
+          <input
+            *transloco="let t; read: 'defaults'"
+            type="search"
+            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+            id="exampleSearch"
+            [placeholder]="t('search')"
+            #searchInput
+          />
+          <span
+            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
+          >
+            search
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 relative">
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="overflow-y-auto">
+          <table
+            #transactioinDetailsTable
+            class="min-w-full text-left text-sm font-light"
+          >
+            <thead class="border-b font-medium dark:border-neutral-500">
+              <ng-container formArrayName="headers">
+                <tr
+                  *transloco="let t; read: 'tableData.vendor'"
+                  class="bg-lightPurple"
+                >
+                  <th
+                    *ngFor="let header of headers.controls; index as ind"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div
+                      class="flex items-center"
+                      [class]="ind === headersMap.AMOUNT ? 'float-right' : ''"
+                    >
+                      <p class="font-semibold">
+                        {{ headers.controls.at(ind)?.get("label")?.value }}
+                      </p>
+                      <button (click)="sortColumnClicked(ind)">
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    class="px-6 font-semibold"
+                    *transloco="let t; read: 'defaults'"
+                  >
+                    {{ t("action") }}
+                  </th>
+                </tr>
+              </ng-container>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div *transloco="let t; read: 'errors'">
+            <p
+              *ngIf="transactions.length <= 0"
+              class="text-center text-sm tracking-wide pt-3 pb-1"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row items-center justify-between">
+      <mat-paginator
+        #paginator
+        [length]="transactions.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+        [showFirstLastButtons]="transactions.length > 20"
+      >
+      </mat-paginator>
+    </div>
+  </div>
+</div>

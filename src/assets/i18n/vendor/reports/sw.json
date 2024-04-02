@@ -1,0 +1,64 @@
+{
+  "overview": {
+    "overview": "Muhtasari",
+    "summary": "Muhtasari",
+    "vendorsTableTitle": "Wauzaji Wapya Walioongezwa",
+    "transactions": "Miamala",
+    "vendorsTable": [
+      "Nambari",
+      "Jina",
+      "Anwani",
+      "Barua pepe",
+      "Nambari ya Simu",
+      "Hali"
+    ]
+  },
+  "transactionDetails": {
+    "transactionDetails": "Maelezo ya Shughuli",
+    "transactionDetailsTable": [
+      "Tarehe",
+      "Kampuni",
+      "Nambari ya Muamala",
+      "Maelezo",
+      "Kiasi",
+      "Hali"
+    ]
+  },
+  "invoiceDetails": {
+    "invoiceDetails": "Maelezo ya Bili",
+    "form": {
+      "company": "Kampuni",
+      "customer": "Mteja",
+      "startDate": "Tarehe ya Kuanzia",
+      "endDate": "Tarehe ya Mwisho",
+      "placeholders": {
+        "all": "yote"
+      }
+    },
+    "invoiceDetailsTable": [
+      "Nambari",
+      "Nambari ya Bili",
+      "Tarehe",
+      "Mteja",
+      "Kiasi cha Bili"
+    ]
+  },
+  "customerDetailReport": {
+    "customerDetailReport": "Ripoti ya Maelezo ya Mteja",
+    "form": {
+      "company": "Kampuni",
+      "region": "Mkoa",
+      "district": "Wilaya",
+      "placeholders": {
+        "all": "Yote"
+      }
+    },
+    "customerDetailReportTable": [
+      "Nambari",
+      "Jukumu",
+      "Sanduku la Posta",
+      "Anwani",
+      "Mtu wa Mawasiliano"
+    ]
+  }
+}

@@ -26,6 +26,7 @@
         <li *ngFor="let header of headers.controls; index as ind">
           <ng-container>
             <a
+              #ahref
               *ngIf="ind !== 3"
               [routerLink]="header.get('rootLink')?.value"
               [routerLinkActive]="'text-darkPurple'"
@@ -35,6 +36,7 @@
                   : 'text-black bg-transparent'
               "
               class="capitalize"
+              (click)="routerClicked(ahref)"
               formGroupName="{{ ind }}"
               >{{ header.get("label")?.value }}</a
             >

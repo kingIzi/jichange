@@ -82,9 +82,7 @@
         "overview",
         "Transaction Details",
         "Invoice Details",
-        "Customer Report",
-        "User Log Report",
-        "Audit Trails"
+        "Customer Report"
       ]
     }
   ],

@@ -234,4 +234,6 @@ export const vendorAnimations = trigger('vendorAnimate', [
     'generated-invoice <=> invoice-details, isLeft <=> generated-invoice, isRight <=> generated-invoice,isLeft <=> invoice-details, isRight <=> invoice-details',
     stepper()
   ),
+  transition(reportsRoutes.join(','), fadeEase()),
+  transition(nestedRouteStates('isLeft', reportsModules).join(','), fadeEase()),
 ]);

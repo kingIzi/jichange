@@ -12,7 +12,9 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { VendorDashboardOverviewCardComponent } from 'src/app/components/cards/vendor-dashboard-overview-card/vendor-dashboard-overview-card.component';
 import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
-import { Chart } from 'tw-elements';
+//import { Chart } from 'tw-elements';
+import Chart from 'chart.js/auto';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,6 +28,7 @@ import { Chart } from 'tw-elements';
     TranslocoModule,
     MatDialogModule,
     TableDateFiltersComponent,
+    MatPaginatorModule,
   ],
   providers: [
     {
@@ -76,13 +79,37 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('transactionChart') transactionChart!: ElementRef;
   @ViewChild('operationsChart') operationsChart!: ElementRef;
   constructor(private dialog: MatDialog) {}
-  ngAfterViewInit(): void {
-    this.buildTransactionChart();
-    this.buildOperationsChart();
-  }
-  private buildTransactionChart() {
-    const dataChartDobuleYAxisExample = {
+  private createTransactionChart() {
+    let canvas = this.transactionChart.nativeElement as HTMLCanvasElement;
+    new Chart(canvas, {
       type: 'bar',
+      data: {
+        labels: ['Paid', 'Pending', 'In-Progress', 'Cancelled'],
+        datasets: [
+          {
+            label: 'Total Status',
+            data: [300, 50, 438, 653],
+            backgroundColor: [
+              'rgba(63, 81, 181, 0.5)',
+              'rgba(77, 182, 172, 0.5)',
+              'rgba(66, 133, 244, 0.5)',
+              'rgba(156, 39, 176, 0.5)',
+              'rgba(233, 30, 99, 0.5)',
+            ],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        aspectRatio: 2.5,
+        maintainAspectRatio: false,
+      },
+    });
+  }
+  private createOperationsChart() {
+    let canvas = this.operationsChart.nativeElement as HTMLCanvasElement;
+    new Chart(canvas, {
+      type: 'line',
       data: {
         labels: [
           'Monday',
@@ -93,153 +120,44 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           'Saturday',
           'Sunday ',
         ],
-        // datasets: [
-        //   {
-        //     label: 'Impressions',
-        //     yAxisID: 'y',
-        //     data: [2112, 2343, 2545, 3423, 2365, 1985, 987],
-        //     order: 2,
-        //   },
-        //   {
-        //     label: 'Impressions (absolute top) %',
-        //     yAxisID: 'y1',
-        //     data: [1.5, 2, 0.5, 3, 1.2, 4, 3.4],
-        //     type: 'line',
-        //     order: 1,
-        //     backgroundColor: 'rgba(66, 133, 244, 0.0)',
-        //     borderColor: '#94DFD7',
-        //     borderWidth: 2,
-        //     pointBorderColor: '#94DFD7',
-        //     pointBackgroundColor: '#94DFD7',
-        //     lineTension: 0.0,
-        //   },
-        // ],
         datasets: [
           {
-            label: 'Transactions',
-            yAxisID: 'y',
-            data: [2112, 2343, 2545, 3423, 2365, 1985, 987],
-            order: 2,
-          },
-          {
-            label: 'Transactions (absolute top) %',
-            yAxisID: 'y1',
-            data: [1.5, 2, 0.5, 3, 1.2, 4, 3.4],
-            type: 'line',
-            order: 1,
-            backgroundColor: 'rgba(66, 133, 244, 0.0)',
-            borderColor: '#94DFD7',
-            borderWidth: 2,
-            pointBorderColor: '#94DFD7',
-            pointBackgroundColor: '#94DFD7',
-            lineTension: 0.0,
+            label: 'ABC Company',
+            data: [2112, 2343, -2545, 3423, 2365, 1985, 987],
           },
         ],
       },
-    };
-
-    // Options
-    const optionsChartDobuleYAxisExample = {
       options: {
+        responsive: true,
+        aspectRatio: 2.5,
+        maintainAspectRatio: false,
         scales: {
           y: {
-            display: true,
-            position: 'left',
-          },
-          y1: {
-            display: true,
-            position: 'right',
-            grid: {
-              drawOnChartArea: false,
-            },
+            beginAtZero: true,
             ticks: {
-              beginAtZero: true,
-            },
-          },
-        },
-      },
-    };
-
-    const optionsDarkModeChartDobuleYAxisExample = {
-      options: {
-        scales: {
-          y: {
-            ticks: {
-              color: '#fff',
-            },
-          },
-          y1: {
-            ticks: {
-              color: '#fff',
-            },
-          },
-          x: {
-            ticks: {
-              color: '#fff',
+              callback: function (value: any, index: any, ticks: any) {
+                return value + ' TZS';
+              },
+              autoSkip: true,
+              maxTicksLimit: 1000,
             },
           },
         },
         plugins: {
-          datalabels: {
-            color: '#fff',
-          },
-          legend: {
-            labels: {
-              color: '#fff',
+          tooltip: {
+            callbacks: {
+              label: function (context: any) {
+                return context.formattedValue + ' /TZS';
+              },
             },
           },
         },
       },
-    };
-    new Chart(
-      this.transactionChart.nativeElement as HTMLCanvasElement,
-      dataChartDobuleYAxisExample,
-      optionsChartDobuleYAxisExample,
-      optionsDarkModeChartDobuleYAxisExample
-    );
+    });
   }
-  private buildOperationsChart() {
-    const dataChartBarDoubleDatasetsExample = {
-      type: 'bar',
-      data: {
-        labels: ['Inclusive', 'Exclusive'],
-        datasets: [
-          {
-            label: 'CREDIT',
-            data: [510, 653, 255],
-          },
-          {
-            label: 'DEBIT',
-            data: [1251, 1553, 1355],
-            backgroundColor: '#94DFD7',
-            borderColor: '#94DFD7',
-          },
-        ],
-      },
-    };
-
-    // Options
-    const optionsChartBarDoubleDatasetsExample = {
-      options: {
-        scales: {
-          y: {
-            stacked: false,
-            ticks: {
-              beginAtZero: true,
-            },
-          },
-          x: {
-            stacked: false,
-          },
-        },
-      },
-    };
-
-    new Chart(
-      this.operationsChart.nativeElement as HTMLCanvasElement,
-      dataChartBarDoubleDatasetsExample,
-      optionsChartBarDoubleDatasetsExample
-    );
+  ngAfterViewInit(): void {
+    this.createTransactionChart();
+    this.createOperationsChart();
   }
   ngOnInit(): void {}
   openInvoiceDetailsDialog() {
