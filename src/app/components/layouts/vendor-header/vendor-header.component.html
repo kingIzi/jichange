@@ -17,30 +17,56 @@
           />
         </svg>
       </div>
-
       <ul
-        id="mobile-nav"
         tabindex="0"
-        class="menu menu-sm dropdown-content space-y-2 mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-72"
+        *transloco="let t"
         formArrayName="headers"
       >
-        <li
-          class="pl-2 lg:mb-0 lg:pl-0 lg:pr-1"
-          data-te-nav-item-ref
-          data-te-dropdown-ref
-          *ngFor="let header of headers.controls; index as ind"
-          formGroupName="{{ ind }}"
-        >
-          <a
-            class="flex items-center text-black transition duration-200 hover:text-neutral-700 hover:ease-in-out focus:text-neutral-700 disabled:text-black/30 motion-reduce:transition-none lg:px-2 [&.active]:text-black/90"
-            type="button"
-            [routerLink]="header.get('rootLink')?.value"
-            [routerLinkActive]="'text-darkPurple bg-lightPurple'"
-            id="dropdownMenuButton2"
-            data-te-dropdown-toggle-ref
-            aria-expanded="false"
-            >{{ header.get("label")?.value }}</a
-          >
+        <li *ngFor="let header of headers.controls; index as ind">
+          <ng-container>
+            <a
+              *ngIf="ind !== 3"
+              [routerLink]="header.get('rootLink')?.value"
+              [routerLinkActive]="'text-darkPurple'"
+              [class]="
+                verifyCurrentRoute(header.get('rootLink')?.value)
+                  ? 'text-darkPurple bg-lightPurple'
+                  : 'text-black bg-transparent'
+              "
+              class="capitalize"
+              formGroupName="{{ ind }}"
+              >{{ header.get("label")?.value }}</a
+            >
+            <a
+              *ngIf="ind === 3"
+              [class]="
+                verifyCurrentRoute(header.get('rootLink')?.value)
+                  ? 'text-darkPurple bg-lightPurple'
+                  : 'text-black bg-transparent'
+              "
+              class="capitalize"
+              formGroupName="{{ ind }}"
+              >{{ header.get("label")?.value }}</a
+            >
+          </ng-container>
+          <ul class="p-2 grid grid-cols-2">
+            <li
+              *ngFor="
+                let dropdown of getHeaderDropdownArray(ind).controls;
+                index as i
+              "
+            >
+              <a
+                #ahref
+                [routerLink]="dropdown.get('routerLink')?.value"
+                [routerLinkActive]="'text-darkPurple'"
+                (click)="routerClicked(ahref)"
+                class="capitalize"
+                >{{ dropdown.get("label")?.value }}</a
+              >
+            </li>
+          </ul>
         </li>
       </ul>
     </div>
@@ -59,27 +85,76 @@
     class="navbar-center hidden lg:flex"
   >
     <ul
+      *transloco="let t"
       formArrayName="headers"
-      id="desktop-nav"
       class="menu menu-horizontal px-1"
     >
       <li
-        class="pl-2 lg:mb-0 lg:pl-0 lg:pr-1"
-        data-te-nav-item-ref
-        data-te-dropdown-ref
-        *ngFor="let header of headers.controls; index as ind"
         formGroupName="{{ ind }}"
+        *ngFor="let header of headers.controls; index as ind"
+        class="dropdown dropdown-bottom dropdown-end"
       >
-        <a
-          class="flex items-center text-black transition duration-200 hover:text-neutral-700 hover:ease-in-out focus:text-neutral-700 disabled:text-black/30 motion-reduce:transition-none lg:px-2 [&.active]:text-black/90"
-          type="button"
-          [routerLink]="header.get('rootLink')?.value"
-          [routerLinkActive]="'text-darkPurple bg-lightPurple'"
-          id="dropdownMenuButton2"
-          data-te-dropdown-toggle-ref
-          aria-expanded="false"
-          >{{ header.get("label")?.value }}</a
+        <ng-container>
+          <a
+            *ngIf="ind !== 3"
+            [routerLink]="header.get('rootLink')?.value"
+            [routerLinkActive]="'text-darkPurple'"
+            tabindex="0"
+            role="button"
+            class="flex flex-row items-center m-1"
+            [class]="
+              verifyCurrentRoute(header.get('rootLink')?.value)
+                ? 'text-darkPurple bg-lightPurple'
+                : 'text-black bg-transparent'
+            "
+          >
+            <p class="font-extrabold capitalize">
+              {{ header.get("label")?.value }}
+            </p>
+          </a>
+          <a
+            *ngIf="ind === 3"
+            tabindex="0"
+            role="button"
+            class="flex flex-row items-center m-1"
+            [class]="
+              verifyCurrentRoute(header.get('rootLink')?.value)
+                ? 'text-darkPurple bg-lightPurple'
+                : 'text-black bg-transparent'
+            "
+          >
+            <p class="font-extrabold capitalize">
+              {{ header.get("label")?.value }}
+            </p>
+            <span
+              *ngIf="getHeaderDropdownArray(ind).controls.length > 0"
+              class="material-symbols-outlined"
+            >
+              expand_more
+            </span>
+          </a>
+        </ng-container>
+        <ul
+          *ngIf="getHeaderDropdownArray(ind).controls.length > 0"
+          tabindex="0"
+          class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
         >
+          <li
+            *ngFor="
+              let dropdown of getHeaderDropdownArray(ind).controls;
+              index as i
+            "
+          >
+            <a
+              #ahref
+              [routerLink]="dropdown.get('routerLink')?.value"
+              [routerLinkActive]="'text-darkPurple'"
+              (click)="routerClicked(ahref)"
+              class="capitalize"
+              >{{ dropdown.get("label")?.value }}</a
+            >
+          </li>
+        </ul>
       </li>
     </ul>
   </div>

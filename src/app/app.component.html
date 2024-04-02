@@ -44,12 +44,6 @@
     </div>
   </ng-container>
   <div class="grow flex flex-col pb-4">
-    <!-- <div *ngIf="!isAuthRoute() && !isBankRoute()" class="px-6 py-2">
-      <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
-      <ng-template #iconTemplate>
-        <span class="material-symbols-outlined"> chevron_right </span>
-      </ng-template>
-    </div> -->
     <div *ngIf="!isAuthRoute()" class="px-6 py-2">
       <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
       <ng-template #iconTemplate>
@@ -60,7 +54,7 @@
       <router-outlet></router-outlet>
     </div>
   </div>
-  <div *ngIf="!isAuthRoute() && !isBankRoute()" class="flex-none">
+  <div *ngIf="!isAuthRoute()" class="flex-none">
     <app-footer></app-footer>
   </div>
 </div>

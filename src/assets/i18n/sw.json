@@ -44,6 +44,17 @@
     {
       "name": "Ankara iliyotengenezwa",
       "dropdowns": []
+    },
+    {
+      "name": "Ripoti",
+      "dropdowns": [
+        "muhtasari",
+        "Maelezo ya Shughuli",
+        "Maelezo ya Bili",
+        "Ripoti ya Mteja",
+        "Ripoti ya Kumbukumbu za Mtumiaji",
+        "Kufuatilia Ukaguzi"
+      ]
     }
   ],
   "bankHeaders": [
