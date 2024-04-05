@@ -4,7 +4,10 @@
     "summary": "Summary",
     "vendorsTableTitle": "Latest added Vendors",
     "transactions": "Transactions",
-    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"]
+    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"],
+    "invoiceChart": "Invoice(s) summary",
+    "statistics": "Statistics",
+    "salesSummary": "Sale(s) Summary"
   },
   "transactionDetails": {
     "transactionDetails": "Transaction Details",
@@ -17,6 +20,26 @@
       "Status"
     ]
   },
+  "amendmentDetails": {
+    "amendment": "Amendment(s)",
+    "form": {
+      "status": "Status",
+      "paymentType": "Payment Type",
+      "errors": {
+        "status": "Please select a status",
+        "paymentType": "Please select a payment typ"
+      }
+    },
+    "amendmentTable": [
+      "Due date",
+      "Invoice N°",
+      "Control N°",
+      "Customer",
+      "Payment type",
+      "Reason",
+      "Expiry date"
+    ]
+  },
   "invoiceDetails": {
     "invoiceDetails": "Invoice details",
     "form": {
@@ -26,14 +49,44 @@
       "endDate": "End date",
       "placeholders": {
         "all": "all"
+      },
+      "errors": {
+        "company": "Please select a company",
+        "customer": "Please select a customer",
+        "startDate": "Please select a start date",
+        "endDate": "Please select an end date",
+        "dialog": {
+          "invalidForm": "Invalid form",
+          "company": "You must select a company",
+          "customer": "You must select a customer",
+          "startDate": "You must select a start date",
+          "endDate": "You must select an end date"
+        }
       }
     },
     "invoiceDetailsTable": [
-      "Sno",
       "Invoice No",
       "Date",
       "Customer",
-      "Invoice amount"
+      "Total",
+      "With VAT",
+      "Without VAT"
+    ]
+  },
+  "paymentDetails": {
+    "payment": "Payment(s)",
+    "paymentsTable": [
+      "Date",
+      "Invoice N°",
+      "Transaction N°",
+      "Control N°",
+      "Channel",
+      "Receipt No",
+      "Amount",
+      "Balance",
+      "From",
+      "To",
+      "For"
     ]
   },
   "customerDetailReport": {

@@ -1,7 +1,7 @@
 export class Company {
   CompSno!: number;
   Sus_Ac_SNo!: number;
-  Sus_Acc!: null | string;
+  Sus_Acc!: any;
   CompName!: string;
   Status!: string;
   PostBox!: string;
@@ -9,9 +9,9 @@ export class Company {
   RegId!: number;
   DistSno!: number;
   WardSno!: number;
-  RegName!: null | string;
-  DistName!: null | string;
-  WardName!: null | string;
+  RegName!: any;
+  DistName!: any;
+  WardName!: any;
   TinNo!: string;
   VatNo!: string;
   DirectorName!: string;
@@ -19,16 +19,16 @@ export class Company {
   TelNo!: string;
   FaxNo!: string;
   MobNo!: string;
-  CompLogo!: null;
-  DirectorSig!: null;
-  Postedby!: null;
+  CompLogo!: any;
+  DirectorSig!: any;
+  Postedby!: any;
   Posteddate!: string;
   BankSno!: number;
   CompanySno!: number;
-  Branch_Sno!: number;
-  BankName!: null | string;
-  BankBranch!: null | string;
-  AccountNo!: null | string;
-  Swiftcode!: null | string;
-  Checker!: string;
+  Branch_Sno!: any;
+  BankName!: any;
+  BankBranch!: any;
+  AccountNo!: any;
+  Swiftcode!: any;
+  Checker!: any;
 }

@@ -41,9 +41,11 @@ export class AppComponent implements OnInit {
     this.breadcrumbService.set('@overview', 'Report(s)');
     this.breadcrumbService.set('@invoice', 'Invoice(s)');
     this.breadcrumbService.set('@userLog', 'User Log(s)');
-    this.breadcrumbService.set('@customer', 'Customer(s)');
+    this.breadcrumbService.set('@customer', 'Vendor(s)');
     this.breadcrumbService.set('@audit', 'Audit');
     this.breadcrumbService.set('@transactions-id', { label: 'Details' });
+    this.breadcrumbService.set('@payment', 'Payment(s)');
+    this.breadcrumbService.set('@amendment', 'Amendment(s)');
     this.breadcrumbService.set('@transactions', {
       label: 'Transactions',
       routeInterceptor(routeLink, breadcrumb) {
@@ -83,6 +85,11 @@ export class AppComponent implements OnInit {
     this.breadcrumbService.set('@view-customer', 'Details');
     this.breadcrumbService.set('@invoice-details', 'Invoice(s)');
     this.breadcrumbService.set('@generated-invoice', 'Generated Invoice(s)');
+    this.breadcrumbService.set('@transactions', 'Transactions');
+    this.breadcrumbService.set('@transactions-id', 'Details');
+    this.breadcrumbService.set('@invoice', 'Invoice');
+    this.breadcrumbService.set('@payments', 'Payment(s)');
+    this.breadcrumbService.set('@customer', 'Customer');
   }
   ngOnInit(): void {
     if (this.isVendorRoute()) {

@@ -68,10 +68,12 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   private reportsMap = {
     overview: 0,
     transactionDetails: 1,
-    invoiceDetails: 2,
-    customerDetailReport: 3,
-    userLogReport: 4,
-    auditTrails: 5,
+    paymentDetails: 2,
+    invoiceDetails: 3,
+    amendmentsDetails: 4,
+    customerDetailReport: 5,
+    userLogReport: 6,
+    auditTrails: 7,
   };
   constructor(
     private translocoService: TranslocoService,
@@ -172,8 +174,12 @@ export class HeaderComponent implements OnInit, AfterViewInit {
         return '/main/reports/overview';
       case this.reportsMap.transactionDetails:
         return '/main/reports/transactions';
+      case this.reportsMap.paymentDetails:
+        return '/main/reports/payment';
       case this.reportsMap.invoiceDetails:
         return '/main/reports/invoice';
+      case this.reportsMap.amendmentsDetails:
+        return '/main/reports/amendment';
       case this.reportsMap.customerDetailReport:
         return '/main/reports/customer';
       case this.reportsMap.userLogReport:

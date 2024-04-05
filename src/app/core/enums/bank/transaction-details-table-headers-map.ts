@@ -1,8 +1,9 @@
 export enum TransactionDetailsTableHeadersMap {
   DATE,
+  INVOICE_NUMBER,
   COMPANY,
   TRANSACTION_NUMBER,
-  DESCRIPTION,
   AMOUNT,
   STATUS,
+  DESCRIPTION,
 }

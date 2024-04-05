@@ -11,7 +11,10 @@
       "Barua pepe",
       "Nambari ya Simu",
       "Hali"
-    ]
+    ],
+    "invoiceChart": "Muhtasari wa Invoice(s)",
+    "statistics": "Takwimu",
+    "salesSummary": "Muhtasari wa Uuzaji(s)"
   },
   "transactionDetails": {
     "transactionDetails": "Maelezo ya Shughuli",
@@ -24,23 +27,73 @@
       "Hali"
     ]
   },
+  "amendmentDetails": {
+    "amendment": "Marekebisho",
+    "form": {
+      "status": "Hali",
+      "paymentType": "Aina ya Malipo",
+      "errors": {
+        "status": "Tafadhali chagua hali",
+        "paymentType": "Tafadhali chagua aina ya malipo"
+      }
+    },
+    "amendmentTable": [
+      "Tarehe ya Muda wa Kulipa",
+      "Nambari ya Invoice",
+      "Nambari ya Kudhibiti",
+      "Mteja",
+      "Aina ya Malipo",
+      "Sababu",
+      "Tarehe ya Mwisho ya Uhalali"
+    ]
+  },
   "invoiceDetails": {
     "invoiceDetails": "Maelezo ya Bili",
     "form": {
       "company": "Kampuni",
-      "customer": "Mteja",
+      "customer": "Muuzaji",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
       "placeholders": {
         "all": "yote"
+      },
+      "errors": {
+        "company": "Tafadhali chagua kampuni",
+        "customer": "Tafadhali chagua mteja",
+        "startDate": "Tafadhali chagua tarehe ya kuanza",
+        "endDate": "Tafadhali chagua tarehe ya mwisho",
+        "dialog": {
+          "invalidForm": "Fomu batili",
+          "company": "Lazima uchague kampuni",
+          "customer": "Lazima uchague mteja",
+          "startDate": "Lazima uchague tarehe ya kuanza",
+          "endDate": "Lazima uchague tarehe ya mwisho"
+        }
       }
     },
     "invoiceDetailsTable": [
-      "Nambari",
       "Nambari ya Bili",
       "Tarehe",
       "Mteja",
-      "Kiasi cha Bili"
+      "Jumla",
+      "Kwa VAT",
+      "Bila VAT"
+    ]
+  },
+  "paymentDetails": {
+    "payment": "Malipo",
+    "paymentsTable": [
+      "Tarehe",
+      "Nambari ya Invoice",
+      "Nambari ya Muamala",
+      "Nambari ya Kudhibiti",
+      "Mfereji",
+      "Nambari ya Risiti",
+      "Kiasi",
+      "Salio",
+      "Kutoka",
+      "Kwenda",
+      "Kwa"
     ]
   },
   "customerDetailReport": {

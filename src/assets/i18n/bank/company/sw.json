@@ -5,13 +5,16 @@
       "addCompany": "Ongeza Kampuni"
     },
     "companySummary": [
-      "Sno",
       "Jina",
       "Anwani",
       "Barua pepe",
-      "Simu",
+      "Nambari ya TIN",
       "Simu ya nyumbani",
-      "Hali"
+      "Hali",
+      "Jina la Mkurugenzi",
+      "Sanduku la posta",
+      "Namba ya simu",
+      "Tarehe Iliyotumwa"
     ],
     "companyForm": {
       "company": "Kampuni",
@@ -79,7 +82,8 @@
         "tinNo": "Tafadhali toa nambari ya TIN",
         "directorName": "Tafadhali toa jina la mkurugenzi",
         "telephoneNo": "Tafadhali toa nambari ya simu",
-        "emailId": "Tafadhali toa anwani ya barua pepe sahihi"
+        "emailId": "Tafadhali toa anwani ya barua pepe sahihi",
+        "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu."
       }
     }
   },

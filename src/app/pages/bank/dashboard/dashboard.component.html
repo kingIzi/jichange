@@ -1,299 +1,278 @@
-<div class="px-6 py-2 w-full grid grid-cols-12 gap-3 lg:gap-x-3 lg:gap-y-6">
+<div
+  class="absolute top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-4 overflow-y-auto"
+>
   <div
-    id="over-view"
-    class="w-full col-span-full lg:col-span-8 flex flex-col space-y-2"
+    class="w-full col-span-full row-span-12 lg:row-span-4 lg:col-span-8 flex flex-col space-y-2"
   >
-    <p
-      *transloco="let t; read: 'panel.dashboard.overview'"
-      class="text-black font-bold tracking-wide text-lg"
-    >
-      {{ t("name") }}
-    </p>
-    <div
-      class="flex flex-row py-2 items-center overflow-x-auto scroll-smooth space-x-2 lg:space-x-3 lg:justify-between bg-white shadow"
-    >
-      <ng-container *ngFor="let overviewCard of overviewCards; index as i">
-        <app-dashboard-overview-card
-          [imgUrl]="overviewCard.imgUrl"
-          [label]="overviewCard.label"
-          [viewMoreLink]="overviewCard.link"
-          [statistic]="overviewCard.statistic"
-          [increase]="overviewCard.increase"
-          [lang]="overviewCard.lang"
-        ></app-dashboard-overview-card>
-      </ng-container>
-    </div>
-  </div>
-  <div class="col-span-full lg:col-span-4 lg:row-span-12">
-    <div class="flex flex-col space-y-4">
-      <div class="flex flex-col space-y-1">
-        <div class="flex flex-row justify-between w-full">
-          <div class="relative">
-            <p
-              *transloco="let t; read: 'panel.dashboard.inboxApproval'"
-              class="text-black font-bold tracking-wide text-lg"
-            >
-              {{ t("name") }}
-            </p>
-            <div
-              class="badge absolute -right-7 -top-3 badge-warning badge-sm text-white"
-            >
-              3
-            </div>
-          </div>
-          <a
-            [routerLink]="'/main/company/inbox'"
-            *transloco="let t; read: 'panel.dashboard.inboxApproval'"
-            class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
-          >
-            {{ t("allOperations") }}
-          </a>
-        </div>
-        <div
-          *ngIf="inboxApprovals.length === 0"
-          class="bg-white py-10 rounded shadow"
-        >
-          <p
-            class="text-sm text-center"
-            *transloco="let t; read: 'panel.dashboard.inboxApproval.errors'"
-          >
-            {{ t("emptyInbox") }}
-          </p>
-        </div>
-        <ul
-          *ngIf="inboxApprovals.length > 0"
-          id="inbox-approval"
-          class="bg-white p-2 rounded flex flex-col space-y-4 divide-y overflow-y-auto max-h-52"
-        >
-          <li class="py-2" *ngFor="let info of inboxApprovals; index as i">
-            <a class="flex flex-row items-center justify-between">
-              <div class="flex flex-col">
-                <p class="text-xs">Izidore ltd</p>
-                <p class="text-xs font-bold">255742536542</p>
-              </div>
-              <button
-                *transloco="let t; read: 'panel.dashboard.inboxApproval'"
-                class="btn btn-xs bg-lightYellow tracking-wide px-4"
-              >
-                {{ t("pending") }}
-              </button>
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div class="flex flex-col space-y-1 relative w-full">
-        <div class="flex flex-row justify-between w-full">
-          <div class="relative">
-            <p
-              *transloco="let t; read: 'panel.dashboard.transaction'"
-              class="text-black font-bold tracking-wide text-lg"
-            >
-              {{ t("name") }}
-            </p>
-            <div
-              class="badge absolute -right-6 -top-2 badge-warning badge-sm text-white"
-            >
-              3
-            </div>
-          </div>
-          <a
-            [routerLink]="'/main/reports/transactions'"
-            *transloco="let t; read: 'defaults'"
-            class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
-          >
-            {{ t("viewAll") }}
-          </a>
-        </div>
-        <div
-          class="w-full min-h-[27rem] max-h-[27rem] overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
-        >
-          <ng-container *ngIf="transactions.length > 0">
-            <ul
-              *ngFor="let arr of transactionsLatest(); index as i"
-              class="flex flex-col space-y-2 py-2"
-            >
-              <li>
-                <div class="flex flex-col space-y-2">
-                  <h6 class="font-semibold">
-                    {{
-                      convertDotNetJSONDate(
-                        arr.at(0).date.toString()
-                      ).toDateString()
-                    }}
-                  </h6>
-                  <div
-                    class="flex flex-col space-y-1 px-4"
-                    *ngFor="let trans of arr; index as ind"
-                  >
-                    <button
-                      [routerLink]="'/main/reports/transactions/' + i"
-                      class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
-                    >
-                      <div class="flex flex-row items-center space-x-1">
-                        <div
-                          class="w-14 h-14 bg-success relative spiky-invoice-number"
-                        >
-                          <p
-                            class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                          >
-                            PAID
-                          </p>
-                        </div>
-                        <div class="flex flex-col">
-                          <p class="text-sm text-left">{{ trans.company }}</p>
-                          <p class="text-xs text-neutral-500 text-left">
-                            {{ trans.name }}
-                          </p>
-                        </div>
-                      </div>
-                      <p class="text-xs text-success">
-                        {{
-                          moneyFormat(trans.amount.toString()) +
-                            " " +
-                            trans.currency
-                        }}
-                      </p>
-                    </button>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </ng-container>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div
-    class="col-span-full lg:col-span-8 lg:row-span-12 flex flex-col space-y-2"
-  >
-    <div class="flex flex-row items-center justify-between">
+    <div class="flex flex-row w-full items-center justify-between">
       <p
-        *transloco="let t; read: 'panel.dashboard.onboardCustomers'"
+        *transloco="let t; read: 'dashboard.dashboard.overview'"
         class="text-black font-bold tracking-wide text-lg"
       >
         {{ t("name") }}
       </p>
     </div>
-    <div class="flex flex-col bg-white shadow px-2 py-4">
-      <div class="flex flex-row items-center justify-end">
-        <div class="flex flex-row items-center space-x-2">
-          <app-table-date-filters></app-table-date-filters>
-          <div class="relative">
-            <input
-              *transloco="let t; read: 'defaults'"
-              type="search"
-              class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
-              id="exampleSearch"
-              [placeholder]="t('search')"
-              #searchInput
-            />
-            <span
-              class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-            >
-              search
-            </span>
-          </div>
-        </div>
+    <div
+      class="w-full h-fit flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden"
+    >
+      <app-dashboard-overview-card
+        *ngFor="let overviewCard of overviewCards; index as i"
+        [imgUrl]="overviewCard.imgUrl"
+        [label]="overviewCard.label"
+        [viewMoreLink]="overviewCard.link"
+        [statistic]="overviewCard.statistic"
+        [increase]="overviewCard.increase"
+        [lang]="overviewCard.lang"
+      ></app-dashboard-overview-card>
+    </div>
+  </div>
+  <div
+    class="flex flex-col space-y-2 relative w-full col-span-full row-span-6 lg:col-span-4 lg:col-start-9 lg:row-span-6"
+  >
+    <div class="flex flex-row justify-between w-full">
+      <div class="relative flex flex-row items-center space-x-1">
+        <p
+          *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("name") }}
+        </p>
+        <div class="badge badge-sm badge-info font-inter text-white">+3</div>
       </div>
-      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="max-h-72 overflow-y-auto">
-            <table class="min-w-full text-left text-sm font-light">
-              <thead class="border-b font-medium">
-                <tr
-                  class="bg-lightPurple"
-                  *transloco="let t; read: 'panel.dashboard'"
-                >
-                  <th
-                    *ngFor="
-                      let header of t('vendorsTable') | slice : 1;
-                      index as ind
-                    "
-                    scope="col"
-                    class="px-6 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
-                  >
-                    <div class="flex flex-row items-center">
-                      <p class="text-sm font-extrabold text-black">
-                        {{ header }}
-                      </p>
-                      <button>
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
-                        </span>
-                      </button>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody
-                *ngFor="let customer of customers | slice : 0 : itemPerPage"
-              >
-                <tr class="border-b hover:bg-neutral-100">
-                  <td class="px-6 py-4">{{ customer.Name }}</td>
-                  <td class="px-6 py-4">{{ customer.Address }}</td>
-                  <td class="px-6 py-4">{{ customer.Email }}</td>
-                  <td class="px-6 py-4">{{ customer["Mobile No"] }}</td>
-                  <td class="px-6 py-4">{{ customer.Status }}</td>
-                </tr>
-              </tbody>
-            </table>
+      <a
+        [routerLink]="'/main/company/inbox'"
+        *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+      >
+        {{ t("allOperations") }}
+      </a>
+    </div>
+    <div
+      *ngIf="inboxApprovals.length === 0"
+      class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+    >
+      <p
+        class="text-lg text-center"
+        *transloco="let t; read: 'dashboard.dashboard.inboxApproval.errors'"
+      >
+        {{ t("emptyInbox") }}
+      </p>
+    </div>
+    <ul
+      *ngIf="inboxApprovals.length > 0"
+      id="inbox-approval"
+      class="bg-white p-2 shadow rounded flex flex-col space-y-4 divide-y overflow-y-auto h-full w-full max-h-96 lg:max-h-none"
+    >
+      <li class="py-2" *ngFor="let info of inboxApprovals; index as i">
+        <a class="flex flex-row items-center justify-between">
+          <div class="flex flex-col">
+            <p class="text-xs">Izidore ltd</p>
+            <p class="text-xs font-bold">255742536542</p>
+          </div>
+          <button
+            *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
+            class="btn btn-xs bg-lightYellow tracking-wide px-4"
+          >
+            {{ t("pending") }}
+          </button>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div
+    class="flex flex-col space-y-1 relative w-full col-span-full row-span-6 lg:col-span-4 lg:col-start-9 lg:row-span-6"
+  >
+    <div class="flex flex-row justify-between w-full">
+      <div class="relative flex flex-row items-center space-x-1">
+        <p
+          *transloco="let t; read: 'dashboard.dashboard.transaction'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("name") }}
+        </p>
+        <div class="badge badge-sm badge-info font-inter text-white">+3</div>
+      </div>
+      <a
+        [routerLink]="'/main/reports/transactions'"
+        *transloco="let t; read: 'defaults'"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+      >
+        {{ t("viewAll") }}
+      </a>
+    </div>
+    <div
+      *ngIf="transactions.length === 0"
+      class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+    >
+      <p
+        class="text-lg text-center"
+        *transloco="let t; read: 'dashboard.dashboard.inboxApproval.errors'"
+      >
+        {{ t("emptyInbox") }}
+      </p>
+    </div>
+    <div
+      *ngIf="transactions.length > 0"
+      class="w-full h-full max-h-96 lg:max-h-none overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
+    >
+      <ul
+        *ngFor="let arr of transactionsLatest(); index as i"
+        class="flex flex-col space-y-2 py-2"
+      >
+        <li>
+          <div class="flex flex-col space-y-2">
+            <h6 class="font-semibold">
+              {{
+                convertDotNetJSONDate(arr.at(0).date.toString()).toDateString()
+              }}
+            </h6>
             <div
-              *transloco="
-                let t;
-                read: 'panel.dashboard.onboardCustomers.errors'
-              "
+              class="flex flex-col space-y-1 px-4"
+              *ngFor="let trans of arr; index as ind"
             >
-              <p
-                *ngIf="customers.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
+              <button
+                [routerLink]="'/main/reports/transactions/' + i"
+                class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
               >
-                {{ t("noDataFound") }}
-              </p>
+                <div class="flex flex-row items-center space-x-1">
+                  <div
+                    class="w-14 h-14 bg-success relative spiky-invoice-number"
+                  >
+                    <p
+                      class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    >
+                      PAID
+                    </p>
+                  </div>
+                  <div class="flex flex-col">
+                    <p class="text-sm text-left">{{ trans.company }}</p>
+                    <p class="text-xs text-neutral-500 text-left">
+                      {{ trans.name }}
+                    </p>
+                  </div>
+                </div>
+                <p class="text-xs text-success">
+                  {{
+                    moneyFormat(trans.amount.toString()) + " " + trans.currency
+                  }}
+                </p>
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div
+    class="flex flex-col space-y-1 relative w-full col-span-full lg:col-start-1 lg:row-start-5 lg:col-span-8 lg:row-span-full"
+  >
+    <div
+      class="col-span-full lg:col-span-8 lg:row-span-12 flex flex-col space-y-2"
+    >
+      <div class="flex flex-row items-center justify-between">
+        <p
+          *transloco="let t; read: 'dashboard.dashboard.onboardCustomers'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("name") }}
+        </p>
+      </div>
+      <div class="flex flex-col bg-white shadow px-2 py-4">
+        <div class="flex flex-row items-center justify-end">
+          <div class="flex flex-row items-center space-x-2">
+            <app-table-date-filters></app-table-date-filters>
+            <div class="relative">
+              <input
+                *transloco="let t; read: 'defaults'"
+                type="search"
+                class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+                id="exampleSearch"
+                [placeholder]="t('search')"
+                #searchInput
+              />
+              <span
+                class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
+              >
+                search
+              </span>
             </div>
           </div>
         </div>
-      </div>
-      <div class="flex flex-row items-center justify-between">
-        <div class="flex flex-row items-center space-x-1">
-          <p *transloco="let t; read: 'tableData'" class="text-xs">
-            {{ t("itemsPerPage") }}:
-          </p>
-          <select
-            name="itemsPerPage"
-            class="select select-sm select-bordered w-16 max-w-xs"
-            #itemPerPageSelect
-            (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-          >
-            <option *ngFor="let option of itemsPerPage" [value]="option">
-              {{ option }}
-            </option>
-          </select>
+        <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+            <div class="min-h-28 max-h-96 overflow-y-auto relative">
+              <table class="min-w-full text-left text-sm font-light">
+                <thead class="border-b font-medium">
+                  <tr
+                    class="bg-lightPurple sticky top-0"
+                    *transloco="let t; read: 'dashboard.dashboard'"
+                  >
+                    <th
+                      *ngFor="
+                        let header of t('vendorsTable') | slice : 1;
+                        index as ind
+                      "
+                      scope="col"
+                      class="px-6 py-2 font-inter text-sm"
+                    >
+                      <div class="flex flex-row items-center">
+                        <p class="text-sm font-extrabold text-black">
+                          {{ header }}
+                        </p>
+                        <button>
+                          <span
+                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                          >
+                            unfold_more
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let customer of customers
+                        | slice
+                          : 1 + paginator.pageSize * paginator.pageIndex - 1
+                          : 1 +
+                              paginator.pageSize * paginator.pageIndex +
+                              paginator.pageSize -
+                              1;
+                      index as i
+                    "
+                    class="border-b hover:bg-neutral-100"
+                  >
+                    <td class="px-6 py-4">{{ customer.Name }}</td>
+                    <td class="px-6 py-4">{{ customer.Address }}</td>
+                    <td class="px-6 py-4">{{ customer.Email }}</td>
+                    <td class="px-6 py-4">{{ customer["Mobile No"] }}</td>
+                    <td class="px-6 py-4">{{ customer.Status }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *transloco="let t; read: 'errors'">
+                <p
+                  *ngIf="customers.length <= 0"
+                  class="text-center text-sm tracking-wide pt-3 pb-1"
+                >
+                  {{ t("noDataFound") }}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="flex flex-row items-center">
-          <p class="text-xs">1-5 of 100</p>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              keyboard_double_arrow_left
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              navigate_before
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              navigate_next
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              keyboard_double_arrow_right
-            </span>
-          </button>
+        <div class="flex flex-row-reverse items-center justify-between">
+          <mat-paginator
+            #paginator
+            [length]="customers.length"
+            [pageSize]="5"
+            [pageSizeOptions]="[5, 10, 20]"
+            aria-label="Select page"
+            [showFirstLastButtons]="customers.length > 20"
+          >
+          </mat-paginator>
         </div>
       </div>
     </div>

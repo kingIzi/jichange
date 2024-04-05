@@ -13,23 +13,7 @@
     </a>
   </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
-    <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
-      <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("company") }}
-        </p>
-        <select class="select select-sm select-bordered w-full">
-          <option
-            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-            selected
-          >
-            {{ t("all") }}
-          </option>
-        </select>
-      </div>
+    <form class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3">
       <div class="flex flex-col space-y-1">
         <p
           *transloco="let t; read: 'reports.invoiceDetails.form'"
@@ -66,6 +50,7 @@
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button
+          type="button"
           *transloco="let t; read: 'actions'"
           class="btn btn-sm text-darkPurple bg-lightPurple"
         >
@@ -148,7 +133,7 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-row items-center justify-between">
+      <div class="flex flex-row items-center justify-end">
         <mat-paginator
           #paginator
           [length]="invoiceDetails.length"

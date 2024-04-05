@@ -5,13 +5,16 @@
       "addCompany": "Add Company"
     },
     "companySummary": [
-      "Sno",
       "Name",
       "Address",
       "Email",
-      "Telephone No",
-      "Mobile No",
-      "Status"
+      "TIN N°",
+      "Mobile N°",
+      "Status",
+      "Director name",
+      "PostBox",
+      "Telephone N°",
+      "Posted"
     ],
     "companyForm": {
       "company": "Company",
@@ -79,7 +82,8 @@
         "tinNo": "Please provide a TIN number",
         "directorName": "Please provide the director name",
         "telephoneNo": "Please provide the telephone number",
-        "emailId": "Please provide a valid email address"
+        "emailId": "Please provide a valid email address",
+        "noDistrictForRegion": "There were no districts found for this region."
       }
     }
   },

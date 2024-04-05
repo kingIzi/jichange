@@ -1283,6 +1283,62 @@
       "Email": "info@innovativesolutions.com",
       "Mobile No": "444-444-4444",
       "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
+    },
+    {
+      "Name": "Innovative Solutions Corp",
+      "Address": "654 Cedar Street",
+      "Email": "info@innovativesolutions.com",
+      "Mobile No": "444-444-4444",
+      "Status": "inactive"
     }
   ],
   "transactionDetails": [
@@ -1295,7 +1351,8 @@
       "currency": "TZS",
       "transactionNumber": "123456789",
       "receipts": ["/Date(1694803200000)/", "/Date(1694803200000)/"],
-      "name": "Amaye Alopi"
+      "name": "Amaye Alopi",
+      "invoiceNo": "INV02115"
     },
     {
       "date": "/Date(1709596800000)/",
@@ -1306,7 +1363,8 @@
       "currency": "TZS",
       "transactionNumber": "987654321",
       "receipts": ["/Date(1694803200000)/", "/Date(1694803200000)/"],
-      "name": "Amaye Alopi"
+      "name": "Amaye Alopi",
+      "invoiceNo": "INV02116"
     },
     {
       "date": "/Date(1709596800000)/",
@@ -1317,7 +1375,8 @@
       "currency": "TZS",
       "transactionNumber": "456789123",
       "receipts": ["/Date(1694803200000)/"],
-      "name": "Amaye Malawi"
+      "name": "Amaye Malawi",
+      "invoiceNo": "INV02117"
     },
     {
       "date": "/Date(1709510400000)/",
@@ -1334,7 +1393,8 @@
         "/Date(1694803200000)/",
         "/Date(1694803200000)/"
       ],
-      "name": "Bangunza ya lobi"
+      "name": "Bangunza ya lobi",
+      "invoiceNo": "INV02118"
     },
     {
       "date": "/Date(1709510400000)/",
@@ -1351,7 +1411,8 @@
         "/Date(1694803200000)/",
         "/Date(1694803200000)/"
       ],
-      "name": "Biso na biso"
+      "name": "Biso na biso",
+      "invoiceNo": "INV02119"
     },
     {
       "date": "/Date(1709510400000)/",
@@ -1362,7 +1423,8 @@
       "currency": "TZS",
       "transactionNumber": "654987321",
       "receipts": ["/Date(1694803200000)/"],
-      "name": "Bijoux Kalume"
+      "name": "Bijoux Kalume",
+      "invoiceNo": "INV021120"
     },
     {
       "date": "/Date(1709510400000)/",
@@ -1373,7 +1435,8 @@
       "currency": "TZS",
       "transactionNumber": "987321654",
       "receipts": ["/Date(1694803200000)/"],
-      "name": "Kabanga tresor"
+      "name": "Kabanga tresor",
+      "invoiceNo": "INV021121"
     },
     {
       "date": "/Date(1695408000000)/",
@@ -1384,7 +1447,8 @@
       "currency": "TZS",
       "transactionNumber": "654123987",
       "receipts": ["/Date(1694803200000)/", "/Date(1694803200000)/"],
-      "name": "Mosika Esengo"
+      "name": "Mosika Esengo",
+      "invoiceNo": "INV021122"
     }
   ]
 }

@@ -23,6 +23,9 @@
   </div>
 </div> -->
 
-<div class="relative" [@triggerName]="prepareRoute(outlet, 'animationState')">
+<div
+  class="relative w-full h-full"
+  [@triggerName]="prepareRoute(outlet, 'animationState')"
+>
   <router-outlet #outlet="outlet"></router-outlet>
 </div>

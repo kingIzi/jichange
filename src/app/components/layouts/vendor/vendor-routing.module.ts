@@ -126,7 +126,7 @@ const routes: Routes = [
               {
                 path: 'invoice',
                 data: {
-                  breadcrumb: { alias: 'transactions', skip: true },
+                  breadcrumb: { alias: 'invoice', skip: false },
                   animationState: 'reports-module-3',
                 },
                 loadComponent: () =>
@@ -135,10 +135,32 @@ const routes: Routes = [
                   ).then((c) => c.InvoiceDetailsComponent),
               },
               {
+                path: 'payments',
+                data: {
+                  breadcrumb: { alias: 'payments', skip: false },
+                  animationState: 'reports-module-4',
+                },
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/reports/payment-details/payment-details.component'
+                  ).then((p) => p.PaymentDetailsComponent),
+              },
+              {
+                path: 'amendment',
+                data: {
+                  breadcrumb: { alias: 'amendment', skip: false },
+                  animationState: 'reports-module-5',
+                },
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/reports/amendments/amendments.component'
+                  ).then((a) => a.AmendmentsComponent),
+              },
+              {
                 path: 'customer',
                 data: {
-                  breadcrumb: { alias: 'transactions', skip: true },
-                  animationState: 'reports-module-4',
+                  breadcrumb: { alias: 'customer', skip: false },
+                  animationState: 'reports-module-6',
                 },
                 loadComponent: () =>
                   import(

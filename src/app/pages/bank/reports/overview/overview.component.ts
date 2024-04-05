@@ -9,7 +9,7 @@ import {
 import { RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
-//import { Chart } from 'tw-elements';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -22,6 +22,7 @@ import Chart from 'chart.js/auto';
     CommonModule,
     RouterModule,
     TableDateFiltersComponent,
+    MatPaginatorModule,
   ],
   providers: [
     {
@@ -31,11 +32,8 @@ import Chart from 'chart.js/auto';
   ],
 })
 export class OverviewComponent implements OnInit, AfterViewInit {
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
   @ViewChild('overviewChart') overviewChart!: ElementRef;
   @ViewChild('invoiceSummary') invoiceSummary!: ElementRef;
-  @ViewChild('transactionsChart') transactionsChart!: ElementRef;
   public customers: any[] = [];
   public overviewChartData: any;
   public invoiceSummaryData: any;
@@ -113,7 +111,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
         labels: ['Paid', 'Pending', 'In-Progress', 'Cancelled'],
         datasets: [
           {
-            label: 'My First Dataset',
+            label: 'Total',
             data: [300, 50, 438, 653],
             hoverOffset: 4,
             backgroundColor: [
@@ -133,36 +131,10 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       },
     });
   }
-  private createTransactionChart() {
-    let canvas = this.transactionsChart.nativeElement as HTMLCanvasElement;
-    this.transactionsChartData = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        //labels: ['Pending', 'In-Progress', 'Approved', 'Paid'],
-        labels: ['Inclusive', 'Exclusive'],
-        datasets: [
-          {
-            label: 'Debit',
-            data: [100, 83],
-          },
-          {
-            label: 'Credit',
-            data: [21, 12],
-          },
-        ],
-      },
-    });
-  }
   constructor() {}
   ngOnInit(): void {}
   ngAfterViewInit(): void {
     this.createOverviewChart();
     this.createSummaryChart();
-    this.createTransactionChart();
-  }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
-    }
   }
 }

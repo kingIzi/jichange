@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -17,18 +24,29 @@ import { DisplayMessageBoxComponent } from '../../../display-message-box/display
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Company } from 'src/app/core/models/bank/company';
+import { RequestClientService } from 'src/app/core/services/request-client.service';
+import { Branch } from 'src/app/core/models/bank/branch';
+import { Region } from 'src/app/core/models/bank/region';
+import { Observable, lastValueFrom } from 'rxjs';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { District } from 'src/app/core/models/bank/district';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-company-summary-dialog',
   templateUrl: './company-summary-dialog.component.html',
   styleUrls: ['./company-summary-dialog.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     CommonModule,
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    DisplayMessageBoxComponent,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -38,25 +56,154 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   ],
 })
 export class CompanySummaryDialogComponent implements OnInit {
+  public startLoading: boolean = false;
+  public isReady: boolean = false;
+  public branches: Branch[] = [];
+  public regions: Region[] = [];
+  public districts: District[] = [];
   public companySummaryForm!: FormGroup;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private fb: FormBuilder,
     private translocoService: TranslocoService,
+    private client: RequestClientService,
     private dialogRef: MatDialogRef<CompanySummaryDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { companySno: number },
-    @Inject(TRANSLOCO_SCOPE) private scope: any
+    @Inject(MAT_DIALOG_DATA) public data: { companyData: Company },
+    @Inject(TRANSLOCO_SCOPE) private scope: any,
+    private cdr: ChangeDetectorRef
   ) {}
-  ngOnInit(): void {
+  async ngOnInit() {
+    this.prepareForm();
+  }
+  private async prepareEditForm(company: Company) {
+    let branchList = (await this.requestBranchList()) as HttpDataResponse<
+      Branch[]
+    >;
+    this.branches = branchList.response;
+    let regionsList = (await this.requestRegionList()) as HttpDataResponse<
+      Region[]
+    >;
+    this.regions = regionsList.response;
+    let districtList = (await this.requestDistrictList({
+      Sno: company.RegId.toString(),
+    })) as HttpDataResponse<District[]>;
+    this.districts = districtList.response;
+    this.createEditForm(company);
+  }
+  private async prepareCreateForm() {
+    let branchList = (await this.requestBranchList()) as HttpDataResponse<
+      Branch[]
+    >;
+    this.branches = branchList.response as Branch[];
+    let regionsList = (await this.requestRegionList()) as HttpDataResponse<
+      Region[]
+    >;
+    this.regions = regionsList.response as Region[];
     this.createForm();
+  }
+  private async prepareForm() {
+    this.startLoading = true;
+    if (this.data?.companyData) {
+      await this.prepareEditForm(this.data?.companyData);
+    } else {
+      await this.prepareCreateForm();
+    }
+    this.startLoading = false;
+    this.isReady = true;
+    this.cdr.detectChanges();
+  }
+  private createEditForm(company: Company) {
+    this.companySummaryForm = this.fb.group({
+      company: this.fb.control(company.CompName, [Validators.required]),
+      mobileNo: this.fb.control(company.MobNo, [
+        Validators.required,
+        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+      ]),
+      branch: this.fb.control(
+        this.branches.find((b) => b.Sno === company.Branch_Sno)?.Name,
+        []
+      ),
+      makerChecker: this.fb.control(company.Checker, []),
+      faxNo: this.fb.control(company.FaxNo, []),
+      poBox: this.fb.control(company.PostBox, []),
+      address: this.fb.control(company.Address, []),
+      region: this.fb.control(
+        this.regions.find((r) => {
+          return r.Region_SNO === company.RegId;
+        })?.Region_Name,
+        []
+      ),
+      district: this.fb.control(
+        this.districts.find((d) => {
+          return d.SNO === company.DistSno;
+        })?.District_Name,
+        []
+      ),
+      ward: this.fb.control(company.WardSno, []),
+      tinNo: this.fb.control(company.TinNo, []),
+      vatNumber: this.fb.control(company.VatNo, []),
+      directorName: this.fb.control(company.DirectorName, []),
+      telphoneNumber: this.fb.control(company.TelNo, [
+        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+      ]),
+      emailId: this.fb.control(company.Email, [Validators.email]),
+      bankDetails: this.fb.array([], []),
+    });
+    this.updateDistrictList();
+    this.addBankDetail();
+    this.companySummaryForm.markAllAsTouched();
+  }
+  private async requestBranchList() {
+    let data = await lastValueFrom(
+      this.client.performPost(`/api/Branch/GetBranchLists`, {})
+    );
+    return data;
+  }
+  private async requestRegionList() {
+    let data = await lastValueFrom(
+      this.client.performGet(`/api/Company/GetRegionDetails`)
+    );
+    return data;
+  }
+  private async requestDistrictList(body: { Sno: string }) {
+    let data = await lastValueFrom(
+      this.client.performPost(`/api/Company/GetDistDetails`, body)
+    );
+    return data;
+  }
+  private updateDistrictList() {
+    this.region.valueChanges.subscribe((value) => {
+      let region = this.regions.find((r) => {
+        return r.Region_Name.toLocaleLowerCase() === value.toLocaleLowerCase();
+      });
+      if (region) {
+        this.requestDistrictList({ Sno: region.Region_SNO.toString() }).then(
+          (data: any) => {
+            let res = data as HttpDataResponse<District[]>;
+            if (typeof res.response === 'number') {
+              this.districts = [];
+              AppUtilities.openDisplayMessageBox(
+                this.displayMessageBox,
+                this.translocoService.translate(`defaults.warning`),
+                this.translocoService.translate(
+                  `company.summary.companyForm.dialogs.noDistrictForRegion`
+                )
+              );
+            } else {
+              this.districts = data.response;
+            }
+          }
+        );
+      }
+    });
   }
   private createForm() {
     this.companySummaryForm = this.fb.group({
       company: this.fb.control('', [Validators.required]),
       mobileNo: this.fb.control('', [
         Validators.required,
-        Validators.pattern(/^[0-9]{12}/),
+        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
       ]),
       branch: this.fb.control('', [Validators.required]),
       makerChecker: this.fb.control('', [Validators.required]),
@@ -69,12 +216,16 @@ export class CompanySummaryDialogComponent implements OnInit {
       tinNo: this.fb.control('', []),
       vatNumber: this.fb.control('', []),
       directorName: this.fb.control('', []),
-      telphoneNumber: this.fb.control('', [Validators.pattern(/^[0-9]{12}/)]),
+      telphoneNumber: this.fb.control('', [
+        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+      ]),
       emailId: this.fb.control('', [Validators.email]),
       bankDetails: this.fb.array([], []),
     });
+    this.updateDistrictList();
     this.addBankDetail();
   }
+
   public addBankDetail(ind: number = -1) {
     let group = this.fb.group({
       accountNumber: this.fb.control('', []),

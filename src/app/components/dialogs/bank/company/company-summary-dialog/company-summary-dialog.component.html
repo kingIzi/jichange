@@ -1,6 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <form
+  *ngIf="isReady"
   [formGroup]="companySummaryForm"
   action=""
   class="grid grid-cols-1 lg:grid-cols-3 p-4 gap-4 h-full overflow-y-auto"
@@ -52,9 +54,7 @@
         type="tel"
         placeholder="(0)"
         formControlName="mobileNo"
-        (change)="updatePhoneNumber(phonePrefix.value, mobileNo)"
         class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
-        pattern="[0-9]{12}"
       />
       <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
         <p
@@ -71,7 +71,7 @@
       *transloco="let t; read: 'company.summary.companyForm'"
       class="text-left text-sm"
     >
-      {{ t("branch") }} <span class="text-red-600">*</span>
+      {{ t("branch") }}
     </h6>
     <select
       formControlName="branch"
@@ -86,7 +86,9 @@
       >
         {{ t("branch") }}
       </option>
-      <option value="123">123</option>
+      <option *ngFor="let branch of branches; index as i" [value]="branch.Name">
+        {{ branch.Name }}
+      </option>
     </select>
     <span *ngIf="branch && branch.invalid && branch.touched">
       <p
@@ -238,6 +240,12 @@
       >
         {{ t("region") }}
       </option>
+      <option
+        *ngFor="let region of regions; index as i"
+        [value]="region.Region_Name"
+      >
+        {{ region.Region_Name }}
+      </option>
     </select>
     <span *ngIf="region && region.invalid && region.touched">
       <p
@@ -266,6 +274,12 @@
         value="Select branch"
       >
         {{ t("district") }}
+      </option>
+      <option
+        *ngFor="let districtOption of districts; index as i"
+        [value]="districtOption.District_Name"
+      >
+        {{ districtOption.District_Name }}
       </option>
     </select>
     <span *ngIf="district && district.invalid && district.touched">
@@ -414,11 +428,9 @@
       </select>
       <input
         type="tel"
-        (change)="updatePhoneNumber(phonePrefix.value, telphoneNumber)"
         placeholder="(0)"
         class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
         formControlName="telphoneNumber"
-        pattern="[0-9]{12}"
       />
       <span
         *ngIf="

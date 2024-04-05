@@ -11,7 +11,7 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'bank/dashboard', alias: 'panel' },
+      useValue: { scope: 'bank/dashboard', alias: 'dashboard' },
     },
   ],
 })

@@ -8,7 +8,10 @@
     "active": "Amilifu",
     "inActive": "Siamilifu",
     "viewAll": "Tazama Yote",
-    "failed": "Imeshindwa "
+    "failed": "Imeshindwa",
+    "columns": "Safuwima",
+    "warning": "Onyo",
+    "any": "Yoyote"
   },
   "actions": {
     "submit": "Wasilisha",
@@ -51,7 +54,9 @@
         "muhtasari",
         "Maelezo ya Shughuli",
         "Maelezo ya Bili",
-        "Ripoti ya Mteja"
+        "Maelezo ya Malipo",
+        "Maelezo ya Marekebisho",
+        "Ripoti ya Muuzaji"
       ]
     }
   ],
@@ -82,10 +87,12 @@
     {
       "name": "Ripoti",
       "dropdowns": [
-        "muhtasari",
+        "Muhtasari",
         "Maelezo ya Shughuli",
+        "Maelezo ya Malipo",
         "Maelezo ya Bili",
-        "Ripoti ya Mteja",
+        "Maelezo ya Marekebisho",
+        "Ripoti ya Muuzaji",
         "Ripoti ya Kumbukumbu za Mtumiaji",
         "Kufuatilia Ukaguzi"
       ]

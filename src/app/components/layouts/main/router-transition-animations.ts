@@ -173,7 +173,7 @@ function generateModuleRoutes(inputStr: string, arr: string[], delim: string) {
 }
 
 let COMPANY_MODULES = 2;
-let REPORTS_MODULES = 6;
+let REPORTS_MODULES = 8;
 let SETUP_MODULES = 14;
 
 let companyModules = Array.from(

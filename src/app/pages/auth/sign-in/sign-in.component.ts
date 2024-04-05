@@ -151,18 +151,20 @@ export class SignInComponent implements OnInit {
     dialogRef: MatDialogRef<ControlNumberDetailsComponent>
   ) {
     this.startLoading = true;
-    this.requestService.performPost(`/Invoice/getControl`, result).subscribe({
-      next: (result) => {
-        this.startLoading = false;
-        dialogRef.componentInstance.controlNumberNotFound();
-      },
-      error: (err) => {
-        this.startLoading = false;
-        dialogRef.componentInstance.submitFailed();
-        console.error(err);
-        throw err;
-      },
-    });
+    this.requestService
+      .performPost(`/api/Invoice/GetControl`, result)
+      .subscribe({
+        next: (result) => {
+          this.startLoading = false;
+          dialogRef.componentInstance.controlNumberNotFound();
+        },
+        error: (err) => {
+          this.startLoading = false;
+          dialogRef.componentInstance.submitFailed();
+          console.error(err);
+          throw err;
+        },
+      });
   }
   ngOnInit(): void {
     initTE({ Popover, Ripple });

@@ -1,3 +1,5 @@
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between w-full">
     <h2 *transloco="let t; read: 'company.summary'" class="text-lg font-bold">
@@ -18,7 +20,18 @@
       </p>
     </button>
   </div>
-  <div class="flex flex-col bg-white shadow px-2 py-4">
+  <div class="flex flex-row items-center justify-end space-x-2">
+    <a
+      (click)="downloadSheet()"
+      class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+    >
+      <span class="material-symbols-outlined text-success"> download </span>
+    </a>
+  </div>
+  <div
+    [formGroup]="headersFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4"
+  >
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
         <div class="dropdown">
@@ -27,15 +40,11 @@
             role="button"
             class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
           >
-            <span class="material-symbols-outlined text-sm"> label </span>
-            <p
-              *transloco="let t; read: 'tableData.vendor'"
-              class="lg:block hidden"
-            >
-              <!-- {{ headers.at(headersMap.COMPANY).get("label")?.value }} -->
-              Status
+            <span class="material-symbols-outlined text-sm"> view_week </span>
+            <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+              {{ t("columns") }}
             </p>
-            <span class="material-symbols-outlined hidden lg:block">
+            <span class="material-symbols-outlined lg:block hidden">
               arrow_drop_down
             </span>
           </button>
@@ -43,24 +52,20 @@
             tabindex="0"
             class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <!-- <li
-              *ngFor="
-                let control of getValueArray(headersMap.COMPANY)?.controls
-              "
-            >
+            <li *ngFor="let control of headers.controls">
               <label class="label cursor-pointer">
                 <span class="label-text text-xs font-normal">{{
-                  control.get("name")?.value
+                  control.get("label")?.value
                 }}</span>
                 <input
                   type="checkbox"
+                  [formControl]="getFormControl(control, 'included')"
                   class="checkbox checkbox-xs"
                 />
               </label>
-            </li> -->
+            </li>
           </ul>
         </div>
-        <app-table-date-filters></app-table-date-filters>
         <div class="relative">
           <input
             *transloco="let t; read: 'defaults'"
@@ -86,96 +91,259 @@
             #customersTable
             class="min-w-full text-left text-sm font-light"
           >
-            <thead class="border-b font-medium">
+            <thead
+              formArrayName="headers"
+              class="border-b font-medium dark:border-neutral-500"
+            >
               <tr
+                *transloco="let t; read: 'tableData.vendor'"
                 class="bg-lightPurple"
-                *transloco="let t; read: 'company.summary'"
               >
-                <th
-                  *ngFor="
-                    let header of t('companySummary') | slice : 1;
-                    index as ind
-                  "
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
                 >
-                  <div class="flex flex-row items-center">
-                    <p class="text-sm font-extrabold text-black">
-                      {{ header }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                      >
-                        unfold_more
-                      </span>
-                    </button>
-                  </div>
-                </th>
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button (click)="sortColumnClicked(ind)">
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
                 <th
                   *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm font-extrabold text-black"
+                  class="px-6 font-inter text-sm text-right"
                 >
                   {{ t("action") }}
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr
-                *ngFor="
-                  let company of companies | slice : 0 : itemPerPage;
-                  index as i
-                "
-                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-              >
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  {{ company.CompName }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  {{ company.Address }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  {{ company.Email }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  {{ company.TelNo }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  {{ company.MobNo }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  <button
-                    class="btn btn-xs btn-ghost btn-success hover:text-white"
-                    [class]="
-                      company.Status === 'Approved'
-                        ? 'bg-success hover:bg-success'
-                        : 'bg-warning hover:bg-warning'
+              <ng-container *ngIf="companies.length > 0">
+                <tr
+                  *ngFor="
+                    let company of companies
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    index as i
+                  "
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                >
+                  <td
+                    *ngIf="
+                      headers.controls.at(this.headersMap.NAME)?.get('included')
+                        ?.value
                     "
+                    [class]="
+                      headers.controls.at(this.headersMap.NAME)?.get('included')
+                        ?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ company.Status }}
-                  </button>
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  <div class="flex flex-row items-center space-x-2">
-                    <button>
-                      <span class="material-symbols-outlined text-info">
-                        edit
-                      </span>
+                    {{ company.CompName }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.ADDRESS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.ADDRESS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.Address }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.EMAIL)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.EMAIL)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.Email }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.TIN_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.TIN_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.TinNo }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.MOBILE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.MOBILE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.MobNo }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.STATUS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.STATUS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    <button
+                      class="btn btn-xs btn-ghost btn-success hover:text-white"
+                      [class]="
+                        company.Status
+                          ? 'bg-success hover:bg-success'
+                          : 'bg-warning hover:bg-warning'
+                      "
+                    >
+                      {{ company.Status ? company.Status : "Pending" }}
                     </button>
-                    <button>
-                      <span class="material-symbols-outlined text-success">
-                        download
-                      </span>
-                    </button>
-                    <button>
-                      <span class="material-symbols-outlined text-danger-600">
-                        cancel
-                      </span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.DIRECTOR_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.DIRECTOR_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.DirectorName }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.POST_BOX)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.POST_BOX)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.PostBox }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.TELEPHONE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.TELEPHONE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.TelNo }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.DATE_POSTED)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.DATE_POSTED)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ convertDateString(company.Posteddate) }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                    <div
+                      class="flex flex-row items-center justify-end space-x-2"
+                    >
+                      <button
+                        (click)="openEditCompanySummaryDialog(company)"
+                        class="btn btn-sm bg-transparent"
+                      >
+                        <span class="material-symbols-outlined text-info">
+                          edit
+                        </span>
+                      </button>
+                      <button class="btn btn-sm bg-transparent">
+                        <span class="material-symbols-outlined text-danger-600">
+                          cancel
+                        </span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
           <div *transloco="let t; read: 'errors'">
@@ -189,45 +357,16 @@
         </div>
       </div>
     </div>
-    <div class="flex flex-row items-center justify-between">
-      <div class="flex flex-row items-center space-x-1">
-        <p *transloco="let t; read: 'tableData'" class="text-xs">
-          {{ t("itemsPerPage") }}:
-        </p>
-        <select
-          name="itemsPerPage"
-          class="select select-sm select-bordered w-16 max-w-xs"
-          #itemPerPageSelect
-          (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-        >
-          <option *ngFor="let option of itemsPerPage" [value]="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-      <div class="flex flex-row items-center">
-        <p class="text-xs">1-5 of 100</p>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_left
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_before
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_next
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_right
-          </span>
-        </button>
-      </div>
+    <div class="flex flex-row items-center justify-end">
+      <mat-paginator
+        #paginator
+        [length]="companies.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+        [showFirstLastButtons]="companies.length > 20"
+      >
+      </mat-paginator>
     </div>
   </div>
 </div>

@@ -28,7 +28,6 @@ export class OverviewComponent {
   public itemPerPage: number = this.itemsPerPage[0];
   @ViewChild('overviewChart') overviewChart!: ElementRef;
   @ViewChild('invoiceSummary') invoiceSummary!: ElementRef;
-  @ViewChild('transactionsChart') transactionsChart!: ElementRef;
   public customers: any[] = [];
   public overviewChartData: any;
   public invoiceSummaryData: any;
@@ -126,32 +125,11 @@ export class OverviewComponent {
       },
     });
   }
-  private createTransactionChart() {
-    let canvas = this.transactionsChart.nativeElement as HTMLCanvasElement;
-    this.transactionsChartData = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        //labels: ['Pending', 'In-Progress', 'Approved', 'Paid'],
-        labels: ['Inclusive', 'Exclusive'],
-        datasets: [
-          {
-            label: 'Debit',
-            data: [100, 83],
-          },
-          {
-            label: 'Credit',
-            data: [21, 12],
-          },
-        ],
-      },
-    });
-  }
   constructor() {}
   ngOnInit(): void {}
   ngAfterViewInit(): void {
     this.createOverviewChart();
     this.createSummaryChart();
-    this.createTransactionChart();
   }
   itemsPerPageChanged(value: string) {
     if (this.itemsPerPage.indexOf(+value) !== -1) {

@@ -19,6 +19,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Chart, initTE } from 'tw-elements';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import * as json from 'src/assets/temp/data.json';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,11 +32,12 @@ import * as json from 'src/assets/temp/data.json';
     DashboardOverviewCardComponent,
     TranslocoModule,
     TableDateFiltersComponent,
+    MatPaginatorModule,
   ],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'bank/dashboard', alias: 'panel' },
+      useValue: { scope: 'bank/dashboard', alias: 'dashboard' },
     },
   ],
 })
@@ -76,7 +78,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       lang: 'users',
     },
   ];
-  public inboxApprovals: any[] = [1, 2, 3];
+  public inboxApprovals: any[] = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  ];
   public customers: any[] = [];
   public transactions: any[] = [];
   constructor(

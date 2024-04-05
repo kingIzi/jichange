@@ -25,6 +25,8 @@ import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-m
 import { TransactionDetailsTableHeadersMap } from 'src/app/core/enums/bank/transaction-details-table-headers-map';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import * as json from 'src/assets/temp/data.json';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
 
 @Component({
   selector: 'app-transaction-details',
@@ -41,6 +43,7 @@ import * as json from 'src/assets/temp/data.json';
     TranslocoModule,
     MatDialogModule,
     RouterModule,
+    MatPaginatorModule,
   ],
   providers: [
     {
@@ -52,12 +55,12 @@ import * as json from 'src/assets/temp/data.json';
 export class TransactionDetailsComponent implements OnInit {
   public headersFormGroup!: FormGroup;
   public startLoading: boolean = false;
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
+  public includedHeaders: any[] = [];
   public transactions: any[] = [];
   public transactionsData: any[] = [];
   public headersMap = {
     DATE: TransactionDetailsTableHeadersMap.DATE,
+    INVOICE_NUMBER: TransactionDetailsTableHeadersMap.INVOICE_NUMBER,
     COMPANY: TransactionDetailsTableHeadersMap.COMPANY,
     DESCRIPTION: TransactionDetailsTableHeadersMap.DESCRIPTION,
     AMOUNT: TransactionDetailsTableHeadersMap.AMOUNT,
@@ -69,6 +72,7 @@ export class TransactionDetailsComponent implements OnInit {
     private dialog: MatDialog,
     private translocoService: TranslocoService,
     private router: Router,
+    private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private getTableColumnDataVariations(ind: number) {
@@ -182,10 +186,17 @@ export class TransactionDetailsComponent implements OnInit {
           labels.forEach((label, index) => {
             let header = this.fb.group({
               label: this.fb.control(label, []),
-              search: this.fb.control('', []),
-              sortAsc: this.fb.control('', []),
+              sortAsc: this.fb.control(false, []),
+              included: this.fb.control(index <= 5, []),
               values: this.fb.array([], []),
             });
+            (header.get('included') as FormControl).valueChanges.subscribe(
+              (value) => {
+                this.includedHeaders = this.headers.controls.filter(
+                  (control) => control.get('included')?.value
+                );
+              }
+            );
             this.tableHeaderFilterValues(header, index);
             header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
               if (value === true) {
@@ -196,6 +207,9 @@ export class TransactionDetailsComponent implements OnInit {
             });
             this.headers.push(header);
           });
+          this.includedHeaders = this.headers.controls.filter(
+            (control) => control.get('included')?.value
+          );
         }
       });
   }
@@ -204,13 +218,19 @@ export class TransactionDetailsComponent implements OnInit {
     this.transactionsData = data.transactionDetails;
     this.transactions = this.transactionsData;
     this.createHeadersFormGroup();
-    //this.openTransactionDetailsEdit(data.transactionDetails[0]);
   }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
+  //returns true if column index as cash amount as values
+  indexIncludedHeader(control: AbstractControl<any, any>) {
+    let amountIndexes = [4];
+    let found = this.includedHeaders.findIndex((group) => {
+      return control === group;
+    });
+    if (found !== -1) {
+      return amountIndexes.includes(found);
     }
+    return false;
   }
+  //open transaction chart
   openTransactionCharts() {
     let dialogRef = this.dialog.open(GeneratedInvoiceDialogComponent, {
       width: '800px',
@@ -219,23 +239,10 @@ export class TransactionDetailsComponent implements OnInit {
         headersMap: this.headersMap,
         headers: this.headers.controls.map((c) => c.get('label')?.value),
         transactions: this.transactions,
-        //generatedInvoices: this.generatedInvoicesData,
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
-    });
-  }
-  openTransactionDetailsEdit(transaction: any) {
-    let dialogRef = this.dialog.open(TransactionDetailsEditComponent, {
-      // width: '800px',
-      // height: '600px',
-      data: {
-        transaction: transaction,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('Transaction details edit closed');
     });
   }
   moneyFormat(value: string) {
@@ -247,6 +254,16 @@ export class TransactionDetailsComponent implements OnInit {
       10
     );
     return new Date(timestamp);
+  }
+  downloadSheet() {
+    let data = this.transactionsData.map((d) => {
+      let t = { ...d };
+      t.date = AppUtilities.convertDotNetJsonDateToDate(
+        d.date
+      ).toLocaleString();
+      return t;
+    });
+    this.fileHandler.exportAsExcelFile(data, 'transaction_details');
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');

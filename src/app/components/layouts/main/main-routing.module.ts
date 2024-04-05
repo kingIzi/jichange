@@ -274,6 +274,17 @@ const routes: Routes = [
             ],
           },
           {
+            path: 'payment',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/payment-details/payment-details.component'
+              ).then((p) => p.PaymentDetailsComponent),
+            data: {
+              breadcrumb: { alias: 'payment', skip: false },
+              animationState: 'reports-module-3',
+            },
+          },
+          {
             path: 'invoice',
             loadComponent: () =>
               import(
@@ -281,7 +292,18 @@ const routes: Routes = [
               ).then((m) => m.InvoiceDetailsComponent),
             data: {
               breadcrumb: { alias: 'invoice', skip: false },
-              animationState: 'reports-module-3',
+              animationState: 'reports-module-4',
+            },
+          },
+          {
+            path: 'amendment',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/amendment/amendment.component'
+              ).then((a) => a.AmendmentComponent),
+            data: {
+              breadcrumb: { alias: 'amendment', skip: false },
+              animationState: 'reports-module-5',
             },
           },
           {
@@ -292,7 +314,7 @@ const routes: Routes = [
               ).then((m) => m.CustomerDetailReportComponent),
             data: {
               breadcrumb: { alias: 'customer', skip: false },
-              animationState: 'reports-module-4',
+              animationState: 'reports-module-6',
             },
           },
           {
@@ -303,7 +325,7 @@ const routes: Routes = [
               ).then((m) => m.UserLogReportComponent),
             data: {
               breadcrumb: { alias: 'userLog', skip: false },
-              animationState: 'reports-module-5',
+              animationState: 'reports-module-7',
             },
           },
           {
@@ -314,7 +336,7 @@ const routes: Routes = [
               ).then((m) => m.AuditTrailsComponent),
             data: {
               breadcrumb: { alias: 'audit', skip: false },
-              animationState: 'reports-module-6',
+              animationState: 'reports-module-8',
             },
           },
         ],

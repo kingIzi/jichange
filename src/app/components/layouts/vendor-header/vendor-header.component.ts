@@ -1,14 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { LanguageSelectorComponent } from '../../language-selector/language-selector.component';
-import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import {
+  TRANSLOCO_SCOPE,
+  TranslocoModule,
+  TranslocoService,
+} from '@ngneat/transloco';
 import {
   FormArray,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-vendor-header',
@@ -33,12 +38,18 @@ export class VendorHeaderComponent implements OnInit {
     reports: 3,
   };
   private reportsMap = {
+    // overview: 0,
+    // transactionDetails: 1,
+    // invoiceDetails: 2,
+    // customerDetailReport: 3,
+    // userLogReport: 4,
+    // auditTrails: 5,
     overview: 0,
     transactionDetails: 1,
     invoiceDetails: 2,
-    customerDetailReport: 3,
-    userLogReport: 4,
-    auditTrails: 5,
+    paymentDetails: 3,
+    amendmentDetails: 4,
+    customerDetailReport: 5,
   };
   constructor(
     private translocoService: TranslocoService,
@@ -61,7 +72,7 @@ export class VendorHeaderComponent implements OnInit {
         return '/vendor';
     }
   }
-  private createHeaders() {
+  private async createHeaders() {
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
@@ -111,12 +122,12 @@ export class VendorHeaderComponent implements OnInit {
         return '/vendor/reports/transactions';
       case this.reportsMap.invoiceDetails:
         return '/vendor/reports/invoice';
+      case this.reportsMap.paymentDetails:
+        return '/vendor/reports/payments';
+      case this.reportsMap.amendmentDetails:
+        return '/vendor/reports/amendment';
       case this.reportsMap.customerDetailReport:
         return '/vendor/reports/customer';
-      case this.reportsMap.userLogReport:
-        return '/vendor/reports/userlog';
-      case this.reportsMap.auditTrails:
-        return '/vendor/reports/audit';
       default:
         return '';
     }

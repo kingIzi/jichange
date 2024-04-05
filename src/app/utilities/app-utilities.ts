@@ -130,4 +130,13 @@ export class AppUtilities {
       date.getFullYear()
     );
   }
+
+  static phoneNumberPrefixes() {
+    [{ code: 'tz', regex: /^(255|\+255|0)[67]\d{8}$/ }];
+  }
+
+  static reformatDate(values: string[]) {
+    let [year, month, date] = values;
+    return `${date}/${month}/${year}`;
+  }
 }

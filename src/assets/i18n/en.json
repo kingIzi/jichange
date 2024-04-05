@@ -9,7 +9,10 @@
     "inActive": "InActive",
     "cancelled": "Cancelled",
     "viewAll": "View All",
-    "failed": "Failed"
+    "failed": "Failed",
+    "columns": "Columns",
+    "warning": "Warning",
+    "any": "Any"
   },
   "actions": {
     "submit": "Submit",
@@ -54,10 +57,12 @@
     {
       "name": "Reports",
       "dropdowns": [
-        "overview",
+        "Overview",
         "Transaction Details",
+        "Payment Details",
         "Invoice Details",
-        "Customer Report",
+        "Amendments Details",
+        "Vendor Report",
         "User Log Report",
         "Audit Trails"
       ]
@@ -82,7 +87,9 @@
         "overview",
         "Transaction Details",
         "Invoice Details",
-        "Customer Report"
+        "Payment Details",
+        "Amendments Details",
+        "Vendor Report"
       ]
     }
   ],

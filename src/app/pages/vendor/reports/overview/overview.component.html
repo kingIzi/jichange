@@ -8,7 +8,7 @@
         *transloco="let t; read: 'reports.overview'"
         class="text-black font-bold tracking-wide text-lg"
       >
-        Number of sales
+        {{ t("salesSummary") }}
       </p>
       <div class="flex flex-row items-center">
         <app-table-date-filters
@@ -30,7 +30,7 @@
             *transloco="let t; read: 'reports.overview'"
             class="text-black font-bold tracking-wide text-lg"
           >
-            Invoice status
+            {{ t("invoiceChart") }}
           </p>
           <app-table-date-filters
             [dropdownPosition]="'dropdown-end'"
@@ -48,16 +48,46 @@
             *transloco="let t; read: 'reports.overview'"
             class="text-black font-bold tracking-wide text-lg"
           >
-            VAT-Category Invoices
+            {{ t("statistics") }}
           </p>
-          <app-table-date-filters
-            [dropdownPosition]="'dropdown-end'"
-          ></app-table-date-filters>
         </div>
-        <div
-          class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
-        >
-          <canvas #transactionsChart></canvas>
+        <div class="flex flex-col bg-white shadow w-full h-full py-6 space-y-3">
+          <div
+            class="flex flex-row items-center justify-between px-3 space-x-3"
+          >
+            <div class="flex flex-col bg-lightPurple p-2 rounded w-full">
+              <p class="text-normal text-sm">Active vendors</p>
+              <p class="font-bold text-lg">12</p>
+            </div>
+            <div class="flex flex-col bg-lightPurple p-2 rounded w-full">
+              <p class="text-normal text-sm">InActive vendors</p>
+              <p class="font-bold text-lg">3</p>
+            </div>
+          </div>
+          <div
+            class="flex flex-row items-center justify-between px-3 space-x-3"
+          >
+            <div class="flex flex-col bg-lightYellow p-2 rounded w-full">
+              <p class="text-normal text-sm">Complete transactions</p>
+              <p class="font-bold text-lg">72</p>
+            </div>
+            <div class="flex flex-col bg-lightYellow p-2 rounded w-full">
+              <p class="text-normal text-sm">Incomplete transactions</p>
+              <p class="font-bold text-lg">8</p>
+            </div>
+          </div>
+          <div
+            class="flex flex-row items-center justify-between px-3 space-x-3"
+          >
+            <div class="flex flex-col bg-green-100 p-2 rounded w-full">
+              <p class="text-normal text-sm">Total Companies</p>
+              <p class="font-bold text-lg">108</p>
+            </div>
+            <div class="flex flex-col bg-green-100 p-2 rounded w-full">
+              <p class="text-normal text-sm">Total Vendors</p>
+              <p class="font-bold text-lg">788</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

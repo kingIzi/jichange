@@ -9,6 +9,9 @@ import {
 import { Ripple, initTE } from 'tw-elements';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { BreadcrumbService } from 'xng-breadcrumb';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { Company } from 'src/app/core/models/bank/company';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -20,6 +23,8 @@ import { BreadcrumbService } from 'xng-breadcrumb';
     RouterModule,
     TranslocoModule,
     TableDateFiltersComponent,
+    MatPaginatorModule,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -29,16 +34,11 @@ import { BreadcrumbService } from 'xng-breadcrumb';
   ],
 })
 export class InboxApprovalComponent implements OnInit {
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
+  public startLoading: boolean = false;
   constructor(private translocoService: TranslocoService) {}
   ngOnInit(): void {
     initTE({ Ripple });
   }
-  public data: any[] = [];
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
-    }
-  }
+  public companies: Company[] = [];
+  public companiesData: Company[] = [];
 }
