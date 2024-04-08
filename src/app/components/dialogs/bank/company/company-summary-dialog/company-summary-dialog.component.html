@@ -24,10 +24,10 @@
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
       [placeholder]="t('customer')"
       type="text"
-      formControlName="company"
+      [formControl]="compname"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="company && company.invalid && company.touched">
+    <span *ngIf="compname && compname.invalid && compname.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-danger-700 text-xs"
@@ -53,10 +53,10 @@
       <input
         type="tel"
         placeholder="(0)"
-        formControlName="mobileNo"
+        [formControl]="mob"
         class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
       />
-      <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+      <span *ngIf="mob && mob.invalid && mob.touched">
         <p
           *transloco="let t; read: 'company.summary.companyForm.errors'"
           class="text-danger-700 text-xs"
@@ -74,7 +74,7 @@
       {{ t("branch") }}
     </h6>
     <select
-      formControlName="branch"
+      [formControl]="branch"
       class="select select-sm select-bordered w-full"
     >
       <option
@@ -86,7 +86,10 @@
       >
         {{ t("branch") }}
       </option>
-      <option *ngFor="let branch of branches; index as i" [value]="branch.Name">
+      <option
+        *ngFor="let branch of branches; index as i"
+        [value]="branch.Branch_Sno"
+      >
         {{ branch.Name }}
       </option>
     </select>
@@ -118,7 +121,7 @@
           <input
             type="radio"
             name="makerChecker"
-            formControlName="makerChecker"
+            [formControl]="check_status"
             class="radio radio-xs"
             [value]="y('yes')"
             checked
@@ -134,7 +137,7 @@
             {{ y("no") }}
           </span>
           <input
-            formControlName="makerChecker"
+            [formControl]="check_status"
             type="radio"
             name="makerChecker"
             [value]="y('no')"
@@ -143,7 +146,7 @@
         </label>
       </div>
     </div>
-    <span *ngIf="makerChecker && makerChecker.invalid && makerChecker.touched">
+    <span *ngIf="check_status && check_status.invalid && check_status.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -163,10 +166,10 @@
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
       [placeholder]="t('faxNo')"
       type="text"
-      formControlName="faxNo"
+      [formControl]="fax"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="faxNo && faxNo.invalid && faxNo.touched">
+    <span *ngIf="fax && fax.invalid && fax.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -184,12 +187,12 @@
     </h6>
     <input
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-      formControlName="poBox"
+      [formControl]="pbox"
       [placeholder]="t('postBoxNo')"
       type="text"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="poBox && poBox.invalid && poBox.touched">
+    <span *ngIf="pbox && pbox.invalid && pbox.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -207,12 +210,12 @@
     </h6>
     <input
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-      formControlName="address"
+      [formControl]="addr"
       [placeholder]="t('address')"
       type="text"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="address && address.invalid && address.touched">
+    <span *ngIf="addr && addr.invalid && addr.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -229,7 +232,7 @@
       {{ t("region") }}
     </h6>
     <select
-      formControlName="region"
+      [formControl]="rsno"
       class="select select-sm select-bordered w-full"
     >
       <option
@@ -242,12 +245,12 @@
       </option>
       <option
         *ngFor="let region of regions; index as i"
-        [value]="region.Region_Name"
+        [value]="region.Region_SNO"
       >
         {{ region.Region_Name }}
       </option>
     </select>
-    <span *ngIf="region && region.invalid && region.touched">
+    <span *ngIf="rsno && rsno.invalid && rsno.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -264,7 +267,7 @@
       {{ t("district") }}
     </h6>
     <select
-      formControlName="district"
+      [formControl]="dsno"
       class="select select-sm select-bordered w-full"
     >
       <option
@@ -277,12 +280,12 @@
       </option>
       <option
         *ngFor="let districtOption of districts; index as i"
-        [value]="districtOption.District_Name"
+        [value]="districtOption.SNO"
       >
         {{ districtOption.District_Name }}
       </option>
     </select>
-    <span *ngIf="district && district.invalid && district.touched">
+    <span *ngIf="dsno && dsno.invalid && dsno.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -299,19 +302,20 @@
       {{ t("ward") }}
     </h6>
     <select
-      formControlName="ward"
+      [formControl]="wsno"
       class="select select-sm select-bordered w-full"
     >
-      <option
+      <!-- <option
         *transloco="let t; read: 'company.summary.companyForm.placeholders'"
         disabled
         selected
-        value="Select ward"
+        value="10"
       >
         {{ t("ward") }}
-      </option>
+      </option> -->
+      <option value="10">10</option>
     </select>
-    <span *ngIf="ward && ward.invalid && ward.touched">
+    <span *ngIf="wsno && wsno.invalid && wsno.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -329,12 +333,12 @@
     </h6>
     <input
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-      formControlName="tinNo"
+      [formControl]="tin"
       [placeholder]="t('tinNo')"
       type="text"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="tinNo && tinNo.invalid && tinNo.touched">
+    <span *ngIf="tin && tin.invalid && tin.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -351,13 +355,13 @@
       {{ t("vatNo") }}
     </h6>
     <input
-      formControlName="vatNumber"
+      [formControl]="vat"
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
       [placeholder]="t('vatNo')"
       type="text"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="vatNumber && vatNumber.invalid && vatNumber.touched">
+    <span *ngIf="vat && vat.invalid && vat.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -375,12 +379,12 @@
     </h6>
     <input
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-      formControlName="directorName"
+      [formControl]="dname"
       [placeholder]="t('directorName')"
       type="text"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="directorName && directorName.invalid && directorName.touched">
+    <span *ngIf="dname && dname.invalid && dname.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -398,12 +402,12 @@
     </h6>
     <input
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-      formControlName="emailId"
+      [formControl]="email"
       [placeholder]="t('emailId')"
       type="text"
       class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="emailId && emailId.invalid && emailId.touched">
+    <span *ngIf="email && email.invalid && email.touched">
       <p
         *transloco="let t; read: 'company.summary.companyForm.errors'"
         class="text-xs text-red-600"
@@ -430,13 +434,9 @@
         type="tel"
         placeholder="(0)"
         class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
-        formControlName="telphoneNumber"
+        [formControl]="telno"
       />
-      <span
-        *ngIf="
-          telphoneNumber && telphoneNumber.invalid && telphoneNumber.touched
-        "
-      >
+      <span *ngIf="telno && telno.invalid && telno.touched">
         <p
           *transloco="let t; read: 'company.summary.companyForm.errors'"
           class="text-xs text-red-600"
@@ -475,9 +475,9 @@
         </th>
       </tr>
     </thead>
-    <tbody formArrayName="bankDetails">
+    <tbody formArrayName="details">
       <tr
-        *ngFor="let bankDetail of bankDetails.controls; index as ind"
+        *ngFor="let bankDetail of details.controls; index as ind"
         formGroupName="{{ ind }}"
       >
         <td>
@@ -485,14 +485,14 @@
         </td>
         <td>
           <input
-            formControlName="accountNumber"
+            formControlName="AccountNo"
             type="number"
             class="input-sm input-bordered input-ghost input w-full"
           />
         </td>
         <td class="flex flex-row items-center justify-center">
           <button
-            *ngIf="ind === bankDetails.controls.length - 1"
+            *ngIf="ind === details.controls.length - 1"
             (click)="addBankDetail(ind)"
           >
             <span class="material-symbols-outlined text-success"> add </span>

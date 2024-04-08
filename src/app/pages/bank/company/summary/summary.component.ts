@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   Inject,
   NO_ERRORS_SCHEMA,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
@@ -35,6 +37,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 
 @Component({
   selector: 'app-summary',
@@ -51,6 +54,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     MatPaginatorModule,
     LoaderRainbowComponent,
     ReactiveFormsModule,
+    SuccessMessageBoxComponent,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -66,6 +70,8 @@ export class SummaryComponent implements OnInit {
   public startLoading: boolean = false;
   public headersFormGroup!: FormGroup;
   public includedHeaders: AbstractControl<any, any>[] = [];
+  @ViewChild('successMessageBox')
+  successMessageBox!: SuccessMessageBoxComponent;
   public headersMap = {
     NAME: 0,
     ADDRESS: 1,
@@ -292,20 +298,34 @@ export class SummaryComponent implements OnInit {
     // }
     return keys;
   }
-  async ngOnInit() {
-    initTE({ Ripple });
-    this.headersFormGroup = this.fb.group({
-      headers: this.fb.array([], []),
-    });
+  private async requestList() {
     this.startLoading = true;
     let customersList = (await this.requestCustomersList()) as HttpDataResponse<
       Company[]
     >;
     this.companiesData = customersList.response;
     this.companies = this.companiesData;
-    this.createHeadersFormGroup();
+    if (this.headers.length == 0) {
+      this.createHeadersFormGroup();
+    }
     this.startLoading = false;
     this.cdr.detectChanges();
+  }
+  async ngOnInit() {
+    initTE({ Ripple });
+    this.headersFormGroup = this.fb.group({
+      headers: this.fb.array([], []),
+    });
+    await this.requestList();
+    // this.startLoading = true;
+    // let customersList = (await this.requestCustomersList()) as HttpDataResponse<
+    //   Company[]
+    // >;
+    // this.companiesData = customersList.response;
+    // this.companies = this.companiesData;
+    // this.createHeadersFormGroup();
+    // this.startLoading = false;
+    // this.cdr.detectChanges();
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
@@ -323,8 +343,19 @@ export class SummaryComponent implements OnInit {
       height: '600px',
       data: null,
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
+    dialogRef.componentInstance.companyAddedSuccessfully
+      .asObservable()
+      .subscribe((value) => {
+        if (value) {
+          this.successMessageBox.title = 'Company added successfully!';
+          this.cdr.detectChanges();
+          this.successMessageBox.openDialog().addEventListener('close', () => {
+            dialogRef.close();
+          });
+        }
+      });
+    dialogRef.afterClosed().subscribe(async () => {
+      await this.requestList();
     });
   }
   openEditCompanySummaryDialog(company: Company) {
@@ -351,6 +382,15 @@ export class SummaryComponent implements OnInit {
       return t;
     });
     this.fileHandler.exportAsExcelFile(data, 'company_summary');
+  }
+  statusStyle(status: string) {
+    if (status) {
+      return status.toLocaleLowerCase() == 'Pending'.toLocaleLowerCase()
+        ? 'bg-warning hover:bg-warning'
+        : 'bg-success hover:bg-success';
+    } else {
+      return 'bg-warning hover:bg-warning';
+    }
   }
   searchTable(searchText: string) {
     if (searchText) {

@@ -1,4 +1,5 @@
 <app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<app-success-message-box #successMessageBox></app-success-message-box>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between w-full">
@@ -246,13 +247,9 @@
                   >
                     <button
                       class="btn btn-xs btn-ghost btn-success hover:text-white"
-                      [class]="
-                        company.Status
-                          ? 'bg-success hover:bg-success'
-                          : 'bg-warning hover:bg-warning'
-                      "
+                      [class]="statusStyle(company.Status)"
                     >
-                      {{ company.Status ? company.Status : "Pending" }}
+                      {{ company.Status }}
                     </button>
                   </td>
                   <td
