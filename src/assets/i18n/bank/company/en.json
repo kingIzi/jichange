@@ -2,7 +2,9 @@
   "summary": {
     "name": "Summary",
     "actions": {
-      "addCompany": "Add Company"
+      "addCompany": "Add Company",
+      "addedCompanySuccessfully": "Added Company successfully!",
+      "modifiedCompanySuccessfully": "Modified company successfully!"
     },
     "companySummary": [
       "Name",
@@ -83,7 +85,9 @@
         "directorName": "Please provide the director name",
         "telephoneNo": "Please provide the telephone number",
         "emailId": "Please provide a valid email address",
-        "noDistrictForRegion": "There were no districts found for this region."
+        "noDistrictForRegion": "There are no districts found for this region.",
+        "noWardForDistrict": "There are no wards found this district.",
+        "failedToAddCompany": "Failed to add company, please try again or contact support."
       }
     }
   },

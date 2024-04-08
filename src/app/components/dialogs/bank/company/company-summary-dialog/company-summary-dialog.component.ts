@@ -34,6 +34,8 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 import { District } from 'src/app/core/models/bank/district';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AddCompany } from 'src/app/core/models/bank/forms/add-company';
+import { Ward } from 'src/app/core/models/bank/ward';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-company-summary-dialog',
@@ -63,7 +65,9 @@ export class CompanySummaryDialogComponent implements OnInit {
   public branches: Branch[] = [];
   public regions: Region[] = [];
   public districts: District[] = [];
+  public wards: Ward[] = [];
   public companySummaryForm!: FormGroup;
+  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   public companyAddedSuccessfully = new EventEmitter<boolean>();
@@ -78,6 +82,13 @@ export class CompanySummaryDialogComponent implements OnInit {
   ) {}
   async ngOnInit() {
     this.prepareForm();
+    this.parseUserProfile();
+  }
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
   }
   private async prepareEditForm(company: Company) {
     let branchList = (await this.requestBranchList()) as HttpDataResponse<
@@ -92,6 +103,10 @@ export class CompanySummaryDialogComponent implements OnInit {
       Sno: company.RegId.toString(),
     })) as HttpDataResponse<District[]>;
     this.districts = districtList.response;
+    let wardList = (await this.requestWardList(
+      company.WardSno.toString()
+    )) as HttpDataResponse<Ward[]>;
+    this.wards = wardList.response;
     this.createEditForm(company);
   }
   private async prepareCreateForm() {
@@ -103,11 +118,6 @@ export class CompanySummaryDialogComponent implements OnInit {
       Region[]
     >;
     this.regions = regionsList.response as Region[];
-    let districtList = (await this.requestDistrictList({
-      //remove this line
-      Sno: '7',
-    })) as HttpDataResponse<District[]>;
-    this.districts = districtList.response;
     this.createForm();
   }
   private async prepareForm() {
@@ -131,6 +141,7 @@ export class CompanySummaryDialogComponent implements OnInit {
         Validators.required,
         Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
       ]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
       branch: this.fb.control(
         this.branches.find((b) => b.Sno === company.Branch_Sno)?.Branch_Sno,
         [Validators.required]
@@ -140,18 +151,22 @@ export class CompanySummaryDialogComponent implements OnInit {
       pbox: this.fb.control(company.PostBox, []),
       addr: this.fb.control(company.Address, []),
       rsno: this.fb.control(
-        this.regions.find((r) => {
-          return r.Region_SNO === company.RegId;
-        })?.Region_SNO,
+        this.regions
+          .find((r) => {
+            return r.Region_SNO === company.RegId;
+          })
+          ?.Region_SNO.toString(),
         [Validators.required]
       ),
       dsno: this.fb.control(
-        this.districts.find((d) => {
-          return d.SNO === company.DistSno;
-        })?.District_Name,
+        this.districts
+          .find((d) => {
+            return d.SNO === company.DistSno;
+          })
+          ?.SNO.toString(),
         [Validators.required]
       ),
-      wsno: this.fb.control(company.WardSno, [Validators.required]),
+      wsno: this.fb.control(company.WardSno.toString(), [Validators.required]),
       tin: this.fb.control(company.TinNo, []),
       vat: this.fb.control(company.VatNo, []),
       dname: this.fb.control(company.DirectorName, []),
@@ -159,14 +174,14 @@ export class CompanySummaryDialogComponent implements OnInit {
         Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
       ]),
       email: this.fb.control(company.Email, [Validators.email]),
-      dummy: this.fb.control(true, [Validators.email]),
+      dummy: this.fb.control(true, [Validators.required]),
       details: this.fb.array(
         [this.fb.group({ AccountNo: this.fb.control(company.AccountNo, []) })],
         []
       ),
     });
     this.updateDistrictList();
-    //this.addBankDetail();
+    this.updateWardList();
     this.companySummaryForm.markAllAsTouched();
   }
   private async requestBranchList() {
@@ -186,6 +201,12 @@ export class CompanySummaryDialogComponent implements OnInit {
       this.client.performPost(`/api/Company/GetDistDetails`, body)
     );
     return data;
+  }
+  private async requestWardList(sno: string) {
+    let wards = await lastValueFrom(
+      this.client.performPost(`/api/Company/GetWard?sno=${sno}`, {})
+    );
+    return wards;
   }
   private async requestAddCompany(body: AddCompany) {
     let data = await lastValueFrom(
@@ -219,6 +240,30 @@ export class CompanySummaryDialogComponent implements OnInit {
       }
     });
   }
+  private updateWardList() {
+    this.dsno.valueChanges.subscribe((value) => {
+      let district = this.districts.find((d) => {
+        return d.SNO == value;
+      });
+      if (district) {
+        this.requestWardList(district.SNO.toString()).then((data) => {
+          let res = data as HttpDataResponse<Ward[]>;
+          if (typeof res.response === 'number') {
+            this.wards = [];
+            AppUtilities.openDisplayMessageBox(
+              this.displayMessageBox,
+              this.translocoService.translate(`defaults.warning`),
+              this.translocoService.translate(
+                `company.summary.companyForm.dialogs.noWardForDistrict`
+              )
+            );
+          } else {
+            this.wards = res.response;
+          }
+        });
+      }
+    });
+  }
   private createForm() {
     this.companySummaryForm = this.fb.group({
       compsno: this.fb.control('0', [Validators.required]),
@@ -232,9 +277,9 @@ export class CompanySummaryDialogComponent implements OnInit {
       fax: this.fb.control('', []),
       pbox: this.fb.control('', []),
       addr: this.fb.control('', []),
-      rsno: this.fb.control('7', [Validators.required]),
-      dsno: this.fb.control('8', [Validators.required]),
-      wsno: this.fb.control('10', [Validators.required]),
+      rsno: this.fb.control('', [Validators.required]),
+      dsno: this.fb.control('', [Validators.required]),
+      wsno: this.fb.control('', [Validators.required]),
       tin: this.fb.control('', []),
       vat: this.fb.control('', []),
       dname: this.fb.control('', []),
@@ -246,6 +291,7 @@ export class CompanySummaryDialogComponent implements OnInit {
       details: this.fb.array([], []),
     });
     this.updateDistrictList();
+    this.updateWardList();
     this.addBankDetail();
   }
 
@@ -378,15 +424,35 @@ export class CompanySummaryDialogComponent implements OnInit {
       );
     }
   }
-  async submitCompanySummary() {
+  submitCompanySummary() {
     if (this.companySummaryForm.valid) {
       this.startLoading = true;
-      let company = await this.requestAddCompany(
+      let companyReq = this.requestAddCompany(
         this.companySummaryForm.value as AddCompany
-      );
-      this.startLoading = false;
-      this.companyAddedSuccessfully.emit(true);
-      this.cdr.detectChanges();
+      )
+        .then((company) => {
+          this.startLoading = false;
+          this.companyAddedSuccessfully.emit(true);
+          this.cdr.detectChanges();
+        })
+        .catch((err) => {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.translocoService.translate(`errors.errorOccured`),
+            this.translocoService.translate(
+              `company.summary.companyForm.dialogs.failedToAddCompany`
+            )
+          );
+          this.startLoading = false;
+          this.cdr.detectChanges();
+          throw err;
+        });
+      // let company = await this.requestAddCompany(
+      //   this.companySummaryForm.value as AddCompany
+      // );
+      // this.startLoading = false;
+      // this.companyAddedSuccessfully.emit(true);
+      // this.cdr.detectChanges();
     } else {
       this.companySummaryForm.markAllAsTouched();
       this.formErrors();

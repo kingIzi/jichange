@@ -305,15 +305,17 @@
       [formControl]="wsno"
       class="select select-sm select-bordered w-full"
     >
-      <!-- <option
+      <option
         *transloco="let t; read: 'company.summary.companyForm.placeholders'"
         disabled
         selected
-        value="10"
+        [value]="t('ward')"
       >
         {{ t("ward") }}
-      </option> -->
-      <option value="10">10</option>
+      </option>
+      <option *ngFor="let ward of wards; index as i" [value]="ward.SNO">
+        {{ ward.Ward_Name }}
+      </option>
     </select>
     <span *ngIf="wsno && wsno.invalid && wsno.touched">
       <p

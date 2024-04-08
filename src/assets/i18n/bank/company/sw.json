@@ -2,7 +2,9 @@
   "summary": {
     "name": "Muhtasari",
     "actions": {
-      "addCompany": "Ongeza Kampuni"
+      "addCompany": "Ongeza Kampuni",
+      "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
+      "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!"
     },
     "companySummary": [
       "Jina",
@@ -83,7 +85,9 @@
         "directorName": "Tafadhali toa jina la mkurugenzi",
         "telephoneNo": "Tafadhali toa nambari ya simu",
         "emailId": "Tafadhali toa anwani ya barua pepe sahihi",
-        "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu."
+        "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu.",
+        "noWardForDistrict": "Hakuna kata zilizogunduliwa katika wilaya hii.",
+        "failedToAddCompany": "Imeshindwa kuongeza kampuni, tafadhali jaribu tena au msaada wa mawasiliano."
       }
     }
   },

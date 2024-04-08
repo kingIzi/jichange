@@ -19,7 +19,11 @@ import { Company } from 'src/app/core/models/bank/company';
 import { Ripple, initTE } from 'tw-elements';
 import * as json from 'src/assets/temp/data.json';
 import { CompanySummaryDialogComponent } from 'src/app/components/dialogs/bank/company/company-summary-dialog/company-summary-dialog.component';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
@@ -38,6 +42,7 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 
 @Component({
   selector: 'app-summary',
@@ -55,6 +60,7 @@ import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-m
     LoaderRainbowComponent,
     ReactiveFormsModule,
     SuccessMessageBoxComponent,
+    DisplayMessageBoxComponent,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -72,6 +78,8 @@ export class SummaryComponent implements OnInit {
   public includedHeaders: AbstractControl<any, any>[] = [];
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   public headersMap = {
     NAME: 0,
     ADDRESS: 1,
@@ -293,23 +301,48 @@ export class SummaryComponent implements OnInit {
     if (indexes.includes(this.headersMap.TELEPHONE_NUMBER)) {
       keys.push('TelNo');
     }
-    // if (indexes.includes(this.headersMap.DATE_POSTED)) {
-    //   keys.push('Posteddate');
-    // }
     return keys;
   }
   private async requestList() {
     this.startLoading = true;
-    let customersList = (await this.requestCustomersList()) as HttpDataResponse<
-      Company[]
-    >;
-    this.companiesData = customersList.response;
-    this.companies = this.companiesData;
+    await this.requestCustomersList()
+      .then((data) => {
+        let customersList = data as HttpDataResponse<Company[]>;
+        this.companiesData = customersList.response;
+        this.companies = this.companiesData;
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        AppUtilities.openDisplayMessageBox(
+          this.displayMessageBox,
+          this.translocoService.translate('errors.errorOccured'),
+          this.translocoService.translate('errors.verifyConnection')
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
     if (this.headers.length == 0) {
       this.createHeadersFormGroup();
+      this.cdr.detectChanges();
     }
-    this.startLoading = false;
-    this.cdr.detectChanges();
+  }
+  private addedCompanySuccessfully(
+    message: string,
+    dialogRef: MatDialogRef<CompanySummaryDialogComponent, any>
+  ) {
+    dialogRef.componentInstance.companyAddedSuccessfully
+      .asObservable()
+      .subscribe((value) => {
+        if (value) {
+          this.successMessageBox.title = message;
+          this.cdr.detectChanges();
+          this.successMessageBox.openDialog().addEventListener('close', () => {
+            dialogRef.close();
+          });
+        }
+      });
   }
   async ngOnInit() {
     initTE({ Ripple });
@@ -317,15 +350,6 @@ export class SummaryComponent implements OnInit {
       headers: this.fb.array([], []),
     });
     await this.requestList();
-    // this.startLoading = true;
-    // let customersList = (await this.requestCustomersList()) as HttpDataResponse<
-    //   Company[]
-    // >;
-    // this.companiesData = customersList.response;
-    // this.companies = this.companiesData;
-    // this.createHeadersFormGroup();
-    // this.startLoading = false;
-    // this.cdr.detectChanges();
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
@@ -343,17 +367,12 @@ export class SummaryComponent implements OnInit {
       height: '600px',
       data: null,
     });
-    dialogRef.componentInstance.companyAddedSuccessfully
-      .asObservable()
-      .subscribe((value) => {
-        if (value) {
-          this.successMessageBox.title = 'Company added successfully!';
-          this.cdr.detectChanges();
-          this.successMessageBox.openDialog().addEventListener('close', () => {
-            dialogRef.close();
-          });
-        }
-      });
+    this.addedCompanySuccessfully(
+      this.translocoService.translate(
+        `company.summary.actions.addedCompanySuccessfully`
+      ),
+      dialogRef
+    );
     dialogRef.afterClosed().subscribe(async () => {
       await this.requestList();
     });
@@ -366,6 +385,12 @@ export class SummaryComponent implements OnInit {
         companyData: company,
       },
     });
+    this.addedCompanySuccessfully(
+      this.translocoService.translate(
+        `company.summary.actions.modifiedCompanySuccessfully`
+      ),
+      dialogRef
+    );
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
     });
