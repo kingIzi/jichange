@@ -142,24 +142,44 @@
       "district": "district",
       "placeholders": {
         "all": "All"
+      },
+      "errors": {
+        "company": "Please select a company",
+        "region": "Please select a region",
+        "district": "Please select a district",
+        "dialog": {
+          "invalidForm": "Invalid form",
+          "company": "You must select a company",
+          "region": "You must select a region",
+          "district": "You must select a district",
+          "noDistrictForRegion": "There are no districts found for this region."
+        }
       }
     },
     "customerDetailReportTable": [
-      "Sno",
-      "Role",
-      "PostBox No",
+      "Customer name",
+      "Contact person",
+      "Phone",
       "Address",
-      "Contact person"
+      "Date posted"
     ]
   },
   "userLogReport": {
     "userLogReport": "User log report",
     "form": {
       "startDate": "Start date",
-      "endDate": "End date"
+      "endDate": "End date",
+      "errors": {
+        "startDate": "Please select a start date",
+        "endDate": "Please select an end date",
+        "dialog": {
+          "invalidForm": "Invalid form",
+          "startDate": "You must select a start date",
+          "endDate": "You must select an end date"
+        }
+      }
     },
     "userLogReportTable": [
-      "Sno",
       "User Name",
       "Ip Address",
       "User Group",

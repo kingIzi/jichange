@@ -233,9 +233,11 @@
                       class="px-6 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
-                      [class]="ind === headersMap.TOTAL ? 'float-right' : ''"
                     >
-                      <div class="flex items-center">
+                      <div
+                        class="flex items-center"
+                        [class]="isCashAmountColumn(ind) ? 'justify-end' : ''"
+                      >
                         <p>
                           {{ header?.get("label")?.value }}
                         </p>

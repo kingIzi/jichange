@@ -31,6 +31,8 @@ import { Statuses } from 'src/app/core/models/status';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { timer } from 'rxjs';
+import { BranchService } from 'src/app/core/services/setup/branch.service';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-branch-list',
@@ -41,12 +43,12 @@ import { timer } from 'rxjs';
     CommonModule,
     TranslocoModule,
     MatDialogModule,
-    TableDateFiltersComponent,
     LoaderRainbowComponent,
     DisplayMessageBoxComponent,
     ReactiveFormsModule,
     RemoveItemDialogComponent,
     SuccessMessageBoxComponent,
+    MatPaginatorModule,
   ],
   providers: [
     {
@@ -58,8 +60,6 @@ import { timer } from 'rxjs';
 })
 export class BranchListComponent implements OnInit {
   public startLoading: boolean = false;
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
   public branches: Branch[] = [];
   public branchHeadersForm!: FormGroup;
   public headersMap = {
@@ -75,6 +75,7 @@ export class BranchListComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private client: RequestClientService,
+    private branchService: BranchService,
     private translocoService: TranslocoService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
@@ -82,13 +83,18 @@ export class BranchListComponent implements OnInit {
   ) {}
   private getBranchList() {
     this.startLoading = true;
-    this.client.performPost(`/api/Branch/GetBranchLists`, {}).subscribe({
-      next: (result: any) => {
+    this.branchService
+      .postBranchList({})
+      .then((results: any) => {
+        if (results.response instanceof Array) {
+          this.branches = results.response as Branch[];
+        } else {
+          this.branches = [];
+        }
         this.startLoading = false;
-        this.branches = result.response as Branch[];
         this.cdr.detectChanges();
-      },
-      error: (err) => {
+      })
+      .catch((err) => {
         this.startLoading = false;
         AppUtilities.openDisplayMessageBox(
           this.diplayMessageBox,
@@ -96,8 +102,7 @@ export class BranchListComponent implements OnInit {
           this.translocoService.translate(`errors.verifyConnection`)
         );
         throw err;
-      },
-    });
+      });
   }
   private createFormHeaders() {
     this.branchHeadersForm = this.fb.group({
@@ -130,27 +135,25 @@ export class BranchListComponent implements OnInit {
   }
   private removeBranch(sno: number) {
     this.startLoading = true;
-    this.client
-      .performPost(`/api/Branch/DeleteBranch?sno=${sno}`, {})
-      .subscribe({
-        next: (result) => {
-          this.successMessageBox.title = this.translocoService.translate(
-            `setup.branch.form.dialog.removedSuccessfully`
-          );
-          let dialog = this.successMessageBox.openDialog();
-          timer(2000).subscribe(() => {
-            this.getBranchList();
-            dialog.close();
-          });
-        },
-        error: (err) => {
-          AppUtilities.openDisplayMessageBox(
-            this.diplayMessageBox,
-            this.translocoService.translate(`errors.errorOccured`),
-            this.translocoService.translate(`errors.verifyConnection`)
-          );
-          throw err;
-        },
+    this.branchService
+      .removeBranch(sno)
+      .then((results: any) => {
+        this.successMessageBox.title = this.translocoService.translate(
+          `setup.branch.form.dialog.removedSuccessfully`
+        );
+        let dialog = this.successMessageBox.openDialog();
+        timer(2000).subscribe(() => {
+          this.getBranchList();
+          dialog.close();
+        });
+      })
+      .catch((err) => {
+        AppUtilities.openDisplayMessageBox(
+          this.diplayMessageBox,
+          this.translocoService.translate(`errors.errorOccured`),
+          this.translocoService.translate(`errors.verifyConnection`)
+        );
+        throw err;
       });
   }
   private sortTableAsc(ind: number): void {
@@ -263,11 +266,6 @@ export class BranchListComponent implements OnInit {
       });
     } else {
       this.getBranchList();
-    }
-  }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
     }
   }
   getActiveStatusStyles(status: string) {

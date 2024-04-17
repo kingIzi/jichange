@@ -43,6 +43,7 @@ import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { CompanyService } from 'src/app/core/services/bank/company/company.service';
 
 @Component({
   selector: 'app-summary',
@@ -95,6 +96,7 @@ export class SummaryComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private client: RequestClientService,
+    private companyService: CompanyService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private translocoService: TranslocoService,
@@ -261,12 +263,6 @@ export class SummaryComponent implements OnInit {
         break;
     }
   }
-  private async requestCustomersList() {
-    const data = await lastValueFrom(
-      this.client.performPost(`/api/Company/getcompanys_S`, {})
-    );
-    return data;
-  }
   private filterIncludedTableHeaders() {
     this.includedHeaders = this.headers.controls.filter(
       (control) => control.get('included')?.value
@@ -305,7 +301,8 @@ export class SummaryComponent implements OnInit {
   }
   private async requestList() {
     this.startLoading = true;
-    await this.requestCustomersList()
+    await this.companyService
+      .getCustomersList({})
       .then((data) => {
         let customersList = data as HttpDataResponse<Company[]>;
         this.companiesData = customersList.response;
@@ -430,7 +427,8 @@ export class SummaryComponent implements OnInit {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
     } else {
-      this.companies = this.companiesData;
+      this.requestList();
+      //this.companies = this.companiesData;
     }
   }
   get headers(): FormArray {

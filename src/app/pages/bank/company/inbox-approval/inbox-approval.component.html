@@ -1,4 +1,5 @@
 <app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<app-success-message-box #successMessageBox></app-success-message-box>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <h2 class="text-lg font-bold">
@@ -7,6 +8,38 @@
   <div class="flex flex-col bg-white shadow px-2 py-4">
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
+        <div class="dropdown">
+          <button
+            tabindex="0"
+            role="button"
+            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+          >
+            <span class="material-symbols-outlined text-sm"> view_week </span>
+            <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+              {{ t("columns") }}
+            </p>
+            <span class="material-symbols-outlined lg:block hidden">
+              arrow_drop_down
+            </span>
+          </button>
+          <ul
+            tabindex="0"
+            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+          >
+            <li *ngFor="let control of headers.controls">
+              <label class="label cursor-pointer">
+                <span class="label-text text-xs font-normal">{{
+                  control.get("label")?.value
+                }}</span>
+                <input
+                  type="checkbox"
+                  [formControl]="getFormControl(control, 'included')"
+                  class="checkbox checkbox-xs"
+                />
+              </label>
+            </li>
+          </ul>
+        </div>
         <div class="relative">
           <input
             *transloco="let t; read: 'defaults'"
@@ -15,6 +48,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
+            (keyup)="searchTable(searchInput.value)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -30,40 +64,154 @@
           <table
             #customersTable
             class="min-w-full text-left text-sm font-light"
+            [formGroup]="tableHeadersFormGroup"
           >
-            <thead class="border-b font-medium">
+            <thead formArrayName="headers" class="border-b font-medium">
               <tr
+                *transloco="let t; read: 'tableData.vendor'"
                 class="bg-lightPurple"
-                *transloco="let t; read: 'company.inboxApproval'"
               >
-                <th
-                  *ngFor="let header of t('inboxApprovalTable'); index as ind"
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
                 >
-                  <div class="flex flex-row items-center">
-                    <p class="text-sm font-extrabold text-black">
-                      {{ header }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                      >
-                        unfold_more
-                      </span>
-                    </button>
-                  </div>
-                </th>
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button (click)="sortColumnClicked(ind)">
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
                 <th
                   *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm font-extrabold text-black"
+                  class="px-6 font-inter text-sm text-right"
                 >
                   {{ t("action") }}
                 </th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <tr
+                *ngFor="
+                  let company of companies
+                    | slice
+                      : 1 + paginator.pageSize * paginator.pageIndex - 1
+                      : 1 +
+                          paginator.pageSize * paginator.pageIndex +
+                          paginator.pageSize -
+                          1;
+                  index as i
+                "
+                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+              >
+                <td
+                  *ngIf="
+                    headers.controls.at(this.headersMap.NAME)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(this.headersMap.NAME)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ company.CompName }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(this.headersMap.ADDRESS)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(this.headersMap.ADDRESS)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ company.Address }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls.at(this.headersMap.EMAIL)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(this.headersMap.EMAIL)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ company.Email }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(this.headersMap.MOBILE_NUMBER)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(this.headersMap.MOBILE_NUMBER)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ company.MobNo }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls.at(this.headersMap.STATUS)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(this.headersMap.STATUS)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  <button [class]="getActiveStatusStyles(company.Status)">
+                    {{ company.Status }}
+                  </button>
+                </td>
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
+                  <div class="flex flex-row items-center justify-end space-x-2">
+                    <button
+                      (click)="openEditCompanySummaryDialog(company)"
+                      class="btn btn-sm bg-transparent"
+                    >
+                      <span class="material-symbols-outlined text-info">
+                        edit
+                      </span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
           </table>
           <div *transloco="let t; read: 'errors'">
             <p

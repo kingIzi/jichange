@@ -1,3 +1,6 @@
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <h2
     *transloco="let t; read: 'reports.customerDetailReport'"
@@ -14,17 +17,32 @@
         >
           {{ t("company") }}
         </p>
-        <select class="select select-sm select-bordered w-full">
+        <select
+          [formControl]="Comp"
+          class="select select-sm select-bordered w-full"
+        >
           <option
             *transloco="
               let t;
               read: 'reports.customerDetailReport.form.placeholders'
             "
             selected
+            [value]="'0'"
           >
             {{ t("all") }}
           </option>
+          <option [value]="company.CompSno" *ngFor="let company of companies">
+            {{ company.CompName }}
+          </option>
         </select>
+        <span *ngIf="Comp && Comp.invalid && Comp.touched">
+          <p
+            *transloco="let t; read: 'reports.customerDetailReport.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("company") }}
+          </p>
+        </span>
       </div>
       <div class="flex flex-col space-y-1">
         <p
@@ -33,17 +51,32 @@
         >
           {{ t("region") }}
         </p>
-        <select class="select select-sm select-bordered w-full">
+        <select
+          [formControl]="reg"
+          class="select select-sm select-bordered w-full"
+        >
           <option
             *transloco="
               let t;
               read: 'reports.customerDetailReport.form.placeholders'
             "
             selected
+            [value]="'0'"
           >
             {{ t("all") }}
           </option>
+          <option [value]="region.Region_SNO" *ngFor="let region of regions">
+            {{ region.Region_Name }}
+          </option>
         </select>
+        <span *ngIf="reg && reg.invalid && reg.touched">
+          <p
+            *transloco="let t; read: 'reports.customerDetailReport.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("region") }}
+          </p>
+        </span>
       </div>
       <div class="flex flex-col space-y-1">
         <p
@@ -52,21 +85,38 @@
         >
           {{ t("district") }}
         </p>
-        <select class="select select-sm select-bordered w-full">
+        <select
+          [formControl]="dist"
+          class="select select-sm select-bordered w-full"
+        >
           <option
             *transloco="
               let t;
               read: 'reports.customerDetailReport.form.placeholders'
             "
             selected
+            [value]="'0'"
           >
             {{ t("all") }}
           </option>
+          <option [value]="district.SNO" *ngFor="let district of districts">
+            {{ district.District_Name }}
+          </option>
         </select>
+        <span *ngIf="dist && dist.invalid && dist.touched">
+          <p
+            *transloco="let t; read: 'reports.customerDetailReport.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("district") }}
+          </p>
+        </span>
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button
           *transloco="let t; read: 'actions'"
+          type="button"
+          (click)="submitTableFilterForm()"
           class="btn btn-sm text-darkPurple bg-lightPurple"
         >
           {{ t("submit") }}
@@ -76,9 +126,38 @@
     <div class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-end">
         <div class="flex flex-row items-center space-x-2">
-          <app-table-date-filters
-            [dropdownPosition]="'dropdown-end'"
-          ></app-table-date-filters>
+          <div class="dropdown">
+            <button
+              tabindex="0"
+              role="button"
+              class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+            >
+              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+                {{ t("columns") }}
+              </p>
+              <span class="material-symbols-outlined lg:block hidden">
+                arrow_drop_down
+              </span>
+            </button>
+            <ul
+              tabindex="0"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li *ngFor="let control of headers.controls">
+                <label class="label cursor-pointer">
+                  <span class="label-text text-xs font-normal">{{
+                    control.get("label")?.value
+                  }}</span>
+                  <input
+                    type="checkbox"
+                    [formControl]="getFormControl(control, 'included')"
+                    class="checkbox checkbox-xs"
+                  />
+                </label>
+              </li>
+            </ul>
+          </div>
           <div class="relative">
             <input
               *transloco="let t; read: 'defaults'"
@@ -87,6 +166,7 @@
               id="exampleSearch"
               [placeholder]="t('search')"
               #searchInput
+              (keyup)="searchTable(searchInput.value)"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -99,47 +179,154 @@
       <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto">
-            <table class="min-w-full text-left text-sm font-light">
-              <thead class="border-b font-medium dark:border-neutral-500">
+            <table
+              [formGroup]="tableHeadersFormGroup"
+              class="min-w-full text-left text-sm font-light"
+            >
+              <thead formArrayName="headers" class="border-b font-medium">
                 <tr
+                  *transloco="let t; read: 'tableData.vendor'"
                   class="bg-lightPurple"
-                  *transloco="let t; read: 'reports.customerDetailReport'"
                 >
-                  <th
-                    *ngFor="
-                      let header of t('customerDetailReportTable') | slice : 1;
-                      index as ind
-                    "
-                    scope="col"
-                    class="px-6 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
+                  <ng-container
+                    *ngFor="let header of headers.controls; index as ind"
                   >
-                    <div class="flex flex-row items-center">
-                      <p class="text-sm font-extrabold text-black">
-                        {{ header }}
-                      </p>
-                      <button>
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
-                        </span>
-                      </button>
-                    </div>
-                  </th>
-                  <th
+                    <th
+                      *ngIf="header.get('included')?.value"
+                      scope="col"
+                      class="px-6 font-inter text-sm"
+                      [id]="'generated-invoice-id-' + ind"
+                      formGroupName="{{ ind }}"
+                    >
+                      <div class="flex items-center">
+                        <p>
+                          {{ header?.get("label")?.value }}
+                        </p>
+                        <button (click)="sortColumnClicked(ind)">
+                          <span
+                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                          >
+                            unfold_more
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </ng-container>
+                  <!-- <th
                     *transloco="let t; read: 'defaults'"
-                    class="px-6 font-inter text-sm font-extrabold text-black"
+                    class="px-6 font-inter text-sm text-right"
                   >
                     {{ t("action") }}
-                  </th>
+                  </th> -->
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let customer of customers
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    index as i
+                  "
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                >
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ customer.Cust_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.CONTACT_PERSON)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.CONTACT_PERSON)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ customer.ConPerson }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.EMAIL)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.EMAIL)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ customer.Email }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.ADDRESS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.ADDRESS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ customer.Address }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.DATE_POSTED)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.DATE_POSTED)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{
+                      dateToFormat(customer.Posted_Date).toLocaleDateString()
+                    }}
+                  </td>
+                </tr>
+              </tbody>
             </table>
             <div *transloco="let t; read: 'errors'">
               <p
-                *ngIf="customerDetailReports.length <= 0"
+                *ngIf="customers.length <= 0"
                 class="text-center text-sm tracking-wide pt-3 pb-1"
               >
                 {{ t("noDataFound") }}
@@ -148,45 +335,16 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-row items-center justify-between">
-        <div class="flex flex-row items-center space-x-1">
-          <p *transloco="let t; read: 'tableData'" class="text-xs">
-            {{ t("itemsPerPage") }}:
-          </p>
-          <select
-            name="itemsPerPage"
-            class="select select-sm select-bordered w-16 max-w-xs"
-            #itemPerPageSelect
-            (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-          >
-            <option *ngFor="let option of itemsPerPage" [value]="option">
-              {{ option }}
-            </option>
-          </select>
-        </div>
-        <div class="flex flex-row items-center">
-          <p class="text-xs">1-5 of 100</p>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              keyboard_double_arrow_left
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              navigate_before
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              navigate_next
-            </span>
-          </button>
-          <button class="btn btn-sm lg:btn-lg btn-ghost">
-            <span class="material-symbols-outlined text-sm lg:text-lg">
-              keyboard_double_arrow_right
-            </span>
-          </button>
-        </div>
+      <div class="flex flex-row items-center justify-end">
+        <mat-paginator
+          #paginator
+          [length]="customers.length"
+          [pageSize]="5"
+          [pageSizeOptions]="[5, 10, 20]"
+          aria-label="Select page"
+          [showFirstLastButtons]="customers.length > 20"
+        >
+        </mat-paginator>
       </div>
     </div>
   </div>

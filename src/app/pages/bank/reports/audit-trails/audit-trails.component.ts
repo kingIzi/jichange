@@ -31,6 +31,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { formatDate } from '@angular/common';
 import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
+import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails.service';
 
 @Component({
   selector: 'app-audit-trails',
@@ -91,7 +92,8 @@ export class AuditTrailsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private translocoService: TranslocoService,
-    private client: RequestClientService,
+    //private client: RequestClientService,
+    private auditTrailsService: AuditTrailsService,
     private cdf: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -255,8 +257,9 @@ export class AuditTrailsComponent implements OnInit {
   }
   private filterAuditTrailsRequest(value: any) {
     this.startLoading = true;
-    this.client.performPost(`/api/AuditTrail/getdet`, value).subscribe({
-      next: (results: any) => {
+    this.auditTrailsService
+      .getDetails(value)
+      .then((results: any) => {
         if (results.response instanceof Array) {
           this.auditTrailsData = results.response;
           this.auditTrails = this.auditTrailsData;
@@ -267,8 +270,8 @@ export class AuditTrailsComponent implements OnInit {
         }
         this.startLoading = false;
         this.cdf.detectChanges();
-      },
-      error: (err) => {
+      })
+      .catch((err) => {
         this.startLoading = false;
         AppUtilities.unexpectedErrorOccured(
           this.displayMessageBox,
@@ -276,8 +279,7 @@ export class AuditTrailsComponent implements OnInit {
         );
         this.cdf.detectChanges();
         throw err;
-      },
-    });
+      });
   }
   ngOnInit(): void {
     this.createForm();

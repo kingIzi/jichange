@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   Inject,
@@ -19,7 +20,7 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
-import { timer } from 'rxjs';
+import { firstValueFrom, lastValueFrom, timer } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { CountryDialogComponent } from 'src/app/components/dialogs/bank/setup/country-dialog/country-dialog.component';
@@ -28,25 +29,28 @@ import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-m
 import { Country } from 'src/app/core/models/bank/country';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
+import { CountryService } from 'src/app/core/services/setup/country.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-country-list',
   templateUrl: './country-list.component.html',
   styleUrls: ['./country-list.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     TranslocoModule,
     NgxLoadingModule,
     MatDialogModule,
-    TableDateFiltersComponent,
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     LoaderRainbowComponent,
     RemoveItemDialogComponent,
+    MatPaginatorModule,
   ],
   providers: [
     {
@@ -58,8 +62,6 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 export class CountryListComponent implements OnInit {
   public startLoading: boolean = false;
   public countries: Country[] = [];
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
   public countryForm!: FormGroup;
   public headersMap = {
     SNO: 0,
@@ -75,7 +77,7 @@ export class CountryListComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private translocoService: TranslocoService,
-    private client: RequestClientService,
+    private countryService: CountryService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -108,15 +110,20 @@ export class CountryListComponent implements OnInit {
         }
       });
   }
-  private getCountryList() {
+  private async getCountryList() {
     this.startLoading = true;
-    this.client.performPost(`/api/Country/getCountries`, {}).subscribe({
-      next: (result: any) => {
+    let list = lastValueFrom(await this.countryService.getCountryList({}));
+    list
+      .then((results: any) => {
+        if (results.response instanceof Array) {
+          this.countries = results.response as Country[];
+        } else {
+          this.countries = [];
+        }
         this.startLoading = false;
-        this.countries = result.response as Country[];
         this.cdr.detectChanges();
-      },
-      error: (err) => {
+      })
+      .catch((err) => {
         this.startLoading = false;
         AppUtilities.openDisplayMessageBox(
           this.diplayMessageBox,
@@ -124,8 +131,7 @@ export class CountryListComponent implements OnInit {
           this.translocoService.translate(`errors.verifyConnection`)
         );
         throw err;
-      },
-    });
+      });
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
@@ -155,11 +161,11 @@ export class CountryListComponent implements OnInit {
         break;
     }
   }
-  private addCountry(country: any) {
+  private async addCountry(country: any) {
     this.startLoading = true;
-    this.client.performPost(`/api/Country/AddCountry`, country).subscribe({
-      next: (result) => {
-        this.startLoading = false;
+    let added = lastValueFrom(await this.countryService.addCountry(country));
+    added
+      .then((results: any) => {
         if (parseInt(country.sno) === 0) {
           this.successMessageBox.title = this.translocoService.translate(
             `setup.countryDialog.form.dialog.addedSuccessfully`
@@ -169,27 +175,30 @@ export class CountryListComponent implements OnInit {
             `setup.countryDialog.form.dialog.addedSuccessfully`
           );
         }
+        this.startLoading = false;
         let dialog = this.successMessageBox.openDialog();
         timer(2000).subscribe(() => {
           dialog.close();
           this.getCountryList();
         });
-      },
-      error: (err) => {
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
         this.startLoading = false;
         AppUtilities.openDisplayMessageBox(
           this.diplayMessageBox,
           this.translocoService.translate(`errors.errorOccured`),
           this.translocoService.translate(`errors.verifyConnection`)
         );
+        this.cdr.detectChanges();
         throw err;
-      },
-    });
+      });
   }
-  private removeCountry(data: any) {
+  private async removeCountry(country: any) {
     this.startLoading = true;
-    this.client.performPost(`/api/Country/DeleteCount`, data).subscribe({
-      next: (result) => {
+    let removed = lastValueFrom(await this.countryService.addCountry(country));
+    removed
+      .then((results: any) => {
         this.startLoading = false;
         this.successMessageBox.title = this.translocoService.translate(
           `setup.countryDialog.form.dialog.removedSuccessfully`
@@ -199,8 +208,8 @@ export class CountryListComponent implements OnInit {
           this.getCountryList();
           dialog.close();
         });
-      },
-      error: (err) => {
+      })
+      .catch((err) => {
         this.startLoading = false;
         AppUtilities.openDisplayMessageBox(
           this.diplayMessageBox,
@@ -208,8 +217,7 @@ export class CountryListComponent implements OnInit {
           this.translocoService.translate(`errors.verifyConnection`)
         );
         throw err;
-      },
-    });
+      });
   }
   ngOnInit(): void {
     this.createHeadersForm();
@@ -255,11 +263,6 @@ export class CountryListComponent implements OnInit {
       };
       this.removeCountry(data);
     });
-  }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
-    }
   }
   sortColumnClicked(index: number) {
     let sortAsc = this.headers.at(index).get('sortAsc');

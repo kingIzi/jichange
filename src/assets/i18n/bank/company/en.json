@@ -93,13 +93,6 @@
   },
   "inboxApproval": {
     "name": "Inbox Approval",
-    "inboxApprovalTable": [
-      "Sno",
-      "Name",
-      "Address",
-      "Email",
-      "Mobile No",
-      "Status"
-    ]
+    "inboxApprovalTable": ["Name", "Address", "Email", "Mobile No", "Status"]
   }
 }

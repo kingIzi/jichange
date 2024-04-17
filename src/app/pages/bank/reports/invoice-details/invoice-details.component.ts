@@ -15,12 +15,11 @@ import {
 } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { GeneratedInvoiceDialogComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-dialog/generated-invoice-dialog.component';
-import { InvoiceDetailsGraphComponent } from 'src/app/components/dialogs/invoice-details-graph/invoice-details-graph.component';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { Datepicker, Input, initTE } from 'tw-elements';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { Company } from 'src/app/core/models/bank/company';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { Customer } from 'src/app/core/models/bank/customer';
 import {
   AbstractControl,
@@ -37,6 +36,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { InvoiceReport } from 'src/app/core/models/bank/invoice-report';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 
 @Component({
   selector: 'app-invoice-details',
@@ -84,83 +84,65 @@ export class InvoiceDetailsComponent implements OnInit {
     private translocoService: TranslocoService,
     private dialog: MatDialog,
     private client: RequestClientService,
+    private reportsService: ReportsService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private async requestCompanyList() {
-    let data = lastValueFrom(
-      this.client.performPost(`/api/InvoiceRep/CompList`, {})
-    );
-    return data;
-  }
-  private async requestCustomerList(body: { Sno: string }) {
-    let data = lastValueFrom(
-      this.client.performPost(`/api/InvoiceRep/getcustdetails`, body)
-    );
-    return data;
-  }
-  private async requestInvoiceReport(body: {
-    Comp: string;
-    cusid: string;
-    stdate: string;
-    enddate: string;
-  }) {
-    let data = lastValueFrom(
-      this.client.performPost(`/api/InvoiceRep/getInvReport`, body)
-    );
-    return data;
-  }
   private async preparePage() {
     this.startLoading = true;
-    let companyList = (await this.requestCompanyList()) as HttpDataResponse<
-      Company[]
-    >;
-    this.companies = companyList.response;
-    this.startLoading = false;
-    this.cdr.detectChanges();
+    this.reportsService
+      .getCompaniesList({})
+      .then((results: any) => {
+        if (typeof results.response !== 'number') {
+          this.companies = results.response;
+          this.startLoading = false;
+        } else {
+          this.companies = [];
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private createRequestFormGroup() {
-    const currentDate = new Date();
     this.formGroup = this.fb.group({
       Comp: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
-      stdate: this.fb.control(
-        AppUtilities.dateToFormat(
-          new Date(
-            currentDate.getFullYear() - 4,
-            currentDate.getMonth(),
-            currentDate.getDate()
-          ),
-          'yyyy-MM-dd'
-        ),
-        [Validators.required]
-      ),
-      enddate: this.fb.control(
-        AppUtilities.dateToFormat(currentDate, 'yyyy-MM-dd'),
-        [Validators.required]
-      ),
+      stdate: this.fb.control('', [Validators.required]),
+      enddate: this.fb.control('', [Validators.required]),
     });
     this.companyChangedEventHandler();
   }
   private companyChangedEventHandler() {
     this.Comp.valueChanges.subscribe((value) => {
       this.startLoading = true;
-      let companyList = this.requestCustomerList({
+      let companyList = this.reportsService.getCustomerDetailsList({
         Sno: value,
       });
-      companyList.then((list) => {
-        let data = list as HttpDataResponse<Customer[]>;
-        if (typeof data.response !== 'number') {
-          this.customers = data.response;
-        } else {
+      companyList
+        .then((list) => {
+          let data = list as HttpDataResponse<Customer[]>;
+          if (typeof data.response !== 'number') {
+            this.customers = data.response;
+          } else {
+            this.customers = [];
+            this.cusid.setValue('all');
+          }
+          this.startLoading = false;
+          this.cdr.detectChanges();
+        })
+        .catch((err) => {
           this.customers = [];
           this.cusid.setValue('all');
-        }
-        this.startLoading = false;
-        this.cdr.detectChanges();
-      });
+          this.cdr.detectChanges();
+          throw err;
+        });
     });
   }
   private async createHeaderGroup() {
@@ -322,6 +304,26 @@ export class InvoiceDetailsComponent implements OnInit {
     }
     return keys;
   }
+  private requestInvoiceDetails(value: any) {
+    this.tableLoading = true;
+    this.reportsService
+      .requestInvoiceReport(value)
+      .then((results: any) => {
+        // this.invoiceReportsData = (
+        //   results as HttpDataResponse<InvoiceReport[]>
+        // ).response;
+        this.invoiceReportsData =
+          results.response === 0 ? [] : results.response;
+        this.invoiceReports = this.invoiceReportsData;
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     initTE({ Datepicker, Input });
     this.createRequestFormGroup();
@@ -335,23 +337,9 @@ export class InvoiceDetailsComponent implements OnInit {
         (form.enddate = AppUtilities.reformatDate(
           this.enddate.value.split('-')
         ));
-      this.invoiceReportsData = [];
-      this.invoiceReports = this.invoiceReportsData;
-      this.tableLoading = true;
-      this.requestInvoiceReport(form)
-        .then((results) => {
-          this.invoiceReportsData = (
-            results as HttpDataResponse<InvoiceReport[]>
-          ).response;
-          this.invoiceReports = this.invoiceReportsData;
-          this.tableLoading = false;
-          this.cdr.detectChanges();
-        })
-        .catch((err) => {
-          this.tableLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        });
+      // this.invoiceReportsData = [];
+      // this.invoiceReports = this.invoiceReportsData;
+      this.requestInvoiceDetails(form);
     } else {
       this.formErrors();
     }

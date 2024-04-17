@@ -29,13 +29,18 @@ import { Company } from 'src/app/core/models/bank/company';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { Branch } from 'src/app/core/models/bank/branch';
 import { Region } from 'src/app/core/models/bank/region';
-import { Observable, lastValueFrom } from 'rxjs';
+import { Observable, catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { District } from 'src/app/core/models/bank/district';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AddCompany } from 'src/app/core/models/bank/forms/add-company';
 import { Ward } from 'src/app/core/models/bank/ward';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { BranchService } from 'src/app/core/services/setup/branch.service';
+import { RegionService } from 'src/app/core/services/setup/region.service';
+import { DistrictService } from 'src/app/core/services/setup/district.service';
+import { WardService } from 'src/app/core/services/setup/ward.service';
+import { CompanyService } from 'src/app/core/services/bank/company/company.service';
 
 @Component({
   selector: 'app-company-summary-dialog',
@@ -75,6 +80,11 @@ export class CompanySummaryDialogComponent implements OnInit {
     private fb: FormBuilder,
     private translocoService: TranslocoService,
     private client: RequestClientService,
+    private branchService: BranchService,
+    private regionService: RegionService,
+    private districtService: DistrictService,
+    private wardService: WardService,
+    private companyService: CompanyService,
     private dialogRef: MatDialogRef<CompanySummaryDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { companyData: Company },
     @Inject(TRANSLOCO_SCOPE) private scope: any,
@@ -91,34 +101,60 @@ export class CompanySummaryDialogComponent implements OnInit {
     }
   }
   private async prepareEditForm(company: Company) {
-    let branchList = (await this.requestBranchList()) as HttpDataResponse<
-      Branch[]
-    >;
-    this.branches = branchList.response;
-    let regionsList = (await this.requestRegionList()) as HttpDataResponse<
-      Region[]
-    >;
-    this.regions = regionsList.response;
-    let districtList = (await this.requestDistrictList({
-      Sno: company.RegId.toString(),
-    })) as HttpDataResponse<District[]>;
-    this.districts = districtList.response;
-    let wardList = (await this.requestWardList(
-      company.WardSno.toString()
-    )) as HttpDataResponse<Ward[]>;
-    this.wards = wardList.response;
+    this.startLoading = true;
+    let branchList = from(this.branchService.postBranchList({}));
+    let regionsList = from(this.regionService.getRegionList());
+    let regSno = company.RegId.toString();
+    let districtList = from(
+      this.districtService.postDistrictList({ Sno: regSno })
+    );
+    let wardSno = company.WardSno.toString();
+    let wardList = from(this.wardService.postWardList(wardSno));
+    let mergedRes = zip(branchList, regionsList, districtList, wardList);
+    let res = await lastValueFrom(
+      mergedRes.pipe(
+        map((results) => {
+          return results;
+        }),
+        catchError((err) => {
+          this.startLoading = false;
+          this.cdr.detectChanges();
+          throw err;
+        })
+      )
+    );
+    let [branches, regions, districts, wards] = res as any;
+    this.branches = branches.response === 0 ? [] : branches.response;
+    this.regions = regions.response === 0 ? [] : regions.response;
+    this.districts = districts.response === 0 ? [] : districts.response;
+    this.wards = wards.response === 0 ? [] : wards.response;
     this.createEditForm(company);
+    this.startLoading = false;
+    this.cdr.detectChanges();
   }
   private async prepareCreateForm() {
-    let branchList = (await this.requestBranchList()) as HttpDataResponse<
-      Branch[]
-    >;
-    this.branches = branchList.response as Branch[];
-    let regionsList = (await this.requestRegionList()) as HttpDataResponse<
-      Region[]
-    >;
-    this.regions = regionsList.response as Region[];
+    this.startLoading = true;
+    let branchList = from(this.branchService.postBranchList({}));
+    let regionsList = from(this.regionService.getRegionList());
+    let mergedRes = zip(branchList, regionsList);
+    let res = await lastValueFrom(
+      mergedRes.pipe(
+        map((results) => {
+          return results;
+        }),
+        catchError((err) => {
+          this.startLoading = false;
+          this.cdr.detectChanges();
+          throw err;
+        })
+      )
+    );
+    let [branches, regions] = res as any;
+    this.branches = branches.response === 0 ? [] : branches.response;
+    this.regions = regions.response === 0 ? [] : regions.response;
     this.createForm();
+    this.startLoading = false;
+    this.cdr.detectChanges();
   }
   private async prepareForm() {
     this.startLoading = true;
@@ -184,45 +220,18 @@ export class CompanySummaryDialogComponent implements OnInit {
     this.updateWardList();
     this.companySummaryForm.markAllAsTouched();
   }
-  private async requestBranchList() {
-    let data = await lastValueFrom(
-      this.client.performPost(`/api/Branch/GetBranchLists`, {})
-    );
-    return data;
-  }
-  private async requestRegionList() {
-    let data = await lastValueFrom(
-      this.client.performGet(`/api/Company/GetRegionDetails`)
-    );
-    return data;
-  }
-  private async requestDistrictList(body: { Sno: string }) {
-    let data = await lastValueFrom(
-      this.client.performPost(`/api/Company/GetDistDetails`, body)
-    );
-    return data;
-  }
-  private async requestWardList(sno: string) {
-    let wards = await lastValueFrom(
-      this.client.performPost(`/api/Company/GetWard?sno=${sno}`, {})
-    );
-    return wards;
-  }
-  private async requestAddCompany(body: AddCompany) {
-    let data = await lastValueFrom(
-      this.client.performPost(`/api/Company/AddCompanyBank`, body)
-    );
-    return data;
-  }
   private updateDistrictList() {
     this.rsno.valueChanges.subscribe((value) => {
       let region = this.regions.find((r) => {
         return r.Region_SNO == value;
       });
       if (region) {
-        this.requestDistrictList({ Sno: region.Region_SNO.toString() }).then(
-          (data: any) => {
-            let res = data as HttpDataResponse<District[]>;
+        let RegSno = region.Region_SNO.toString();
+        this.startLoading = true;
+        this.districtService
+          .postDistrictList({ Sno: RegSno })
+          .then((results: any) => {
+            let res = results as HttpDataResponse<District[]>;
             if (typeof res.response === 'number') {
               this.districts = [];
               AppUtilities.openDisplayMessageBox(
@@ -233,10 +242,15 @@ export class CompanySummaryDialogComponent implements OnInit {
                 )
               );
             } else {
-              this.districts = data.response;
+              this.districts = res.response;
             }
-          }
-        );
+            this.startLoading = false;
+            this.cdr.detectChanges();
+          })
+          .catch((err) => {
+            this.startLoading = false;
+            throw err;
+          });
       }
     });
   }
@@ -246,7 +260,8 @@ export class CompanySummaryDialogComponent implements OnInit {
         return d.SNO == value;
       });
       if (district) {
-        this.requestWardList(district.SNO.toString()).then((data) => {
+        this.startLoading = true;
+        this.wardService.postWardList(district.SNO.toString()).then((data) => {
           let res = data as HttpDataResponse<Ward[]>;
           if (typeof res.response === 'number') {
             this.wards = [];
@@ -260,6 +275,8 @@ export class CompanySummaryDialogComponent implements OnInit {
           } else {
             this.wards = res.response;
           }
+          this.startLoading = false;
+          this.cdr.detectChanges();
         });
       }
     });
@@ -427,9 +444,8 @@ export class CompanySummaryDialogComponent implements OnInit {
   submitCompanySummary() {
     if (this.companySummaryForm.valid) {
       this.startLoading = true;
-      let companyReq = this.requestAddCompany(
-        this.companySummaryForm.value as AddCompany
-      )
+      let companyReq = this.companyService
+        .addCompany(this.companySummaryForm.value as AddCompany)
         .then((company) => {
           this.startLoading = false;
           this.companyAddedSuccessfully.emit(true);
@@ -447,12 +463,6 @@ export class CompanySummaryDialogComponent implements OnInit {
           this.cdr.detectChanges();
           throw err;
         });
-      // let company = await this.requestAddCompany(
-      //   this.companySummaryForm.value as AddCompany
-      // );
-      // this.startLoading = false;
-      // this.companyAddedSuccessfully.emit(true);
-      // this.cdr.detectChanges();
     } else {
       this.companySummaryForm.markAllAsTouched();
       this.formErrors();

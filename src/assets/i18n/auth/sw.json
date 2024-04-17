@@ -55,7 +55,8 @@
           "missingPhoneNo": "Tafadhali toa nambari halali ya simu",
           "missingBranchName": "Tafadhali toa jina la Tawi",
           "missingAccountNo": "Tafadhali toa namba ya akaunti",
-          "makerChecker": "Tafadhali, taja hitaji la idhini ya ombi lako"
+          "makerChecker": "Tafadhali, taja hitaji la idhini ya ombi lako",
+          "invalidAccounntNo": "Namba ya akaunti uliyoingiza ni batili."
         }
       },
       "success": {

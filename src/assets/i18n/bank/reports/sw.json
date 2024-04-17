@@ -134,24 +134,44 @@
       "district": "Wilaya",
       "placeholders": {
         "all": "Yote"
+      },
+      "errors": {
+        "company": "Tafadhali chagua kampuni",
+        "region": "Tafadhali chagua mkoa",
+        "district": "Tafadhali chagua wilaya",
+        "dialog": {
+          "invalidForm": "Fomu batili",
+          "company": "Lazima uchague kampuni",
+          "region": "Lazima uchague eneo",
+          "district": "Lazima uchague wilaya",
+          "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu."
+        }
       }
     },
     "customerDetailReportTable": [
-      "Nambari",
-      "Jukumu",
-      "Sanduku la Posta",
+      "Jina la Mteja",
+      "Mtu wa Mawasiliano",
+      "Simu",
       "Anwani",
-      "Mtu wa Mawasiliano"
+      "Tarehe ya Kutuma"
     ]
   },
   "userLogReport": {
     "userLogReport": "Ripoti ya Kumbukumbu za Mtumiaji",
     "form": {
       "startDate": "Tarehe ya Kuanzia",
-      "endDate": "Tarehe ya Mwisho"
+      "endDate": "Tarehe ya Mwisho",
+      "errors": {
+        "startDate": "Tafadhali chagua tarehe ya kuanza",
+        "endDate": "Tafadhali chagua tarehe ya mwisho",
+        "dialog": {
+          "invalidForm": "Fomu batili",
+          "startDate": "Lazima uchague tarehe ya kuanza",
+          "endDate": "Lazima uchague tarehe ya mwisho"
+        }
+      }
     },
     "userLogReportTable": [
-      "Nambari",
       "Jina la Mtumiaji",
       "Anwani ya IP",
       "Kikundi cha Mtumiaji",

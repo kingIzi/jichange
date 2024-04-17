@@ -1,5 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="w-full h-full relative">
   <div class="py-10 px-10 flex flex-col divide-y">
@@ -23,9 +24,9 @@
           type="text"
           [placeholder]="t('placeholders.vendorName')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"
-          formControlName="CompName"
+          [formControl]="compname"
         />
-        <span *ngIf="CompName && CompName.invalid && CompName.touched">
+        <span *ngIf="compname && compname.invalid && compname.touched">
           <p class="text-xs text-red-600">
             {{ t("errors.vendorName") }}
           </p>
@@ -47,13 +48,11 @@
           <input
             type="tel"
             placeholder="(0)"
-            (change)="updatePhoneNumberPrefix(phonePrefix.value, MobNo)"
             class="input input-bordered w-full pl-[6.2rem] bg-transparent text-black font-inter"
-            formControlName="MobNo"
-            pattern="[0-9]{12}"
+            [formControl]="mob"
           />
         </span>
-        <span *ngIf="MobNo && MobNo.invalid && MobNo.touched">
+        <span *ngIf="mob && mob.invalid && mob.touched">
           <p class="text-xs text-red-600">
             {{ t("errors.mobileNo") }}
           </p>
@@ -64,7 +63,7 @@
           {{ t("branch") }} <span class="text-red-600">*</span>
         </h6>
         <select
-          formControlName="BranchName"
+          [formControl]="branch"
           class="select select-bordered w-full max-w-xs"
         >
           <option
@@ -78,12 +77,12 @@
           <option
             class="font-inter"
             *ngFor="let branchDetail of branchDetails; index as ind"
-            [value]="branchDetail.Name"
+            [value]="branchDetail.Sno"
           >
             {{ branchDetail.Name }}
           </option>
         </select>
-        <span *ngIf="BranchName && BranchName.invalid && BranchName.touched">
+        <span *ngIf="branch && branch.invalid && branch.touched">
           <p class="text-xs text-red-600">
             {{ t("errors.branch") }}
           </p>
@@ -95,11 +94,11 @@
         </h6>
         <input
           type="text"
-          formControlName="AccountNo"
+          [formControl]="accno"
           [placeholder]="t('placeholders.accountNo')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black font-inter"
         />
-        <span *ngIf="AccountNo && AccountNo.invalid && AccountNo.touched">
+        <span *ngIf="accno && accno.invalid && accno.touched">
           <p class="text-xs text-red-600">
             {{ t("errors.accountNo") }}
           </p>
@@ -121,7 +120,7 @@
               <input
                 type="radio"
                 name="Checker"
-                formControlName="Checker"
+                [formControl]="check_status"
                 class="radio radio-xs"
                 [value]="t('makerOptions.yes')"
                 checked
@@ -134,7 +133,7 @@
                 {{ t("makerOptions.no") }}
               </span>
               <input
-                formControlName="Checker"
+                [formControl]="check_status"
                 type="radio"
                 name="Checker"
                 [value]="t('makerOptions.no')"
@@ -143,7 +142,9 @@
             </label>
           </div>
         </div>
-        <span *ngIf="Checker && Checker.invalid && Checker.touched">
+        <span
+          *ngIf="check_status && check_status.invalid && check_status.touched"
+        >
           <p class="text-xs text-red-600">
             {{ t("errors.branch") }}
           </p>
