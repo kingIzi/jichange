@@ -36,6 +36,11 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { clientInterceptor } from 'src/app/core/interceptors/client.interceptor';
+import { TimeoutError, throwError } from 'rxjs';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -53,6 +58,7 @@ import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-m
     ReactiveFormsModule,
     MatDialogModule,
     SuccessMessageBoxComponent,
+    DisplayMessageBoxComponent,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -70,6 +76,8 @@ export class InboxApprovalComponent implements OnInit {
   public userProfile!: LoginResponse;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   public headersMap = {
     NAME: CompanyInboxTableHeaders.NAME,
     ADDRESS: CompanyInboxTableHeaders.ADDRESS,
@@ -220,6 +228,9 @@ export class InboxApprovalComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -286,7 +297,7 @@ export class InboxApprovalComponent implements OnInit {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
     } else {
-      this.requestCompanyInbox();
+      this.companies = this.companiesData;
     }
   }
   get headers() {

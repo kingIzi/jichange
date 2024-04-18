@@ -27,7 +27,8 @@
     "connected": "Nyuma ya mtandaoni",
     "noDataFound": "Hakuna taarifa iliyopatikana",
     "validDate": "Tafadhali chagua tarehe halali",
-    "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano."
+    "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano.",
+    "timeoutError": "Ombi limepitwa na wakati. Tafadhali jaribu tena."
   },
   "roles": {
     "role": "Jukumu",

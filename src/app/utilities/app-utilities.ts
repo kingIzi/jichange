@@ -16,6 +16,15 @@ export class AppUtilities {
     return dialog.openDialog();
   }
 
+  static openTimeoutError(
+    dialog: DisplayMessageBoxComponent,
+    tr: TranslocoService
+  ) {
+    dialog.title = tr.translate(`errors.errorOccured`);
+    dialog.message = tr.translate(`errors.timeoutError`);
+    return dialog.openDialog();
+  }
+
   static openDialog(dialog: any, title: string, message: string) {
     dialog.title = title;
     dialog.message = message;

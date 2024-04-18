@@ -28,7 +28,8 @@
     "connected": "Back online",
     "noDataFound": "No data found",
     "validDate": "Please select a valid date",
-    "contactSupport": "An unexpected error occurred, please try again or contact support."
+    "contactSupport": "An unexpected error occurred, please try again or contact support.",
+    "timeoutError": "Request timed out. Please try again."
   },
   "bankHeaders": [
     {
