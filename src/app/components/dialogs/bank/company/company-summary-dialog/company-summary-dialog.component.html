@@ -87,7 +87,11 @@
         {{ t("branch") }}
       </option>
       <option
-        *ngFor="let branch of branches; index as i"
+        *ngFor="
+          let branch of branches;
+          index as i;
+          trackBy: PerformanceUtils.trackByIndex
+        "
         [value]="branch.Branch_Sno"
       >
         {{ branch.Name }}
@@ -244,7 +248,11 @@
         {{ t("region") }}
       </option>
       <option
-        *ngFor="let region of regions; index as i"
+        *ngFor="
+          let region of regions;
+          index as i;
+          trackBy: PerformanceUtils.trackByIndex
+        "
         [value]="region.Region_SNO"
       >
         {{ region.Region_Name }}
@@ -279,7 +287,11 @@
         {{ t("district") }}
       </option>
       <option
-        *ngFor="let districtOption of districts; index as i"
+        *ngFor="
+          let districtOption of districts;
+          index as i;
+          trackBy: PerformanceUtils.trackByIndex
+        "
         [value]="districtOption.SNO"
       >
         {{ districtOption.District_Name }}
@@ -313,7 +325,14 @@
       >
         {{ t("ward") }}
       </option>
-      <option *ngFor="let ward of wards; index as i" [value]="ward.SNO">
+      <option
+        *ngFor="
+          let ward of wards;
+          index as i;
+          trackBy: PerformanceUtils.trackByIndex
+        "
+        [value]="ward.SNO"
+      >
         {{ ward.Ward_Name }}
       </option>
     </select>

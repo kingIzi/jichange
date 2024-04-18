@@ -37,6 +37,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { InvoiceReport } from 'src/app/core/models/bank/invoice-report';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-invoice-details',
@@ -70,6 +71,7 @@ export class InvoiceDetailsComponent implements OnInit {
   public headerFormGroup!: FormGroup;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
+  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     INVOICE_NUMBER: 0,
     INVOICE_DATE: 1,

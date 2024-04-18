@@ -9,12 +9,6 @@
     >
       {{ t("invoiceDetails") }}
     </h2>
-    <!-- <a
-      (click)="openInvoiceDetailsGraph()"
-      class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
-    >
-      <span class="material-symbols-outlined text-warning"> bar_chart </span>
-    </a> -->
     <div class="flex flex-items flex-row space-x-2">
       <a
         (click)="downloadSheet()"
@@ -55,7 +49,11 @@
           </option>
           <ng-container *ngIf="companies.length > 0">
             <option
-              *ngFor="let company of companies; index as i"
+              *ngFor="
+                let company of companies;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
               [value]="company.CompSno"
             >
               {{ company.CompName }}
@@ -91,7 +89,11 @@
           </option>
           <ng-container *ngIf="customers.length > 0">
             <option
-              *ngFor="let customer of customers; index as i"
+              *ngFor="
+                let customer of customers;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
               [value]="customer.Cust_Sno"
             >
               {{ customer.Cust_Name }}

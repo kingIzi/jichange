@@ -121,10 +121,15 @@
       },
       "dialog": {
         "invalidForm": "Invalid form",
-        "missingDesignation": "Please provide a designation name"
+        "missingDesignation": "Please provide a designation name",
+        "removeDesignation": "Remove designation",
+        "sureDelete": "Are you sure you want to delete this?",
+        "removedSuccessfully": "Country deleted successfully!",
+        "addedSuccessfully": "Country added successfully!",
+        "modifiedSuccessfully": "Country modified successfully!"
       }
     },
-    "designationsTable": ["Sno", "Designation"]
+    "designationsTable": ["Designation"]
   },
   "branch": {
     "addBranch": "Add branch",
@@ -312,11 +317,10 @@
       }
     },
     "bankUserTable": [
-      "Sno",
-      "Employee Id",
       "Full name",
       "Designation",
-      "Email Id",
+      "Username",
+      "Mobile number",
       "Status"
     ]
   },

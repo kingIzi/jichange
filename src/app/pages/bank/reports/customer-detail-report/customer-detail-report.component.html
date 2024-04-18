@@ -31,7 +31,13 @@
           >
             {{ t("all") }}
           </option>
-          <option [value]="company.CompSno" *ngFor="let company of companies">
+          <option
+            [value]="company.CompSno"
+            *ngFor="
+              let company of companies;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+          >
             {{ company.CompName }}
           </option>
         </select>
@@ -65,7 +71,13 @@
           >
             {{ t("all") }}
           </option>
-          <option [value]="region.Region_SNO" *ngFor="let region of regions">
+          <option
+            [value]="region.Region_SNO"
+            *ngFor="
+              let region of regions;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+          >
             {{ region.Region_Name }}
           </option>
         </select>
@@ -99,7 +111,13 @@
           >
             {{ t("all") }}
           </option>
-          <option [value]="district.SNO" *ngFor="let district of districts">
+          <option
+            [value]="district.SNO"
+            *ngFor="
+              let district of districts;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+          >
             {{ district.District_Name }}
           </option>
         </select>

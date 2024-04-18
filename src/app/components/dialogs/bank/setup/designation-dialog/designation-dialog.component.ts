@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,8 +20,9 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { Designation } from 'src/app/core/models/bank/designation';
 
 @Component({
   selector: 'app-designation-dialog',
@@ -46,10 +53,15 @@ export class DesignationDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DesignationDialogComponent>,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    @Inject(MAT_DIALOG_DATA) public data: { designationData: Designation }
   ) {}
   ngOnInit(): void {
-    this.createForm();
+    if (this.data.designationData) {
+      this.createEditForm(this.data.designationData);
+    } else {
+      this.createForm();
+    }
   }
   setDesignationValue(value: string) {
     this.designation.setValue(value.trim());
@@ -76,6 +88,13 @@ export class DesignationDialogComponent implements OnInit {
   private createForm() {
     this.designationForm = this.fb.group({
       designation: this.fb.control('', [Validators.required]),
+    });
+  }
+  private createEditForm(designation: Designation) {
+    this.designationForm = this.fb.group({
+      designation: this.fb.control(designation.Desg_Name, [
+        Validators.required,
+      ]),
     });
   }
   get designation() {

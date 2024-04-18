@@ -120,10 +120,15 @@
       },
       "dialog": {
         "invalidForm": "Fomu batili",
-        "missingDesignation": "Tafadhali toa jina la jina"
+        "missingDesignation": "Tafadhali toa jina la jina",
+        "removeDesignation": "Ondoa cheo",
+        "sureDelete": "Una uhakika unataka kufuta hii?",
+        "removedSuccessfully": "Nchi imefutwa kwa mafanikio!",
+        "addedSuccessfully": "Nchi imeongezwa kwa mafanikio!",
+        "modifiedSuccessfully": "Nchi imebadilishwa kwa mafanikio!"
       }
     },
-    "designationsTable": ["Sno", "Uteuzi"]
+    "designationsTable": ["Uteuzi"]
   },
   "branch": {
     "addBranch": "Ongeza tawi",
@@ -311,11 +316,10 @@
       }
     },
     "bankUserTable": [
-      "Sno",
-      "Id ya Mfanyakazi",
-      "Full name",
-      "Jina kamili",
-      "Barua pepe",
+      "Jina Kamili",
+      "Cheo",
+      "Jina la Mtumiaji",
+      "Nambari ya simu",
       "Hali"
     ]
   },

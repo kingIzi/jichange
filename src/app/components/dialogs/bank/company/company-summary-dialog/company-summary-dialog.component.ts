@@ -41,6 +41,7 @@ import { RegionService } from 'src/app/core/services/setup/region.service';
 import { DistrictService } from 'src/app/core/services/setup/district.service';
 import { WardService } from 'src/app/core/services/setup/ward.service';
 import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-company-summary-dialog',
@@ -76,6 +77,7 @@ export class CompanySummaryDialogComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   public companyAddedSuccessfully = new EventEmitter<boolean>();
+  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor(
     private fb: FormBuilder,
     private translocoService: TranslocoService,

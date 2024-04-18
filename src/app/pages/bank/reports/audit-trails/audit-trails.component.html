@@ -31,7 +31,11 @@
             {{ t("pleaseSelect") }}
           </option> -->
           <option
-            *ngFor="let selectPageOption of selectPageOptions; index as ind"
+            *ngFor="
+              let selectPageOption of selectPageOptions;
+              index as ind;
+              trackBy: PerformanceUtils.trackByIndex
+            "
             [value]="selectPageOption"
           >
             {{ selectPageOption }}
@@ -65,7 +69,14 @@
           >
             {{ t("pleaseSelect") }}
           </option> -->
-          <option *ngFor="let action of actions; index as i" [value]="action">
+          <option
+            *ngFor="
+              let action of actions;
+              index as i;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+            [value]="action"
+          >
             {{ action }}
           </option>
         </select>

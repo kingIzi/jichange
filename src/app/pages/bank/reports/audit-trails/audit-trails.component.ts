@@ -32,6 +32,7 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { formatDate } from '@angular/common';
 import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
 import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails.service';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-audit-trails',
@@ -79,6 +80,7 @@ export class AuditTrailsComponent implements OnInit {
   public auditTrails: AuditTrail[] = [];
   public auditTrailsData: AuditTrail[] = [];
   public headersFormGroup!: FormGroup;
+  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     ACTIONS: 0,
     COLUMN_NAME: 1,

@@ -1,7 +1,4 @@
-<ngx-loading
-  [show]="startLoading"
-  [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -26,7 +23,6 @@
   <div class="flex flex-col bg-white shadow px-2 py-4">
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
-        <app-table-date-filters></app-table-date-filters>
         <div class="relative">
           <input
             *transloco="let t; read: 'defaults'"
@@ -35,6 +31,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
+            (keyup)="searchTable(searchInput.value)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -50,40 +47,87 @@
           <table
             #customersTable
             class="min-w-full text-left text-sm font-light"
+            [formGroup]="tableHeadersFormGroup"
           >
-            <thead class="border-b font-medium">
+            <thead formArrayName="headers" class="border-b font-medium">
               <tr
+                *transloco="let t; read: 'tableData.vendor'"
                 class="bg-lightPurple"
-                *transloco="let t; read: 'setup.designation'"
               >
-                <th
-                  *ngFor="let header of t('designationsTable'); index as ind"
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
                 >
-                  <div class="flex flex-row items-center">
-                    <p class="text-sm font-extrabold text-black">
-                      {{ header }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                      >
-                        unfold_more
-                      </span>
-                    </button>
-                  </div>
-                </th>
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button (click)="sortColumnClicked(ind)">
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
                 <th
                   *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm font-extrabold text-black"
+                  class="px-6 font-inter text-sm text-right"
                 >
                   {{ t("action") }}
                 </th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <tr
+                *ngFor="
+                  let designation of designations
+                    | slice
+                      : 1 + paginator.pageSize * paginator.pageIndex - 1
+                      : 1 +
+                          paginator.pageSize * paginator.pageIndex +
+                          paginator.pageSize -
+                          1;
+                  index as i
+                "
+                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+              >
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                  {{ designation.Desg_Name }}
+                </td>
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                  <app-remove-item-dialog
+                    #removeItemDialog
+                  ></app-remove-item-dialog>
+                  <div class="flex flex-row items-center justify-end space-x-2">
+                    <button
+                      (click)="openEditDesignationDialog(designation)"
+                      class="btn btn-sm btn-ghost"
+                    >
+                      <span class="material-symbols-outlined text-info">
+                        edit
+                      </span>
+                    </button>
+                    <button
+                      (click)="openRemoveDialog(designation, removeItemDialog)"
+                      class="btn btn-sm btn-ghost"
+                    >
+                      <span class="material-symbols-outlined text-danger-600">
+                        delete
+                      </span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
           </table>
           <div *transloco="let t; read: 'errors'">
             <p
@@ -96,45 +140,16 @@
         </div>
       </div>
     </div>
-    <div class="flex flex-row items-center justify-between">
-      <div class="flex flex-row items-center space-x-1">
-        <p *transloco="let t; read: 'tableData'" class="text-xs">
-          {{ t("itemsPerPage") }}:
-        </p>
-        <select
-          name="itemsPerPage"
-          class="select select-sm select-bordered w-16 max-w-xs"
-          #itemPerPageSelect
-          (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-        >
-          <option *ngFor="let option of itemsPerPage" [value]="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-      <div class="flex flex-row items-center">
-        <p class="text-xs">1-5 of 100</p>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_left
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_before
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_next
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_right
-          </span>
-        </button>
-      </div>
+    <div class="flex flex-row items-center justify-end">
+      <mat-paginator
+        #paginator
+        [length]="designations.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+        [showFirstLastButtons]="designations.length > 20"
+      >
+      </mat-paginator>
     </div>
   </div>
 </div>

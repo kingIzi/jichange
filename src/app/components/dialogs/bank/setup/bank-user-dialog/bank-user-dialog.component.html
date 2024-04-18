@@ -1,5 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -129,15 +130,25 @@
           {{ t("designation") }}<span class="text-red-600">*</span>
         </p>
         <select
-          formControlName="designation"
-          class="select select-sm select-bordered w-full"
+          [formControl]="designation"
+          class="select select-sm select-bordered w-full relative"
         >
           <option
             *transloco="let t; read: 'setup.bankUser.form.placeholders'"
             disabled
             selected
+            [value]="t('designation')"
           >
             {{ t("designation") }}
+          </option>
+          <option
+            [value]="designation.Desg_Id"
+            *ngFor="
+              let designation of designations;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+          >
+            {{ designation.Desg_Name }}
           </option>
         </select>
         <span *ngIf="designation && designation.invalid && designation.touched">
@@ -151,18 +162,28 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
-          {{ t("branch") }}<span class="text-red-600">*</span>
+          {{ t("branch") }}
         </p>
         <select
-          formControlName="branch"
+          [formControl]="branch"
           class="select select-sm select-bordered w-full"
         >
           <option
             *transloco="let t; read: 'setup.bankUser.form.placeholders'"
             disabled
             selected
+            [value]="t('branch')"
           >
             {{ t("branch") }}
+          </option>
+          <option
+            *ngFor="
+              let branch of branches;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+            [value]="branch.Sno"
+          >
+            {{ branch.Name }}
           </option>
         </select>
         <span *ngIf="branch && branch.invalid && branch.touched">

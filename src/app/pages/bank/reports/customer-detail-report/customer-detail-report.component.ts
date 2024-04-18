@@ -44,6 +44,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { District } from 'src/app/core/models/bank/district';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { VendorDetailsReportTable } from 'src/app/core/enums/bank/vendor-details-report-table';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -76,6 +77,7 @@ export class CustomerDetailReportComponent implements OnInit {
   public districts: District[] = [];
   public customers: Customer[] = [];
   public customersData: Customer[] = [];
+  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
     CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
