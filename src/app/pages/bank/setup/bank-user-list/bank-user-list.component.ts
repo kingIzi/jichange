@@ -55,6 +55,7 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 })
 export class BankUserListComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
   public employeeDetails: EmployeeDetail[] = [];
   public employeeDetailsData: EmployeeDetail[] = [];
@@ -183,18 +184,21 @@ export class BankUserListComponent implements OnInit {
     }
   }
   private requestBankDetails() {
-    this.startLoading = true;
+    //this.startLoading = true;
+    this.tableLoading = true;
     this.bankService
       .postEmployeeDetails({})
       .then((results: any) => {
         this.employeeDetailsData =
           results.response === 0 ? [] : results.response;
         this.employeeDetails = this.employeeDetailsData;
-        this.startLoading = false;
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });

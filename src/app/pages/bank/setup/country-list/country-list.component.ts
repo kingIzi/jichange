@@ -20,7 +20,7 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
-import { firstValueFrom, lastValueFrom, timer } from 'rxjs';
+import { TimeoutError, firstValueFrom, lastValueFrom, timer } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { CountryDialogComponent } from 'src/app/components/dialogs/bank/setup/country-dialog/country-dialog.component';
@@ -62,7 +62,9 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 export class CountryListComponent implements OnInit {
   public startLoading: boolean = false;
   public countries: Country[] = [];
+  public countriesData: Country[] = [];
   public countryForm!: FormGroup;
+  public tableLoading: boolean = false;
   public headersMap = {
     SNO: 0,
     COUNTRY_NAME: 1,
@@ -72,11 +74,12 @@ export class CountryListComponent implements OnInit {
   ) as LoginResponse;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
-  @ViewChild('diplayMessageBox') diplayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private countryService: CountryService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -85,7 +88,7 @@ export class CountryListComponent implements OnInit {
     this.countryForm = this.fb.group({
       headers: this.fb.array([], []),
     });
-    this.translocoService
+    this.tr
       .selectTranslate(`countryDialog.countriesTable`, {}, this.scope)
       .subscribe((labels: string[]) => {
         if (labels && labels.length > 0) {
@@ -111,25 +114,30 @@ export class CountryListComponent implements OnInit {
       });
   }
   private async getCountryList() {
-    this.startLoading = true;
+    //this.startLoading = true;
+    this.tableLoading = true;
     let list = lastValueFrom(await this.countryService.getCountryList({}));
     list
       .then((results: any) => {
         if (results.response instanceof Array) {
-          this.countries = results.response as Country[];
+          this.countriesData = results.response as Country[];
+          this.countries = this.countriesData;
         } else {
-          this.countries = [];
+          this.countriesData = [];
+          this.countries = this.countriesData;
         }
-        this.startLoading = false;
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
-        AppUtilities.openDisplayMessageBox(
-          this.diplayMessageBox,
-          this.translocoService.translate(`errors.errorOccured`),
-          this.translocoService.translate(`errors.verifyConnection`)
-        );
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        //this.startLoading = false;
+        this.tableLoading = false;
         throw err;
       });
   }
@@ -167,11 +175,11 @@ export class CountryListComponent implements OnInit {
     added
       .then((results: any) => {
         if (parseInt(country.sno) === 0) {
-          this.successMessageBox.title = this.translocoService.translate(
+          this.successMessageBox.title = this.tr.translate(
             `setup.countryDialog.form.dialog.addedSuccessfully`
           );
         } else {
-          this.successMessageBox.title = this.translocoService.translate(
+          this.successMessageBox.title = this.tr.translate(
             `setup.countryDialog.form.dialog.addedSuccessfully`
           );
         }
@@ -184,12 +192,12 @@ export class CountryListComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
-        AppUtilities.openDisplayMessageBox(
-          this.diplayMessageBox,
-          this.translocoService.translate(`errors.errorOccured`),
-          this.translocoService.translate(`errors.verifyConnection`)
-        );
         this.cdr.detectChanges();
         throw err;
       });
@@ -200,7 +208,7 @@ export class CountryListComponent implements OnInit {
     removed
       .then((results: any) => {
         this.startLoading = false;
-        this.successMessageBox.title = this.translocoService.translate(
+        this.successMessageBox.title = this.tr.translate(
           `setup.countryDialog.form.dialog.removedSuccessfully`
         );
         let dialog = this.successMessageBox.openDialog();
@@ -210,12 +218,12 @@ export class CountryListComponent implements OnInit {
         });
       })
       .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
-        AppUtilities.openDisplayMessageBox(
-          this.diplayMessageBox,
-          this.translocoService.translate(`errors.errorOccured`),
-          this.translocoService.translate(`errors.verifyConnection`)
-        );
         throw err;
       });
   }
@@ -249,10 +257,10 @@ export class CountryListComponent implements OnInit {
       });
   }
   openRemoveDialog(country: Country, dialog: RemoveItemDialogComponent) {
-    dialog.title = this.translocoService.translate(
+    dialog.title = this.tr.translate(
       `setup.countryDialog.form.dialog.removeCountry`
     );
-    dialog.message = this.translocoService.translate(
+    dialog.message = this.tr.translate(
       `setup.countryDialog.form.dialog.sureDelete`
     );
     dialog.openDialog();
@@ -276,13 +284,14 @@ export class CountryListComponent implements OnInit {
   }
   searchTable(searchText: string) {
     if (searchText) {
-      this.countries = this.countries.filter((elem) => {
+      this.countries = this.countriesData.filter((elem) => {
         return elem.Country_Name.toLocaleLowerCase().includes(
           searchText.toLocaleLowerCase()
         );
       });
     } else {
-      this.getCountryList();
+      this.countries = this.countriesData;
+      //this.getCountryList();
     }
   }
   get headers() {

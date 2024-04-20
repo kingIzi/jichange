@@ -246,10 +246,7 @@
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    <button
-                      class="btn btn-xs btn-ghost btn-success hover:text-white"
-                      [class]="statusStyle(company.Status)"
-                    >
+                    <button [class]="getActiveStatusStyles(company.Status)">
                       {{ company.Status }}
                     </button>
                   </td>
@@ -344,14 +341,23 @@
               </ng-container>
             </tbody>
           </table>
-          <div *transloco="let t; read: 'errors'">
-            <p
-              *ngIf="companies.length <= 0"
-              class="text-center text-sm tracking-wide pt-3 pb-1"
-            >
-              {{ t("noDataFound") }}
-            </p>
-          </div>
+          <ng-container *ngIf="!tableLoading">
+            <div *transloco="let t; read: 'errors'">
+              <p
+                *ngIf="companies.length <= 0"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="tableLoading">
+            <div class="w-full grid place-items-center mt-6">
+              <span
+                class="loading loading-spinner loading-sm bg-darkPurple"
+              ></span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

@@ -39,7 +39,7 @@ import {
 } from '@angular/forms';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
-import { lastValueFrom } from 'rxjs';
+import { TimeoutError, lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -75,6 +75,7 @@ export class SummaryComponent implements OnInit {
   public companies: Company[] = [];
   public companiesData: Company[] = [];
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
   public includedHeaders: AbstractControl<any, any>[] = [];
   @ViewChild('successMessageBox')
@@ -104,6 +105,9 @@ export class SummaryComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersFormGroup() {
+    this.headersFormGroup = this.fb.group({
+      headers: this.fb.array([], []),
+    });
     this.translocoService
       .selectTranslate('summary.companySummary', {}, this.scope)
       .subscribe((labels: string[]) => {
@@ -300,30 +304,35 @@ export class SummaryComponent implements OnInit {
     return keys;
   }
   private async requestList() {
-    this.startLoading = true;
+    this.companiesData = [];
+    this.companies = this.companiesData;
+    this.tableLoading = true;
     await this.companyService
       .getCustomersList({})
       .then((data) => {
         let customersList = data as HttpDataResponse<Company[]>;
         this.companiesData = customersList.response;
         this.companies = this.companiesData;
-        this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
-        AppUtilities.openDisplayMessageBox(
-          this.displayMessageBox,
-          this.translocoService.translate('errors.errorOccured'),
-          this.translocoService.translate('errors.verifyConnection')
-        );
+        this.tableLoading = false;
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(
+            this.displayMessageBox,
+            this.translocoService
+          );
+        } else {
+          AppUtilities.noInternetError(
+            this.displayMessageBox,
+            this.translocoService
+          );
+        }
         this.cdr.detectChanges();
         throw err;
       });
-    if (this.headers.length == 0) {
-      this.createHeadersFormGroup();
-      this.cdr.detectChanges();
-    }
+    this.cdr.detectChanges();
   }
   private addedCompanySuccessfully(
     message: string,
@@ -341,11 +350,9 @@ export class SummaryComponent implements OnInit {
         }
       });
   }
+
   async ngOnInit() {
-    initTE({ Ripple });
-    this.headersFormGroup = this.fb.group({
-      headers: this.fb.array([], []),
-    });
+    this.createHeadersFormGroup();
     await this.requestList();
   }
   sortColumnClicked(ind: number) {
@@ -371,7 +378,7 @@ export class SummaryComponent implements OnInit {
       dialogRef
     );
     dialogRef.afterClosed().subscribe(async () => {
-      await this.requestList();
+      this.requestList();
     });
   }
   openEditCompanySummaryDialog(company: Company) {
@@ -405,14 +412,10 @@ export class SummaryComponent implements OnInit {
     });
     this.fileHandler.exportAsExcelFile(data, 'company_summary');
   }
-  statusStyle(status: string) {
-    if (status) {
-      return status.toLocaleLowerCase() == 'Pending'.toLocaleLowerCase()
-        ? 'bg-warning hover:bg-warning'
-        : 'bg-success hover:bg-success';
-    } else {
-      return 'bg-warning hover:bg-warning';
-    }
+  getActiveStatusStyles(status: string) {
+    return status?.toLocaleLowerCase() === 'approved'
+      ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
+      : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
   }
   searchTable(searchText: string) {
     if (searchText) {
@@ -427,8 +430,8 @@ export class SummaryComponent implements OnInit {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
     } else {
-      this.requestList();
-      //this.companies = this.companiesData;
+      //this.requestList();
+      this.companies = this.companiesData;
     }
   }
   get headers(): FormArray {

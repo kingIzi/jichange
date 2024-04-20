@@ -23,11 +23,41 @@
       }
     },
     "onboardCustomers": {
-      "name": "Latest added vendor(s)",
+      "name": "Vendor details report",
       "errors": {
         "noDataFound": "No data found"
       }
     },
-    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"]
+    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"],
+    "customerDetailReport": {
+      "customerDetailReport": "Vendor detail report",
+      "form": {
+        "company": "Company",
+        "region": "region",
+        "district": "district",
+        "placeholders": {
+          "all": "All"
+        },
+        "errors": {
+          "company": "Please select a company",
+          "region": "Please select a region",
+          "district": "Please select a district",
+          "dialog": {
+            "invalidForm": "Invalid form",
+            "company": "You must select a company",
+            "region": "You must select a region",
+            "district": "You must select a district",
+            "noDistrictForRegion": "There are no districts found for this region."
+          }
+        }
+      },
+      "customerDetailReportTable": [
+        "Customer name",
+        "Contact person",
+        "Phone",
+        "Address",
+        "Date posted"
+      ]
+    }
   }
 }

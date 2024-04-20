@@ -57,7 +57,7 @@ export class DesignationDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { designationData: Designation }
   ) {}
   ngOnInit(): void {
-    if (this.data.designationData) {
+    if (this.data) {
       this.createEditForm(this.data.designationData);
     } else {
       this.createForm();

@@ -70,6 +70,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 })
 export class InboxApprovalComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public companies: Company[] = [];
   public companiesData: Company[] = [];
   public tableHeadersFormGroup!: FormGroup;
@@ -215,7 +216,7 @@ export class InboxApprovalComponent implements OnInit {
   }
   private requestCompanyInbox() {
     this.parseUserProfile();
-    this.startLoading = true;
+    this.tableLoading = true;
     let inbox = this.companyService.postCompanyInboxList({
       design: this.userProfile.desig,
       braid: Number(this.userProfile.braid),
@@ -224,14 +225,16 @@ export class InboxApprovalComponent implements OnInit {
       .then((results: any) => {
         this.companiesData = results.response === 0 ? [] : results.response;
         this.companies = this.companiesData;
-        this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
         if (err instanceof TimeoutError) {
           AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
         }
-        this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });

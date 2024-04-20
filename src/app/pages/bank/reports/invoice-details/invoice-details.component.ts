@@ -19,7 +19,7 @@ import { RequestClientService } from 'src/app/core/services/request-client.servi
 import { Datepicker, Input, initTE } from 'tw-elements';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { Company } from 'src/app/core/models/bank/company';
-import { firstValueFrom } from 'rxjs';
+import { TimeoutError, firstValueFrom } from 'rxjs';
 import { Customer } from 'src/app/core/models/bank/customer';
 import {
   AbstractControl,
@@ -83,7 +83,7 @@ export class InvoiceDetailsComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private dialog: MatDialog,
     private client: RequestClientService,
     private reportsService: ReportsService,
@@ -107,6 +107,11 @@ export class InvoiceDetailsComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -140,8 +145,14 @@ export class InvoiceDetailsComponent implements OnInit {
           this.cdr.detectChanges();
         })
         .catch((err) => {
+          if (err instanceof TimeoutError) {
+            AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+          } else {
+            AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+          }
           this.customers = [];
           this.cusid.setValue('all');
+          this.startLoading = false;
           this.cdr.detectChanges();
           throw err;
         });
@@ -152,7 +163,7 @@ export class InvoiceDetailsComponent implements OnInit {
       headers: this.fb.array([], []),
     });
     let labels = (await firstValueFrom(
-      this.translocoService.selectTranslate(
+      this.tr.selectTranslate(
         `invoiceDetails.invoiceDetailsTable`,
         {},
         this.scope
@@ -270,29 +281,29 @@ export class InvoiceDetailsComponent implements OnInit {
     if (this.Comp.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.company`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.company`)
       );
     }
     if (this.cusid.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.customer`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.customer`)
       );
     }
     if (this.stdate.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.startDate`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.startDate`)
       );
     }
     if (this.enddate.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.endDate`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.endDate`)
       );
     }
   }
@@ -311,9 +322,6 @@ export class InvoiceDetailsComponent implements OnInit {
     this.reportsService
       .requestInvoiceReport(value)
       .then((results: any) => {
-        // this.invoiceReportsData = (
-        //   results as HttpDataResponse<InvoiceReport[]>
-        // ).response;
         this.invoiceReportsData =
           results.response === 0 ? [] : results.response;
         this.invoiceReports = this.invoiceReportsData;
@@ -321,6 +329,11 @@ export class InvoiceDetailsComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;

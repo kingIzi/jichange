@@ -35,6 +35,36 @@
       "Barua pepe",
       "Nambari ya Simu",
       "Hali"
-    ]
+    ],
+    "customerDetailReport": {
+      "customerDetailReport": "Ripoti ya Maelezo ya Muuzaji",
+      "form": {
+        "company": "Kampuni",
+        "region": "Mkoa",
+        "district": "Wilaya",
+        "placeholders": {
+          "all": "Yote"
+        },
+        "errors": {
+          "company": "Tafadhali chagua kampuni",
+          "region": "Tafadhali chagua mkoa",
+          "district": "Tafadhali chagua wilaya",
+          "dialog": {
+            "invalidForm": "Fomu batili",
+            "company": "Lazima uchague kampuni",
+            "region": "Lazima uchague eneo",
+            "district": "Lazima uchague wilaya",
+            "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu."
+          }
+        }
+      },
+      "customerDetailReportTable": [
+        "Jina la Mteja",
+        "Mtu wa Mawasiliano",
+        "Simu",
+        "Anwani",
+        "Tarehe ya Kutuma"
+      ]
+    }
   }
 }

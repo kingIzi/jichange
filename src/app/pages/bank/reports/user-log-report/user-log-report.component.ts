@@ -29,6 +29,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { UserLog } from 'src/app/core/models/bank/user-log';
 import { UserLogReportTable } from 'src/app/core/enums/bank/user-log-report-table';
+import { TimeoutError } from 'rxjs';
 
 @Component({
   selector: 'app-user-log-report',
@@ -58,6 +59,7 @@ export class UserLogReportComponent implements OnInit {
   public userReportLogsData: UserLog[] = [];
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
+  public tableLoading: boolean = false;
   public headersMap = {
     USERNAME: UserLogReportTable.USERNAME,
     IP_ADDRESS: UserLogReportTable.IP_ADDRESS,
@@ -200,19 +202,23 @@ export class UserLogReportComponent implements OnInit {
     }
   }
   private requestUserLog(value: any) {
-    this.startLoading = true;
+    this.tableLoading = true;
     this.reportsService
       .getUserLogTimes(value)
       .then((results: any) => {
-        this.startLoading = false;
+        this.tableLoading = false;
         this.userReportLogsData =
           results.response === 0 ? [] : results.response;
         this.userReportLogs = this.userReportLogsData;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
-        AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        this.tableLoading = false;
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.cdr.detectChanges();
         throw err;
       });
@@ -252,6 +258,8 @@ export class UserLogReportComponent implements OnInit {
     value.enddate = AppUtilities.reformatDate(
       this.tableFilterFormGroup.value.enddate.split('-')
     );
+    this.userReportLogsData = [];
+    this.userReportLogs = this.userReportLogsData;
     this.requestUserLog(value);
   }
   sortColumnClicked(ind: number) {

@@ -30,7 +30,7 @@ import { Branch } from 'src/app/core/models/bank/branch';
 import { Statuses } from 'src/app/core/models/status';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
-import { timer } from 'rxjs';
+import { TimeoutError, timer } from 'rxjs';
 import { BranchService } from 'src/app/core/services/setup/branch.service';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 
@@ -60,7 +60,9 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 })
 export class BranchListComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public branches: Branch[] = [];
+  public branchesData: Branch[] = [];
   public branchHeadersForm!: FormGroup;
   public headersMap = {
     SNO: 0,
@@ -70,37 +72,42 @@ export class BranchListComponent implements OnInit {
   };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
-  @ViewChild('diplayMessageBox') diplayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('alertMsg') alertMsg!: ElementRef;
   constructor(
     private dialog: MatDialog,
-    private client: RequestClientService,
     private branchService: BranchService,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private getBranchList() {
-    this.startLoading = true;
+    //this.startLoading = true;
+    this.tableLoading = true;
     this.branchService
       .postBranchList({})
       .then((results: any) => {
         if (results.response instanceof Array) {
-          this.branches = results.response as Branch[];
+          this.branchesData = results.response as Branch[];
+          this.branches = this.branchesData;
         } else {
-          this.branches = [];
+          this.branchesData = [];
+          this.branches = this.branchesData;
         }
-        this.startLoading = false;
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
-        AppUtilities.openDisplayMessageBox(
-          this.diplayMessageBox,
-          this.translocoService.translate(`errors.errorOccured`),
-          this.translocoService.translate(`errors.verifyConnection`)
-        );
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        //this.startLoading = false;
+        this.tableLoading = false;
         throw err;
       });
   }
@@ -108,7 +115,7 @@ export class BranchListComponent implements OnInit {
     this.branchHeadersForm = this.fb.group({
       headers: this.fb.array([], []),
     });
-    this.translocoService
+    this.tr
       .selectTranslate(`branch.branchesTable`, {}, this.scope)
       .subscribe((labels: string[]) => {
         if (labels && labels.length > 0) {
@@ -134,11 +141,14 @@ export class BranchListComponent implements OnInit {
       });
   }
   private removeBranch(sno: number) {
-    this.startLoading = true;
+    //this.startLoading = true;
+    this.tableLoading = true;
     this.branchService
       .removeBranch(sno)
       .then((results: any) => {
-        this.successMessageBox.title = this.translocoService.translate(
+        //this.startLoading = false;
+        this.tableLoading = false;
+        this.successMessageBox.title = this.tr.translate(
           `setup.branch.form.dialog.removedSuccessfully`
         );
         let dialog = this.successMessageBox.openDialog();
@@ -148,11 +158,13 @@ export class BranchListComponent implements OnInit {
         });
       })
       .catch((err) => {
-        AppUtilities.openDisplayMessageBox(
-          this.diplayMessageBox,
-          this.translocoService.translate(`errors.errorOccured`),
-          this.translocoService.translate(`errors.verifyConnection`)
-        );
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        //this.startLoading = false;
+        this.tableLoading = false;
         throw err;
       });
   }
@@ -226,7 +238,7 @@ export class BranchListComponent implements OnInit {
     });
     dialogRef.componentInstance.addedBranch.asObservable().subscribe((id) => {
       this.getBranchList();
-      this.successMessageBox.title = this.translocoService.translate(
+      this.successMessageBox.title = this.tr.translate(
         `setup.branch.form.dialog.updated`
       );
       let dialog = this.successMessageBox.openDialog();
@@ -238,12 +250,8 @@ export class BranchListComponent implements OnInit {
     });
   }
   openRemoveDialog(branch: Branch, dialog: RemoveItemDialogComponent) {
-    dialog.title = this.translocoService.translate(
-      `setup.branch.form.dialog.removeBranch`
-    );
-    dialog.message = this.translocoService.translate(
-      `setup.branch.form.dialog.sureDelete`
-    );
+    dialog.title = this.tr.translate(`setup.branch.form.dialog.removeBranch`);
+    dialog.message = this.tr.translate(`setup.branch.form.dialog.sureDelete`);
     dialog.openDialog();
     dialog.remove.asObservable().subscribe((e) => {
       this.removeBranch(branch.Sno);
@@ -251,7 +259,7 @@ export class BranchListComponent implements OnInit {
   }
   searchTable(searchText: string) {
     if (searchText) {
-      this.branches = this.branches.filter((elem) => {
+      this.branches = this.branchesData.filter((elem) => {
         return (
           elem.Name.toLocaleLowerCase().includes(
             searchText.toLocaleLowerCase()
@@ -265,7 +273,8 @@ export class BranchListComponent implements OnInit {
         );
       });
     } else {
-      this.getBranchList();
+      this.branches = this.branchesData;
+      //this.getBranchList();
     }
   }
   getActiveStatusStyles(status: string) {

@@ -33,6 +33,7 @@ import { formatDate } from '@angular/common';
 import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
 import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { TimeoutError } from 'rxjs';
 
 @Component({
   selector: 'app-audit-trails',
@@ -58,8 +59,6 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuditTrailsComponent implements OnInit {
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
   public selectPageOptions: string[] = [
     'Country',
     'Region',
@@ -275,10 +274,17 @@ export class AuditTrailsComponent implements OnInit {
       })
       .catch((err) => {
         this.startLoading = false;
-        AppUtilities.unexpectedErrorOccured(
-          this.displayMessageBox,
-          this.translocoService
-        );
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(
+            this.displayMessageBox,
+            this.translocoService
+          );
+        } else {
+          AppUtilities.noInternetError(
+            this.displayMessageBox,
+            this.translocoService
+          );
+        }
         this.cdf.detectChanges();
         throw err;
       });
@@ -290,11 +296,6 @@ export class AuditTrailsComponent implements OnInit {
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
     sortAsc?.setValue(!sortAsc?.value);
-  }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
-    }
   }
   submitFilter() {
     if (this.formGroup.valid) {

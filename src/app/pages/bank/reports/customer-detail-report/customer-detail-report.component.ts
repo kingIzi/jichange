@@ -18,6 +18,7 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import {
   Observable,
+  TimeoutError,
   catchError,
   from,
   lastValueFrom,
@@ -70,6 +71,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 })
 export class CustomerDetailReportComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
   public companies: Company[] = [];
@@ -153,7 +155,11 @@ export class CustomerDetailReportComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -193,7 +199,11 @@ export class CustomerDetailReportComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -295,18 +305,25 @@ export class CustomerDetailReportComponent implements OnInit {
     }
   }
   private requestCustomerDetails(form: any) {
-    this.startLoading = true;
+    //this.startLoading = true;
+    this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
       .then((results: any) => {
-        this.startLoading = false;
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.customersData = results.response === 0 ? [] : results.response;
         this.customers = this.customersData;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        this.startLoading = false;
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -337,6 +354,8 @@ export class CustomerDetailReportComponent implements OnInit {
       this.formErrors();
       return;
     }
+    this.customersData = [];
+    this.customers = this.customersData;
     this.requestCustomerDetails(this.tableFilterFormGroup.value);
   }
   sortColumnClicked(ind: number) {
@@ -362,7 +381,8 @@ export class CustomerDetailReportComponent implements OnInit {
         return keys.some((key) => customer[key]?.toLowerCase().includes(text));
       });
     } else {
-      this.requestCustomerDetails(this.tableFilterFormGroup.value);
+      this.customers = this.customersData;
+      //this.requestCustomerDetails(this.tableFilterFormGroup.value);
     }
   }
   get Comp() {

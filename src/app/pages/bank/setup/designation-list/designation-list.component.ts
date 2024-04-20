@@ -5,6 +5,7 @@ import {
   Component,
   Inject,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
@@ -31,6 +32,9 @@ import {
 import { Designation } from 'src/app/core/models/bank/designation';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
+import { TimeoutError } from 'rxjs';
+import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
 
 @Component({
   selector: 'app-designation-list',
@@ -47,6 +51,7 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
     ReactiveFormsModule,
     LoaderRainbowComponent,
     RemoveItemDialogComponent,
+    DisplayMessageBoxComponent,
   ],
   providers: [
     {
@@ -57,9 +62,12 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 })
 export class DesignationListComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public designations: Designation[] = [];
   public designationsData: Designation[] = [];
   public tableHeadersFormGroup!: FormGroup;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private dialog: MatDialog,
     private designationService: DesignationService,
@@ -120,17 +128,25 @@ export class DesignationListComponent implements OnInit {
     }
   }
   private requestDesignationList() {
-    this.startLoading = true;
+    //this.startLoading = true;
+    this.tableLoading = true;
     this.designationService
       .getDesignationList()
       .then((results: any) => {
         this.designationsData = results.response === 0 ? [] : results.response;
         this.designations = this.designationsData;
-        this.startLoading = false;
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        //this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
