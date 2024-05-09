@@ -14,7 +14,11 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { Company } from 'src/app/core/models/bank/company';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import {
@@ -41,6 +45,7 @@ import { clientInterceptor } from 'src/app/core/interceptors/client.interceptor'
 import { TimeoutError, throwError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { ApproveCompanyInboxComponent } from 'src/app/components/dialogs/bank/company/approve-company-inbox/approve-company-inbox.component';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -59,6 +64,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
     MatDialogModule,
     SuccessMessageBoxComponent,
     DisplayMessageBoxComponent,
+    ApproveCompanyInboxComponent,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -215,7 +221,6 @@ export class InboxApprovalComponent implements OnInit {
     return keys;
   }
   private requestCompanyInbox() {
-    this.parseUserProfile();
     this.tableLoading = true;
     let inbox = this.companyService.postCompanyInboxList({
       design: this.userProfile.desig,
@@ -239,6 +244,50 @@ export class InboxApprovalComponent implements OnInit {
         throw err;
       });
   }
+  private companyApprovedSuccessullyMessage() {
+    let dialog = AppUtilities.openSuccessMessageBox(
+      this.successMessageBox,
+      this.tr.translate(`company.summary.actions.approvedCompanySuccessfully`)
+    );
+  }
+  private failedToApproveCompanyMessage() {
+    let dialog = AppUtilities.openDisplayMessageBox(
+      this.displayMessageBox,
+      this.tr.translate(`defaults.failed`),
+      this.tr.translate(
+        `company.summary.companyForm.dialogs.failedToApproveCompany`
+      )
+    );
+  }
+  private requestApproveCompany(value: {
+    compsno: number;
+    pfx: string;
+    ssno: string;
+    userid: number;
+  }) {
+    this.startLoading = true;
+    this.companyService
+      .approveCompany(value)
+      .then((results: any) => {
+        this.startLoading = false;
+        if (results.response === 0 || typeof results.response !== 'number') {
+          this.failedToApproveCompanyMessage();
+        } else {
+          this.companyApprovedSuccessullyMessage();
+        }
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   private addedCompanySuccessfully(
     message: string,
     dialogRef: MatDialogRef<CompanySummaryDialogComponent, any>
@@ -256,6 +305,7 @@ export class InboxApprovalComponent implements OnInit {
       });
   }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestCompanyInbox();
   }
@@ -266,10 +316,26 @@ export class InboxApprovalComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  getActiveStatusStyles(status: string) {
-    return status.toLocaleLowerCase() === 'active'
-      ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
-      : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
+  approveCompany(dialog: ApproveCompanyInboxComponent, company: Company) {
+    let payload: {
+      compsno: number;
+      pfx: string;
+      ssno: string;
+      userid: number;
+    } = {
+      compsno: company.CompSno,
+      pfx: '',
+      ssno: '',
+      userid: this.userProfile.Usno,
+    };
+    let dialogRef = dialog.openDialog();
+    dialog.close.asObservable().subscribe(() => {
+      dialogRef.close();
+    });
+    dialog.approve.asObservable().subscribe(() => {
+      this.requestApproveCompany(payload);
+      dialogRef.close();
+    });
   }
   openEditCompanySummaryDialog(company: Company) {
     let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
@@ -287,8 +353,9 @@ export class InboxApprovalComponent implements OnInit {
       console.log(`Dialog result: ${result}`);
     });
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       let indexes = this.headers.controls
         .map((control, index) => {
           return control.get('included')?.value ? index : -1;

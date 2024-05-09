@@ -28,7 +28,11 @@ import { AuditTrail } from 'src/app/core/models/bank/auditTrail';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { formatDate } from '@angular/common';
 import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
 import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails.service';
@@ -274,17 +278,11 @@ export class AuditTrailsComponent implements OnInit {
       })
       .catch((err) => {
         this.startLoading = false;
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(
-            this.displayMessageBox,
-            this.translocoService
-          );
-        } else {
-          AppUtilities.noInternetError(
-            this.displayMessageBox,
-            this.translocoService
-          );
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.translocoService
+        );
         this.cdf.detectChanges();
         throw err;
       });
@@ -314,8 +312,9 @@ export class AuditTrailsComponent implements OnInit {
   dateStringToDate(dateString: string) {
     return new Date(dateString);
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       let search = searchText.toLocaleLowerCase();
       this.auditTrails = this.auditTrails.filter((elem: AuditTrail) => {
         return (

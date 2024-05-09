@@ -1,9 +1,6 @@
-<ngx-loading
-  [show]="startLoading"
-  [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
-
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -25,7 +22,7 @@
   <div class="flex flex-col bg-white shadow px-2 py-4">
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
-        <app-table-date-filters></app-table-date-filters>
+        <!-- <app-table-date-filters></app-table-date-filters> -->
         <div class="relative">
           <input
             *transloco="let t; read: 'defaults'"
@@ -34,7 +31,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
-            (keyup)="searchTable(searchInput.value)"
+            (keyup)="searchTable(searchInput.value, paginator)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -85,7 +82,14 @@
             <tbody>
               <tr
                 *ngFor="
-                  let customer of customers | slice : 0 : itemPerPage;
+                  let customer of customers
+                    | slice
+                      : 1 + paginator.pageSize * paginator.pageIndex - 1
+                      : 1 +
+                          paginator.pageSize * paginator.pageIndex +
+                          paginator.pageSize -
+                          1;
+                  trackBy: PerformanceUtils.trackByIndex;
                   index as i
                 "
                 class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
@@ -146,45 +150,16 @@
         </div>
       </div>
     </div>
-    <div class="flex flex-row items-center justify-between">
-      <div class="flex flex-row items-center space-x-1">
-        <p *transloco="let t; read: 'tableData'" class="text-xs">
-          {{ t("itemsPerPage") }}:
-        </p>
-        <select
-          name="itemsPerPage"
-          class="select select-sm select-bordered w-16 max-w-xs"
-          #itemPerPageSelect
-          (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-        >
-          <option *ngFor="let option of itemsPerPage" [value]="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-      <div class="flex flex-row items-center">
-        <p class="text-xs">1-5 of 100</p>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_left
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_before
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_next
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_right
-          </span>
-        </button>
-      </div>
+    <div class="flex flex-row items-center justify-end">
+      <mat-paginator
+        #paginator
+        [length]="customers.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+        [showFirstLastButtons]="customers.length > 20"
+      >
+      </mat-paginator>
     </div>
   </div>
 </div>

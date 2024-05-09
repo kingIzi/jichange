@@ -25,12 +25,12 @@ import { DisplayMessageBoxComponent } from '../../../display-message-box/display
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { CommonModule } from '@angular/common';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { BankService } from 'src/app/core/services/setup/bank.service';
+import { BankService } from 'src/app/core/services/bank/setup/bank.service';
 import { EmployeeDetail } from 'src/app/core/models/bank/employee-detail';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
-import { DesignationService } from 'src/app/core/services/setup/designation.service';
+import { DesignationService } from 'src/app/core/services/bank/setup/designation.service';
 import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
-import { BranchService } from 'src/app/core/services/setup/branch.service';
+import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
 import { Designation } from 'src/app/core/models/bank/designation';
 import { Branch } from 'src/app/core/models/bank/branch';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';

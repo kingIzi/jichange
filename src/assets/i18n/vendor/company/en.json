@@ -1,0 +1,47 @@
+{
+  "companyUsers": "Company users",
+  "addCompanyButton": "Add company users",
+  "companyTable": [
+    "User name",
+    "User type",
+    "Full name",
+    "Email ID",
+    "Mobile No"
+  ],
+  "companyUsersForm": {
+    "role": "Role",
+    "username": "User name",
+    "fullName": "Full name",
+    "mobileNo": "Mobile No",
+    "emailId": "Email ID",
+    "userPosition": "User position",
+    "successMessage": "Company added successfully!",
+    "placeholder": {
+      "role": "Select role",
+      "username": "Enter User name",
+      "fullName": "Enter Full name",
+      "mobileNo": "(0) 255",
+      "emailId": "Enter email address",
+      "userPosition": "Enter User position"
+    },
+    "errors": {
+      "role": "Please select role",
+      "username": "Please enter a User name",
+      "mobileNo": "Please enter a valid phone number",
+      "emailId": "Please enter email address",
+      "userPosition": "Please enter user position",
+      "fullName": "Please enter a Full name",
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "role": "You must select a role",
+        "username": "You must enter a User name",
+        "mobileNo": "You must enter a valid phone number",
+        "emailId": "You must enter email address",
+        "userPosition": "You must enter user position",
+        "fullName": "You must enter a Full name",
+        "noRoleActFound": "No Role acts found in your institution.",
+        "FailedToAddCompany": "Failed to add company because {}"
+      }
+    }
+  }
+}

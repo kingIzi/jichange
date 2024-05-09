@@ -1,6 +1,78 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
 
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+
+<dialog #controlFound class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Found</h3>
+    <!-- <p class="py-4">Press ESC key or click the button below to close</p> -->
+    <form [formGroup]="foundFormGroup" class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col">
+        <p
+          *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
+          class="capitalize"
+        >
+          {{ t("controlNo") }}
+        </p>
+        <p class="font-semibold">
+          {{ Control_No.value ? Control_No.value : "-" }}
+        </p>
+      </div>
+      <div class="flex flex-col">
+        <p
+          *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
+          class="capitalize"
+        >
+          {{ t("customerName") }}
+        </p>
+        <p class="font-semibold">
+          {{ Cust_Name.value ? Cust_Name.value : "-" }}
+        </p>
+      </div>
+      <div class="flex flex-col">
+        <p
+          *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
+          class="capitalize"
+        >
+          {{ t("paymentType") }}
+        </p>
+        <p class="font-semibold">
+          {{ Payment_Type.value ? Payment_Type.value : "-" }}
+        </p>
+      </div>
+      <div class="flex flex-col">
+        <p
+          *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
+          class="capitalize"
+        >
+          {{ t("itemTotalAmount") }}
+        </p>
+        <p class="font-semibold">
+          {{ Item_Total_Amount.value + " " + Currency.value }}
+        </p>
+      </div>
+      <div class="flex flex-col">
+        <p
+          *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
+          class="capitalize"
+        >
+          {{ t("balance") }}
+        </p>
+        <p class="font-semibold">{{ Balance.value + " " + Currency.value }}</p>
+      </div>
+    </form>
+    <div class="modal-action">
+      <form method="dialog">
+        <!-- if there is a button in form, it will close the modal -->
+        <button class="btn text-xs btn-outline font-inter btn-success w-24">
+          Ok
+        </button>
+      </form>
+    </div>
+  </div>
+</dialog>
+
 <div class="flex flex-col w-full h-full">
   <form
     *transloco="let t; read: 'auth.controlNumberDetails'"

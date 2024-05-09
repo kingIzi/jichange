@@ -1,0 +1,47 @@
+{
+  "companyUsers": "Watumiaji wa Kampuni",
+  "addCompanyButton": "Ongeza watumiaji wa kampuni",
+  "companyTable": [
+    "Jina la mtumiaji",
+    "Aina ya mtumiaji",
+    "Jina kamili",
+    "Barua pepe",
+    "Namba ya simu"
+  ],
+  "companyUsersForm": {
+    "role": "Jukumu",
+    "username": "Jina la mtumiaji",
+    "fullName": "Jina kamili",
+    "mobileNo": "Namba ya simu",
+    "emailId": "Barua pepe",
+    "userPosition": "Nafasi ya mtumiaji",
+    "successMessage": "Kampuni imeongezwa kwa mafanikio!",
+    "placeholder": {
+      "role": "Chagua jukumu",
+      "username": "Ingiza jina la mtumiaji",
+      "fullName": "Ingiza jina kamili",
+      "mobileNo": "(0) 255",
+      "emailId": "Ingiza anwani ya barua pepe",
+      "userPosition": "Ingiza nafasi ya mtumiaji"
+    },
+    "errors": {
+      "role": "Tafadhali chagua jukumu",
+      "username": "Tafadhali ingiza jina la mtumiaji",
+      "mobileNo": "Tafadhali ingiza namba ya simu sahihi",
+      "emailId": "Tafadhali ingiza anwani ya barua pepe",
+      "userPosition": "Tafadhali ingiza nafasi ya mtumiaji",
+      "fullName": "Tafadhali ingiza jina kamili",
+      "dialog": {
+        "invalidForm": "Fomu batili",
+        "role": "Lazima uchague jukumu",
+        "username": "Lazima uingize jina la mtumiaji",
+        "mobileNo": "Lazima uingize namba ya simu sahihi",
+        "emailId": "Lazima uingize anwani ya barua pepe",
+        "userPosition": "Lazima uingize nafasi ya mtumiaji",
+        "fullName": "Lazima uingize jina kamili",
+        "noRoleActFound": "Hakuna majukumu yaliyopatikana kwenye taasisi yako.",
+        "FailedToAddCompany": "Kushindwa kuongeza kampuni kwa sababu ya {}"
+      }
+    }
+  }
+}

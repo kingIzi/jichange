@@ -51,26 +51,60 @@ const routes: Routes = [
             ],
           },
           {
-            path: 'invoice',
-            loadComponent: () =>
-              import(
-                '../../../pages/vendor/invoice-details/invoice-details.component'
-              ).then((c) => c.InvoiceDetailsComponent),
-            data: {
-              breadcrumb: { alias: 'invoice-details', skip: false },
-              animationState: 'invoice-details',
-            },
+            path: 'company',
+            data: { breadcrumb: { skip: true } },
+            children: [
+              {
+                path: '',
+                data: {
+                  breadcrumb: { alias: 'company', skip: false },
+                  animationState: 'company-module-1',
+                },
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/company-users/company-users.component'
+                  ).then((c) => c.CompanyUsersComponent),
+              },
+            ],
           },
           {
-            path: 'generated',
-            loadComponent: () =>
-              import(
-                '../../../pages/vendor/generated-invoice-list/generated-invoice-list.component'
-              ).then((c) => c.GeneratedInvoiceListComponent),
-            data: {
-              breadcrumb: { alias: 'generated-invoice', skip: false },
-              animationState: 'generated-invoice',
-            },
+            path: 'invoice',
+            data: { breadcrumb: { skip: true } },
+            children: [
+              {
+                path: 'amendments',
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/invoice/admendments/admendments.component'
+                  ).then((c) => c.AdmendmentsComponent),
+                data: {
+                  breadcrumb: { alias: 'invoice-amendments', skip: false },
+                  animationState: 'invoice-module-1',
+                },
+              },
+              {
+                path: 'cancelled',
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/invoice/invoice-cancelled/invoice-cancelled.component'
+                  ).then((c) => c.InvoiceCancelledComponent),
+                data: {
+                  breadcrumb: { alias: 'invoice-cancelled', skip: false },
+                  animationState: 'invoice-module-2',
+                },
+              },
+              {
+                path: 'generated',
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/invoice/generated-invoice-list/generated-invoice-list.component'
+                  ).then((c) => c.GeneratedInvoiceListComponent),
+                data: {
+                  breadcrumb: { alias: 'invoice-generated', skip: false },
+                  animationState: 'invoice-module-3',
+                },
+              },
+            ],
           },
           {
             path: 'reports',

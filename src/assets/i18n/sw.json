@@ -11,7 +11,8 @@
     "failed": "Imeshindwa",
     "columns": "Safuwima",
     "warning": "Onyo",
-    "any": "Yoyote"
+    "any": "Yoyote",
+    "confirm": "Thibitisha"
   },
   "actions": {
     "submit": "Wasilisha",
@@ -28,7 +29,7 @@
     "noDataFound": "Hakuna taarifa iliyopatikana",
     "validDate": "Tafadhali chagua tarehe halali",
     "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano.",
-    "timeoutError": "Ombi limepitwa na wakati. Tafadhali jaribu tena."
+    "timeoutError": "Ombi limepitwa na wakati. Tafadhali thibitisha muunganisho wako au jaribu tena."
   },
   "roles": {
     "role": "Jukumu",
@@ -42,22 +43,22 @@
       "dropdowns": []
     },
     {
-      "name": "Maelezo ya ankara",
+      "name": "Watumiaji wa Kampuni",
       "dropdowns": []
     },
     {
-      "name": "Ankara iliyotengenezwa",
-      "dropdowns": []
+      "name": "Makadirio",
+      "dropdowns": ["Mageuzi", "Kufutwa", "Yameundwa"]
     },
     {
       "name": "Ripoti",
       "dropdowns": [
-        "muhtasari",
-        "Maelezo ya Shughuli",
-        "Maelezo ya Bili",
+        "Muhtasari",
+        "Maelezo ya Miamala",
+        "Maelezo ya Makadirio",
         "Maelezo ya Malipo",
-        "Maelezo ya Marekebisho",
-        "Ripoti ya Muuzaji"
+        "Maelezo ya Mageuzi",
+        "Ripoti ya Mtoa Huduma"
       ]
     }
   ],

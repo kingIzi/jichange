@@ -15,9 +15,9 @@
     "allOperations": {
       "allOperations": "All operations"
     },
-    "latestTransactionsTitle": "Latest transactions",
+    "viewAllInvoices": "View All",
+    "latestTransactionsTitle": "Generated invoice(s)",
     "latestTransactionsTable": [
-      "Sno",
       "Invoice No",
       "Invoice Date",
       "Customer",

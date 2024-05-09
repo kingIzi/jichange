@@ -15,7 +15,6 @@ import { BreadcrumbService } from 'xng-breadcrumb';
   imports: [
     CommonModule,
     TranslocoModule,
-    NgxLoadingModule,
     MatDialogModule,
     TableDateFiltersComponent,
   ],
@@ -36,6 +35,7 @@ export class DistrictListComponent implements OnInit {
   openDistrictForm() {
     let dialogRef = this.dialog.open(DistrictDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

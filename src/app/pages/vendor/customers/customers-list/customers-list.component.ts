@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -21,16 +28,28 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import * as json from 'src/assets/temp/data.json';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 
 @Component({
   selector: 'app-customers-list',
   templateUrl: './customers-list.component.html',
   styleUrls: ['./customers-list.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     TranslocoModule,
-    NgxLoadingModule,
     MatDialogModule,
     RouterModule,
     RemoveItemDialogComponent,
@@ -38,6 +57,9 @@ import * as json from 'src/assets/temp/data.json';
     FormsModule,
     ReactiveFormsModule,
     TableDateFiltersComponent,
+    MatPaginatorModule,
+    DisplayMessageBoxComponent,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -50,9 +72,10 @@ export class CustomersListComponent implements OnInit {
   public startLoading: boolean = false;
   public customersData: Customer[] = [];
   public customers: Customer[] = [];
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
   public headersFormGroup!: FormGroup;
+  public userProfile!: LoginResponse;
+  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  //public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
   private headersMap = {
     customerName: 0,
     emailId: 1,
@@ -60,23 +83,48 @@ export class CustomersListComponent implements OnInit {
   };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private dialog: MatDialog,
     private activatedRoute: ActivatedRoute,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private fb: FormBuilder,
+    private invoiceService: InvoiceService,
+    private cdr: ChangeDetectorRef,
+    private reportService: ReportsService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  ngOnInit(): void {
-    let data = JSON.parse(JSON.stringify(json));
-    this.customersData = data.customers;
-    this.customers = this.customersData;
-    this.buildHeadersForm();
-    this.activatedRoute.params.subscribe((params) => {
-      if (params['addCustomer']) {
-        this.openCustomersDialog();
-      }
-    });
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private requestCustomerNames() {
+    this.startLoading = true;
+    this.reportService
+      .postCustomerDetailsReport({
+        Comp: this.userProfile.InstID.toString(),
+        reg: '0',
+        dist: '0',
+      })
+      .then((results: any) => {
+        this.customersData = results.response === 0 ? [] : results.response;
+        this.customers = this.customersData;
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
@@ -142,7 +190,7 @@ export class CustomersListComponent implements OnInit {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    this.translocoService
+    this.tr
       .selectTranslate('customersTable', {}, this.scope)
       .subscribe((headers: string[]) => {
         if (headers && headers.length > 0) {
@@ -155,6 +203,16 @@ export class CustomersListComponent implements OnInit {
           });
         }
       });
+  }
+  ngOnInit(): void {
+    this.buildHeadersForm();
+    this.parseUserProfile();
+    this.requestCustomerNames();
+    this.activatedRoute.params.subscribe((params) => {
+      if (params['addCustomer']) {
+        this.openCustomersDialog();
+      }
+    });
   }
   sortColumn(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
@@ -169,6 +227,7 @@ export class CustomersListComponent implements OnInit {
   openCustomersDialog() {
     let dialogRef = this.dialog.open(CustomersDialogComponent, {
       width: '800px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
@@ -178,6 +237,7 @@ export class CustomersListComponent implements OnInit {
     let dialogRef = this.dialog.open(CustomersDialogComponent, {
       width: '800px',
       data: customer,
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
@@ -193,7 +253,7 @@ export class CustomersListComponent implements OnInit {
       this.successMessageBox.openDialog();
     });
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       this.customers = this.customersData.filter((elem: Customer) => {
         return (
@@ -208,13 +268,9 @@ export class CustomersListComponent implements OnInit {
           )
         );
       });
+      paginator.firstPage();
     } else {
       this.customers = this.customersData;
-    }
-  }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
     }
   }
   get headers() {

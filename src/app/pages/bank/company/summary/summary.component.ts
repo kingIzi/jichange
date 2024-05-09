@@ -27,7 +27,11 @@ import {
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import {
   AbstractControl,
@@ -370,6 +374,7 @@ export class SummaryComponent implements OnInit {
       width: '800px',
       height: '600px',
       data: null,
+      disableClose: true,
     });
     this.addedCompanySuccessfully(
       this.translocoService.translate(
@@ -385,6 +390,7 @@ export class SummaryComponent implements OnInit {
     let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
       width: '800px',
       height: '600px',
+      disableClose: true,
       data: {
         companyData: company,
       },
@@ -417,8 +423,9 @@ export class SummaryComponent implements OnInit {
       ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
       : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       let indexes = this.headers.controls
         .map((control, index) => {
           return control.get('included')?.value ? index : -1;
@@ -430,7 +437,6 @@ export class SummaryComponent implements OnInit {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
     } else {
-      //this.requestList();
       this.companies = this.companiesData;
     }
   }

@@ -1,7 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
 
 <div
-  class="absolute top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-4 overflow-y-auto"
+  class="absolute py-2 top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-4 overflow-y-auto"
 >
   <div
     class="w-full col-span-full row-span-12 lg:row-span-4 lg:col-span-8 flex flex-col space-y-2"
@@ -39,7 +40,7 @@
         >
           {{ t("name") }}
         </p>
-        <div class="badge badge-sm badge-info font-inter text-white">+3</div>
+        <!-- <div class="badge badge-sm badge-info font-inter text-white">+3</div> -->
       </div>
       <a
         [routerLink]="'/main/company/inbox'"
@@ -54,11 +55,17 @@
       class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
     >
       <p
+        [class]="inboxApprovalLoading ? 'hidden' : ''"
         class="text-lg text-center"
         *transloco="let t; read: 'dashboard.dashboard.inboxApproval.errors'"
       >
         {{ t("emptyInbox") }}
       </p>
+      <ng-container *ngIf="inboxApprovalLoading">
+        <div class="w-full grid place-items-center mt-6">
+          <span class="loading loading-spinner loading-sm bg-darkPurple"></span>
+        </div>
+      </ng-container>
     </div>
     <ul
       *ngIf="inboxApprovals.length > 0"
@@ -75,8 +82,9 @@
               {{ info.MobNo }}
             </p>
           </div>
+          <app-approve-company-inbox #approveDialog></app-approve-company-inbox>
           <button
-            (click)="openEditCompanySummaryDialog(info)"
+            (click)="approveCompany(approveDialog, info)"
             *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
             class="btn btn-xs bg-lightYellow tracking-wide px-4"
           >
@@ -97,7 +105,7 @@
         >
           {{ t("name") }}
         </p>
-        <div class="badge badge-sm badge-info font-inter text-white">+3</div>
+        <!-- <div class="badge badge-sm badge-info font-inter text-white">+3</div> -->
       </div>
       <a
         [routerLink]="'/main/reports/transactions'"
@@ -345,7 +353,7 @@
               id="exampleSearch"
               [placeholder]="t('search')"
               #searchInput
-              (keyup)="searchTable(searchInput.value)"
+              (keyup)="searchTable(searchInput.value, paginator)"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -380,7 +388,7 @@
                           <p>
                             {{ header?.get("label")?.value }}
                           </p>
-                          <button>
+                          <button *ngIf="ind !== headersMap.DATE_POSTED">
                             <span
                               class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
                             >

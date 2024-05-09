@@ -1,5 +1,6 @@
 {
   "generatedInvoice": "Generated Invoice",
+  "addInvoice": "Add Invoice",
   "generatedInvoicesTable": [
     "Customer name",
     "Invoice No",
@@ -11,6 +12,11 @@
   "generateInvoiceView": {
     "viewTable": ["Description", "Quantity", "Unit Price", "Subtotal"]
   },
+  "errors": {
+    "noCustomersFound": "No customers found.",
+    "failedToDownload": "Failed to download invoice."
+  },
+  "cancelInvoice": "Are you sure you want to cancel this invoice.",
   "generateChart": {
     "generateChart": "Generate graph",
     "chartType": "Chart type",

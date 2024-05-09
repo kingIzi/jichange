@@ -89,14 +89,13 @@ export class CustomersDialogComponent implements OnInit {
   }
   submitCountryForm() {
     if (this.customerForm.valid) {
-      console.log(this.customerForm.value);
       this.showFormReady(this.customerForm.value);
       this.submitMessagBox.attachInvoice.asObservable().subscribe(() => {
-        this.router.navigate(['/vendor/invoice/20123']);
-        this.closeDialog();
+        // this.router.navigate(['/vendor/invoice/20123']);
+        // this.closeDialog();
       });
       this.submitMessagBox.addCustomer.asObservable().subscribe(() => {
-        this.closeDialog();
+        //this.closeDialog();
       });
     }
     this.customerForm.markAllAsTouched();

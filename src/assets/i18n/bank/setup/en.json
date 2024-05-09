@@ -111,6 +111,7 @@
   },
   "designation": {
     "addDesignation": "Add Designation",
+    "addedDesignationSuccessfully": "Added designation successfully!",
     "designation": "Designation",
     "form": {
       "placeholders": {
@@ -121,12 +122,14 @@
       },
       "dialog": {
         "invalidForm": "Invalid form",
+        "failed": "Failed",
         "missingDesignation": "Please provide a designation name",
         "removeDesignation": "Remove designation",
         "sureDelete": "Are you sure you want to delete this?",
         "removedSuccessfully": "Country deleted successfully!",
         "addedSuccessfully": "Country added successfully!",
-        "modifiedSuccessfully": "Country modified successfully!"
+        "modifiedSuccessfully": "Country modified successfully!",
+        "failedToAddDesignation": "Failed to add designation."
       }
     },
     "designationsTable": ["Designation"]
@@ -334,8 +337,9 @@
     }
   },
   "suspenseAccount": {
-    "addSuspenseAccount": "Add Suspense Account",
+    "addSuspenseAccount": "Add",
     "suspenseAccount": "Suspense Account",
+    "addedSuspenseAccountSuccessfully": "Added suspense account successfully!",
     "form": {
       "placeholders": {
         "suspenseAccount": "Enter suspense account"
@@ -344,15 +348,17 @@
         "suspenseAccount": "Please enter suspense account number"
       },
       "dialog": {
-        "invalidForm": "Invalid form",
-        "suspenseAccount": "You must provide a suspense account number",
-        "missingStatus": "Please select a status"
+        "invalidForm": "Invalid form.",
+        "failed": "Failed.",
+        "suspenseAccount": "You must provide a suspense account number.",
+        "missingStatus": "Please select a status.",
+        "failedToAddSuspenseAccount": "Failed to add suspense account."
       }
     },
-    "suspenseAccountsTable": ["Sno", "Suspense Account No", "Status"]
+    "suspenseAccountsTable": ["Suspense Account No", "Status"]
   },
   "depositAccount": {
-    "addDepositAccount": "Add deposit",
+    "addDepositAccount": "Add",
     "depositAccount": "Deposit Account",
     "form": {
       "vendor": "Vendor",

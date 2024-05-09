@@ -17,6 +17,13 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MatDialogRef } from '@angular/material/dialog';
 import { RegionDialogComponent } from '../region-dialog/region-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account.service';
+import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { TimeoutError, catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import { Company } from 'src/app/core/models/bank/company';
+import { SuspenseAccount } from 'src/app/core/models/bank/suspense-account';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-deposit-account-dialog',
@@ -29,6 +36,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -38,8 +46,11 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   ],
 })
 export class DepositAccountDialogComponent implements OnInit {
+  public startLoading: boolean = false;
   public depositAccountForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public customers: Company[] = [];
+  public accounts: SuspenseAccount[] = [];
+  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -47,24 +58,11 @@ export class DepositAccountDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RegionDialogComponent>,
-    private translocoService: TranslocoService
+    private translocoService: TranslocoService,
+    private suspenseAccountService: SuspenseAccountService,
+    private companyService: CompanyService,
+    private tr: TranslocoService
   ) {}
-  ngOnInit(): void {
-    this.createForm();
-  }
-  submitDepositForm() {
-    if (this.depositAccountForm.valid) {
-      this.isLoading.emit(this.depositAccountForm.value);
-    }
-    this.depositAccountForm.markAllAsTouched();
-    this.formErrors();
-  }
-  closeDialog() {
-    this.dialogRef.close({ data: 'Dialog closed' });
-  }
-  setControlValue(control: FormControl, value: string) {
-    control.setValue(value.trim());
-  }
   private formErrors(errorsPath: string = 'setup.depositAccount.form.dialog') {
     if (this.vendor.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -94,6 +92,60 @@ export class DepositAccountDialogComponent implements OnInit {
       account: this.fb.control('', [Validators.required]),
       reason: this.fb.control('', [Validators.required]),
     });
+  }
+  private buildPage() {
+    this.startLoading = true;
+    let customersListObservable = from(
+      this.companyService.getCustomersList({})
+    );
+    let accountsListObservable = from(
+      this.suspenseAccountService.getSuspenseActiveAccountList({})
+    );
+    let merged = zip(customersListObservable, accountsListObservable);
+    let response = lastValueFrom(
+      merged.pipe(
+        map((result) => {
+          return result;
+        }),
+        catchError((err) => {
+          throw err;
+        })
+      )
+    );
+    response
+      .then((res: Array<any>) => {
+        let [customers, accounts] = res;
+        this.startLoading = false;
+        this.customers = customers.response === 0 ? [] : customers.response;
+        this.accounts = accounts.response === 0 ? [] : accounts.response;
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        throw err;
+      });
+  }
+  ngOnInit(): void {
+    this.createForm();
+    this.buildPage();
+  }
+  submitDepositForm() {
+    if (this.depositAccountForm.valid) {
+      //this.isLoading.emit(this.depositAccountForm.value);
+      console.log(this.depositAccountForm.value);
+    }
+    this.depositAccountForm.markAllAsTouched();
+    this.formErrors();
+  }
+  closeDialog() {
+    this.dialogRef.close({ data: 'Dialog closed' });
+  }
+  setControlValue(control: FormControl, value: string) {
+    control.setValue(value.trim());
   }
   get vendor() {
     return this.depositAccountForm.get('vendor') as FormControl;

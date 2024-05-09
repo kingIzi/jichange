@@ -36,9 +36,10 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { toggle } from '../auth-animations';
-import { timer } from 'rxjs';
+import { TimeoutError, timer } from 'rxjs';
 import { UserRoles } from 'src/app/core/enums/bank/user-roles';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { LoginService } from 'src/app/core/services/login.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -72,7 +73,8 @@ export class SignInComponent implements OnInit {
     private fb: FormBuilder,
     private translocoService: TranslocoService,
     private router: Router,
-    private cdf: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private loginService: LoginService
   ) {}
   private createForm() {
     this.formGroup = this.fb.group({
@@ -112,58 +114,40 @@ export class SignInComponent implements OnInit {
         break;
     }
   }
+  private loginFailedMessageDialog() {
+    AppUtilities.openDisplayMessageBox(
+      this.displayMessageBox,
+      this.translocoService.translate(
+        `auth.loginForm.errors.dialogs.loginFailed`
+      ),
+      this.translocoService.translate(
+        `auth.loginForm.errors.dialogs.usernamePasswordIncorrect`
+      )
+    );
+    return;
+  }
   private signIn(value: { uname: string; pwd: string }) {
     this.startLoading = true;
-    this.requestService
-      .performPost(`/api/LoginUser/AddLogins`, value)
-      .subscribe({
-        next: (result) => {
-          this.startLoading = false;
-          let res = result as HttpDataResponse<LoginResponse>;
-          if (!res.response.Usno) {
-            AppUtilities.openDisplayMessageBox(
-              this.displayMessageBox,
-              this.translocoService.translate(
-                `auth.loginForm.errors.dialogs.loginFailed`
-              ),
-              this.translocoService.translate(
-                `auth.loginForm.errors.dialogs.usernamePasswordIncorrect`
-              )
-            );
-            return;
-          }
-          this.cdf.detectChanges();
-          this.switchUserLogin(res.response);
-        },
-        error: (err) => {
-          this.startLoading = false;
-          AppUtilities.noInternetError(
-            this.displayMessageBox,
-            this.translocoService
-          );
-          this.cdf.detectChanges();
-          throw err;
-        },
-      });
-  }
-  private verifyControlNumber(
-    result: { control: string },
-    dialogRef: MatDialogRef<ControlNumberDetailsComponent>
-  ) {
-    this.startLoading = true;
-    this.requestService
-      .performPost(`/api/Invoice/GetControl`, result)
-      .subscribe({
-        next: (result) => {
-          this.startLoading = false;
-          dialogRef.componentInstance.controlNumberNotFound();
-        },
-        error: (err) => {
-          this.startLoading = false;
-          dialogRef.componentInstance.submitFailed();
-          console.error(err);
-          throw err;
-        },
+    this.loginService
+      .loginUser(value)
+      .then((results: any) => {
+        if (!results.response.Usno) {
+          this.loginFailedMessageDialog();
+          return;
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        this.switchUserLogin(results.response);
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.translocoService
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
       });
   }
   ngOnInit(): void {
@@ -173,9 +157,7 @@ export class SignInComponent implements OnInit {
   openControlNumberDetailsDialog() {
     let dialogRef = this.dialog.open(ControlNumberDetailsComponent, {
       width: '600px',
-    });
-    dialogRef.componentInstance.isLoading.asObservable().subscribe((result) => {
-      this.verifyControlNumber(result, dialogRef);
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
@@ -184,16 +166,7 @@ export class SignInComponent implements OnInit {
   openVendorRegistrationDialog() {
     let dialogRef = this.dialog.open(VendorRegistrationComponent, {
       width: '600px',
-    });
-    dialogRef.componentInstance.loadingStart.asObservable().subscribe(() => {
-      if (!this.startLoading) {
-        //this.startLoading = true;
-      }
-    });
-    dialogRef.componentInstance.loadingEnd.asObservable().subscribe(() => {
-      if (this.startLoading) {
-        //this.startLoading = false;
-      }
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Vendor registration closed: ${result}`);

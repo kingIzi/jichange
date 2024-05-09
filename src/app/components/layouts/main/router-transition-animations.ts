@@ -191,9 +191,28 @@ let reportsModules = Array.from(
   (_, index) => `reports-module-${index + 1}`
 );
 
+let vendorInvoiceModules = Array.from(
+  { length: 3 },
+  (_, index) => `invoice-module-${index + 1}`
+);
+
+let vendorReportsModules = Array.from(
+  { length: 6 },
+  (_, index) => `reports-module-${index + 1}`
+);
+
+let vendorCompanyModules = Array.from(
+  { length: 1 },
+  (_, index) => `company-module-${index + 1}`
+);
+
 let companyRoutes = generateFactorialStrings(companyModules, '<=>');
 let setupRoutes = generateFactorialStrings(setupModules, '<=>');
 let reportsRoutes = generateFactorialStrings(reportsModules, '<=>');
+
+let vendorInvoiceRoutes = generateFactorialStrings(vendorInvoiceModules, '<=>');
+let vendorReportRoutes = generateFactorialStrings(vendorReportsModules, '<=>');
+let vendorCompanyRoutes = generateFactorialStrings(vendorCompanyModules, '<=>');
 
 function routesStates(initalArr: string[], arr: string[]) {
   let output: any[][] = [];
@@ -231,9 +250,27 @@ export const vendorAnimations = trigger('vendorAnimate', [
   transition('dashboard => *', slideTo('right')),
   transition('* => dashboard', slideTo('left')),
   transition(
-    'generated-invoice <=> invoice-details, isLeft <=> generated-invoice, isRight <=> generated-invoice,isLeft <=> invoice-details, isRight <=> invoice-details',
+    routesStates(vendorInvoiceModules, vendorReportsModules).join(','),
     stepper()
   ),
-  transition(reportsRoutes.join(','), fadeEase()),
-  transition(nestedRouteStates('isLeft', reportsModules).join(','), fadeEase()),
+  transition(
+    routesStates(vendorCompanyModules, vendorInvoiceModules).join(','),
+    stepper()
+  ),
+  transition(
+    routesStates(vendorCompanyModules, vendorReportsModules).join(','),
+    stepper()
+  ),
+  transition(vendorInvoiceRoutes.join(','), fadeEase()),
+  transition(vendorReportRoutes.join(','), fadeEase()),
+  transition(
+    nestedRouteStates('isLeft', vendorInvoiceModules).join(','),
+    stepper()
+  ),
+  transition(
+    nestedRouteStates('isLeft', vendorReportsModules).join(','),
+    fadeEase()
+  ),
+  transition('isLeft <=> company-module-1', stepper()),
+  transition('isLeft <=> isLeft', stepper()),
 ]);

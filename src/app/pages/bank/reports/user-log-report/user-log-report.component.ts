@@ -13,7 +13,11 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import {
   AbstractControl,
   FormArray,
@@ -272,8 +276,9 @@ export class UserLogReportComponent implements OnInit {
   dateToFormat(date: string) {
     return new Date(date);
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       let indexes = this.headers.controls
         .map((control, index) => {
           return control.get('included')?.value ? index : -1;

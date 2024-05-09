@@ -29,10 +29,14 @@ import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-m
 import { Country } from 'src/app/core/models/bank/country';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { CountryService } from 'src/app/core/services/setup/country.service';
+import { CountryService } from 'src/app/core/services/bank/setup/country.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-country-list',
@@ -234,6 +238,7 @@ export class CountryListComponent implements OnInit {
   openAddCountryDialog() {
     let dialogRef = this.dialog.open(CountryDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.componentInstance.addedCountry
       .asObservable()
@@ -245,6 +250,7 @@ export class CountryListComponent implements OnInit {
   openEditCountryDialog(country: Country) {
     let dialogRef = this.dialog.open(CountryDialogComponent, {
       width: '600px',
+      disableClose: true,
       data: {
         country: country,
       },
@@ -282,8 +288,9 @@ export class CountryListComponent implements OnInit {
       sortAsc?.setValue(false);
     }
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       this.countries = this.countriesData.filter((elem) => {
         return elem.Country_Name.toLocaleLowerCase().includes(
           searchText.toLocaleLowerCase()

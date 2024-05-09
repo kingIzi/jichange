@@ -12,7 +12,8 @@
     "failed": "Failed",
     "columns": "Columns",
     "warning": "Warning",
-    "any": "Any"
+    "any": "Any",
+    "confirm": "Confirm"
   },
   "actions": {
     "submit": "Submit",
@@ -29,7 +30,7 @@
     "noDataFound": "No data found",
     "validDate": "Please select a valid date",
     "contactSupport": "An unexpected error occurred, please try again or contact support.",
-    "timeoutError": "Request timed out. Please try again."
+    "timeoutError": "Request timed out. Please verify your connection or try again."
   },
   "bankHeaders": [
     {
@@ -75,12 +76,12 @@
       "dropdowns": []
     },
     {
-      "name": "Invoice details",
+      "name": "Company users",
       "dropdowns": []
     },
     {
-      "name": "Generated invoice",
-      "dropdowns": []
+      "name": "Invoices",
+      "dropdowns": ["Amendments", "Cancelled", "Generated"]
     },
     {
       "name": "Reports",

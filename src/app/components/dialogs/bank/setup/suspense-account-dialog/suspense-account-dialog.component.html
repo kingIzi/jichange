@@ -1,5 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -24,19 +25,12 @@
         <input
           *transloco="let t; read: 'setup.suspenseAccount.form.placeholders'"
           #controlNumber
-          formControlName="suspenseAccountNo"
-          (change)="setCountryValue(controlNumber.value)"
+          [formControl]="account"
           type="text"
           [placeholder]="t('suspenseAccount')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"
         />
-        <span
-          *ngIf="
-            suspenseAccountNo &&
-            suspenseAccountNo.invalid &&
-            suspenseAccountNo.touched
-          "
-        >
+        <span *ngIf="account && account.invalid && account.touched">
           <p
             *transloco="let t; read: 'setup.suspenseAccount.form.errors'"
             class="text-xs text-red-600"
@@ -51,34 +45,34 @@
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
-            <label class="label cursor-pointer">
-              <span
-                *transloco="let t; read: 'defaults'"
-                class="label-text text-xs font-inter"
-              >
+            <label
+              class="label cursor-pointer flex flex-row space-x-0.5"
+              *transloco="let t; read: 'defaults'"
+            >
+              <span class="label-text text-xs font-inter">
                 {{ t("active") }}
               </span>
               <input
                 type="radio"
-                formControlName="status"
+                [formControl]="status"
                 class="radio radio-xs"
-                [value]="true"
+                [value]="'Active'"
                 checked
               />
             </label>
           </div>
           <div class="form-control">
-            <label class="label cursor-pointer">
-              <span
-                *transloco="let t; read: 'defaults'"
-                class="label-text text-xs font-inter"
-              >
+            <label
+              class="label cursor-pointer flex flex-row space-x-0.5"
+              *transloco="let t; read: 'defaults'"
+            >
+              <span class="label-text text-xs font-inter">
                 {{ t("inActive") }}
               </span>
               <input
-                formControlName="status"
+                [formControl]="status"
                 type="radio"
-                [value]="false"
+                [value]="'Inactive'"
                 class="radio radio-xs"
               />
             </label>

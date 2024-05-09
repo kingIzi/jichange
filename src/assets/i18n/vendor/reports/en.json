@@ -47,6 +47,7 @@
       "customer": "Customer",
       "startDate": "Start date",
       "endDate": "End date",
+      "invoiceNo": "Invoice number",
       "placeholders": {
         "all": "all"
       },
@@ -55,12 +56,14 @@
         "customer": "Please select a customer",
         "startDate": "Please select a start date",
         "endDate": "Please select an end date",
+        "invoiceNo": "Please select an invoice number",
         "dialog": {
           "invalidForm": "Invalid form",
           "company": "You must select a company",
           "customer": "You must select a customer",
           "startDate": "You must select a start date",
-          "endDate": "You must select an end date"
+          "endDate": "You must select an end date",
+          "invoiceNo": "You must select an invoice number"
         }
       }
     },
@@ -90,7 +93,7 @@
     ]
   },
   "customerDetailReport": {
-    "customerDetailReport": "Customer detail report",
+    "customerDetailReport": "Vendor detail report",
     "form": {
       "company": "Company",
       "region": "region",

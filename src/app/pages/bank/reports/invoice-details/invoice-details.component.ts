@@ -17,7 +17,11 @@ import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-f
 import { GeneratedInvoiceDialogComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-dialog/generated-invoice-dialog.component';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { Datepicker, Input, initTE } from 'tw-elements';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { Company } from 'src/app/core/models/bank/company';
 import { TimeoutError, firstValueFrom } from 'rxjs';
 import { Customer } from 'src/app/core/models/bank/customer';
@@ -401,8 +405,9 @@ export class InvoiceDetailsComponent implements OnInit {
       index === this.headersMap.WITHOUT_VAT
     );
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       let indexes = this.headers.controls
         .map((control, index) => {
           return control.get('included')?.value ? index : -1;

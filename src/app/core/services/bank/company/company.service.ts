@@ -51,4 +51,21 @@ export class CompanyService {
     );
     return data;
   }
+  public async postCompanyUsersList(body: { compid: number }) {
+    const data = await lastValueFrom(
+      this.client.performPost(`/api/CompanyUsers/GetCompanyUserss`, body)
+    );
+    return data;
+  }
+  public async approveCompany(body: {
+    compsno: number;
+    pfx: string;
+    ssno: string;
+    userid: number;
+  }) {
+    const data = await lastValueFrom(
+      this.client.performPost(`/api/CompanyInbox/AddCompanyBank`, body)
+    );
+    return data;
+  }
 }

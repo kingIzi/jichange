@@ -1,5 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -23,13 +24,12 @@
       <input
         *transloco="let t; read: 'setup.designation.form.placeholders'"
         #controlNumber
-        formControlName="designation"
-        (change)="setDesignationValue(controlNumber.value)"
+        [formControl]="desg"
         type="text"
         [placeholder]="t('name')"
         class="input input-bordered w-full max-w-lg bg-transparent text-black"
       />
-      <span *ngIf="designation && designation.invalid && designation.touched">
+      <span *ngIf="desg && desg.invalid && desg.touched">
         <p
           *transloco="let t; read: 'setup.designation.form.errors'"
           class="text-xs text-red-600"

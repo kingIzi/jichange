@@ -1,4 +1,5 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -19,10 +20,46 @@
           *transloco="let t; read: 'reports.invoiceDetails.form'"
           class="text-xs"
         >
+          {{ t("company") }}
+        </p>
+        <select
+          [formControl]="compid"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="'all'"
+          >
+            {{ t("all") }}
+          </option>
+          <ng-container *ngIf="companies.length > 0">
+            <option
+              *ngFor="let comp of companies; index as i"
+              [value]="comp.CompSno"
+            >
+              {{ comp.CompName }}
+            </option>
+          </ng-container>
+        </select>
+        <span *ngIf="compid && compid.invalid && compid.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("company") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
           {{ t("customer") }}
         </p>
         <select
-          [formControl]="cusid"
+          [formControl]="cust"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -35,13 +72,13 @@
           <ng-container *ngIf="customers.length > 0">
             <option
               *ngFor="let customer of customers; index as i"
-              [value]="customer.Cust_Sno"
+              [value]="customer.Cus_Mas_Sno"
             >
-              {{ customer.Cust_Name }}
+              {{ customer.Customer_Name }}
             </option>
           </ng-container>
         </select>
-        <span *ngIf="cusid && cusid.invalid && cusid.touched">
+        <span *ngIf="cust && cust.invalid && cust.touched">
           <p
             *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"
@@ -52,111 +89,81 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p
-          *transloco="let t; read: 'reports.amendmentDetails.form'"
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
           class="text-xs"
         >
-          {{ t("status") }}
+          {{ t("invoiceNo") }}
         </p>
         <select
-          [formControl]="cusid"
+          [formControl]="invno"
           class="select select-sm select-bordered w-full"
         >
-          <option *transloco="let t; read: 'defaults'" selected [value]="'any'">
-            {{ t("any") }}
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="'all'"
+          >
+            {{ t("all") }}
           </option>
-          <ng-container *ngIf="statuses.length > 0">
+          <ng-container *ngIf="invoices.length > 0">
             <option
-              *ngFor="let status of statuses; index as i"
-              [value]="status"
+              *ngFor="let invoice of invoices; index as i"
+              [value]="invoice.Inv_Mas_Sno"
             >
-              {{ status }}
+              {{ invoice.Invoice_No }}
             </option>
           </ng-container>
         </select>
-        <span *ngIf="status && status.invalid && status.touched">
+        <span *ngIf="invno && invno.invalid && invno.touched">
           <p
-            *transloco="let t; read: 'reports.amendmentDetails.form.errors'"
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"
           >
-            {{ t("status") }}
+            {{ t("invoiceNo") }}
           </p>
         </span>
       </div>
       <div class="flex flex-col space-y-1">
         <p
-          *transloco="let t; read: 'reports.amendmentDetails.form'"
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
           class="text-xs"
         >
-          {{ t("paymentType") }}
+          {{ t("startDate") }}
         </p>
-        <select
-          [formControl]="cusid"
-          class="select select-sm select-bordered w-full"
-        >
-          <option *transloco="let t; read: 'defaults'" selected [value]="'any'">
-            {{ t("any") }}
-          </option>
-          <ng-container *ngIf="paymentTypes.length > 0">
-            <option
-              *ngFor="let paymentType of paymentTypes; index as i"
-              [value]="paymentType"
-            >
-              {{ paymentType }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="paymentType && paymentType.invalid && paymentType.touched">
+        <input
+          type="date"
+          [formControl]="stdate"
+          class="input input-sm input-bordered"
+        />
+        <span *ngIf="stdate && stdate.invalid && stdate.touched">
           <p
-            *transloco="let t; read: 'reports.amendmentDetails.form.errors'"
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"
-          >
-            {{ t("paymentType") }}
-          </p>
-        </span>
-      </div>
-      <div class="col-span-full grid grid-cols-2 gap-2">
-        <div class="flex flex-col space-y-1">
-          <p
-            *transloco="let t; read: 'reports.invoiceDetails.form'"
-            class="text-xs"
           >
             {{ t("startDate") }}
           </p>
-          <input
-            type="date"
-            [formControl]="stdate"
-            class="input input-sm input-bordered"
-          />
-          <span *ngIf="stdate && stdate.invalid && stdate.touched">
-            <p
-              *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-              class="text-danger-700 text-xs"
-            >
-              {{ t("startDate") }}
-            </p>
-          </span>
-        </div>
-        <div class="flex flex-col space-y-1">
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("endDate") }}
+        </p>
+        <input
+          type="date"
+          [formControl]="enddate"
+          class="input input-sm input-bordered"
+        />
+        <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
-            *transloco="let t; read: 'reports.invoiceDetails.form'"
-            class="text-xs"
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
           >
             {{ t("endDate") }}
           </p>
-          <input
-            type="date"
-            [formControl]="enddate"
-            class="input input-sm input-bordered"
-          />
-          <span *ngIf="enddate && enddate.invalid && enddate.touched">
-            <p
-              *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-              class="text-danger-700 text-xs"
-            >
-              {{ t("endDate") }}
-            </p>
-          </span>
-        </div>
+        </span>
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button

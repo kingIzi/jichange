@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Inject,
@@ -23,6 +24,10 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Designation } from 'src/app/core/models/bank/designation';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { DesignationService } from 'src/app/core/services/bank/setup/designation.service';
+import { TimeoutError } from 'rxjs';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-designation-dialog',
@@ -35,6 +40,7 @@ import { Designation } from 'src/app/core/models/bank/designation';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -44,7 +50,9 @@ import { Designation } from 'src/app/core/models/bank/designation';
   ],
 })
 export class DesignationDialogComponent implements OnInit {
+  public startLoading: boolean = false;
   public designationForm!: FormGroup;
+  public userProfile!: LoginResponse;
   public isLoading = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -53,51 +61,98 @@ export class DesignationDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DesignationDialogComponent>,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
+    private designationService: DesignationService,
+    private cdr: ChangeDetectorRef,
+    @Inject(TRANSLOCO_SCOPE) private scope: any,
     @Inject(MAT_DIALOG_DATA) public data: { designationData: Designation }
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private formErrors(errorsPath: string = 'setup.designation.form.dialog') {
+    if (this.designationForm.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingDesignation`)
+      );
+    }
+  }
+  private createForm() {
+    this.designationForm = this.fb.group({
+      desg: this.fb.control('', [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      dummy: this.fb.control(true, [Validators.required]),
+    });
+  }
+  private createEditForm(designation: Designation) {
+    this.designationForm = this.fb.group({
+      desg: this.fb.control(designation.Desg_Name, [Validators.required]),
+      sno: this.fb.control(designation.Desg_Id, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      dummy: this.fb.control(true, [Validators.required]),
+    });
+  }
   ngOnInit(): void {
+    this.parseUserProfile();
     if (this.data) {
       this.createEditForm(this.data.designationData);
     } else {
       this.createForm();
     }
   }
-  setDesignationValue(value: string) {
-    this.designation.setValue(value.trim());
+  requestPostDesignation(form: any) {
+    this.startLoading = true;
+    this.designationService
+      .addDesignation(form)
+      .then((res: any) => {
+        if (typeof res.response === 'number' && res.response > 0) {
+          let dialog = AppUtilities.openSuccessMessageBox(
+            this.successMessageBox,
+            this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
+          );
+          dialog.addEventListener('close', () => {
+            this.closeDialog();
+          });
+        } else if (typeof res.response === 'boolean' && res.response) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`setup.designation.form.dialog.failed`),
+            this.tr.translate(
+              `setup.designation.form.dialog.failedToAddDesignation`
+            )
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitDesignationForm() {
     if (this.designationForm.valid) {
-      this.isLoading.emit(this.designationForm.value);
+      this.requestPostDesignation(this.designationForm.value);
     }
     this.designationForm.markAllAsTouched();
     this.formErrors();
   }
-  private formErrors(errorsPath: string = 'setup.designation.form.dialog') {
-    if (this.designation.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingDesignation`)
-      );
-    }
-  }
-  private createForm() {
-    this.designationForm = this.fb.group({
-      designation: this.fb.control('', [Validators.required]),
-    });
-  }
-  private createEditForm(designation: Designation) {
-    this.designationForm = this.fb.group({
-      designation: this.fb.control(designation.Desg_Name, [
-        Validators.required,
-      ]),
-    });
-  }
-  get designation() {
-    return this.designationForm.get('designation') as FormControl;
+  get desg() {
+    return this.designationForm.get('desg') as FormControl;
   }
 }

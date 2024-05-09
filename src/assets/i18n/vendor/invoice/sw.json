@@ -17,6 +17,8 @@
     "remarks": "Maelezo",
     "status": "Hali",
     "addNewCustomer": "Ongeza mteja mpya",
+    "company": "Kampuni",
+    "invoiceRemark": "Maoni ya ankara",
     "actions": {
       "sureToAddCustomer": "Una uhakika unataka kuongeza mteja huyu?",
       "addInvoiceAsWell": "Je! Ungependa pia kuambatanisha ankara kwa mteja huyu?",
@@ -30,7 +32,8 @@
       "invoiceExpire": "Ingiza tarehe ya kumalizika kwa bili",
       "customer": "Chagua mteja",
       "paymentType": "Chagua aina ya malipo",
-      "status": "Chagua hali"
+      "status": "Chagua hali",
+      "invoiceRemark": "Ingiza alama ya ankara"
     },
     "errors": {
       "invoiceNo": "Tafadhali ingiza nambari ya bili",
@@ -40,10 +43,13 @@
       "customer": "Tafadhali chagua mteja",
       "paymentType": "Tafadhali chagua aina ya malipo",
       "status": "Tafadhali chagua hali",
+      "invoiceRemark": "Tafadhali ingiza alama ya ankara",
       "itemDetails": {
         "missingDescription": "Tafadhali jaza",
         "missingQuantity": "Eleza kiasi",
-        "missingUnitPrice": "Eleza bei ya kitengo"
+        "noQuantity": "Haiwezi kuwa 0",
+        "missingUnitPrice": "Eleza bei ya kitengo",
+        "noUnitPrice": "Haiwezi kuwa 0"
       }
     },
     "dialog": {
@@ -55,7 +61,9 @@
       "customer": "Tafadhali eleza mteja",
       "paymentType": "Tafadhali eleza aina ya malipo",
       "maximumItemDetails": "Idadi kubwa ya bidhaa {} imefikiwa.",
-      "status": "Unapaswa kutoa hali."
+      "status": "Unapaswa kutoa hali.",
+      "total": "Lazima angalau uongeze kipengee kimoja ili kuongeza ankara.",
+      "invoiceRemark": "Lazima ubainishe alama ya ankara."
     }
   },
   "invoiceDetailsTable": [
@@ -65,5 +73,44 @@
     "Jina la Mteja",
     "Jumla ya Kiasi",
     "Maelezo"
-  ]
+  ],
+  "amendments": {
+    "amendments": "Marekebisho"
+  },
+  "invoiceDetailsForm": {
+    "invoiceDetails": "Maelezo ya Bili",
+    "form": {
+      "company": "Kampuni",
+      "customer": "Muuzaji",
+      "startDate": "Tarehe ya Kuanzia",
+      "endDate": "Tarehe ya Mwisho",
+      "invoiceNo": "Nambari ya ankara",
+      "placeholders": {
+        "all": "yote"
+      },
+      "errors": {
+        "company": "Tafadhali chagua kampuni",
+        "customer": "Tafadhali chagua mteja",
+        "startDate": "Tafadhali chagua tarehe ya kuanza",
+        "endDate": "Tafadhali chagua tarehe ya mwisho",
+        "invoiceNo": "Tafadhali chagua nambari ya ankara",
+        "dialog": {
+          "invalidForm": "Fomu batili",
+          "company": "Lazima uchague kampuni",
+          "customer": "Lazima uchague mteja",
+          "startDate": "Lazima uchague tarehe ya kuanza",
+          "endDate": "Lazima uchague tarehe ya mwisho",
+          "invoiceNo": "Lazima uchague nambari ya ankara"
+        }
+      }
+    },
+    "invoiceDetailsTable": [
+      "Nambari ya Bili",
+      "Tarehe",
+      "Mteja",
+      "Jumla",
+      "Kwa VAT",
+      "Bila VAT"
+    ]
+  }
 }

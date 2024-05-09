@@ -14,7 +14,11 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import {
   Observable,
@@ -368,8 +372,9 @@ export class CustomerDetailReportComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       let indexes = this.headers.controls
         .map((control, index) => {
           return control.get('included')?.value ? index : -1;

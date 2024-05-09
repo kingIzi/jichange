@@ -7,28 +7,28 @@
     <h2 *transloco="let t; read: 'company.summary'" class="text-lg font-bold">
       {{ t("name") }}
     </h2>
-    <button
-      (click)="openCompanySummaryDialog()"
-      class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
-    >
-      <span class="material-symbols-outlined text-darkPurple">
-        add_circle
-      </span>
-      <p
-        *transloco="let t; read: 'company.summary.actions'"
-        class="text-sm text-darkPurple"
+    <div class="flex flex-row items-center space-x-2">
+      <a
+        (click)="downloadSheet()"
+        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
       >
-        {{ t("addCompany") }}
-      </p>
-    </button>
-  </div>
-  <div class="flex flex-row items-center justify-end space-x-2">
-    <a
-      (click)="downloadSheet()"
-      class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
-    >
-      <span class="material-symbols-outlined text-success"> download </span>
-    </a>
+        <span class="material-symbols-outlined text-success"> download </span>
+      </a>
+      <button
+        (click)="openCompanySummaryDialog()"
+        class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
+      >
+        <span class="material-symbols-outlined text-darkPurple">
+          add_circle
+        </span>
+        <p
+          *transloco="let t; read: 'company.summary.actions'"
+          class="text-sm text-darkPurple"
+        >
+          {{ t("addCompany") }}
+        </p>
+      </button>
+    </div>
   </div>
   <div
     [formGroup]="headersFormGroup"
@@ -76,7 +76,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
-            (keyup)="searchTable(searchInput.value)"
+            (keyup)="searchTable(searchInput.value, paginator)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"

@@ -36,6 +36,7 @@ export class SmtpListComponent implements OnInit {
   openSmtpForm() {
     let dialogRef = this.dialog.open(SmtpDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

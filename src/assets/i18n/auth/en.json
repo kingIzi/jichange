@@ -52,6 +52,7 @@
         "mobileNo": "Please add a valid phone number",
         "branch": "Please specify",
         "accountNo": "Enter valid account number",
+        "invalidAccountNo": "Invalid account number",
         "dialogs": {
           "invalidFormError": "Invalid form",
           "missingVendorName": "Please provide a vendor name",
@@ -69,6 +70,13 @@
   },
   "controlNumberDetails": {
     "title": "Control Number Details",
+    "controlFound": {
+      "controlNo": "Control Number",
+      "customerName": "Customer name",
+      "paymentType": "Payment type",
+      "itemTotalAmount": "Item total amount",
+      "balance": "balance"
+    },
     "form": {
       "controlName": "Control number",
       "placeholders": {

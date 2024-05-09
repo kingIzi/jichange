@@ -28,7 +28,6 @@
             <a
               #ahref
               *ngIf="ind !== 3"
-              [routerLink]="header.get('rootLink')?.value"
               [routerLinkActive]="'text-darkPurple'"
               [class]="
                 verifyCurrentRoute(header.get('rootLink')?.value)
@@ -36,7 +35,7 @@
                   : 'text-black bg-transparent'
               "
               class="capitalize"
-              (click)="routerClicked(ahref)"
+              (click)="routerClicked(ahref, header.get('rootLink')?.value)"
               formGroupName="{{ ind }}"
               >{{ header.get("label")?.value }}</a
             >
@@ -63,7 +62,7 @@
                 #ahref
                 [routerLink]="dropdown.get('routerLink')?.value"
                 [routerLinkActive]="'text-darkPurple'"
-                (click)="routerClicked(ahref)"
+                (click)="routerClicked(ahref, header.get('rootLink')?.value)"
                 class="capitalize"
                 >{{ dropdown.get("label")?.value }}</a
               >
@@ -98,7 +97,7 @@
       >
         <ng-container>
           <a
-            *ngIf="ind !== 3"
+            *ngIf="ind !== 3 && ind !== 2"
             [routerLink]="header.get('rootLink')?.value"
             [routerLinkActive]="'text-darkPurple'"
             tabindex="0"
@@ -115,7 +114,7 @@
             </p>
           </a>
           <a
-            *ngIf="ind === 3"
+            *ngIf="ind === 3 || ind === 2"
             tabindex="0"
             role="button"
             class="flex flex-row items-center m-1"
@@ -151,7 +150,7 @@
               #ahref
               [routerLink]="dropdown.get('routerLink')?.value"
               [routerLinkActive]="'text-darkPurple'"
-              (click)="routerClicked(ahref)"
+              (click)="routerClicked(ahref, header.get('rootLink')?.value)"
               class="capitalize"
               >{{ dropdown.get("label")?.value }}</a
             >

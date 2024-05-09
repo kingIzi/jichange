@@ -49,6 +49,7 @@
         "mobileNo": "Tafadhali ongeza nambari halali ya simu",
         "branch": "Tafadhali bainisha",
         "accountNo": "Ingiza namba halali ya akaunti",
+        "invalidAccountNo": "Namba ya akaunti batili",
         "dialogs": {
           "invalidFormError": "Fomu batili",
           "missingVendorName": "Tafadhali toa jina la muuzaji",
@@ -66,6 +67,13 @@
   },
   "controlNumberDetails": {
     "title": "Maelezo ya Nambari ya Kudhibiti",
+    "controlFound": {
+      "controlNo": "Namba ya Udhibiti",
+      "customerName": "Jina la Mteja",
+      "paymentType": "Aina ya Malipo",
+      "itemTotalAmount": "Jumla ya Bidhaa",
+      "balance": "Salio"
+    },
     "form": {
       "controlName": "Nambari ya kudhibiti",
       "placeholders": {

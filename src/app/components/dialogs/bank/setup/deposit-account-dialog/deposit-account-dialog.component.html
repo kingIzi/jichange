@@ -1,5 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -22,7 +23,7 @@
           {{ t("vendor") }}<span class="text-red-600">*</span>
         </p>
         <select
-          formControlName="vendor"
+          [formControl]="vendor"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -32,7 +33,16 @@
           >
             {{ t("vendor") }}
           </option>
-          <option value="123">123</option>
+          <option
+            *ngFor="
+              let customer of customers;
+              index as ind;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+            [value]="customer.CompSno"
+          >
+            {{ customer.CompName }}
+          </option>
         </select>
         <span *ngIf="vendor && vendor.invalid && vendor.touched">
           <p
@@ -51,7 +61,7 @@
           {{ t("account") }}<span class="text-red-600">*</span>
         </p>
         <select
-          formControlName="account"
+          [formControl]="account"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -61,7 +71,17 @@
           >
             {{ t("account") }}
           </option>
-          <option value="123">123</option>
+          <option
+            *ngFor="
+              let account of accounts;
+              index as i;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+            [value]="account.Sus_Acc_No"
+          >
+            {{ account.Sus_Acc_No ? account.Sus_Acc_No : "-" }}
+          </option>
+          <!-- <option value="123">123</option> -->
         </select>
         <span *ngIf="account && account.invalid && account.touched">
           <p
@@ -82,7 +102,7 @@
         <input
           *transloco="let t; read: 'setup.depositAccount.form.placeholders'"
           #controlNumber
-          formControlName="reason"
+          [formControl]="reason"
           (change)="setControlValue(reason, controlNumber.value)"
           type="text"
           [placeholder]="t('reason')"

@@ -1,5 +1,6 @@
 {
   "generatedInvoice": "Bili iliyotengenezwa",
+  "addInvoice": "Ongeza Bili",
   "generatedInvoicesTable": [
     "Jina la Mteja",
     "Nambari ya Bili",
@@ -11,6 +12,11 @@
   "generateInvoiceView": {
     "viewTable": ["Maelezo", "Kiasi", "Bei", "Jumla"]
   },
+  "errors": {
+    "noCustomersFound": "Hakuna wateja waliopatikana.",
+    "failedToDownload": "Imeshindwa kupakua ankara."
+  },
+  "cancelInvoice": "Una uhakika unataka kufuta ankara hii?",
   "generateChart": {
     "generateChart": "Jenga grafu",
     "chartType": "Aina ya Grafu",

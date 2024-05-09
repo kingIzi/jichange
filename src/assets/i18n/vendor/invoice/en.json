@@ -1,5 +1,5 @@
 {
-  "invoiceDetails": "Invoice details",
+  "invoiceDetails": "Invoice cancelled",
   "addInvoice": "Add Invoice",
   "createInvoice": "Create Invoice",
   "form": {
@@ -16,7 +16,10 @@
     "totalPrice": "Total price",
     "remarks": "Remarks",
     "status": "Status",
+    "currency": "Currency",
     "addNewCustomer": "Add new customer",
+    "company": "Company",
+    "invoiceRemark": "Invoice remark",
     "actions": {
       "sureToAddCustomer": "Are you sure you want to add this customer?",
       "addInvoiceAsWell": "Would you also want to attach an invoice to this customer?",
@@ -30,7 +33,10 @@
       "invoiceExpire": "enter the invoice's expiry date",
       "customer": "Select a customer",
       "paymentType": "Select a payment type",
-      "status": "Select a status"
+      "status": "Select a status",
+      "currency": "Select a currency",
+      "company": "Select a company",
+      "invoiceRemark": "Enter invoice remark"
     },
     "errors": {
       "invoiceNo": "Please enter invoice number",
@@ -40,10 +46,15 @@
       "customer": "Please select a customer",
       "paymentType": "Please select a payment type",
       "status": "Please select a status",
+      "currency": "Please select a currency",
+      "company": "Please select a company",
+      "invoiceRemark": "Please enter invoice remark",
       "itemDetails": {
         "missingDescription": "Please fill",
-        "missingQuantity": "Specify a quantity",
-        "missingUnitPrice": "Specify a unit price"
+        "missingQuantity": "Specify",
+        "noQuantity": "Cannot be 0",
+        "missingUnitPrice": "Specify",
+        "noUnitPrice": "Cannot be 0"
       }
     },
     "dialog": {
@@ -55,7 +66,13 @@
       "customer": "Please specify a customer",
       "paymentType": "Please specify a payment type",
       "maximumItemDetails": "Maximum number of items {} reached.",
-      "status": "You must specify a status."
+      "status": "You must specify a status.",
+      "currency": "You must specify a currency.",
+      "company": "You must specify a company.",
+      "total": "You must at least add one item to add an invoice.",
+      "invoiceRemark": "You must specify an invoice remark",
+      "invoiceExists": "Failed to add invoice because it already exists.",
+      "addedInvoiceSuccessfully": "Added invoice successfully!"
     }
   },
   "invoiceDetailsTable": [
@@ -65,5 +82,44 @@
     "Customer name",
     "Total amount",
     "Remarks"
-  ]
+  ],
+  "amendments": {
+    "amendments": "Amendments"
+  },
+  "invoiceDetailsForm": {
+    "invoiceDetails": "Invoice details",
+    "form": {
+      "company": "Company",
+      "customer": "Customer",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "invoiceNo": "Invoice number",
+      "placeholders": {
+        "all": "all"
+      },
+      "errors": {
+        "company": "Please select a company",
+        "customer": "Please select a customer",
+        "startDate": "Please select a start date",
+        "endDate": "Please select an end date",
+        "invoiceNo": "Please select an invoice number",
+        "dialog": {
+          "invalidForm": "Invalid form",
+          "company": "You must select a company",
+          "customer": "You must select a customer",
+          "startDate": "You must select a start date",
+          "endDate": "You must select an end date",
+          "invoiceNo": "You must select an invoice number"
+        }
+      }
+    },
+    "invoiceDetailsTable": [
+      "Invoice No",
+      "Date",
+      "Customer",
+      "Total",
+      "With VAT",
+      "Without VAT"
+    ]
+  }
 }

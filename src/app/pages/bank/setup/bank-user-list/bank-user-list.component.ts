@@ -25,7 +25,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { BankService } from 'src/app/core/services/setup/bank.service';
+import { BankService } from 'src/app/core/services/bank/setup/bank.service';
 import { EmployeeTable } from 'src/app/core/enums/bank/employee-table';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
@@ -241,6 +241,7 @@ export class BankUserListComponent implements OnInit {
   openBankUserForm() {
     let dialogRef = this.dialog.open(BankUserDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
@@ -249,6 +250,7 @@ export class BankUserListComponent implements OnInit {
   openEditBankUserForm(employeeDetail: EmployeeDetail) {
     let dialogRef = this.dialog.open(BankUserDialogComponent, {
       width: '600px',
+      disableClose: true,
       data: {
         Detail_Id: employeeDetail.Detail_Id,
       },

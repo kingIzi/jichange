@@ -1,5 +1,7 @@
 import {
+  ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   OnInit,
   Output,
@@ -22,6 +24,9 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { LoginService } from 'src/app/core/services/login.service';
+import { GetControlResponse } from 'src/app/core/models/vendors/get-control-response';
 
 @Component({
   selector: 'app-control-number-details',
@@ -36,22 +41,50 @@ import {
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    LoaderRainbowComponent,
   ],
 })
 export class ControlNumberDetailsComponent implements OnInit {
+  public startLoading: boolean = false;
   public controlNumberFormGroup!: FormGroup;
+  public foundFormGroup!: FormGroup;
   @Output() public isLoading = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('controlFound', { static: true })
+  controlFound!: ElementRef<HTMLDialogElement>;
   constructor(
     private dialogRef: MatDialogRef<ControlNumberDetailsComponent>,
     private fb: FormBuilder,
-    private translocoService: TranslocoService
+    private tr: TranslocoService,
+    private loginService: LoginService,
+    private cdr: ChangeDetectorRef
   ) {}
   ngOnInit(): void {
     this.createForm();
+    this.createControlFoundFormGroup();
+  }
+
+  private createControlFoundFormGroup() {
+    this.foundFormGroup = this.fb.group({
+      Control_No: this.fb.control('', []),
+      Cust_Name: this.fb.control('', []),
+      Payment_Type: this.fb.control('', []),
+      Item_Total_Amount: this.fb.control(0, []),
+      Balance: this.fb.control(0, []),
+      Currency: this.fb.control('', []),
+    });
+  }
+
+  private modifyControlFoundData(controlFound: GetControlResponse) {
+    this.Control_No.setValue(controlFound?.Control_No?.trim());
+    this.Cust_Name.setValue(controlFound?.Cust_Name?.trim());
+    this.Payment_Type.setValue(controlFound?.Payment_Type?.trim());
+    this.Item_Total_Amount.setValue(controlFound?.Item_Total_Amount);
+    this.Balance.setValue(controlFound?.Balance);
+    this.Currency.setValue(controlFound?.Currency);
   }
 
   private createForm() {
@@ -69,10 +102,38 @@ export class ControlNumberDetailsComponent implements OnInit {
     if (this.control.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidFormError`),
-        this.translocoService.translate(`${errorsPath}.missingAccountNo`)
+        this.tr.translate(`${errorsPath}.invalidFormError`),
+        this.tr.translate(`${errorsPath}.missingAccountNo`)
       );
     }
+  }
+
+  private requestVerifyControlNumber(body: { control: string }) {
+    this.startLoading = true;
+    this.loginService
+      .verifyControlNumber(body)
+      .then((results: any) => {
+        this.startLoading = false;
+        if (!results.response || results.response === 0) {
+          this.controlNumberNotFoundMessage();
+        } else {
+          this.modifyControlFoundData(results.response);
+          this.controlFound.nativeElement.showModal();
+          this.controlFound.nativeElement.addEventListener('close', () => {
+            this.closeDialog();
+          });
+        }
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      });
   }
 
   setControlNumberValue(value: string) {
@@ -80,21 +141,22 @@ export class ControlNumberDetailsComponent implements OnInit {
   }
 
   submitControlNumberForm() {
-    if (this.controlNumberFormGroup.valid) {
-      this.isLoading.emit(this.controlNumberFormGroup.value);
+    if (this.controlNumberFormGroup.invalid) {
+      this.controlNumberFormGroup.markAllAsTouched();
+      this.formErrors();
+      return;
     }
-    this.controlNumberFormGroup.markAllAsTouched();
-    this.formErrors();
+    this.requestVerifyControlNumber(this.controlNumberFormGroup.value);
   }
 
-  controlNumberNotFound() {
-    let message = this.translocoService.translate(
+  controlNumberNotFoundMessage() {
+    let message = this.tr.translate(
       `auth.controlNumberDetails.form.errors.dialogs.notFoundMessage`
     );
 
     AppUtilities.openDisplayMessageBox(
       this.displayMessageBox,
-      this.translocoService.translate(
+      this.tr.translate(
         `auth.controlNumberDetails.form.errors.dialogs.notFound`
       ),
       message.replace('{}', this.control.value)
@@ -102,7 +164,7 @@ export class ControlNumberDetailsComponent implements OnInit {
   }
 
   submitFailed() {
-    AppUtilities.noInternetError(this.displayMessageBox, this.translocoService);
+    AppUtilities.noInternetError(this.displayMessageBox, this.tr);
   }
 
   closeDialog() {
@@ -111,5 +173,29 @@ export class ControlNumberDetailsComponent implements OnInit {
 
   get control() {
     return this.controlNumberFormGroup.get('control') as FormControl;
+  }
+
+  get Control_No() {
+    return this.foundFormGroup.get('Control_No') as FormControl;
+  }
+
+  get Cust_Name() {
+    return this.foundFormGroup.get('Cust_Name') as FormControl;
+  }
+
+  get Payment_Type() {
+    return this.foundFormGroup.get('Payment_Type') as FormControl;
+  }
+
+  get Item_Total_Amount() {
+    return this.foundFormGroup.get('Item_Total_Amount') as FormControl;
+  }
+
+  get Balance() {
+    return this.foundFormGroup.get('Balance') as FormControl;
+  }
+
+  get Currency() {
+    return this.foundFormGroup.get('Currency') as FormControl;
   }
 }

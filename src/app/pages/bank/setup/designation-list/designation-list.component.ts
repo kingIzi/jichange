@@ -21,8 +21,12 @@ import { NgxLoadingModule } from 'ngx-loading';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { DesignationDialogComponent } from 'src/app/components/dialogs/bank/setup/designation-dialog/designation-dialog.component';
 import { BreadcrumbService } from 'xng-breadcrumb';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
-import { DesignationService } from 'src/app/core/services/setup/designation.service';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
+import { DesignationService } from 'src/app/core/services/bank/setup/designation.service';
 import {
   FormArray,
   FormBuilder,
@@ -145,7 +149,6 @@ export class DesignationListComponent implements OnInit {
         } else {
           AppUtilities.noInternetError(this.displayMessageBox, this.tr);
         }
-        //this.startLoading = false;
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -162,12 +165,14 @@ export class DesignationListComponent implements OnInit {
   openDesignationDialog() {
     let dialogRef = this.dialog.open(DesignationDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {});
   }
   openEditDesignationDialog(designation: Designation) {
     let dialogRef = this.dialog.open(DesignationDialogComponent, {
       width: '600px',
+      disableClose: true,
       data: {
         designationData: designation,
       },
@@ -189,8 +194,9 @@ export class DesignationListComponent implements OnInit {
       console.log(`Item deleted`);
     });
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       this.designations = this.designations.filter((elem) => {
         return elem.Desg_Name.toLocaleLowerCase().includes(
           searchText.toLocaleLowerCase()

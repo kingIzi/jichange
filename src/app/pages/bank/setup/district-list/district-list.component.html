@@ -1,8 +1,3 @@
-<ngx-loading
-  [show]="startLoading"
-  [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
-
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
     <h2
@@ -29,7 +24,6 @@
   <div class="flex flex-col bg-white shadow px-2 py-4">
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
-        <app-table-date-filters></app-table-date-filters>
         <div class="relative">
           <input
             *transloco="let t; read: 'defaults'"

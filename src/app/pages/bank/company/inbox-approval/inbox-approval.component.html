@@ -49,7 +49,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
-            (keyup)="searchTable(searchInput.value)"
+            (keyup)="searchTable(searchInput.value, paginator)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -96,12 +96,12 @@
                     </div>
                   </th>
                 </ng-container>
-                <th
+                <!-- <th
                   *transloco="let t; read: 'defaults'"
                   class="px-6 font-inter text-sm text-right"
                 >
                   {{ t("action") }}
-                </th>
+                </th> -->
               </tr>
             </thead>
             <tbody>
@@ -195,21 +195,15 @@
                   "
                   class="text-sm font-inter whitespace-nowrap px-6 py-4"
                 >
-                  <button [class]="getActiveStatusStyles(company.Status)">
+                  <app-approve-company-inbox
+                    #approveDialog
+                  ></app-approve-company-inbox>
+                  <button
+                    (click)="approveCompany(approveDialog, company)"
+                    class="bg-orange-100 hover:bg-orange-200 text-black btn btn-xs"
+                  >
                     {{ company.Status }}
                   </button>
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                  <div class="flex flex-row items-center justify-end space-x-2">
-                    <button
-                      (click)="openEditCompanySummaryDialog(company)"
-                      class="btn btn-sm bg-transparent"
-                    >
-                      <span class="material-symbols-outlined text-info">
-                        edit
-                      </span>
-                    </button>
-                  </div>
                 </td>
               </tr>
             </tbody>

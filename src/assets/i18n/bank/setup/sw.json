@@ -333,7 +333,7 @@
     }
   },
   "suspenseAccount": {
-    "addSuspenseAccount": "Ongeza Akaunti ya Suspense",
+    "addSuspenseAccount": "Ongeza",
     "suspenseAccount": "Akaunti ya Suspense",
     "form": {
       "placeholders": {
@@ -343,13 +343,17 @@
         "suspenseAccount": "Tafadhali ingiza nambari ya akaunti ya mashaka"
       },
       "dialog": {
-        "suspenseAccount": "Lazima utoe nambari ya akaunti ya mashaka"
+        "invalidForm": "Fomu batili.",
+        "failed": "Imeshindwa.",
+        "suspenseAccount": "Lazima utoe nambari ya akaunti ya mashaka.",
+        "missingStatus": "Tafadhali chagua hali.",
+        "failedToAddSuspenseAccount": "Imeshindwa kuongeza akaunti ya mashaka."
       }
     },
-    "suspenseAccountsTable": ["Sno", "Nambari ya Akaunti ya Suspense", "Hali"]
+    "suspenseAccountsTable": ["Nambari ya Akaunti ya Suspense", "Hali"]
   },
   "depositAccount": {
-    "addDepositAccount": "Ongeza akaunti ya amana",
+    "addDepositAccount": "Ongeza",
     "depositAccount": "Akaunti ya amana",
     "form": {
       "vendor": "Muuzaji",

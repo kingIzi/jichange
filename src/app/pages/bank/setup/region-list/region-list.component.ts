@@ -37,6 +37,7 @@ export class RegionListComponent implements OnInit {
   openAddRegionDialog() {
     let dialogRef = this.dialog.open(RegionDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

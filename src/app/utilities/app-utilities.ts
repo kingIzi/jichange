@@ -4,6 +4,7 @@ import { SuccessMessageBoxComponent } from '../components/dialogs/success-messag
 import { FormControl } from '@angular/forms';
 import { SubmitMessageBoxComponent } from '../components/dialogs/submit-message-box/submit-message-box.component';
 import { formatDate } from '@angular/common';
+import { TimeoutError } from 'rxjs';
 
 export class AppUtilities {
   static openDisplayMessageBox(
@@ -147,5 +148,19 @@ export class AppUtilities {
   static reformatDate(values: string[]) {
     let [year, month, date] = values;
     return `${date}/${month}/${year}`;
+  }
+
+  static requestFailedCatchError(
+    err: any,
+    dialog: DisplayMessageBoxComponent,
+    tr: TranslocoService
+  ) {
+    if (err instanceof TimeoutError) {
+      AppUtilities.openTimeoutError(dialog, tr);
+    } else if (err.status === 500) {
+      AppUtilities.unexpectedErrorOccured(dialog, tr);
+    } else {
+      AppUtilities.noInternetError(dialog, tr);
+    }
   }
 }

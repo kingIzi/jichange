@@ -1,7 +1,10 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
   Inject,
   OnInit,
   ViewChild,
@@ -25,6 +28,12 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { CommonModule, DatePipe } from '@angular/common';
 import * as json from 'src/assets/temp/data.json';
 import { CancelledDialogComponent } from '../../cancelled-dialog/cancelled-dialog.component';
+import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { DisplayMessageBoxComponent } from '../../display-message-box/display-message-box.component';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 
 @Component({
   selector: 'app-generated-invoice-view',
@@ -36,6 +45,8 @@ import { CancelledDialogComponent } from '../../cancelled-dialog/cancelled-dialo
     TranslocoModule,
     ReactiveFormsModule,
     CancelledDialogComponent,
+    DisplayMessageBoxComponent,
+    LoaderRainbowComponent,
   ],
   providers: [
     {
@@ -43,96 +54,141 @@ import { CancelledDialogComponent } from '../../cancelled-dialog/cancelled-dialo
       useValue: { scope: 'vendor/generated', alias: 'generated' },
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GeneratedInvoiceViewComponent implements OnInit, AfterViewInit {
+export class GeneratedInvoiceViewComponent implements OnInit {
+  public startLoading: boolean = false;
   public itemsData: any[] = [];
   public formGroup!: FormGroup;
-  @ViewChild('invoiceView') invoiceView!: ElementRef;
-  @ViewChild('cancelledCanvas') cancelledCanvas!: ElementRef;
-  @ViewChild('cancelledImage') cancelledImage!: ElementRef;
+  public invoices: GeneratedInvoice[] = [];
+  public generatedInvoice!: GeneratedInvoice;
+  public viewReady = new EventEmitter<HTMLFormElement>();
+  //@ViewChild('invoiceView') invoiceView!: ElementRef;
+  @ViewChild('invoiceView', { static: true })
+  invoiceView!: ElementRef<HTMLFormElement>;
+  //@ViewChild('cancelledCanvas') cancelledCanvas!: ElementRef;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private dialogRef: MatDialogRef<GeneratedInvoiceViewComponent>,
+    private invoiceService: InvoiceService,
+    private cdr: ChangeDetectorRef,
+    private fileHandler: FileHandlerService,
     @Inject(MAT_DIALOG_DATA)
-    public data: { invoice: GeneratedInvoice; forDownload: boolean }
+    public data: {
+      Inv_Mas_Sno: string;
+      userProfile: LoginResponse;
+    }
   ) {}
   private createForm() {
     this.formGroup = this.fb.group({
-      invoiceNo: this.fb.control(this.data.invoice.Invoice_No.trim(), [
-        Validators.required,
-      ]),
-      controlNo: this.fb.control(120400000, [Validators.required]),
+      invoiceNo: this.fb.control('', [Validators.required]),
+      controlNo: this.fb.control('', [Validators.required]),
       dateIssued: this.fb.control(
-        AppUtilities.convertDotNetJsonDateToDate(
-          this.data.invoice.Invoice_Date.toString()
-        ),
+        AppUtilities.convertDotNetJsonDateToDate('10/10/22'),
         []
       ),
-      paymentType: this.fb.control(this.data.invoice.Payment_Type, []),
+      paymentType: this.fb.control('', []),
       issuedTo: this.fb.group({
-        fullName: this.fb.control(this.data.invoice.Chus_Name.trim()),
-        address: this.fb.control('1234 Ali Hassan Mwinyi Road', []),
-        city: this.fb.control('Dar es Salaam, Tanzania', []),
-        phone: this.fb.control('255724636906', []),
+        fullName: this.fb.control(''),
+        address: this.fb.control('', []),
+        city: this.fb.control('', []),
+        phone: this.fb.control('', []),
       }),
       issuedBy: this.fb.group({
-        fullName: this.fb.control(this.data.invoice.Cmpny_Name.trim()),
-        address: this.fb.control('27 Samora Avenue Ilala district', []),
-        city: this.fb.control('Dar es Salaam, Tanzania', []),
-        phone: this.fb.control('255753565432', []),
+        fullName: this.fb.control('', []),
+        address: this.fb.control('', []),
+        city: this.fb.control('', []),
+        phone: this.fb.control('', []),
       }),
-      discount: this.fb.control('40%', []),
+      discount: this.fb.control('', []),
       items: this.fb.array([], []),
-      remark: this.fb.control(this.data.invoice.Remarks.trim(), []),
-      bankName: this.fb.control('CRDB Bank PLC', []),
-      accountNo: this.fb.control('123-456-7890'),
+      remark: this.fb.control('', []),
+      bankName: this.fb.control('', []),
+      accountNo: this.fb.control(''),
     });
   }
   private appendItems() {
-    this.itemsData.forEach((item) => {
+    this.invoices.forEach((item) => {
       let group = this.fb.group({
-        description: this.fb.control(item.description.trim(), []),
-        quantity: this.fb.control(item.quantity, []),
-        price: this.fb.control(item.price, []),
+        description: this.fb.control(item?.Item_Description?.trim(), []),
+        quantity: this.fb.control(Math.floor(item?.Item_Qty), []),
+        price: this.fb.control(item.Item_Unit_Price, []),
+        total: this.fb.control(item.Item_Total_Amount, []),
       });
       this.items.push(group);
     });
   }
-  private decreasetAmountByDiscount(sum: number, percentage: number) {
-    let decimalPercentage = percentage / 100;
-    let decreaseAmount = sum * decimalPercentage;
-    let decreasedSum = sum - decreaseAmount;
-    return decreasedSum;
-  }
-  ngOnInit(): void {
-    let data = JSON.parse(JSON.stringify(json));
-    this.itemsData = data.items;
-    this.createForm();
+  private modifyFormGroup() {
+    this.invoiceNo.setValue(this.generatedInvoice.Invoice_No);
+    this.controlNo.setValue(this.generatedInvoice.Customer_ID_No);
+    this.dateIssued.setValue(
+      AppUtilities.dateToFormat(
+        new Date(this.generatedInvoice.Invoice_Date),
+        'dd/MM/yyyy'
+      )
+    );
+    this.paymentType.setValue('MasterCard');
+    (this.issuedTo.get('fullName') as FormControl).setValue(
+      this.generatedInvoice.Chus_Name
+    );
+    (this.issuedBy.get('fullName') as FormControl).setValue(
+      this.generatedInvoice.Cmpny_Name
+    );
+    this.discount.setValue('0%');
+    this.remark.setValue(this.generatedInvoice.Remarks);
     this.appendItems();
   }
-  ngAfterViewInit(): void {
-    if (this.data.invoice.approval_status === '0') {
-      let canvas = this.cancelledCanvas.nativeElement as HTMLCanvasElement;
-      //this.drawCancelledWatermark(canvas);
-    }
+  private async prepareInvoiceView() {
+    this.startLoading = true;
+    let invoiceDetailsObservable = from(
+      this.invoiceService.invoiceDetailsById({
+        compid: this.data.userProfile.InstID,
+        invid: Number(this.data.Inv_Mas_Sno),
+      })
+    );
+    let invoiceItemObservable = from(
+      this.invoiceService.invoiceItemDetails({
+        invid: Number(this.data.Inv_Mas_Sno),
+      })
+    );
+    let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
+    lastValueFrom(
+      mergedObservable.pipe(
+        map((result) => {
+          return result;
+        }),
+        catchError((err) => {
+          throw err;
+        })
+      )
+    )
+      .then((results: Array<any>) => {
+        let [invoiceDetails, invoiceItem] = results;
+        this.generatedInvoice =
+          invoiceDetails.response === 0 ? {} : invoiceDetails.response;
+        this.invoices = invoiceItem.response === 0 ? [] : invoiceItem.response;
+        this.modifyFormGroup();
+        this.startLoading = false;
+        this.viewReady.emit(this.invoiceView.nativeElement);
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
-  private drawCancelledWatermark(canvas: HTMLCanvasElement) {
-    let view = this.invoiceView.nativeElement as HTMLFormElement;
-    canvas.width = view.clientWidth;
-    canvas.height = view.clientHeight;
-    let ctx = canvas.getContext('2d');
-    if (ctx) {
-      // ctx.fillStyle = '#FF0E0E';
-      ctx.strokeStyle = '#FF0E0E';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      let text = 'Cancelled';
-      var fontSize = canvas.width / text.length;
-      ctx.font = fontSize * 2 + 'px Helvetica';
-      ctx.strokeText('Cancelled', 0, canvas.height / 2);
-      var imgData = canvas.toDataURL('image/png', 1.0);
-    }
+  ngOnInit() {
+    this.createForm();
+    this.prepareInvoiceView();
   }
   formatDate(date: Date, format: string) {
     return AppUtilities.dateToFormat(date, format);
@@ -142,16 +198,10 @@ export class GeneratedInvoiceViewComponent implements OnInit, AfterViewInit {
   }
   accumulateTotal() {
     let sum = this.items.controls.reduce(
-      (total, item) =>
-        total + item.get('price')?.value * item.get('quantity')?.value,
+      (total, item) => total + item.get('total')?.value,
       0
     );
-    let discount = this.discount.value.substring(
-      0,
-      this.discount.value.length - 1
-    );
-    let estimate = this.decreasetAmountByDiscount(sum, Number(discount));
-    return this.moneyFormat(estimate.toString());
+    return this.moneyFormat(sum.toString());
   }
   moneyFormat(amount: string) {
     return AppUtilities.moneyFormat(amount);

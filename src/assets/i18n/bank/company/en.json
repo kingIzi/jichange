@@ -4,7 +4,8 @@
     "actions": {
       "addCompany": "Add Company",
       "addedCompanySuccessfully": "Added Company successfully!",
-      "modifiedCompanySuccessfully": "Modified company successfully!"
+      "modifiedCompanySuccessfully": "Modified company successfully!",
+      "approvedCompanySuccessfully": "Company approved successfully!"
     },
     "companySummary": [
       "Name",
@@ -37,6 +38,7 @@
       "telephoneNo": "Telephone N°",
       "bankDetails": "Bank Details",
       "accountNo": "Account Number",
+      "areYouSureYouWantToApproveCompany": "Are you sure you want this company approved?",
       "placeholders": {
         "customer": "Enter company name",
         "branch": "Select branch",
@@ -87,7 +89,8 @@
         "emailId": "Please provide a valid email address",
         "noDistrictForRegion": "There are no districts found for this region.",
         "noWardForDistrict": "There are no wards found this district.",
-        "failedToAddCompany": "Failed to add company, please try again or contact support."
+        "failedToAddCompany": "Failed to add company, please try again or contact support.",
+        "failedToApproveCompany": "Failed to approve company."
       }
     }
   },

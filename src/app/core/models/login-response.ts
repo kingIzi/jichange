@@ -8,5 +8,5 @@ export class LoginResponse {
   sessb!: string;
   uname!: string;
   fulname!: string;
-  instID!: number;
+  InstID!: number;
 }

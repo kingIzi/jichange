@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { LanguageSelectorComponent } from '../../language-selector/language-selector.component';
 import {
@@ -31,19 +31,7 @@ import { firstValueFrom } from 'rxjs';
 export class VendorHeaderComponent implements OnInit {
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
-  private headersMap = {
-    customers: 0,
-    invoiceDetails: 1,
-    generatedInvoice: 2,
-    reports: 3,
-  };
   private reportsMap = {
-    // overview: 0,
-    // transactionDetails: 1,
-    // invoiceDetails: 2,
-    // customerDetailReport: 3,
-    // userLogReport: 4,
-    // auditTrails: 5,
     overview: 0,
     transactionDetails: 1,
     invoiceDetails: 2,
@@ -63,9 +51,9 @@ export class VendorHeaderComponent implements OnInit {
       case 0:
         return '/vendor/customers';
       case 1:
-        return '/vendor/invoice';
+        return '/vendor/company';
       case 2:
-        return '/vendor/generated';
+        return '/vendor/invoice';
       case 3:
         return '/vendor/reports';
       default:
@@ -102,13 +90,13 @@ export class VendorHeaderComponent implements OnInit {
   }
   private getHeaderRouterLink(bankIndex: number, dropdownIndex: number) {
     switch (bankIndex) {
-      case this.headersMap.customers:
+      case 0:
         return '';
-      case this.headersMap.invoiceDetails:
+      case 1:
         return '';
-      case this.headersMap.generatedInvoice:
-        return '';
-      case this.headersMap.reports:
+      case 2:
+        return this.switchInvoiceReportsLink(dropdownIndex);
+      case 3:
         return this.swicthReportsLink(dropdownIndex);
       default:
         return '';
@@ -132,14 +120,23 @@ export class VendorHeaderComponent implements OnInit {
         return '';
     }
   }
+  private switchInvoiceReportsLink(index: number) {
+    switch (index) {
+      case 0:
+        return '/vendor/invoice/amendments';
+      case 1:
+        return '/vendor/invoice/cancelled';
+      case 2:
+        return '/vendor/invoice/generated';
+      default:
+        return '';
+    }
+  }
   getHeaderDropdownArray(index: number) {
     return this.headers.at(index).get('dropdowns') as FormArray;
   }
-  routerClicked(ahref: HTMLAnchorElement) {
+  routerClicked(ahref: HTMLAnchorElement, value: string) {
     ahref.blur();
-  }
-  ahrefClicked(link: string) {
-    console.log(link);
   }
   verifyCurrentRoute(path: string) {
     return location.pathname.includes(path);

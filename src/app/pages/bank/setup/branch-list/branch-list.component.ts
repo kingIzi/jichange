@@ -31,8 +31,12 @@ import { Statuses } from 'src/app/core/models/status';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { TimeoutError, timer } from 'rxjs';
-import { BranchService } from 'src/app/core/services/setup/branch.service';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-branch-list',
@@ -221,6 +225,7 @@ export class BranchListComponent implements OnInit {
   openBranchForm() {
     let dialogRef = this.dialog.open(BranchDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.componentInstance.addedBranch
       .asObservable()
@@ -232,6 +237,7 @@ export class BranchListComponent implements OnInit {
   openEditBranchForm(branch: Branch) {
     let dialogRef = this.dialog.open(BranchDialogComponent, {
       width: '600px',
+      disableClose: true,
       data: {
         branch: branch,
       },
@@ -257,8 +263,9 @@ export class BranchListComponent implements OnInit {
       this.removeBranch(branch.Sno);
     });
   }
-  searchTable(searchText: string) {
+  searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
+      paginator.firstPage();
       this.branches = this.branchesData.filter((elem) => {
         return (
           elem.Name.toLocaleLowerCase().includes(

@@ -36,7 +36,7 @@ export class EmailTextListComponent implements OnInit {
   openEmailTextForm() {
     let dialogRef = this.dialog.open(EmailTextDialogComponent, {
       width: '600px',
-      height: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

@@ -99,8 +99,11 @@
           class="input input-bordered w-full max-w-lg bg-transparent text-black font-inter"
         />
         <span *ngIf="accno && accno.invalid && accno.touched">
-          <p class="text-xs text-red-600">
+          <p *ngIf="accno.hasError('required')" class="text-xs text-red-600">
             {{ t("errors.accountNo") }}
+          </p>
+          <p *ngIf="accno.hasError('pattern')" class="text-xs text-red-600">
+            {{ t("errors.invalidAccountNo") }}
           </p>
         </span>
       </div>

@@ -4,7 +4,8 @@
     "actions": {
       "addCompany": "Ongeza Kampuni",
       "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
-      "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!"
+      "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!",
+      "approvedCompanySuccessfully": "Kampuni imefanikiwa kwa mafanikio!"
     },
     "companySummary": [
       "Jina",
@@ -37,6 +38,7 @@
       "telephoneNo": "Nambari ya Simu",
       "bankDetails": "Maelezo ya Benki",
       "accountNo": "Nambari ya Akaunti",
+      "areYouSureYouWantToApproveCompany": "Una uhakika unataka kampuni hii iidhinishwe?",
       "placeholders": {
         "customer": "Ingiza jina la kampuni",
         "branch": "Chagua tawi",
@@ -87,7 +89,8 @@
         "emailId": "Tafadhali toa anwani ya barua pepe sahihi",
         "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu.",
         "noWardForDistrict": "Hakuna kata zilizogunduliwa katika wilaya hii.",
-        "failedToAddCompany": "Imeshindwa kuongeza kampuni, tafadhali jaribu tena au msaada wa mawasiliano."
+        "failedToAddCompany": "Imeshindwa kuongeza kampuni, tafadhali jaribu tena au msaada wa mawasiliano.",
+        "failedToApproveCompany": "Imeshindwa kuikubali kampuni."
       }
     }
   },

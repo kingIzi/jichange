@@ -54,6 +54,7 @@
       "customer": "Muuzaji",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
+      "invoiceNo": "Nambari ya ankara",
       "placeholders": {
         "all": "yote"
       },
@@ -62,12 +63,14 @@
         "customer": "Tafadhali chagua mteja",
         "startDate": "Tafadhali chagua tarehe ya kuanza",
         "endDate": "Tafadhali chagua tarehe ya mwisho",
+        "invoiceNo": "Tafadhali chagua nambari ya ankara",
         "dialog": {
           "invalidForm": "Fomu batili",
           "company": "Lazima uchague kampuni",
           "customer": "Lazima uchague mteja",
           "startDate": "Lazima uchague tarehe ya kuanza",
-          "endDate": "Lazima uchague tarehe ya mwisho"
+          "endDate": "Lazima uchague tarehe ya mwisho",
+          "invoiceNo": "Lazima uchague nambari ya ankara"
         }
       }
     },
@@ -97,7 +100,7 @@
     ]
   },
   "customerDetailReport": {
-    "customerDetailReport": "Ripoti ya Maelezo ya Mteja",
+    "customerDetailReport": "Ripoti ya maelezo ya Vendor",
     "form": {
       "company": "Kampuni",
       "region": "Mkoa",

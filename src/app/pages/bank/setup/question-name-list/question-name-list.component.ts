@@ -36,6 +36,7 @@ export class QuestionNameListComponent implements OnInit {
   openQuestionName() {
     let dialogRef = this.dialog.open(QuestionNameDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

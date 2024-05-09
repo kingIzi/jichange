@@ -36,6 +36,7 @@ export class CurrencyListComponent implements OnInit {
   openCurrencyForm() {
     let dialogRef = this.dialog.open(CurrencyDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

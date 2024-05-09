@@ -36,6 +36,7 @@ export class WardListComponent implements OnInit {
   openWardForm() {
     let dialogRef = this.dialog.open(WardDialogComponent, {
       width: '600px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);

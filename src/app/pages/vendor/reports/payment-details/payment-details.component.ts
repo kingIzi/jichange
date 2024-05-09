@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -15,10 +22,23 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { firstValueFrom } from 'rxjs';
+import {
+  catchError,
+  firstValueFrom,
+  from,
+  lastValueFrom,
+  map,
+  zip,
+} from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { Company } from 'src/app/core/models/bank/company';
 import { Customer } from 'src/app/core/models/bank/customer';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
+import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
+import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 
 @Component({
@@ -30,9 +50,11 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     TranslocoModule,
+    LoaderRainbowComponent,
   ],
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -46,34 +68,34 @@ export class PaymentDetailsComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public companies: Company[] = [];
-  public customers: Customer[] = [];
+  public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
+  public invoices: GeneratedInvoice[] = [];
   public payments: any[] = [];
+  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+    private invoiceService: InvoiceService,
+    private reportService: ReportsService,
+    private paymentService: PaymentsService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createFilterForm() {
-    const currentDate = new Date();
     this.filterFormGroup = this.fb.group({
-      cusid: this.fb.control('', [Validators.required]),
-      stdate: this.fb.control(
-        AppUtilities.dateToFormat(
-          new Date(
-            currentDate.getFullYear() - 4,
-            currentDate.getMonth(),
-            currentDate.getDate()
-          ),
-          'yyyy-MM-dd'
-        ),
-        [Validators.required]
-      ),
-      enddate: this.fb.control(
-        AppUtilities.dateToFormat(currentDate, 'yyyy-MM-dd'),
-        [Validators.required]
-      ),
+      compid: this.fb.control(this.userProfile.InstID, [Validators.required]),
+      cust: this.fb.control('', [Validators.required]),
+      stdate: this.fb.control('', [Validators.required]),
+      enddate: this.fb.control('', [Validators.required]),
+      invno: this.fb.control('', [Validators.required]),
     });
   }
   private async createHeaderGroup() {
@@ -110,11 +132,18 @@ export class PaymentDetailsComponent implements OnInit {
     });
   }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
-    if (this.cusid.invalid) {
+    if (this.cust.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.customer`)
+      );
+    }
+    if (this.invno.valid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.invoiceNo`)
       );
     }
     if (this.stdate.invalid) {
@@ -132,9 +161,80 @@ export class PaymentDetailsComponent implements OnInit {
       );
     }
   }
+  private buildPage() {
+    this.startLoading = true;
+    let companiesObservable = from(this.reportService.getCompaniesList({}));
+    let customersObservable = from(
+      this.invoiceService.getInvoiceCustomerNames({
+        compid: this.userProfile.InstID,
+      })
+    );
+    let invoicesObservable = from(
+      this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
+    );
+    let mergedObservable = zip(
+      companiesObservable,
+      customersObservable,
+      invoicesObservable
+    );
+    lastValueFrom(
+      mergedObservable.pipe(
+        map((result) => {
+          return result;
+        }),
+        catchError((err) => {
+          throw err;
+        })
+      )
+    )
+      .then((results: Array<any>) => {
+        let [companies, customers, invoices] = results;
+        this.companies = companies.response === 0 ? [] : companies.response;
+        this.customers = customers.response === 0 ? [] : customers.response;
+        this.invoices = invoices.response === 0 ? [] : invoices.response;
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private requestPaymentReport(value: any) {
+    this.startLoading = true;
+    this.paymentService
+      .getPaymentReport(value)
+      .then((results: any) => {
+        this.payments = results.response === 0 ? [] : results.response;
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private reformatDate(values: string[]) {
+    let [year, month, date] = values;
+    return `${month}/${date}/${year}`;
+  }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createFilterForm();
     this.createHeaderGroup();
+    this.buildPage();
   }
   searchTable(searchText: string) {}
   getFormControl(control: AbstractControl, name: string) {
@@ -146,18 +246,32 @@ export class PaymentDetailsComponent implements OnInit {
   }
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
+      let value = { ...this.filterFormGroup.value };
+      value.stdate = this.reformatDate(
+        this.filterFormGroup.value.stdate.split('-')
+      );
+      value.enddate = this.reformatDate(
+        this.filterFormGroup.value.enddate.split('-')
+      );
+      this.requestPaymentReport(value);
     } else {
       this.formErrors();
     }
   }
-  get cusid() {
-    return this.filterFormGroup.get('cusid') as FormControl;
+  get compid() {
+    return this.filterFormGroup.get('compid') as FormControl;
+  }
+  get cust() {
+    return this.filterFormGroup.get('cust') as FormControl;
   }
   get stdate() {
     return this.filterFormGroup.get('stdate') as FormControl;
   }
   get enddate() {
     return this.filterFormGroup.get('enddate') as FormControl;
+  }
+  get invno() {
+    return this.filterFormGroup.get('invno') as FormControl;
   }
   get tableHeaders() {
     return this.tableFormGroup.get('tableHeaders') as FormArray;

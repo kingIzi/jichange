@@ -1,0 +1,29 @@
+<dialog #dialog id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 *transloco="let t; read: 'defaults'" class="font-bold text-lg">
+      {{ t("confirm") }}
+    </h3>
+    <div class="flex flex-col">
+      <p *transloco="let t; read: 'company.summary.companyForm'" class="py-4">
+        {{ t("areYouSureYouWantToApproveCompany") }}
+      </p>
+      <div class="flex flex-row justify-end space-x-2">
+        <button
+          (click)="closeDialog()"
+          class="btn btn-ghost btn-xs btn-info text-danger-600"
+        >
+          cancel
+        </button>
+        <button
+          (click)="approveCompany()"
+          class="btn btn-ghost btn-xs btn-info text-green-600"
+        >
+          Approve
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

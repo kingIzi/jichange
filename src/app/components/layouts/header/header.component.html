@@ -1,4 +1,4 @@
-<div class="navbar bg-base-100 shadow-4">
+<div class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50">
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -54,16 +54,16 @@
         </li>
       </ul>
     </div>
-    <a class="flex flex-row items-center">
+    <a [routerLink]="'/main'" class="flex flex-row items-center">
       <img
         class="w-20 lg:w-32"
         src="assets/img/jichangelogo.png"
         alt="TE Logo"
         loading="lazy"
       />
-      <p [routerLink]="'/main'" class="btn btn-ghost text-sm btn-xs lg:btn-lg">
+      <!-- <p [routerLink]="'/main'" class="btn btn-ghost text-sm btn-xs lg:btn-lg">
         Dream<span class="text-success">ville</span>
-      </p>
+      </p> -->
     </a>
   </div>
   <div [formGroup]="formGroup" class="navbar-center hidden lg:flex">
@@ -129,5 +129,8 @@
         </div>
       </button>
     </div>
+  </div>
+  <div *ngIf="routeLoading" class="absolute bottom-0 left-0 w-full right-0">
+    <progress class="progress w-full h-0.5 progress-info"></progress>
   </div>
 </div>

@@ -184,7 +184,7 @@
               id="exampleSearch"
               [placeholder]="t('search')"
               #searchInput
-              (keyup)="searchTable(searchInput.value)"
+              (keyup)="searchTable(searchInput.value, paginator)"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -194,8 +194,8 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+      <div class="overflow-x-auto">
+        <div class="inline-block min-w-full py-2">
           <div class="overflow-y-auto">
             <table
               [formGroup]="tableHeadersFormGroup"

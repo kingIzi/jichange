@@ -23,6 +23,7 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import * as json from 'src/assets/temp/data.json';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-customer-view',
@@ -44,7 +45,7 @@ import * as json from 'src/assets/temp/data.json';
     RemoveItemDialogComponent,
     FormsModule,
     ReactiveFormsModule,
-    TableDateFiltersComponent,
+    MatPaginatorModule,
   ],
 })
 export class CustomerViewComponent implements OnInit {

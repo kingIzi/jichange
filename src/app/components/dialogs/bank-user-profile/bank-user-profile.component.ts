@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+} from '@angular/core';
 import { LanguageSelectorComponent } from '../../language-selector/language-selector.component';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -26,29 +31,39 @@ import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 export class BankUserProfileComponent {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  private userProfile = JSON.parse(
+  public userProfile = JSON.parse(
     localStorage.getItem('userProfile') as string
   ) as LoginResponse;
   constructor(
     private dialogRef: MatDialogRef<BankUserProfileComponent>,
     private router: Router,
     private client: RequestClientService,
-    private tr: TranslocoService
+    private tr: TranslocoService,
+    private cdr: ChangeDetectorRef
   ) {}
   // [routerLink]="'/auth'"
   private logout() {
     this.client
-      .performPost(`/api/LoginUser/Logout/Userid=${this.userProfile.Usno}`, {})
+      .performPost(`/api/LoginUser/Logout/Userid=${this.userProfile.Usno}`, {
+        Userid: this.userProfile.Usno,
+      })
       .subscribe({
         next: (result) => {
+          console.log(result);
           this.router.navigate(['/auth']);
         },
         error: (err) => {
-          AppUtilities.openDisplayMessageBox(
+          // AppUtilities.openDisplayMessageBox(
+          //   this.displayMessageBox,
+          //   this.tr.translate(`errors.errorOccured`),
+          //   this.tr.translate(`errors.verifyConnection`)
+          // );
+          AppUtilities.requestFailedCatchError(
+            err,
             this.displayMessageBox,
-            this.tr.translate(`errors.errorOccured`),
-            this.tr.translate(`errors.verifyConnection`)
+            this.tr
           );
+          this.cdr.detectChanges();
           throw err;
         },
       });

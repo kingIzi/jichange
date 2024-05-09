@@ -36,10 +36,10 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AddCompany } from 'src/app/core/models/bank/forms/add-company';
 import { Ward } from 'src/app/core/models/bank/ward';
 import { LoginResponse } from 'src/app/core/models/login-response';
-import { BranchService } from 'src/app/core/services/setup/branch.service';
-import { RegionService } from 'src/app/core/services/setup/region.service';
-import { DistrictService } from 'src/app/core/services/setup/district.service';
-import { WardService } from 'src/app/core/services/setup/ward.service';
+import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
+import { RegionService } from 'src/app/core/services/bank/setup/region.service';
+import { DistrictService } from 'src/app/core/services/bank/setup/district.service';
+import { WardService } from 'src/app/core/services/bank/setup/ward.service';
 import { CompanyService } from 'src/app/core/services/bank/company/company.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
@@ -81,7 +81,6 @@ export class CompanySummaryDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private translocoService: TranslocoService,
-    private client: RequestClientService,
     private branchService: BranchService,
     private regionService: RegionService,
     private districtService: DistrictService,
@@ -446,7 +445,7 @@ export class CompanySummaryDialogComponent implements OnInit {
   submitCompanySummary() {
     if (this.companySummaryForm.valid) {
       this.startLoading = true;
-      let companyReq = this.companyService
+      this.companyService
         .addCompany(this.companySummaryForm.value as AddCompany)
         .then((company) => {
           this.startLoading = false;

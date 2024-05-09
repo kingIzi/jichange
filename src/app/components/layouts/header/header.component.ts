@@ -38,7 +38,7 @@ import { BankUserProfileComponent } from '../../dialogs/bank-user-profile/bank-u
   ],
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
-  @ViewChild('desktopSetupDropdown') desktopSetupDropdown!: ElementRef;
+  public routeLoading: boolean = false;
   public formGroup!: FormGroup;
   private headersMap = {
     company: 0,

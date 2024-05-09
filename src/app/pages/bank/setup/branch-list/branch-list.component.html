@@ -33,7 +33,7 @@
             id="exampleSearch"
             [placeholder]="t('search')"
             #searchInput
-            (keyup)="searchTable(searchInput.value)"
+            (keyup)="searchTable(searchInput.value, paginator)"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
