@@ -25,11 +25,12 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CountryDialogComponent } from '../country-dialog/country-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { SuspenseAccount } from 'src/app/core/models/bank/suspense-account';
+import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
-import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account.service';
+import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
 import { TimeoutError } from 'rxjs';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-suspense-account-dialog',
@@ -44,6 +45,7 @@ import { TimeoutError } from 'rxjs';
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {

@@ -10,6 +10,7 @@ import {
 import {
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
@@ -26,10 +27,10 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 import { CountryDialogComponent } from 'src/app/components/dialogs/bank/setup/country-dialog/country-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
-import { Country } from 'src/app/core/models/bank/country';
+import { Country } from 'src/app/core/models/bank/setup/country';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { CountryService } from 'src/app/core/services/bank/setup/country.service';
+import { CountryService } from 'src/app/core/services/bank/setup/country/country.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import {
@@ -37,6 +38,10 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { CountryTable } from 'src/app/core/enums/bank/setup/country-table';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-country-list',
@@ -55,6 +60,7 @@ import {
     LoaderRainbowComponent,
     RemoveItemDialogComponent,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -69,10 +75,11 @@ export class CountryListComponent implements OnInit {
   public countriesData: Country[] = [];
   public countryForm!: FormGroup;
   public tableLoading: boolean = false;
-  public headersMap = {
-    SNO: 0,
-    COUNTRY_NAME: 1,
-  };
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public CountryTable: typeof CountryTable = CountryTable;
+  // public headersMap = {
+  //   COUNTRY_NAME: 0,
+  // };
   private userProfile = JSON.parse(
     localStorage.getItem('userProfile') as string
   ) as LoginResponse;
@@ -80,6 +87,7 @@ export class CountryListComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -91,37 +99,25 @@ export class CountryListComponent implements OnInit {
   private createHeadersForm() {
     this.countryForm = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate(`countryDialog.countriesTable`, {}, this.scope)
-      .subscribe((labels: string[]) => {
-        if (labels && labels.length > 0) {
-          labels.forEach((label, index) => {
-            if (index !== 0) {
-              let header = this.fb.group({
-                label: this.fb.control(label, []),
-                search: this.fb.control('', []),
-                sortAsc: this.fb.control('', []),
-                values: this.fb.array([], []),
-              });
-              header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-                if (value === true) {
-                  this.sortTableAsc(index);
-                } else {
-                  this.sortTableDesc(index);
-                }
-              });
-              this.headers.push(header);
-            }
-          });
-        }
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `countryDialog.countriesTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   private async getCountryList() {
     //this.startLoading = true;
     this.tableLoading = true;
-    let list = lastValueFrom(await this.countryService.getCountryList({}));
-    list
+    this.countryService
+      .getCountryList({})
       .then((results: any) => {
         if (results.response instanceof Array) {
           this.countriesData = results.response as Country[];
@@ -147,7 +143,7 @@ export class CountryListComponent implements OnInit {
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
-      case this.headersMap.COUNTRY_NAME:
+      case this.CountryTable.NAME:
         this.countries.sort((a, b) =>
           a.Country_Name.toLocaleLowerCase() >
           b.Country_Name.toLocaleLowerCase()
@@ -161,7 +157,7 @@ export class CountryListComponent implements OnInit {
   }
   private sortTableDesc(ind: number): void {
     switch (ind) {
-      case this.headersMap.COUNTRY_NAME:
+      case this.CountryTable.NAME:
         this.countries.sort((a, b) =>
           a.Country_Name.toLocaleLowerCase() <
           b.Country_Name.toLocaleLowerCase()
@@ -173,63 +169,48 @@ export class CountryListComponent implements OnInit {
         break;
     }
   }
-  private async addCountry(country: any) {
+  private async requestRemoveCountry(body: {
+    sno: number | string;
+    userid: number | string;
+  }) {
     this.startLoading = true;
-    let added = lastValueFrom(await this.countryService.addCountry(country));
-    added
-      .then((results: any) => {
-        if (parseInt(country.sno) === 0) {
-          this.successMessageBox.title = this.tr.translate(
-            `setup.countryDialog.form.dialog.addedSuccessfully`
+    this.countryService
+      .deleteCountry(body)
+      .then((result) => {
+        if (
+          result.response &&
+          typeof result.response === 'number' &&
+          result.response > 0
+        ) {
+          let d = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(
+              `setup.countryDialog.form.dialog.removedSuccessfully`
+            )
           );
-        } else {
-          this.successMessageBox.title = this.tr.translate(
-            `setup.countryDialog.form.dialog.addedSuccessfully`
-          );
+          d.then((res) => {
+            this.getCountryList();
+          });
         }
         this.startLoading = false;
-        let dialog = this.successMessageBox.openDialog();
-        timer(2000).subscribe(() => {
-          dialog.close();
-          this.getCountryList();
-        });
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
-  private async removeCountry(country: any) {
-    this.startLoading = true;
-    let removed = lastValueFrom(await this.countryService.addCountry(country));
-    removed
-      .then((results: any) => {
-        this.startLoading = false;
-        this.successMessageBox.title = this.tr.translate(
-          `setup.countryDialog.form.dialog.removedSuccessfully`
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      this.countries = this.countriesData.filter((elem) => {
+        return elem.Country_Name.toLocaleLowerCase().includes(
+          searchText.toLocaleLowerCase()
         );
-        let dialog = this.successMessageBox.openDialog();
-        timer(2000).subscribe(() => {
-          this.getCountryList();
-          dialog.close();
-        });
-      })
-      .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
-        this.startLoading = false;
-        throw err;
       });
+    } else {
+      this.countries = this.countriesData;
+    }
   }
   ngOnInit(): void {
     this.createHeadersForm();
@@ -243,7 +224,7 @@ export class CountryListComponent implements OnInit {
     dialogRef.componentInstance.addedCountry
       .asObservable()
       .subscribe((country) => {
-        this.addCountry(country);
+        this.getCountryList();
         dialogRef.close();
       });
   }
@@ -258,7 +239,7 @@ export class CountryListComponent implements OnInit {
     dialogRef.componentInstance.addedCountry
       .asObservable()
       .subscribe((country) => {
-        this.addCountry(country);
+        this.getCountryList();
         dialogRef.close();
       });
   }
@@ -275,7 +256,7 @@ export class CountryListComponent implements OnInit {
         sno: country.SNO,
         userid: this.userProfile.Usno,
       };
-      this.removeCountry(data);
+      this.requestRemoveCountry(data);
     });
   }
   sortColumnClicked(index: number) {
@@ -288,20 +269,10 @@ export class CountryListComponent implements OnInit {
       sortAsc?.setValue(false);
     }
   }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      this.countries = this.countriesData.filter((elem) => {
-        return elem.Country_Name.toLocaleLowerCase().includes(
-          searchText.toLocaleLowerCase()
-        );
-      });
-    } else {
-      this.countries = this.countriesData;
-      //this.getCountryList();
-    }
-  }
   get headers() {
     return this.countryForm.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.countryForm.get('tableSearch') as FormControl;
   }
 }

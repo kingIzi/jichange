@@ -16,10 +16,18 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
   ],
 })
 export class VendorDashboardOverviewCardComponent {
-  @Input() statistic: number = 0;
-  @Input() label: string = 'Transaction';
-  @Input() imgUrl: string = '';
-  @Input() viewMoreLink: string = '';
-  @Input() increase: boolean = true;
-  @Input() lang: string = '';
+  @Input() overviewCard!: {
+    imgUrl: string;
+    viewMoreLink: string;
+    increase: boolean;
+    statistic: number;
+    lang: string;
+    label: string;
+  };
+  // @Input() statistic: number = 0;
+  // @Input() label: string = 'Transaction';
+  // @Input() imgUrl: string = '';
+  // @Input() viewMoreLink: string = '';
+  // @Input() increase: boolean = true;
+  // @Input() lang: string = '';
 }

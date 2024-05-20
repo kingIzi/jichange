@@ -22,6 +22,17 @@ const routes: Routes = [
                 (m) => m.DashboardComponent
               ),
           },
+          {
+            path: 'profile/:id',
+            data: {
+              breadcrumb: { alias: 'profile', skip: false },
+              animationState: 'profile',
+            },
+            loadComponent: () =>
+              import('../../../pages/bank/profile/profile.component').then(
+                (p) => p.ProfileComponent
+              ),
+          },
         ],
       },
       {

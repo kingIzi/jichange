@@ -24,7 +24,7 @@ import {
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { TablePaginationComponent } from 'src/app/components/table-pagination/table-pagination.component';
-import { AuditTrail } from 'src/app/core/models/bank/auditTrail';
+import { AuditTrail } from 'src/app/core/models/bank/reports/auditTrail';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -35,9 +35,10 @@ import {
 } from '@angular/material/paginator';
 import { formatDate } from '@angular/common';
 import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
-import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails.service';
+import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails/audit-trails.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TimeoutError } from 'rxjs';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-audit-trails',
@@ -53,6 +54,7 @@ import { TimeoutError } from 'rxjs';
     DisplayMessageBoxComponent,
     TablePaginationComponent,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -80,10 +82,11 @@ export class AuditTrailsComponent implements OnInit {
   public actions: string[] = ['All', 'Insert', 'Update', 'Delete'];
   public formGroup!: FormGroup;
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public auditTrails: AuditTrail[] = [];
   public auditTrailsData: AuditTrail[] = [];
   public headersFormGroup!: FormGroup;
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     ACTIONS: 0,
     COLUMN_NAME: 1,
@@ -308,9 +311,6 @@ export class AuditTrailsComponent implements OnInit {
     } else {
       this.formErrors();
     }
-  }
-  dateStringToDate(dateString: string) {
-    return new Date(dateString);
   }
   searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {

@@ -6,25 +6,26 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
+import { TranslocoModule } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-submit-message-box',
   templateUrl: './submit-message-box.component.html',
   styleUrls: ['./submit-message-box.component.scss'],
   standalone: true,
+  imports: [TranslocoModule],
 })
 export class SubmitMessageBoxComponent {
   @Output()
-  @ViewChild('submitMessageBox')
-  submitMessageBox!: ElementRef;
+  @ViewChild('submitMessageBox', { static: true })
+  submitMessageBox!: ElementRef<HTMLDialogElement>;
   @Input() title: string = 'Message Title';
   @Input() message: string = 'Enter error message here';
-  public attachInvoice = new EventEmitter<any>();
-  public addCustomer = new EventEmitter<any>();
+  public confirm = new EventEmitter<any>();
 
   openDialog() {
     let dialog = this.submitMessageBox.nativeElement as HTMLDialogElement;
-    return dialog.showModal();
+    dialog.showModal();
   }
 
   closeDialog() {
@@ -32,13 +33,8 @@ export class SubmitMessageBoxComponent {
     dialog.close();
   }
 
-  addCustomerClikced() {
-    this.addCustomer.emit();
-    this.closeDialog();
-  }
-
-  attachInvoiceClicked() {
-    this.attachInvoice.emit();
+  confirmClicked() {
+    this.confirm.emit();
     this.closeDialog();
   }
 }

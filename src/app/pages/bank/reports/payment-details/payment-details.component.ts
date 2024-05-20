@@ -24,23 +24,24 @@ import { NgxLoadingModule } from 'ngx-loading';
 import { firstValueFrom } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
-import { Company } from 'src/app/core/models/bank/company';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-payment-details',
   standalone: true,
   imports: [
-    NgxLoadingModule,
     SuccessMessageBoxComponent,
     TranslocoModule,
     CommonModule,
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
@@ -57,7 +58,6 @@ export class PaymentDetailsComponent implements OnInit {
   public customers: Customer[] = [];
   public payments: any[] = [];
   public filterForm!: FormGroup;
-  //public tableHeaders!: FormArray;
   public tableFormGroup!: FormGroup;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;

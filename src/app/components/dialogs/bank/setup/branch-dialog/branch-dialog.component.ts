@@ -25,7 +25,8 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { Branch } from 'src/app/core/models/bank/branch';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-branch-dialog',
@@ -39,6 +40,7 @@ import { Branch } from 'src/app/core/models/bank/branch';
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {

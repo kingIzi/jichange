@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <h2
@@ -118,9 +121,9 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto">
+          <div class="overflow-y-auto shadow">
             <table
               [formGroup]="tableHeadersFormGroup"
               class="min-w-full text-left text-sm font-light"
@@ -274,14 +277,6 @@
                 </tr>
               </tbody>
             </table>
-            <!-- <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="userReportLogs.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
-            </div> -->
             <ng-container *ngIf="!tableLoading">
               <div *transloco="let t; read: 'errors'">
                 <p

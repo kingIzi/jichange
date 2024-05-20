@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -301,14 +304,13 @@
                 </p>
               </div>
             </ng-container>
-            <div
-              *ngIf="tableLoading"
-              class="w-full grid place-items-center mt-6"
-            >
-              <span
-                class="loading loading-spinner loading-sm bg-darkPurple"
-              ></span>
-            </div>
+            <ng-container *ngIf="tableLoading">
+              <div class="w-full grid place-items-center mt-6">
+                <span
+                  class="loading loading-spinner loading-sm bg-darkPurple"
+                ></span>
+              </div>
+            </ng-container>
           </div>
         </div>
       </div>

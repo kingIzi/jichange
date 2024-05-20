@@ -35,10 +35,10 @@ export class RequestClientService {
     );
   }
 
-  public performPost<T>(url: string, payload: T) {
+  public performPost<T, V>(url: string, payload: T) {
     return this.post(url, payload).pipe(
       map((result) => {
-        return result;
+        return result as V;
       })
     );
   }

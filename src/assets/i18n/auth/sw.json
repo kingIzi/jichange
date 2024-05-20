@@ -93,6 +93,8 @@
   "forgotPassword": {
     "welcomeMessage": "Imesahau Nywila",
     "forgotPasswordMessage": "Ingiza barua pepe yako na maagizo yatatumwa kwako!",
+    "resetPasswordSuccessfull": "Barua pepe ya kuweka upya nenosiri imetumwa kwa mafanikio!",
+    "resetPasswordFailed": "Imeshindwa kutuma barua pepe ya kuweka upya nenosiri",
     "form": {
       "email": "Anwani ya barua pepe",
       "placeholders": {
@@ -109,5 +111,58 @@
         "backToLogin": "Nenda kwenye kuingia"
       }
     }
+  },
+  "profile": {
+    "settings": "Mipangilio",
+    "saveChanges": "Hifadhi Mabadiliko",
+    "activeTabs": [
+      {
+        "label": "Jumla",
+        "description": "Badilisha mapendeleo yako na taarifa za akaunti kwa urahisi katika sehemu yetu ya Mipangilio ya Jumla, ikihakikisha uzoefu wa kibinafsi na wa kirafiki kwenye tovuti yetu.",
+        "form": {
+          "firstName": "Jina la Kwanza",
+          "lastName": "Jina la Mwisho",
+          "email": "Anwani ya Barua pepe",
+          "mobile": "Namba ya Simu",
+          "role": "Jukumu la Mtumiaji",
+          "placeholders": {
+            "firstName": "Ingiza jina la kwanza",
+            "lastName": "Ingiza jina la mwisho",
+            "email": "Ingiza anwani ya barua pepe",
+            "role": "Chagua jukumu la mtumiaji"
+          },
+          "errors": {
+            "firstName": "Haiwezi kuwa tupu",
+            "lastName": "Haiwezi kuwa tupu"
+          }
+        }
+      },
+      {
+        "label": "Usalama",
+        "description": "Tia nguvu usalama wako wa mtandaoni kwa urahisi katika sehemu yetu maalum ya Mipangilio ya Usalama, ambapo unaweza kusasisha barua pepe yako na nenosiri kwa urahisi na uhakika.",
+        "form": {
+          "currentPassword": "Nenosiri la Sasa",
+          "newPassword": "Nenosiri Jipya",
+          "confirmPassword": "Thibitisha Nenosiri",
+          "placeholders": {
+            "currentPassword": "Ingiza nenosiri la sasa",
+            "newPassword": "Ingiza nenosiri jipya",
+            "confirmPassword": "Thibitisha nenosiri jipya"
+          }
+        }
+      },
+      {
+        "label": "Lugha",
+        "description": "Gundua fursa za kimataifa katika sehemu yetu ya Mipangilio ya Lugha, ambapo unaweza kubadilisha lugha kwa urahisi kwa uzoefu wa kipekee na unaolingana.",
+        "changeLanguage": "Badilisha Lugha",
+        "sureLanguage": "Una uhakika unataka kubadilisha lugha kuwa {}",
+        "form": {
+          "language": "Lugha",
+          "placeholders": {
+            "language": "Chagua lugha"
+          }
+        }
+      }
+    ]
   }
 }

@@ -18,12 +18,12 @@
     "viewAllInvoices": "View All",
     "latestTransactionsTitle": "Generated invoice(s)",
     "latestTransactionsTable": [
+      "Customer name",
       "Invoice No",
       "Invoice Date",
-      "Customer",
-      "Control No",
-      "Totoal amount",
-      "Remarks"
+      "Payment type",
+      "Total Amount",
+      "Delivery Status"
     ]
   }
 }

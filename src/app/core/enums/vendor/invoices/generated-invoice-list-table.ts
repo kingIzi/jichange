@@ -1,0 +1,8 @@
+export enum GeneratedInvoiceListTable {
+  CUSTOMER_NAME,
+  INVOICE_NUMBER,
+  INVOICE_DATE,
+  PAYMENT_TYPE,
+  TOTAL_AMOUNT,
+  DELIVERY_STATUS,
+}

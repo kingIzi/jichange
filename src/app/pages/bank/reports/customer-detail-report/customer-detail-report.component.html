@@ -1,5 +1,8 @@
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <h2
@@ -194,9 +197,9 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto">
-        <div class="inline-block min-w-full py-2">
-          <div class="overflow-y-auto">
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="overflow-y-auto shadow">
             <table
               [formGroup]="tableHeadersFormGroup"
               class="min-w-full text-left text-sm font-light"
@@ -249,12 +252,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.CUSTOMER_NAME)
+                        .at(VendorDetailsReportTable.CUSTOMER_NAME)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.CUSTOMER_NAME)
+                        .at(VendorDetailsReportTable.CUSTOMER_NAME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -266,12 +269,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.CONTACT_PERSON)
+                        .at(VendorDetailsReportTable.CONTACT_PERSON)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.CONTACT_PERSON)
+                        .at(VendorDetailsReportTable.CONTACT_PERSON)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -283,12 +286,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.EMAIL)
+                        .at(VendorDetailsReportTable.EMAIL)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.EMAIL)
+                        .at(VendorDetailsReportTable.EMAIL)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -300,12 +303,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.ADDRESS)
+                        .at(VendorDetailsReportTable.ADDRESS)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.ADDRESS)
+                        .at(VendorDetailsReportTable.ADDRESS)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -317,12 +320,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.DATE_POSTED)
+                        .at(VendorDetailsReportTable.DATE_POSTED)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.DATE_POSTED)
+                        .at(VendorDetailsReportTable.DATE_POSTED)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -330,7 +333,9 @@
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
                     {{
-                      dateToFormat(customer.Posted_Date).toLocaleDateString()
+                      PerformanceUtils.convertDateStringToDate(
+                        customer.Posted_Date
+                      ).toLocaleDateString()
                     }}
                   </td>
                 </tr>

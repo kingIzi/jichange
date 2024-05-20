@@ -49,15 +49,10 @@ export class BankUserProfileComponent {
       })
       .subscribe({
         next: (result) => {
-          console.log(result);
+          localStorage.clear();
           this.router.navigate(['/auth']);
         },
         error: (err) => {
-          // AppUtilities.openDisplayMessageBox(
-          //   this.displayMessageBox,
-          //   this.tr.translate(`errors.errorOccured`),
-          //   this.tr.translate(`errors.verifyConnection`)
-          // );
           AppUtilities.requestFailedCatchError(
             err,
             this.displayMessageBox,

@@ -1,6 +1,9 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <h2 *transloco="let t; read: 'reports.auditTrails'" class="text-lg font-bold">
@@ -22,14 +25,6 @@
           [formControl]="tbname"
           class="select select-sm select-bordered w-full"
         >
-          <!-- <option
-            *transloco="let t; read: 'reports.auditTrails.form.placeholders'"
-            disabled
-            selected
-            class="text-xs font-inter font-normal capitalize"
-          >
-            {{ t("pleaseSelect") }}
-          </option> -->
           <option
             *ngFor="
               let selectPageOption of selectPageOptions;
@@ -61,14 +56,6 @@
           [formControl]="act"
           class="select select-sm select-bordered w-full"
         >
-          <!-- <option
-            *transloco="let t; read: 'reports.auditTrails.form.placeholders'"
-            disabled
-            selected
-            class="text-xs font-inter font-normal capitalize"
-          >
-            {{ t("pleaseSelect") }}
-          </option> -->
           <option
             *ngFor="
               let action of actions;
@@ -153,9 +140,9 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto">
+          <div class="overflow-y-auto shadow">
             <table class="min-w-full text-left text-sm font-light">
               <thead
                 [formGroup]="headersFormGroup"
@@ -199,7 +186,8 @@
                             paginator.pageSize * paginator.pageIndex +
                             paginator.pageSize -
                             1;
-                    index as i
+                    index as i;
+                    trackBy: PerformanceUtils.trackByIndex
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                 >
@@ -221,19 +209,32 @@
                     {{ auditTrail.aby }}
                   </td>
                   <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                    {{ dateStringToDate(auditTrail.adate).toDateString() }}
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        auditTrail.adate
+                      ).toDateString()
+                    }}
                   </td>
                 </tr>
               </tbody>
             </table>
-            <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="auditTrails.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
-            </div>
+            <ng-container *ngIf="!tableLoading">
+              <div *transloco="let t; read: 'errors'">
+                <p
+                  *ngIf="auditTrails.length <= 0"
+                  class="text-center text-sm tracking-wide pt-3 pb-1"
+                >
+                  {{ t("noDataFound") }}
+                </p>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="tableLoading">
+              <div class="w-full grid place-items-center mt-6">
+                <span
+                  class="loading loading-spinner loading-sm bg-darkPurple"
+                ></span>
+              </div>
+            </ng-container>
           </div>
         </div>
       </div>

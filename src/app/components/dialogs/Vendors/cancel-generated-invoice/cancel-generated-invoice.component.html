@@ -1,19 +1,74 @@
 <dialog #removeItem class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-sm">{{ title }}</h3>
-    <p class="py-4 text-xs">{{ message }}</p>
-    <div class="modal-action">
-      <div class="flex flex-row items">
-        <button (click)="closeDialog()" class="btn btn-ghost btn-xs btn-info">
-          Close
-        </button>
-        <button
-          (click)="cancelInvoiceClicked()"
-          class="btn btn-ghost btn-xs btn-info text-danger-600"
+    <app-loader-infinite-spinner
+      [show]="startLoading"
+    ></app-loader-infinite-spinner>
+    <app-display-message-box #displayMessageBox></app-display-message-box>
+    <div class="flex flex-col space-y-4 w-full h-full">
+      <h3
+        *transloco="let t; read: 'invoice.createdInvoice.cancelInvoice'"
+        class="font-bold text-lg"
+      >
+        {{ t("label") }}
+      </h3>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'invoice.createdInvoice.cancelInvoice.form'"
+          class="text-sm"
         >
-          cancel
-        </button>
+          {{ t("reason") }} <span class="text-red-600">*</span>
+        </p>
+        <input
+          *transloco="
+            let t;
+            read: 'invoice.createdInvoice.cancelInvoice.form.placeholders'
+          "
+          type="text"
+          [placeholder]="t('reason')"
+          class="input input-sm input-bordered font-inter"
+          [formControl]="reason"
+          #InvRemark
+        />
+        <span *ngIf="reason && reason.invalid && reason.touched">
+          <p
+            *transloco="
+              let t;
+              read: 'invoice.createdInvoice.cancelInvoice.form.errors'
+            "
+            class="text-xs text-red-600"
+          >
+            {{ t("reason") }}
+          </p>
+        </span>
       </div>
+      <div class="w-full grid place-items-center">
+        <p
+          *transloco="let t; read: 'invoice.createdInvoice.cancelInvoice'"
+          class="text-center italic font-bold p-1 w-10/12 relative text-wrap"
+        >
+          {{ t("cautionMessage") }}
+        </p>
+      </div>
+    </div>
+    <div class="modal-action">
+      <form class="flex flex-col">
+        <div class="flex flex-row items">
+          <button
+            *transloco="let t; read: 'defaults'"
+            (click)="closeDialog()"
+            class="btn btn-ghost btn-xs btn-info"
+          >
+            {{ t("close") }}
+          </button>
+          <button
+            *transloco="let t; read: 'defaults'"
+            (click)="cancelInvoiceClicked()"
+            class="btn btn-ghost btn-xs btn-info text-danger-600"
+          >
+            {{ t("confirm") }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop">

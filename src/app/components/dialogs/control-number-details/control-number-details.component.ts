@@ -27,6 +27,8 @@ import {
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { LoginService } from 'src/app/core/services/login.service';
 import { GetControlResponse } from 'src/app/core/models/vendors/get-control-response';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TimeoutError } from 'rxjs';
 
 @Component({
   selector: 'app-control-number-details',
@@ -42,6 +44,7 @@ import { GetControlResponse } from 'src/app/core/models/vendors/get-control-resp
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
 })
 export class ControlNumberDetailsComponent implements OnInit {
@@ -133,6 +136,7 @@ export class ControlNumberDetailsComponent implements OnInit {
         );
         this.startLoading = false;
         this.cdr.detectChanges();
+        throw err;
       });
   }
 

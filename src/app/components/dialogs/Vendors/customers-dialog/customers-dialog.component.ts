@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Inject,
@@ -24,8 +26,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CountryDialogComponent } from '../../bank/setup/country-dialog/country-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { SubmitMessageBoxComponent } from '../../submit-message-box/submit-message-box.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { Customer } from 'src/app/core/models/vendors/customer';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
+import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
+import { AddCustomerForm } from 'src/app/core/models/vendors/forms/add-customer-form';
 
 @Component({
   selector: 'app-customers-dialog',
@@ -39,7 +46,10 @@ import { Customer } from 'src/app/core/models/vendors/customer';
     SuccessMessageBoxComponent,
     TranslocoModule,
     SubmitMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
+    PhoneNumberInputComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -48,8 +58,11 @@ import { Customer } from 'src/app/core/models/vendors/customer';
   ],
 })
 export class CustomersDialogComponent implements OnInit {
+  public startLoading: boolean = false;
+  public userProfile!: LoginResponse;
   public customerForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public attachInvoice = new EventEmitter<number>();
+  public addedCustomer = new EventEmitter<void>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -58,11 +71,142 @@ export class CustomersDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
+    private customerService: CustomerService,
+    private cdr: ChangeDetectorRef,
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data: Customer
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private formErrors(errorsPath: string = 'customer.form.dialog') {
+    if (this.CName.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.customerName`)
+      );
+    }
+    if (this.Mobile_Number.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.mobileNo`)
+      );
+    }
+    if (this.Mail.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.emailId`)
+      );
+    }
+  }
+  private createForm() {
+    this.customerForm = this.fb.group({
+      compid: this.fb.control(this.userProfile.InstID, []),
+      userid: this.fb.control(this.userProfile.Usno, []),
+      CSno: this.fb.control(0, []),
+      CName: this.fb.control('', [Validators.required]),
+      PostboxNo: this.fb.control('', []),
+      Address: this.fb.control('', []),
+      regid: this.fb.control(0, []),
+      distsno: this.fb.control(0, []),
+      wardsno: this.fb.control(0, []),
+      Tinno: this.fb.control('', []),
+      VatNo: this.fb.control('', []),
+      CoPerson: this.fb.control('', []),
+      Mail: this.fb.control('', [Validators.required, Validators.email]),
+      Mobile_Number: this.fb.control('', [
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+      ]),
+      dummy: this.fb.control(true, []),
+      check_status: this.fb.control(''),
+    });
+  }
+  private createEditForm() {
+    this.customerForm = this.fb.group({
+      compid: this.fb.control(this.userProfile.InstID, []),
+      userid: this.fb.control(this.userProfile.Usno, []),
+      CSno: this.fb.control(this.data.Cust_Sno, []),
+      CName: this.fb.control(this.data.Cust_Name, [Validators.required]),
+      PostboxNo: this.fb.control('', []),
+      Address: this.fb.control('', []),
+      regid: this.fb.control(0, []),
+      distsno: this.fb.control(0, []),
+      wardsno: this.fb.control(0, []),
+      Tinno: this.fb.control('', []),
+      VatNo: this.fb.control('', []),
+      CoPerson: this.fb.control('', []),
+      Mail: this.fb.control(this.data.Email, [
+        Validators.required,
+        Validators.email,
+      ]),
+      Mobile_Number: this.fb.control(this.data.Phone, [
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+      ]),
+      dummy: this.fb.control(true, []),
+      check_status: this.fb.control(''),
+    });
+  }
+  private requestAddCustomer(
+    body: AddCustomerForm,
+    attachInvoice: boolean = false
+  ) {
+    this.startLoading = true;
+    this.customerService
+      .addCustomer(body)
+      .then((result) => {
+        if (typeof result.response === 'boolean') {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`customer.form.dialog.failedToAddCustomer`)
+          );
+        } else if (
+          typeof result.response === 'string' &&
+          result.response.toLocaleLowerCase() ===
+            'Customer already mapped to an Invoice'.toLocaleLowerCase()
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(
+              `customer.form.dialog.addFailedCustomerMappedToInvoice`
+            )
+          );
+        } else if (typeof result.response === 'number' && result.response > 0) {
+          let success = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(`customer.addedCustomerSuccessfully`)
+          );
+          success.then((res) => {
+            if (attachInvoice) {
+              this.attachInvoice.emit(result.response as number);
+            } else {
+              this.addedCustomer.emit();
+            }
+            this.closeDialog();
+          });
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      });
+  }
   ngOnInit(): void {
+    this.parseUserProfile();
     if (this.data) {
       this.createEditForm();
     } else {
@@ -78,79 +222,25 @@ export class CustomersDialogComponent implements OnInit {
   updatePhoneNumberPrefix(prefix: string, control: FormControl) {
     AppUtilities.mobileNumberFormat(prefix, control);
   }
-  private showFormReady(value: any) {
-    AppUtilities.openSubmitMessageBox(
-      this.submitMessagBox,
-      this.translocoService.translate(
-        'customer.form.actions.sureToAddCustomer'
-      ),
-      this.translocoService.translate('customer.form.actions.addInvoiceAsWell')
-    );
-  }
-  submitCountryForm() {
+  submitCustomerForm(dialog: HTMLDialogElement) {
     if (this.customerForm.valid) {
-      this.showFormReady(this.customerForm.value);
-      this.submitMessagBox.attachInvoice.asObservable().subscribe(() => {
-        // this.router.navigate(['/vendor/invoice/20123']);
-        // this.closeDialog();
-      });
-      this.submitMessagBox.addCustomer.asObservable().subscribe(() => {
-        //this.closeDialog();
-      });
-    }
-    this.customerForm.markAllAsTouched();
-    this.formErrors();
-  }
-  private formErrors(errorsPath: string = 'customer.form.dialog') {
-    if (this.customerName.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.customerName`)
-      );
-    }
-    if (this.mobileNo.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.mobileNo`)
-      );
-    }
-    if (this.emailId.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.emailId`)
-      );
+      dialog.showModal();
+    } else {
+      this.customerForm.markAllAsTouched();
+      //this.formErrors();
     }
   }
-  private createForm() {
-    this.customerForm = this.fb.group({
-      customerName: this.fb.control('', [Validators.required]),
-      mobileNo: this.fb.control('', [
-        Validators.required,
-        Validators.pattern(/^[0-9]{12}/),
-      ]),
-      emailId: this.fb.control('', [Validators.email]),
-    });
+  addCustomer(attachInvoice: boolean, dialog: HTMLDialogElement) {
+    dialog.close();
+    this.requestAddCustomer(this.customerForm.value, attachInvoice);
   }
-  private createEditForm() {
-    this.customerForm = this.fb.group({
-      customerName: this.fb.control(this.data.Cust_Name, [Validators.required]),
-      mobileNo: this.fb.control(this.data.Phone, [
-        Validators.required,
-        Validators.pattern(/^[0-9]{12}/),
-      ]),
-      emailId: this.fb.control(this.data.Email, [Validators.email]),
-    });
+  get CName() {
+    return this.customerForm.get('CName') as FormControl;
   }
-  get customerName() {
-    return this.customerForm.get('customerName') as FormControl;
+  get Mobile_Number() {
+    return this.customerForm.get('Mobile_Number') as FormControl;
   }
-  get mobileNo() {
-    return this.customerForm.get('mobileNo') as FormControl;
-  }
-  get emailId() {
-    return this.customerForm.get('emailId') as FormControl;
+  get Mail() {
+    return this.customerForm.get('Mail') as FormControl;
   }
 }

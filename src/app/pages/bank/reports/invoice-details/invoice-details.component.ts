@@ -22,7 +22,7 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
-import { Company } from 'src/app/core/models/bank/company';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { TimeoutError, firstValueFrom } from 'rxjs';
 import { Customer } from 'src/app/core/models/bank/customer';
 import {
@@ -38,10 +38,11 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { InvoiceReport } from 'src/app/core/models/bank/invoice-report';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-invoice-details',
@@ -57,6 +58,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     ReactiveFormsModule,
     LoaderRainbowComponent,
     DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -75,7 +77,7 @@ export class InvoiceDetailsComponent implements OnInit {
   public headerFormGroup!: FormGroup;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     INVOICE_NUMBER: 0,
     INVOICE_DATE: 1,
@@ -394,9 +396,6 @@ export class InvoiceDetailsComponent implements OnInit {
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
     sortAsc?.setValue(!sortAsc?.value);
-  }
-  parseDateStringFormat(date: string) {
-    return new Date(date);
   }
   isCashAmountColumn(index: number) {
     return (

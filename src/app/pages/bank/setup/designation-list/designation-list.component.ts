@@ -26,19 +26,23 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
-import { DesignationService } from 'src/app/core/services/bank/setup/designation.service';
+import { DesignationService } from 'src/app/core/services/bank/setup/designation/designation.service';
 import {
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { Designation } from 'src/app/core/models/bank/designation';
+import { Designation } from 'src/app/core/models/bank/setup/designation';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { TimeoutError } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-designation-list',
@@ -56,6 +60,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     LoaderRainbowComponent,
     RemoveItemDialogComponent,
     DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -70,8 +75,10 @@ export class DesignationListComponent implements OnInit {
   public designations: Designation[] = [];
   public designationsData: Designation[] = [];
   public tableHeadersFormGroup!: FormGroup;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private designationService: DesignationService,
@@ -83,27 +90,19 @@ export class DesignationListComponent implements OnInit {
   private createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate('designation.designationsTable', {}, this.scope)
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index < 5, []),
-            values: this.fb.array([], []),
-          });
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `designation.designationsTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
@@ -154,6 +153,18 @@ export class DesignationListComponent implements OnInit {
         throw err;
       });
   }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      this.designations = this.designations.filter((elem) => {
+        return elem.Desg_Name.toLocaleLowerCase().includes(
+          searchText.toLocaleLowerCase()
+        );
+      });
+    } else {
+      this.requestDesignationList();
+    }
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.requestDesignationList();
@@ -194,19 +205,10 @@ export class DesignationListComponent implements OnInit {
       console.log(`Item deleted`);
     });
   }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      this.designations = this.designations.filter((elem) => {
-        return elem.Desg_Name.toLocaleLowerCase().includes(
-          searchText.toLocaleLowerCase()
-        );
-      });
-    } else {
-      this.requestDesignationList();
-    }
-  }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;
+  }
+  get tableSearch() {
+    return this.tableHeadersFormGroup.get('tableSearch') as FormControl;
   }
 }

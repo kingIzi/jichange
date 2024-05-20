@@ -19,6 +19,7 @@ import { FooterComponent } from '../footer/footer.component';
 import { VendorHeaderComponent } from '../vendor-header/vendor-header.component';
 import { vendorAnimations } from '../main/router-transition-animations';
 import { BreadcrumbModule, BreadcrumbService } from 'xng-breadcrumb';
+import { TranslocoService } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-vendor',
@@ -35,29 +36,78 @@ import { BreadcrumbModule, BreadcrumbService } from 'xng-breadcrumb';
   animations: [vendorAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VendorComponent implements OnInit, AfterViewInit {
-  private initialRoute: string = '/vendor';
-  public breadcrums: { url: string; name: string }[] = [];
+export class VendorComponent implements OnInit {
   @ViewChild('vendorHeader') vendorHeader!: VendorHeaderComponent;
   constructor(
     private breadcrumbService: BreadcrumbService,
-    private router: Router
+    private router: Router,
+    private tr: TranslocoService
   ) {}
   private prepareVendorRoutes() {
-    this.breadcrumbService.set('@vendor', 'Home');
-    this.breadcrumbService.set('@customers', 'Customer(s)');
-    this.breadcrumbService.set('@view-customer', 'Detail(s)');
-    this.breadcrumbService.set('@company', 'User(s)');
-    this.breadcrumbService.set('@invoice-amendments', 'Amendment(s)');
-    this.breadcrumbService.set('@invoice-cancelled', 'Cancelled');
-    this.breadcrumbService.set('@invoice-generated', 'Invoice(s)');
-    this.breadcrumbService.set('@overview', 'Overview');
-    this.breadcrumbService.set('@transactions', 'Transactions Report');
-    this.breadcrumbService.set('@transactions-id', 'Detail(s)');
-    this.breadcrumbService.set('@invoice', 'Invoice Report');
-    this.breadcrumbService.set('@payments', 'Payment Report');
-    this.breadcrumbService.set('@amendment', 'Amendment Report');
-    this.breadcrumbService.set('@customer', 'Customer Report');
+    this.breadcrumbService.set(
+      '@profile',
+      this.tr.translate(`vendorRoutes.profile`)
+    );
+    this.breadcrumbService.set(
+      '@vendor',
+      this.tr.translate(`vendorRoutes.home`)
+    );
+    this.breadcrumbService.set(
+      '@customers',
+      this.tr.translate(`vendorRoutes.customer`)
+    );
+    this.breadcrumbService.set(
+      '@view-customer',
+      this.tr.translate(`vendorRoutes.detail`)
+    );
+    this.breadcrumbService.set(
+      '@company',
+      this.tr.translate(`vendorRoutes.users`)
+    );
+    this.breadcrumbService.set(
+      '@invoice-created',
+      this.tr.translate(`vendorRoutes.created`)
+    );
+    this.breadcrumbService.set(
+      '@invoice-amendments',
+      this.tr.translate(`vendorRoutes.amendment`)
+    );
+    this.breadcrumbService.set(
+      '@invoice-cancelled',
+      this.tr.translate(`vendorRoutes.cancelled`)
+    );
+    this.breadcrumbService.set(
+      '@invoice-generated',
+      this.tr.translate(`vendorRoutes.invoice`)
+    );
+    this.breadcrumbService.set(
+      '@overview',
+      this.tr.translate(`vendorRoutes.overview`)
+    );
+    this.breadcrumbService.set(
+      '@transactions',
+      this.tr.translate(`vendorRoutes.transactionsReport`)
+    );
+    this.breadcrumbService.set(
+      '@transactions-id',
+      this.tr.translate(`vendorRoutes.detail`)
+    );
+    this.breadcrumbService.set(
+      '@invoice',
+      this.tr.translate(`vendorRoutes.invoiceReport`)
+    );
+    this.breadcrumbService.set(
+      '@payments',
+      this.tr.translate(`vendorRoutes.paymentReport`)
+    );
+    this.breadcrumbService.set(
+      '@amendment',
+      this.tr.translate(`vendorRoutes.amendmentReport`)
+    );
+    this.breadcrumbService.set(
+      '@customer',
+      this.tr.translate(`vendorRoutes.customerReport`)
+    );
   }
   private routeLoaderListener() {
     this.router.events.subscribe((event) => {
@@ -78,21 +128,7 @@ export class VendorComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  private switchRouteName(url: string) {
-    switch (url) {
-      case '/vendor':
-        return 'Home';
-      default:
-        return '';
-    }
-  }
   ngOnInit(): void {
-    this.breadcrums.push({
-      url: this.initialRoute,
-      name: this.switchRouteName(this.initialRoute),
-    });
-  }
-  ngAfterViewInit(): void {
     this.prepareVendorRoutes();
     this.routeLoaderListener();
   }

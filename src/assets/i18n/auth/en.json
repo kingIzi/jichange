@@ -96,6 +96,8 @@
   "forgotPassword": {
     "welcomeMessage": "Forgot Password",
     "forgotPasswordMessage": "Enter your Email and instructions will be sent to you!",
+    "resetPasswordSuccessfull": "Resest password has been Successfuly sent!",
+    "resetPasswordFailed": "Failed to send reset password",
     "form": {
       "email": "Email Address",
       "placeholders": {
@@ -112,5 +114,58 @@
         "backToLogin": "Go to login"
       }
     }
+  },
+  "profile": {
+    "settings": "Settings",
+    "saveChanges": "Save Changes",
+    "activeTabs": [
+      {
+        "label": "General",
+        "description": "Easily customize your preferences and account details with our intuitive General Settings section, ensuring a personalized and seamless experience on our website.",
+        "form": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "email": "Email Address",
+          "mobile": "Mobile number",
+          "role": "User role",
+          "placeholders": {
+            "firstName": "Enter first name",
+            "lastName": "Enter last name",
+            "email": "Enter email address",
+            "role": "Select user role"
+          },
+          "errors": {
+            "firstName": "Cannot be empty",
+            "lastName": "Cannot be empty"
+          }
+        }
+      },
+      {
+        "label": "Security",
+        "description": "Strengthen your online security effortlessly in our dedicated Security Settings section, where you can update your email and password with ease and peace of mind.",
+        "form": {
+          "currentPassword": "Current Password",
+          "newPassword": "New Password",
+          "confirmPassword": "Confirm Password",
+          "placeholders": {
+            "currentPassword": "Enter current password",
+            "newPassword": "Enter new Password",
+            "confirmPassword": "Confirm new Password"
+          }
+        }
+      },
+      {
+        "label": "Language",
+        "description": "Explore global possibilities with our Language Settings section, where you can effortlessly switch languages for a truly inclusive and tailored experience.",
+        "changeLanguage": "Change Language",
+        "sureLanguage": "Are you sure you want to change the language to {}",
+        "form": {
+          "language": "Language(s)",
+          "placeholders": {
+            "language": "Select language"
+          }
+        }
+      }
+    ]
   }
 }

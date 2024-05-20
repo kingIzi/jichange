@@ -1,3 +1,7 @@
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
     <h2 *transloco="let t; read: 'invoice'" class="text-lg font-bold">
@@ -61,14 +65,23 @@
             </thead>
             <tbody></tbody>
           </table>
-          <div *transloco="let t; read: 'errors'">
-            <p
-              *ngIf="invoicesList.length <= 0"
-              class="text-center text-sm tracking-wide pt-3 pb-1"
-            >
-              {{ t("noDataFound") }}
-            </p>
-          </div>
+          <ng-container *ngIf="!tableLoading">
+            <div *transloco="let t; read: 'errors'">
+              <p
+                *ngIf="invoicesList.length <= 0"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="tableLoading">
+            <div class="w-full grid place-items-center mt-6">
+              <span
+                class="loading loading-spinner loading-sm bg-darkPurple"
+              ></span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

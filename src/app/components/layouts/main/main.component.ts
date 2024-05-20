@@ -20,6 +20,7 @@ import { FooterComponent } from '../footer/footer.component';
 import { CommonModule } from '@angular/common';
 import { BreadcrumbService, BreadcrumbModule } from 'xng-breadcrumb';
 import { fader } from './router-transition-animations';
+import { TranslocoService } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-main',
@@ -37,11 +38,12 @@ import { fader } from './router-transition-animations';
     BreadcrumbModule,
   ],
 })
-export class MainComponent implements OnInit, AfterViewInit {
+export class MainComponent implements OnInit {
   @ViewChild('mainHeader') mainHeader!: HeaderComponent;
   constructor(
     private breadcrumbService: BreadcrumbService,
-    private router: Router
+    private router: Router,
+    private tr: TranslocoService
   ) {}
   private routeLoaderListener() {
     this.router.events.subscribe((event) => {
@@ -57,55 +59,131 @@ export class MainComponent implements OnInit, AfterViewInit {
           break;
         }
         default: {
+          //this.mainHeader.routeLoading = false;
           break;
         }
       }
     });
   }
   private prepareReportsRoutes() {
-    this.breadcrumbService.set('@overview', 'Report(s)');
-    this.breadcrumbService.set('@invoice', 'Invoice(s)');
-    this.breadcrumbService.set('@userLog', 'User Log(s)');
-    this.breadcrumbService.set('@customer', 'Vendor(s)');
-    this.breadcrumbService.set('@audit', 'Audit');
-    this.breadcrumbService.set('@transactions-id', { label: 'Details' });
-    this.breadcrumbService.set('@payment', 'Payment(s)');
-    this.breadcrumbService.set('@amendment', 'Amendment(s)');
+    this.breadcrumbService.set(
+      '@overview',
+      this.tr.translate(`bankRoutes.reports.overview`)
+    );
+    this.breadcrumbService.set(
+      '@invoice',
+      this.tr.translate(`bankRoutes.reports.invoice`)
+    );
+    this.breadcrumbService.set(
+      '@userLog',
+      this.tr.translate(`bankRoutes.reports.userLog`)
+    );
+    this.breadcrumbService.set(
+      '@customer',
+      this.tr.translate(`bankRoutes.reports.vendor`)
+    );
+    this.breadcrumbService.set(
+      '@audit',
+      this.tr.translate(`bankRoutes.reports.audit`)
+    );
+    this.breadcrumbService.set(
+      '@transactions-id',
+      this.tr.translate(`bankRoutes.reports.details`)
+    );
+    this.breadcrumbService.set(
+      '@payment',
+      this.tr.translate(`bankRoutes.reports.payments`)
+    );
+    this.breadcrumbService.set(
+      '@amendment',
+      this.tr.translate(`bankRoutes.reports.amendment`)
+    );
     this.breadcrumbService.set('@transactions', {
-      label: 'Transactions',
+      label: this.tr.translate(`bankRoutes.reports.transaction`),
       routeInterceptor(routeLink: any, breadcrumb: any) {
         return routeLink.startsWith('/main') ? routeLink : `/main${routeLink}`;
       },
     });
   }
   private prepareSetupRoutes() {
-    this.breadcrumbService.set('@country', 'Countries');
-    this.breadcrumbService.set('@region', 'Regions');
-    this.breadcrumbService.set('@district', 'Districts');
-    this.breadcrumbService.set('@ward', 'Wards');
-    this.breadcrumbService.set('@currency', 'Currencies');
-    this.breadcrumbService.set('@designation', 'Designations');
-    this.breadcrumbService.set('@branch', 'Branch');
-    this.breadcrumbService.set('@question', 'Question(s)');
-    this.breadcrumbService.set('@smtp', 'SMTP');
-    this.breadcrumbService.set('@email', 'Email');
-    this.breadcrumbService.set('@user', 'Bank user(s)');
-    this.breadcrumbService.set('@language', 'Language');
-    this.breadcrumbService.set('@suspense', 'Suspense account');
-    this.breadcrumbService.set('@deposit', 'Deposit account');
+    this.breadcrumbService.set(
+      '@country',
+      this.tr.translate(`bankRoutes.setup.country`)
+    );
+    this.breadcrumbService.set(
+      '@region',
+      this.tr.translate(`bankRoutes.setup.region`)
+    );
+    this.breadcrumbService.set(
+      '@district',
+      this.tr.translate(`bankRoutes.setup.district`)
+    );
+    this.breadcrumbService.set(
+      '@ward',
+      this.tr.translate(`bankRoutes.setup.ward`)
+    );
+    this.breadcrumbService.set(
+      '@currency',
+      this.tr.translate(`bankRoutes.setup.currencies`)
+    );
+    this.breadcrumbService.set(
+      '@designation',
+      this.tr.translate(`bankRoutes.setup.designation`)
+    );
+    this.breadcrumbService.set(
+      '@branch',
+      this.tr.translate(`bankRoutes.setup.branch`)
+    );
+    this.breadcrumbService.set(
+      '@question',
+      this.tr.translate(`bankRoutes.setup.question`)
+    );
+    this.breadcrumbService.set(
+      '@smtp',
+      this.tr.translate(`bankRoutes.setup.smtp`)
+    );
+    this.breadcrumbService.set(
+      '@email',
+      this.tr.translate(`bankRoutes.setup.email`)
+    );
+    this.breadcrumbService.set(
+      '@user',
+      this.tr.translate(`bankRoutes.setup.bankUser`)
+    );
+    this.breadcrumbService.set(
+      '@language',
+      this.tr.translate(`bankRoutes.setup.language`)
+    );
+    this.breadcrumbService.set(
+      '@suspense',
+      this.tr.translate(`bankRoutes.setup.suspense`)
+    );
+    this.breadcrumbService.set(
+      '@deposit',
+      this.tr.translate(`bankRoutes.setup.deposit`)
+    );
   }
   private prepareCompanyRoutes() {
-    this.breadcrumbService.set('@summary', 'Companies list');
-    this.breadcrumbService.set('@inbox', 'Vendor approvals');
+    this.breadcrumbService.set(
+      '@summary',
+      this.tr.translate(`bankRoutes.company.summary`)
+    );
+    this.breadcrumbService.set(
+      '@inbox',
+      this.tr.translate(`bankRoutes.company.inbox`)
+    );
   }
   private prepareBankBreadcrumbs() {
-    this.breadcrumbService.set('@home', 'Home');
+    this.breadcrumbService.set('@home', this.tr.translate(`bankRoutes.home`));
+    this.breadcrumbService.set(
+      '@profile',
+      this.tr.translate(`bankRoutes.profile`)
+    );
     this.prepareReportsRoutes();
     this.prepareSetupRoutes();
     this.prepareCompanyRoutes();
   }
-  ngOnInit(): void {}
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.prepareBankBreadcrumbs();
     this.routeLoaderListener();
   }

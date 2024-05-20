@@ -26,13 +26,16 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { AddCompany } from 'src/app/core/models/bank/forms/add-company';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { AddCompany } from 'src/app/core/models/bank/forms/company/summary/add-company';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
-import { Branch } from 'src/app/core/models/bank/branch';
-import { AddCompanyL } from 'src/app/core/models/bank/forms/add-company-l';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { AddCompanyL } from 'src/app/core/models/bank/forms/company/summary/add-company-l';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TimeoutError } from 'rxjs';
+import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 
 @Component({
   selector: 'app-vendor-registration',
@@ -49,6 +52,8 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
+    PhoneNumberInputComponent,
   ],
 })
 export class VendorRegistrationComponent implements OnInit {
@@ -77,8 +82,12 @@ export class VendorRegistrationComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
-        this.submitFailed();
         this.cdr.detectChanges();
         throw err;
       });
@@ -142,7 +151,6 @@ export class VendorRegistrationComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.submitFailed();
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -181,7 +189,7 @@ export class VendorRegistrationComponent implements OnInit {
       compname: this.fb.control('', [Validators.required]),
       mob: this.fb.control('', [
         Validators.required,
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       branch: this.fb.control('', [Validators.required]),
       check_status: this.fb.control('', [Validators.required]),
@@ -195,7 +203,7 @@ export class VendorRegistrationComponent implements OnInit {
       vat: this.fb.control('', []),
       dname: this.fb.control('', []),
       telno: this.fb.control('', [
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       email: this.fb.control('', [Validators.email]),
       dummy: this.fb.control(true, [Validators.required]),

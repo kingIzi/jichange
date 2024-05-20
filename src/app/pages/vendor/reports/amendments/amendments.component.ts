@@ -31,7 +31,7 @@ import {
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { Company } from 'src/app/core/models/bank/company';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
@@ -133,7 +133,7 @@ export class AmendmentsComponent implements OnInit {
     });
   }
   private buildPage() {
-    this.startLoading = true;
+    this.tableLoading = true;
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
@@ -158,21 +158,39 @@ export class AmendmentsComponent implements OnInit {
         })
       )
     )
-      .then((results: Array<any>) => {
+      .then((results) => {
         let [companies, customers, invoices] = results;
-        this.companies = companies.response === 0 ? [] : companies.response;
-        this.customers = customers.response === 0 ? [] : customers.response;
-        this.invoices = invoices.response === 0 ? [] : invoices.response;
-        this.startLoading = false;
+        if (
+          companies.response &&
+          typeof companies.response !== 'string' &&
+          typeof companies.response !== 'number'
+        ) {
+          this.companies = companies.response;
+        }
+        if (
+          customers.response &&
+          typeof customers.response !== 'string' &&
+          typeof customers.response !== 'number'
+        ) {
+          this.customers = customers.response;
+        }
+        if (
+          invoices.response &&
+          typeof invoices.response !== 'string' &&
+          typeof invoices.response !== 'number'
+        ) {
+          this.invoices = invoices.response;
+        }
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -214,12 +232,12 @@ export class AmendmentsComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -241,7 +259,8 @@ export class AmendmentsComponent implements OnInit {
       );
       this.requestAmendmentsReport(value);
     } else {
-      this.formErrors();
+      this.filterFormGroup.markAllAsTouched();
+      //this.formErrors();
     }
   }
   getFormControl(control: AbstractControl, name: string) {

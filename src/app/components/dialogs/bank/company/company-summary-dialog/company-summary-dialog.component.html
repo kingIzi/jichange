@@ -1,17 +1,26 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<!-- <app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner> -->
+<!-- class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2" -->
+
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+<app-success-message-box #successMessageBox></app-success-message-box>
 
 <form
   *ngIf="isReady"
   [formGroup]="companySummaryForm"
   action=""
-  class="grid grid-cols-1 lg:grid-cols-3 p-4 gap-4 h-full overflow-y-auto"
+  class="grid grid-cols-1 lg:grid-cols-3 p-4 gap-4 h-full overflow-y-auto relative"
 >
   <h1
     *transloco="let t; read: 'company.summary.companyForm'"
     class="text-xl md:text-2xl p-0 col-span-full"
   >
-    {{ t("company") }}
+    {{ t("addVendor") }}
   </h1>
   <div class="flex flex-col space-y-1">
     <h6
@@ -43,27 +52,14 @@
     >
       {{ t("mobileNo") }} <span class="text-red-600">*</span>
     </h6>
-    <span class="relative">
-      <select
-        #phonePrefix
-        class="select select-sm select-bordered select-disabled w-20 absolute"
+    <app-phone-number-input [mobileNumber]="mob"></app-phone-number-input>
+    <span *ngIf="mob && mob.invalid && mob.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-danger-700 text-xs"
       >
-        <option selected class="font-inter text-xs" value="+255">+255</option>
-      </select>
-      <input
-        type="tel"
-        placeholder="(0)"
-        [formControl]="mob"
-        class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
-      />
-      <span *ngIf="mob && mob.invalid && mob.touched">
-        <p
-          *transloco="let t; read: 'company.summary.companyForm.errors'"
-          class="text-danger-700 text-xs"
-        >
-          {{ t("mobileNo") }}
-        </p>
-      </span>
+        {{ t("mobileNo") }}
+      </p>
     </span>
   </div>
   <div class="flex flex-col space-y-1 w-full">
@@ -71,7 +67,7 @@
       *transloco="let t; read: 'company.summary.companyForm'"
       class="text-left text-sm"
     >
-      {{ t("branch") }}
+      {{ t("branch") }} <span class="text-red-600">*</span>
     </h6>
     <select
       [formControl]="branch"
@@ -107,17 +103,17 @@
     </span>
   </div>
   <div class="flex flex-col space-y-1 w-full">
+    <h6
+      *transloco="let t; read: 'company.summary.companyForm'"
+      class="text-left text-sm"
+    >
+      {{ t("makerChecker") }} <span class="text-red-600">*</span>
+    </h6>
     <div class="flex flex-row items-center">
-      <p
-        *transloco="let t; read: 'company.summary.companyForm'"
-        class="text-xs"
-      >
-        {{ t("makerChecker") }}
-      </p>
       <div class="form-control">
         <label
           *transloco="let y; read: 'defaults'"
-          class="label cursor-pointer"
+          class="label cursor-pointer flex flex-row space-x-0.5"
         >
           <span class="label-text text-xs font-inter">
             {{ y("yes") }}
@@ -135,7 +131,7 @@
       <div class="form-control">
         <label
           *transloco="let y; read: 'defaults'"
-          class="label cursor-pointer"
+          class="label cursor-pointer flex flex-row space-x-0.5"
         >
           <span class="label-text text-xs font-inter">
             {{ y("no") }}
@@ -233,7 +229,7 @@
       *transloco="let t; read: 'company.summary.companyForm'"
       class="text-left text-sm"
     >
-      {{ t("region") }}
+      {{ t("region") }} <span class="text-red-600">*</span>
     </h6>
     <select
       [formControl]="rsno"
@@ -272,7 +268,7 @@
       *transloco="let t; read: 'company.summary.companyForm'"
       class="text-left text-sm"
     >
-      {{ t("district") }}
+      {{ t("district") }} <span class="text-red-600">*</span>
     </h6>
     <select
       [formControl]="dsno"
@@ -311,7 +307,7 @@
       *transloco="let t; read: 'company.summary.companyForm'"
       class="text-left text-sm"
     >
-      {{ t("ward") }}
+      {{ t("ward") }} <span class="text-red-600">*</span>
     </h6>
     <select
       [formControl]="wsno"
@@ -419,7 +415,7 @@
       *transloco="let t; read: 'company.summary.companyForm'"
       class="text-left text-sm"
     >
-      {{ t("emailId") }}
+      {{ t("emailId") }} <span class="text-red-600">*</span>
     </h6>
     <input
       *transloco="let t; read: 'company.summary.companyForm.placeholders'"
@@ -444,27 +440,14 @@
     >
       {{ t("telephoneNo") }}
     </h6>
-    <span class="relative">
-      <select
-        #phonePrefix
-        class="select select-sm select-bordered select-disabled w-20 absolute"
+    <app-phone-number-input [mobileNumber]="telno"></app-phone-number-input>
+    <span *ngIf="telno && telno.invalid && telno.touched">
+      <p
+        *transloco="let t; read: 'company.summary.companyForm.errors'"
+        class="text-xs text-red-600"
       >
-        <option selected class="font-inter text-xs" value="+255">+255</option>
-      </select>
-      <input
-        type="tel"
-        placeholder="(0)"
-        class="input input-sm input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
-        [formControl]="telno"
-      />
-      <span *ngIf="telno && telno.invalid && telno.touched">
-        <p
-          *transloco="let t; read: 'company.summary.companyForm.errors'"
-          class="text-xs text-red-600"
-        >
-          {{ t("telephoneNo") }}
-        </p>
-      </span>
+        {{ t("telephoneNo") }}
+      </p>
     </span>
   </div>
   <p
@@ -477,14 +460,14 @@
     <thead class="border-b font-medium dark:border-neutral-500">
       <tr *transloco="let t; read: 'tableData'">
         <th
-          *transloco="let t; read: 'defaults'"
-          class="text-xs font-inter py-4"
+          *transloco="let t; read: 'company.summary.companyForm'"
+          class="text-xs font-inter py-4 w-12"
         >
-          Sno
+          #
         </th>
         <th
           *transloco="let t; read: 'company.summary.companyForm'"
-          class="text-xs font-inter py-4"
+          class="text-xs font-inter py-4 px-12"
         >
           {{ t("accountNo") }}
         </th>
@@ -496,15 +479,15 @@
         </th>
       </tr>
     </thead>
-    <tbody formArrayName="details">
+    <tbody formArrayName="details" class="py-2">
       <tr
         *ngFor="let bankDetail of details.controls; index as ind"
         formGroupName="{{ ind }}"
       >
-        <td>
-          {{ ind + 1 }}
+        <td class="w-12">
+          <h4>{{ ind + 1 }}</h4>
         </td>
-        <td>
+        <td class="w-full px-12">
           <input
             formControlName="AccountNo"
             type="number"
@@ -518,7 +501,10 @@
           >
             <span class="material-symbols-outlined text-success"> add </span>
           </button>
-          <button (click)="removeBankDetail(ind)">
+          <button
+            *ngIf="ind !== details.controls.length - 1"
+            (click)="removeBankDetail(ind)"
+          >
             <span class="material-symbols-outlined text-danger-600">
               delete
             </span>

@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -24,15 +27,13 @@
         <input
           *transloco="let t; read: 'setup.questionName.form.placeholders'"
           #currencyNumber
-          formControlName="questionName"
-          (change)="setControlValue(questionName, currencyNumber.value)"
+          [formControl]="q_name"
+          (change)="setControlValue(q_name, currencyNumber.value)"
           type="text"
           [placeholder]="t('questionName')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"
         />
-        <span
-          *ngIf="questionName && questionName.invalid && questionName.touched"
-        >
+        <span *ngIf="q_name && q_name.invalid && q_name.touched">
           <p
             *transloco="let t; read: 'setup.questionName.form.errors'"
             class="text-xs text-red-600"
@@ -56,9 +57,9 @@
               </span>
               <input
                 type="radio"
-                formControlName="status"
+                [formControl]="q_qstatus"
                 class="radio radio-xs"
-                [value]="true"
+                [value]="'Active'"
                 checked
               />
             </label>
@@ -72,16 +73,19 @@
                 {{ t("inActive") }}
               </span>
               <input
-                formControlName="status"
+                [formControl]="q_qstatus"
                 type="radio"
-                [value]="false"
+                [value]="'InActive'"
                 class="radio radio-xs"
               />
             </label>
           </div>
         </div>
-        <span *ngIf="status && status.invalid && status.touched">
-          <p *transloco="let t; read: 'errors'" class="text-xs text-red-600">
+        <span *ngIf="q_qstatus && q_qstatus.invalid && q_qstatus.touched">
+          <p
+            *transloco="let t; read: 'setup.questionName.form.errors'"
+            class="text-xs text-red-600"
+          >
             {{ t("missingStatus") }}
           </p>
         </span>

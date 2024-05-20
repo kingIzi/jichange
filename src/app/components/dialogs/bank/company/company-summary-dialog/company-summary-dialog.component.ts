@@ -25,23 +25,32 @@ import { DisplayMessageBoxComponent } from '../../../display-message-box/display
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Company } from 'src/app/core/models/bank/company';
-import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { Branch } from 'src/app/core/models/bank/branch';
-import { Region } from 'src/app/core/models/bank/region';
-import { Observable, catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import { Company } from 'src/app/core/models/bank/company/company';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { Region } from 'src/app/core/models/bank/setup/region';
+import {
+  Observable,
+  TimeoutError,
+  catchError,
+  from,
+  lastValueFrom,
+  map,
+  zip,
+} from 'rxjs';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
-import { District } from 'src/app/core/models/bank/district';
+import { District } from 'src/app/core/models/bank/setup/district';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { AddCompany } from 'src/app/core/models/bank/forms/add-company';
-import { Ward } from 'src/app/core/models/bank/ward';
+import { AddCompany } from 'src/app/core/models/bank/forms/company/summary/add-company';
+import { Ward } from 'src/app/core/models/bank/setup/ward';
 import { LoginResponse } from 'src/app/core/models/login-response';
-import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
-import { RegionService } from 'src/app/core/services/bank/setup/region.service';
-import { DistrictService } from 'src/app/core/services/bank/setup/district.service';
-import { WardService } from 'src/app/core/services/bank/setup/ward.service';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { RegionService } from 'src/app/core/services/bank/setup/region/region.service';
+import { DistrictService } from 'src/app/core/services/bank/setup/district/district.service';
+import { WardService } from 'src/app/core/services/bank/setup/ward/ward.service';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-company-summary-dialog',
@@ -57,6 +66,8 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     TranslocoModule,
     DisplayMessageBoxComponent,
     LoaderRainbowComponent,
+    PhoneNumberInputComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -76,11 +87,13 @@ export class CompanySummaryDialogComponent implements OnInit {
   public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  public companyAddedSuccessfully = new EventEmitter<boolean>();
+  @ViewChild('successMessageBox')
+  successMessageBox!: SuccessMessageBoxComponent;
+  public companyAddedSuccessfully = new EventEmitter<void>();
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor(
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private branchService: BranchService,
     private regionService: RegionService,
     private districtService: DistrictService,
@@ -91,10 +104,6 @@ export class CompanySummaryDialogComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any,
     private cdr: ChangeDetectorRef
   ) {}
-  async ngOnInit() {
-    this.prepareForm();
-    this.parseUserProfile();
-  }
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
     if (userProfile) {
@@ -107,7 +116,7 @@ export class CompanySummaryDialogComponent implements OnInit {
     let regionsList = from(this.regionService.getRegionList());
     let regSno = company.RegId.toString();
     let districtList = from(
-      this.districtService.postDistrictList({ Sno: regSno })
+      this.districtService.getDistrictByRegion({ Sno: regSno })
     );
     let wardSno = company.WardSno.toString();
     let wardList = from(this.wardService.postWardList(wardSno));
@@ -118,6 +127,11 @@ export class CompanySummaryDialogComponent implements OnInit {
           return results;
         }),
         catchError((err) => {
+          if (err instanceof TimeoutError) {
+            AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+          } else {
+            AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+          }
           this.startLoading = false;
           this.cdr.detectChanges();
           throw err;
@@ -176,7 +190,7 @@ export class CompanySummaryDialogComponent implements OnInit {
       compname: this.fb.control(company.CompName, [Validators.required]),
       mob: this.fb.control(company.MobNo, [
         Validators.required,
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
       branch: this.fb.control(
@@ -208,12 +222,16 @@ export class CompanySummaryDialogComponent implements OnInit {
       vat: this.fb.control(company.VatNo, []),
       dname: this.fb.control(company.DirectorName, []),
       telno: this.fb.control(company.TelNo, [
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       email: this.fb.control(company.Email, [Validators.email]),
       dummy: this.fb.control(true, [Validators.required]),
       details: this.fb.array(
-        [this.fb.group({ AccountNo: this.fb.control(company.AccountNo, []) })],
+        [
+          this.fb.group({
+            AccountNo: this.fb.control(company.AccountNo, []),
+          }),
+        ],
         []
       ),
     });
@@ -230,15 +248,15 @@ export class CompanySummaryDialogComponent implements OnInit {
         let RegSno = region.Region_SNO.toString();
         this.startLoading = true;
         this.districtService
-          .postDistrictList({ Sno: RegSno })
+          .getDistrictByRegion({ Sno: RegSno })
           .then((results: any) => {
             let res = results as HttpDataResponse<District[]>;
             if (typeof res.response === 'number') {
               this.districts = [];
               AppUtilities.openDisplayMessageBox(
                 this.displayMessageBox,
-                this.translocoService.translate(`defaults.warning`),
-                this.translocoService.translate(
+                this.tr.translate(`defaults.warning`),
+                this.tr.translate(
                   `company.summary.companyForm.dialogs.noDistrictForRegion`
                 )
               );
@@ -268,8 +286,8 @@ export class CompanySummaryDialogComponent implements OnInit {
             this.wards = [];
             AppUtilities.openDisplayMessageBox(
               this.displayMessageBox,
-              this.translocoService.translate(`defaults.warning`),
-              this.translocoService.translate(
+              this.tr.translate(`defaults.warning`),
+              this.tr.translate(
                 `company.summary.companyForm.dialogs.noWardForDistrict`
               )
             );
@@ -288,8 +306,9 @@ export class CompanySummaryDialogComponent implements OnInit {
       compname: this.fb.control('', [Validators.required]),
       mob: this.fb.control('', [
         Validators.required,
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
       branch: this.fb.control('', [Validators.required]),
       check_status: this.fb.control('', [Validators.required]),
       fax: this.fb.control('', []),
@@ -302,7 +321,7 @@ export class CompanySummaryDialogComponent implements OnInit {
       vat: this.fb.control('', []),
       dname: this.fb.control('', []),
       telno: this.fb.control('', [
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       email: this.fb.control('', [Validators.email]),
       dummy: this.fb.control(true, [Validators.required]),
@@ -312,8 +331,163 @@ export class CompanySummaryDialogComponent implements OnInit {
     this.updateWardList();
     this.addBankDetail();
   }
-
-  public addBankDetail(ind: number = -1) {
+  private formErrors(
+    errorsPath: string = 'company.summary.companyForm.dialogs'
+  ) {
+    if (this.compname.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.customer`)
+      );
+    } else if (this.mob.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.mobileNo`)
+      );
+    } else if (this.branch.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.branch`)
+      );
+    } else if (this.check_status.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.makerChecker`)
+      );
+    } else if (this.fax.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.faxNo`)
+      );
+    } else if (this.vat.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.vatNo`)
+      );
+    } else if (this.pbox.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.postBoxNo`)
+      );
+    } else if (this.addr.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.address`)
+      );
+    } else if (this.rsno.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.region`)
+      );
+    } else if (this.dsno.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.district`)
+      );
+    } else if (this.wsno.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.ward`)
+      );
+    } else if (this.tin.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.tinNo`)
+      );
+    } else if (this.dname.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.directorName`)
+      );
+    } else if (this.telno.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.telephoneNo`)
+      );
+    } else if (this.email.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.emailId`)
+      );
+    }
+  }
+  private determineAddCompanyErrorMessage(message: string) {
+    if (
+      message.toLocaleLowerCase() ===
+      'Email Address already Exist'.toLocaleLowerCase()
+    ) {
+      return this.tr.translate(
+        `company.summary.companyForm.dialogs.emailAddressExists`
+      );
+    } else if (
+      message.toLocaleLowerCase() ===
+      'Mobile number already Exist'.toLocaleLowerCase()
+    ) {
+      return this.tr.translate(
+        `company.summary.companyForm.dialogs.mobileNumberAlreadyExists`
+      );
+    } else {
+      return this.tr.translate(
+        `company.summary.companyForm.dialogs.failedToAddCompany`
+      );
+    }
+  }
+  private requestAddCompany(successMessage: string) {
+    this.startLoading = true;
+    this.companyService
+      .addCompany(this.companySummaryForm.value as AddCompany)
+      .then((result) => {
+        if (
+          result.message.toLocaleLowerCase() === 'failed' &&
+          typeof result.response === 'string'
+        ) {
+          let msg = this.determineAddCompanyErrorMessage(result.response);
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`errors.errorOccured`),
+            msg
+          );
+        } else if (result.message.toLocaleLowerCase() === 'success') {
+          let msg = AppUtilities.sweetAlertSuccessMessage(successMessage);
+          msg.then(() => {
+            this.companyAddedSuccessfully.emit();
+            this.closeDialog();
+          });
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  ngOnInit() {
+    this.parseUserProfile();
+    this.prepareForm();
+  }
+  addBankDetail(ind: number = -1) {
     let group = this.fb.group({
       AccountNo: this.fb.control('', []),
     });
@@ -327,149 +501,35 @@ export class CompanySummaryDialogComponent implements OnInit {
     } else if (this.details.length === MAX) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(
-          `vendors.invoiceDetails.form.dialog.invalidForm`
-        ),
-        this.translocoService
+        this.tr.translate(`vendors.invoiceDetails.form.dialog.invalidForm`),
+        this.tr
           .translate(`vendors.invoiceDetails.form.dialog.maximumItemDetails`)
           .replace('{}', MAX.toString())
       );
     }
   }
-  public removeBankDetail(ind: number) {
+  removeBankDetail(ind: number) {
     if (this.details.length > 1) {
       this.details.removeAt(ind);
     }
   }
-  public closeDialog() {
+  closeDialog() {
     this.dialogRef.close('Vendor dialog closed');
   }
-  updatePhoneNumber(prefix: string, control: FormControl) {
-    AppUtilities.mobileNumberFormat(prefix, control);
-  }
-  private formErrors(
-    errorsPath: string = 'company.summary.companyForm.dialogs'
-  ) {
-    if (this.compname.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.customer`)
-      );
-    } else if (this.mob.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.mobileNo`)
-      );
-    } else if (this.branch.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.branch`)
-      );
-    } else if (this.check_status.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.makerChecker`)
-      );
-    } else if (this.fax.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.faxNo`)
-      );
-    } else if (this.vat.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.vatNo`)
-      );
-    } else if (this.pbox.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.postBoxNo`)
-      );
-    } else if (this.addr.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.address`)
-      );
-    } else if (this.rsno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.region`)
-      );
-    } else if (this.dsno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.district`)
-      );
-    } else if (this.wsno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.ward`)
-      );
-    } else if (this.tin.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.tinNo`)
-      );
-    } else if (this.dname.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.directorName`)
-      );
-    } else if (this.telno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.telephoneNo`)
-      );
-    } else if (this.email.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.emailId`)
-      );
-    }
-  }
   submitCompanySummary() {
-    if (this.companySummaryForm.valid) {
-      this.startLoading = true;
-      this.companyService
-        .addCompany(this.companySummaryForm.value as AddCompany)
-        .then((company) => {
-          this.startLoading = false;
-          this.companyAddedSuccessfully.emit(true);
-          this.cdr.detectChanges();
-        })
-        .catch((err) => {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.translocoService.translate(`errors.errorOccured`),
-            this.translocoService.translate(
-              `company.summary.companyForm.dialogs.failedToAddCompany`
-            )
-          );
-          this.startLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        });
+    if (this.companySummaryForm.valid && !this.data?.companyData) {
+      this.requestAddCompany(
+        this.tr.translate(`company.summary.actions.addedCompanySuccessfully`)
+      );
+    } else if (this.companySummaryForm.valid && this.data?.companyData) {
+      this.requestAddCompany(
+        this.tr.translate(`company.summary.actions.modifiedCompanySuccessfully`)
+      );
     } else {
       this.companySummaryForm.markAllAsTouched();
       this.formErrors();
     }
   }
-
   get compsno() {
     return this.companySummaryForm.get('compsno') as FormControl;
   }

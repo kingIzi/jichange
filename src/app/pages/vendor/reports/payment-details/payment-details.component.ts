@@ -31,13 +31,14 @@ import {
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { Company } from 'src/app/core/models/bank/company';
-import { Customer } from 'src/app/core/models/bank/customer';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 
@@ -51,6 +52,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
@@ -68,7 +70,7 @@ export class PaymentDetailsComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public companies: Company[] = [];
-  public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
+  public customers: CustomerName[] = [];
   public invoices: GeneratedInvoice[] = [];
   public payments: any[] = [];
   public userProfile!: LoginResponse;
@@ -162,7 +164,7 @@ export class PaymentDetailsComponent implements OnInit {
     }
   }
   private buildPage() {
-    this.startLoading = true;
+    this.tableLoading = true;
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
@@ -187,21 +189,39 @@ export class PaymentDetailsComponent implements OnInit {
         })
       )
     )
-      .then((results: Array<any>) => {
+      .then((results) => {
         let [companies, customers, invoices] = results;
-        this.companies = companies.response === 0 ? [] : companies.response;
-        this.customers = customers.response === 0 ? [] : customers.response;
-        this.invoices = invoices.response === 0 ? [] : invoices.response;
-        this.startLoading = false;
+        if (
+          companies.response &&
+          typeof companies.response !== 'string' &&
+          typeof companies.response !== 'number'
+        ) {
+          this.companies = companies.response;
+        }
+        if (
+          customers.response &&
+          typeof customers.response !== 'string' &&
+          typeof customers.response !== 'number'
+        ) {
+          this.customers = customers.response;
+        }
+        if (
+          invoices.response &&
+          typeof invoices.response !== 'string' &&
+          typeof invoices.response !== 'number'
+        ) {
+          this.invoices = invoices.response;
+        }
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -216,12 +236,12 @@ export class PaymentDetailsComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -255,7 +275,8 @@ export class PaymentDetailsComponent implements OnInit {
       );
       this.requestPaymentReport(value);
     } else {
-      this.formErrors();
+      this.filterFormGroup.markAllAsTouched();
+      //this.formErrors();
     }
   }
   get compid() {

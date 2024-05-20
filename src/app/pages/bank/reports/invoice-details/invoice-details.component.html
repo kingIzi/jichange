@@ -1,5 +1,8 @@
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -214,9 +217,9 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto">
-        <div class="inline-block min-w-full py-2">
-          <div class="overflow-y-auto">
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="overflow-y-auto shadow">
             <table
               [formGroup]="headerFormGroup"
               class="min-w-full text-left text-sm font-light"
@@ -308,7 +311,7 @@
                     class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
                     {{
-                      parseDateStringFormat(
+                      PerformanceUtils.convertDateStringToDate(
                         invoiceReport.Invoice_Date
                       ).toLocaleDateString()
                     }}
@@ -345,7 +348,12 @@
                     "
                     class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
-                    {{ moneyFormat(invoiceReport.Total) }} TZS
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        invoiceReport.Total.toString()
+                      )
+                    }}
+                    TZS
                   </td>
                   <td
                     *ngIf="
@@ -362,7 +370,12 @@
                     "
                     class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
-                    {{ moneyFormat(invoiceReport.Total_Vt) }} TZS
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        invoiceReport.Total_Vt.toString()
+                      )
+                    }}
+                    TZS
                   </td>
                   <td
                     *ngIf="
@@ -379,7 +392,12 @@
                     "
                     class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
-                    {{ moneyFormat(invoiceReport.Total_Without_Vt) }} TZS
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        invoiceReport.Total_Without_Vt.toString()
+                      )
+                    }}
+                    TZS
                   </td>
                   <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
                     <div

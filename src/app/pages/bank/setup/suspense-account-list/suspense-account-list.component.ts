@@ -23,14 +23,19 @@ import {
 import {
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account.service';
+import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
 import { TimeoutError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { SuspenseAccount } from 'src/app/core/models/bank/suspense-account';
+import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { SuspenseAccountTable } from 'src/app/core/enums/bank/setup/suspense-account-table';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -46,6 +51,7 @@ import { SuspenseAccount } from 'src/app/core/models/bank/suspense-account';
     MatPaginatorModule,
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -60,8 +66,12 @@ export class SuspenseAccountListComponent implements OnInit {
   public tableHeadersFormGroup!: FormGroup;
   public suspenseAccounts: SuspenseAccount[] = [];
   public suspenseAccountsData: SuspenseAccount[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public SuspenseAccountTable: typeof SuspenseAccountTable =
+    SuspenseAccountTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -73,27 +83,31 @@ export class SuspenseAccountListComponent implements OnInit {
   private createHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate(`suspenseAccount.suspenseAccountsTable`, {}, this.scope)
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index < 5, []),
-            values: this.fb.array([], []),
-          });
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              //this.sortTableAsc(index);
-            } else {
-              //this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `suspenseAccount.suspenseAccountsTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
+  }
+  private sortTableAsc(ind: number) {
+    switch (ind) {
+      default:
+        break;
+    }
+  }
+  private sortTableDesc(ind: number) {
+    switch (ind) {
+      default:
+        break;
+    }
   }
   private requestSuspenseAccountList(form: {}) {
     this.tableLoading = true;
@@ -115,6 +129,20 @@ export class SuspenseAccountListComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.toLocaleLowerCase();
+      this.suspenseAccounts = this.suspenseAccountsData.filter((account) => {
+        return (
+          account?.Sus_Acc_No?.toLocaleLowerCase().includes(text) ||
+          account?.Status?.toLocaleLowerCase().includes(text)
+        );
+      });
+    } else {
+      this.suspenseAccounts = this.suspenseAccountsData;
+    }
   }
   ngOnInit(): void {
     this.createHeadersFormGroup();
@@ -141,16 +169,10 @@ export class SuspenseAccountListComponent implements OnInit {
       },
     });
   }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      //this.suspenseAccounts = this.suspenseAccountsData.filter(())
-    } else {
-      this.suspenseAccounts = this.suspenseAccountsData;
-    }
-  }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;
+  }
+  get tableSearch() {
+    return this.tableHeadersFormGroup.get('tableSearch') as FormControl;
   }
 }

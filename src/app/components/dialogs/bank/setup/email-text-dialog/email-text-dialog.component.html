@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -19,7 +22,7 @@
           {{ t("flowId") }}<span class="text-red-600">*</span>
         </p>
         <select
-          formControlName="flowId"
+          [formControl]="flow"
           class="select select-sm select-bordered w-1/2"
         >
           <option
@@ -29,8 +32,18 @@
           >
             {{ t("flowId") }}
           </option>
+          <option
+            *ngFor="
+              let flowId of flows;
+              trackBy: PerformanceUtils.trackByIndex;
+              index as ind
+            "
+            [value]="ind + 1"
+          >
+            {{ flowId }}
+          </option>
         </select>
-        <span *ngIf="flowId && flowId.invalid && flowId.touched">
+        <span *ngIf="flow && flow.invalid && flow.touched">
           <p
             *transloco="let t; read: 'setup.emailText.form.errors'"
             class="text-xs text-red-600"
@@ -48,15 +61,10 @@
           type="email"
           [placeholder]="t('subjectEnglish')"
           class="input input-sm input-bordered font-inter"
-          formControlName="subjectEnglish"
+          [formControl]="sub"
           #subjectEnglishInput
-          (change)="setControlValue(subjectEnglish, subjectEnglishInput.value)"
         />
-        <span
-          *ngIf="
-            subjectEnglish && subjectEnglish.invalid && subjectEnglish.touched
-          "
-        >
+        <span *ngIf="sub && sub.invalid && sub.touched">
           <p
             *transloco="let t; read: 'setup.emailText.form.errors'"
             class="text-xs text-red-600"
@@ -74,15 +82,10 @@
           type="email"
           [placeholder]="t('subjectSwahili')"
           class="input input-sm input-bordered font-inter"
-          formControlName="subjectSwahili"
+          [formControl]="subloc"
           #subjectSwahiliInput
-          (change)="setControlValue(subjectSwahili, subjectSwahiliInput.value)"
         />
-        <span
-          *ngIf="
-            subjectSwahili && subjectSwahili.invalid && subjectSwahili.touched
-          "
-        >
+        <span *ngIf="subloc && subloc.invalid && subloc.touched">
           <p
             *transloco="let t; read: 'setup.emailText.form.errors'"
             class="text-xs text-red-600"
@@ -97,16 +100,15 @@
         </p>
         <textarea
           *transloco="let t; read: 'setup.emailText.form.placeholders'"
-          formControlName="emailText"
+          [formControl]="text"
           [placeholder]="t('emailText')"
           class="textarea textarea-bordered textarea-sm h-36"
-          (change)="setControlValue(emailText, emailTextArea.value)"
           #emailTextArea
           id=""
           cols="30"
           rows="10"
         ></textarea>
-        <span *ngIf="emailText && emailText.invalid && emailText.touched">
+        <span *ngIf="text && text.invalid && text.touched">
           <p
             *transloco="let t; read: 'setup.emailText.form.errors'"
             class="text-xs text-red-600"
@@ -121,18 +123,15 @@
         </p>
         <textarea
           *transloco="let t; read: 'setup.emailText.form.placeholders'"
-          formControlName="emailSwahili"
+          [formControl]="loctext"
           [placeholder]="t('emailSwahili')"
           class="textarea textarea-bordered textarea-sm h-36"
-          (change)="setControlValue(emailText, emailSwahiliTextArea.value)"
           #emailSwahiliTextArea
           id=""
           cols="30"
           rows="10"
         ></textarea>
-        <span
-          *ngIf="emailSwahili && emailSwahili.invalid && emailSwahili.touched"
-        >
+        <span *ngIf="loctext && loctext.invalid && loctext.touched">
           <p
             *transloco="let t; read: 'setup.emailText.form.errors'"
             class="text-xs text-red-600"

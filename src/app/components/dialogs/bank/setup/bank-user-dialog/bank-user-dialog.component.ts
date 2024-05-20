@@ -25,16 +25,22 @@ import { DisplayMessageBoxComponent } from '../../../display-message-box/display
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { CommonModule } from '@angular/common';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { BankService } from 'src/app/core/services/bank/setup/bank.service';
-import { EmployeeDetail } from 'src/app/core/models/bank/employee-detail';
+import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
+import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
-import { DesignationService } from 'src/app/core/services/bank/setup/designation.service';
-import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
-import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
-import { Designation } from 'src/app/core/models/bank/designation';
-import { Branch } from 'src/app/core/models/bank/branch';
+import { DesignationService } from 'src/app/core/services/bank/setup/designation/designation.service';
+import { TimeoutError, catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { Designation } from 'src/app/core/models/bank/setup/designation';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { NgxLoadingModule } from 'ngx-loading';
+import { AddBankUserForm } from 'src/app/core/models/bank/forms/setup/bank-user/add-bank-user-form';
+import Swal from 'sweetalert2';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-bank-user-dialog',
@@ -48,7 +54,10 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
-    LoaderRainbowComponent,
+    //LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
+    PhoneNumberInputComponent,
+    NgxLoadingModule,
   ],
   providers: [
     {
@@ -63,8 +72,9 @@ export class BankUserDialogComponent implements OnInit {
   public employeeDetail!: EmployeeDetail;
   public designations: Designation[] = [];
   public branches: Branch[] = [];
+  public userProfile!: LoginResponse;
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public isLoading = new EventEmitter<any>();
+  public added = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -80,43 +90,42 @@ export class BankUserDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { Detail_Id: number },
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private formErrors(errorsPath: string = 'setup.bankUser.form.dialog') {
-    if (this.employeeId.invalid) {
+    if (this.empid.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.employeeId`)
       );
     }
-    if (this.firstName.invalid) {
+    if (this.fname.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.firstName`)
       );
     }
-    if (this.lastName.invalid) {
+    if (this.lname.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.lastName`)
       );
     }
-    if (this.middleName.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.middleName`)
-      );
-    }
-    if (this.username.invalid) {
+    if (this.user.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.username`)
       );
     }
-    if (this.designation.invalid) {
+    if (this.desg.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
@@ -130,21 +139,21 @@ export class BankUserDialogComponent implements OnInit {
         this.tr.translate(`${errorsPath}.branch`)
       );
     }
-    if (this.emailId.invalid) {
+    if (this.email.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.emailId`)
       );
     }
-    if (this.mobileNo.invalid) {
+    if (this.mobile.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
         this.tr.translate(`${errorsPath}.mobileNo`)
       );
     }
-    if (this.status.invalid) {
+    if (this.gender.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
@@ -154,19 +163,42 @@ export class BankUserDialogComponent implements OnInit {
   }
   private createForm() {
     this.bankUserForm = this.fb.group({
-      employeeId: this.fb.control('', [Validators.required]),
-      firstName: this.fb.control('', [Validators.required]),
-      middleName: this.fb.control('', [Validators.required]),
-      lastName: this.fb.control('', [Validators.required]),
-      username: this.fb.control('', [Validators.required]),
-      designation: this.fb.control('', [Validators.required]),
+      empid: this.fb.control('', [Validators.required]),
+      fname: this.fb.control('', [Validators.required]),
+      mname: this.fb.control('', []),
+      lname: this.fb.control('', [Validators.required]),
+      user: this.fb.control('', [Validators.required]),
+      desg: this.fb.control('', [Validators.required]),
       branch: this.fb.control('', []),
-      emailId: this.fb.control('', [Validators.required, Validators.email]),
-      mobileNo: this.fb.control('', [
-        Validators.required,
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+      email: this.fb.control('', [Validators.required, Validators.email]),
+      mobile: this.fb.control('', [
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      status: this.fb.control(false, [Validators.required]),
+      gender: this.fb.control('', [Validators.required]),
+      dummy: this.fb.control(true, [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+    });
+  }
+  private setEditFormValues() {
+    this.bankUserForm.setValue({
+      empid: this.employeeDetail.Emp_Id_No,
+      fname: this.employeeDetail.First_Name,
+      mname: this.employeeDetail.Middle_name,
+      lname: this.employeeDetail.Last_name,
+      user: this.employeeDetail.User_name,
+      desg: this.employeeDetail.Desg_Id
+        ? this.employeeDetail.Desg_Id.toString()
+        : '',
+      branch: this.employeeDetail.Branch_Sno
+        ? this.employeeDetail?.Branch_Sno.toString()
+        : '',
+      email: this.employeeDetail.Email_Address,
+      mobile: this.employeeDetail.Mobile_No,
+      gender: this.employeeDetail.Emp_Status,
+      dummy: true,
+      sno: this.employeeDetail.Detail_Id,
+      userid: this.userProfile.Usno,
     });
   }
   private fetchFormData() {
@@ -196,6 +228,11 @@ export class BankUserDialogComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -208,26 +245,11 @@ export class BankUserDialogComponent implements OnInit {
         sno: detailId.toString(),
       })) as HttpDataResponse<EmployeeDetail>
     ).response;
-    this.bankUserForm.setValue({
-      employeeId: this.employeeDetail.Detail_Id,
-      firstName: this.employeeDetail.First_Name,
-      middleName: this.employeeDetail.Middle_name,
-      lastName: this.employeeDetail.Last_name,
-      username: this.employeeDetail.Email_Address,
-      designation: this.employeeDetail.Desg_Id
-        ? this.employeeDetail.Desg_Id.toString()
-        : '',
-      branch: this.employeeDetail.Branch_Sno
-        ? this.employeeDetail?.Branch_Sno.toString()
-        : '',
-      emailId: this.employeeDetail.Email_Address,
-      mobileNo: this.employeeDetail.Mobile_No,
-      status: this.employeeDetail.Emp_Status.toLocaleLowerCase() === 'active',
-    });
+    this.setEditFormValues();
     this.startLoading = false;
     this.cdr.detectChanges();
   }
-  private async prepareForm() {
+  private prepareForm() {
     this.fetchFormData();
     if (this.data?.Detail_Id) {
       this.createForm();
@@ -236,50 +258,118 @@ export class BankUserDialogComponent implements OnInit {
       this.createForm();
     }
   }
-  async ngOnInit() {
+  private requestAddBankUser(form: AddBankUserForm) {
+    this.startLoading = true;
+    this.bankService
+      .addEmployeeDetail(form)
+      .then((result) => {
+        console.log(result);
+        if (typeof result.response === 'number' && result.response > 0) {
+          let message = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(`setup.bankUser.addedBankUserSuccessfully`)
+          );
+          message.then(() => {
+            this.added.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.bankUser.failedToAddUser`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private requestModifyBankUser(form: AddBankUserForm) {
+    this.startLoading = true;
+    this.bankService
+      .addEmployeeDetail(form)
+      .then((result) => {
+        if (typeof result.response === 'number' && result.response > 0) {
+          let message = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(`setup.bankUser.modifiedBankUserSuccessfully`)
+          );
+          message.then(() => {
+            this.added.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.bankUser.failedToModifyUser`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  ngOnInit() {
+    this.parseUserProfile();
     this.prepareForm();
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
-  setControlValue(control: FormControl, value: string) {
-    control.setValue(value.trim());
-  }
   submitBankUserForm() {
-    if (this.bankUserForm.valid) {
-      this.isLoading.emit(this.bankUserForm.value);
+    if (this.bankUserForm.valid && !this.data.Detail_Id) {
+      this.requestAddBankUser(this.bankUserForm.value);
+    } else if (this.bankUserForm.valid && this.data.Detail_Id) {
+      this.requestModifyBankUser(this.bankUserForm.value);
+    } else {
+      this.bankUserForm.markAllAsTouched();
+      this.formErrors();
     }
-    this.bankUserForm.markAllAsTouched();
-    this.formErrors();
   }
-  get employeeId() {
-    return this.bankUserForm.get('employeeId') as FormControl;
+  get empid() {
+    return this.bankUserForm.get('empid') as FormControl;
   }
-  get firstName() {
-    return this.bankUserForm.get('firstName') as FormControl;
+  get fname() {
+    return this.bankUserForm.get('fname') as FormControl;
   }
-  get middleName() {
-    return this.bankUserForm.get('middleName') as FormControl;
+  get mname() {
+    return this.bankUserForm.get('mname') as FormControl;
   }
-  get lastName() {
-    return this.bankUserForm.get('lastName') as FormControl;
+  get lname() {
+    return this.bankUserForm.get('lname') as FormControl;
   }
-  get username() {
-    return this.bankUserForm.get('username') as FormControl;
+  get user() {
+    return this.bankUserForm.get('user') as FormControl;
   }
-  get designation() {
-    return this.bankUserForm.get('designation') as FormControl;
+  get desg() {
+    return this.bankUserForm.get('desg') as FormControl;
   }
   get branch() {
     return this.bankUserForm.get('branch') as FormControl;
   }
-  get emailId() {
-    return this.bankUserForm.get('emailId') as FormControl;
+  get email() {
+    return this.bankUserForm.get('email') as FormControl;
   }
-  get mobileNo() {
-    return this.bankUserForm.get('mobileNo') as FormControl;
+  get mobile() {
+    return this.bankUserForm.get('mobile') as FormControl;
   }
-  get status() {
-    return this.bankUserForm.get('status') as FormControl;
+  get gender() {
+    return this.bankUserForm.get('gender') as FormControl;
   }
 }

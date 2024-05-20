@@ -4,6 +4,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-customer-report',
@@ -14,6 +15,7 @@ import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-f
     TableDateFiltersComponent,
     MatDialogModule,
     TranslocoModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './customer-report.component.html',
   styleUrl: './customer-report.component.scss',

@@ -1,7 +1,8 @@
-<ngx-loading
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
   [show]="startLoading"
-  [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -23,7 +24,10 @@
       </p>
     </button>
   </div>
-  <div class="flex flex-col bg-white shadow px-2 py-4">
+  <div
+    [formGroup]="tableFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4"
+  >
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
         <div class="relative">
@@ -33,7 +37,7 @@
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
             [placeholder]="t('search')"
-            #searchInput
+            [formControl]="tableSearch"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -45,95 +49,152 @@
     </div>
     <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-        <div class="overflow-y-auto">
-          <table
-            #customersTable
-            class="min-w-full text-left text-sm font-light"
-          >
-            <thead class="border-b font-medium">
+        <div class="overflow-y-auto shadow">
+          <table class="min-w-full text-left text-sm font-light">
+            <thead formArrayName="headers" class="border-b font-medium">
               <tr
+                *transloco="let t; read: 'tableData.vendor'"
                 class="bg-lightPurple"
-                *transloco="let t; read: 'setup.currency'"
               >
-                <th
-                  *ngFor="let header of t('currenciesTable'); index as ind"
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
                 >
-                  <div class="flex flex-row items-center">
-                    <p class="text-sm font-extrabold text-black">
-                      {{ header }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
                       >
-                        unfold_more
-                      </span>
-                    </button>
-                  </div>
-                </th>
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
                 <th
                   *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm font-extrabold text-black"
+                  class="px-6 font-inter text-sm text-right"
                 >
                   {{ t("action") }}
                 </th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <tr
+                *ngFor="
+                  let currency of currencies
+                    | slice
+                      : 1 + paginator.pageSize * paginator.pageIndex - 1
+                      : 1 +
+                          paginator.pageSize * paginator.pageIndex +
+                          paginator.pageSize -
+                          1;
+                  index as i;
+                  trackBy: PerformanceUtils.trackByIndex
+                "
+                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+              >
+                <td
+                  *ngIf="
+                    headers.controls.at(CurrencyTable.CODE)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(CurrencyTable.CODE)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{ currency.Currency_Code }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls.at(CurrencyTable.NAME)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(CurrencyTable.NAME)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{ currency.Currency_Name }}
+                </td>
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                  <app-remove-item-dialog
+                    #removeItemDialog
+                  ></app-remove-item-dialog>
+                  <div class="flex flex-row items-center justify-end space-x-2">
+                    <button
+                      (click)="editCurrencyForm(currency)"
+                      class="btn btn-sm btn-ghost"
+                    >
+                      <span class="material-symbols-outlined text-info">
+                        edit
+                      </span>
+                    </button>
+                    <button
+                      (click)="
+                        openRemoveCurrencyDialog(currency, removeItemDialog)
+                      "
+                      class="btn btn-sm btn-ghost"
+                    >
+                      <span class="material-symbols-outlined text-danger-600">
+                        delete
+                      </span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
           </table>
-          <div *transloco="let t; read: 'errors'">
-            <p
-              *ngIf="currencies.length <= 0"
-              class="text-center text-sm tracking-wide pt-3 pb-1"
-            >
-              {{ t("noDataFound") }}
-            </p>
-          </div>
+          <ng-container *ngIf="!tableLoading">
+            <div *transloco="let t; read: 'errors'">
+              <p
+                *ngIf="currencies.length <= 0"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="tableLoading">
+            <div class="w-full grid place-items-center mt-6">
+              <span
+                class="loading loading-spinner loading-sm bg-darkPurple"
+              ></span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>
-    <div class="flex flex-row items-center justify-between">
-      <div class="flex flex-row items-center space-x-1">
-        <p *transloco="let t; read: 'tableData'" class="text-xs">
-          {{ t("itemsPerPage") }}:
-        </p>
-        <select
-          name="itemsPerPage"
-          class="select select-sm select-bordered w-16 max-w-xs"
-          #itemPerPageSelect
-          (change)="itemsPerPageChanged(itemPerPageSelect.value)"
-        >
-          <option *ngFor="let option of itemsPerPage" [value]="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
-      <div class="flex flex-row items-center">
-        <p class="text-xs">1-5 of 100</p>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_left
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_before
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            navigate_next
-          </span>
-        </button>
-        <button class="btn btn-sm lg:btn-lg btn-ghost">
-          <span class="material-symbols-outlined text-sm lg:text-lg">
-            keyboard_double_arrow_right
-          </span>
-        </button>
-      </div>
+    <div class="flex flex-row items-center justify-end">
+      <mat-paginator
+        #paginator
+        [length]="currencies.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+        [showFirstLastButtons]="currencies.length > 20"
+      >
+      </mat-paginator>
     </div>
   </div>
 </div>

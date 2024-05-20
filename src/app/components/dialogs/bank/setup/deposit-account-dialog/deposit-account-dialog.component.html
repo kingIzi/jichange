@@ -1,6 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -23,7 +25,7 @@
           {{ t("vendor") }}<span class="text-red-600">*</span>
         </p>
         <select
-          [formControl]="vendor"
+          [formControl]="csno"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -44,7 +46,7 @@
             {{ customer.CompName }}
           </option>
         </select>
-        <span *ngIf="vendor && vendor.invalid && vendor.touched">
+        <span *ngIf="csno && csno.invalid && csno.touched">
           <p
             *transloco="let t; read: 'setup.depositAccount.form.errors'"
             class="text-xs text-red-600"

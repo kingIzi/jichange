@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div
   class="absolute py-2 top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-4 overflow-y-auto"
@@ -40,7 +43,6 @@
         >
           {{ t("name") }}
         </p>
-        <!-- <div class="badge badge-sm badge-info font-inter text-white">+3</div> -->
       </div>
       <a
         [routerLink]="'/main/company/inbox'"
@@ -82,9 +84,8 @@
               {{ info.MobNo }}
             </p>
           </div>
-          <app-approve-company-inbox #approveDialog></app-approve-company-inbox>
           <button
-            (click)="approveCompany(approveDialog, info)"
+            (click)="approveCompany(info)"
             *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
             class="btn btn-xs bg-lightYellow tracking-wide px-4"
           >
@@ -105,7 +106,6 @@
         >
           {{ t("name") }}
         </p>
-        <!-- <div class="badge badge-sm badge-info font-inter text-white">+3</div> -->
       </div>
       <a
         [routerLink]="'/main/reports/transactions'"
@@ -179,6 +179,7 @@
     </div>
   </div>
   <div
+    [formGroup]="tableHeadersFormGroup"
     class="flex flex-col space-y-1 relative w-full col-span-full lg:col-start-1 lg:row-start-5 lg:col-span-8 lg:row-span-full"
   >
     <div
@@ -352,8 +353,7 @@
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
               [placeholder]="t('search')"
-              #searchInput
-              (keyup)="searchTable(searchInput.value, paginator)"
+              [formControl]="tableSearch"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -364,11 +364,8 @@
         </div>
         <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
           <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-            <div class="overflow-y-auto">
-              <table
-                [formGroup]="tableHeadersFormGroup"
-                class="min-w-full text-left text-sm font-light"
-              >
+            <div class="overflow-y-auto shadow">
+              <table class="min-w-full text-left text-sm font-light">
                 <thead formArrayName="headers" class="border-b font-medium">
                   <tr
                     *transloco="let t; read: 'tableData.vendor'"
@@ -388,7 +385,9 @@
                           <p>
                             {{ header?.get("label")?.value }}
                           </p>
-                          <button *ngIf="ind !== headersMap.DATE_POSTED">
+                          <button
+                            *ngIf="ind !== VendorDetailsReportTable.DATE_POSTED"
+                          >
                             <span
                               class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
                             >
@@ -418,12 +417,12 @@
                     <td
                       *ngIf="
                         headers.controls
-                          .at(this.headersMap.CUSTOMER_NAME)
+                          .at(VendorDetailsReportTable.CUSTOMER_NAME)
                           ?.get('included')?.value
                       "
                       [class]="
                         headers.controls
-                          .at(this.headersMap.CUSTOMER_NAME)
+                          .at(VendorDetailsReportTable.CUSTOMER_NAME)
                           ?.get('included')?.value
                           ? ''
                           : 'hidden'
@@ -435,12 +434,12 @@
                     <td
                       *ngIf="
                         headers.controls
-                          .at(this.headersMap.CONTACT_PERSON)
+                          .at(VendorDetailsReportTable.CONTACT_PERSON)
                           ?.get('included')?.value
                       "
                       [class]="
                         headers.controls
-                          .at(this.headersMap.CONTACT_PERSON)
+                          .at(VendorDetailsReportTable.CONTACT_PERSON)
                           ?.get('included')?.value
                           ? ''
                           : 'hidden'
@@ -452,12 +451,12 @@
                     <td
                       *ngIf="
                         headers.controls
-                          .at(this.headersMap.EMAIL)
+                          .at(VendorDetailsReportTable.EMAIL)
                           ?.get('included')?.value
                       "
                       [class]="
                         headers.controls
-                          .at(this.headersMap.EMAIL)
+                          .at(VendorDetailsReportTable.EMAIL)
                           ?.get('included')?.value
                           ? ''
                           : 'hidden'
@@ -469,12 +468,12 @@
                     <td
                       *ngIf="
                         headers.controls
-                          .at(this.headersMap.ADDRESS)
+                          .at(VendorDetailsReportTable.ADDRESS)
                           ?.get('included')?.value
                       "
                       [class]="
                         headers.controls
-                          .at(this.headersMap.ADDRESS)
+                          .at(VendorDetailsReportTable.ADDRESS)
                           ?.get('included')?.value
                           ? ''
                           : 'hidden'
@@ -486,20 +485,27 @@
                     <td
                       *ngIf="
                         headers.controls
-                          .at(this.headersMap.DATE_POSTED)
+                          .at(VendorDetailsReportTable.DATE_POSTED)
                           ?.get('included')?.value
                       "
                       [class]="
                         headers.controls
-                          .at(this.headersMap.DATE_POSTED)
+                          .at(VendorDetailsReportTable.DATE_POSTED)
                           ?.get('included')?.value
                           ? ''
                           : 'hidden'
                       "
                       class="text-sm font-inter whitespace-nowrap px-6 py-4"
                     >
+                      <!-- {{
+                        DateUtils.dateFormat(
+                          customer.Posted_Date
+                        ).toLocaleDateString()
+                      }} -->
                       {{
-                        dateToFormat(customer.Posted_Date).toLocaleDateString()
+                        PerformanceUtils.convertDateStringToDate(
+                          customer.Posted_Date
+                        ).toLocaleDateString()
                       }}
                     </td>
                   </tr>

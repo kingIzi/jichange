@@ -1,4 +1,6 @@
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 <app-success-message-box #successMessageBox></app-success-message-box>
 <app-display-message-box #displayMessageBox></app-display-message-box>
 
@@ -6,7 +8,10 @@
   <h2 class="text-lg font-bold">
     {{ "company.inboxApproval.name" | transloco }}
   </h2>
-  <div class="flex flex-col bg-white shadow px-2 py-4">
+  <div
+    [formGroup]="tableHeadersFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4"
+  >
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
         <div class="dropdown">
@@ -48,8 +53,7 @@
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
             [placeholder]="t('search')"
-            #searchInput
-            (keyup)="searchTable(searchInput.value, paginator)"
+            [formControl]="tableSearch"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -61,11 +65,10 @@
     </div>
     <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-        <div class="overflow-y-auto">
+        <div class="overflow-y-auto shadow">
           <table
             #customersTable
             class="min-w-full text-left text-sm font-light"
-            [formGroup]="tableHeadersFormGroup"
           >
             <thead formArrayName="headers" class="border-b font-medium">
               <tr
@@ -120,11 +123,11 @@
               >
                 <td
                   *ngIf="
-                    headers.controls.at(this.headersMap.NAME)?.get('included')
+                    headers.controls.at(CompanyInboxTable.NAME)?.get('included')
                       ?.value
                   "
                   [class]="
-                    headers.controls.at(this.headersMap.NAME)?.get('included')
+                    headers.controls.at(CompanyInboxTable.NAME)?.get('included')
                       ?.value
                       ? ''
                       : 'hidden'
@@ -136,12 +139,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.ADDRESS)
+                      .at(CompanyInboxTable.ADDRESS)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.ADDRESS)
+                      .at(CompanyInboxTable.ADDRESS)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -152,12 +155,14 @@
                 </td>
                 <td
                   *ngIf="
-                    headers.controls.at(this.headersMap.EMAIL)?.get('included')
-                      ?.value
+                    headers.controls
+                      .at(CompanyInboxTable.EMAIL)
+                      ?.get('included')?.value
                   "
                   [class]="
-                    headers.controls.at(this.headersMap.EMAIL)?.get('included')
-                      ?.value
+                    headers.controls
+                      .at(CompanyInboxTable.EMAIL)
+                      ?.get('included')?.value
                       ? ''
                       : 'hidden'
                   "
@@ -168,12 +173,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.MOBILE_NUMBER)
+                      .at(CompanyInboxTable.MOBILE_NUMBER)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.MOBILE_NUMBER)
+                      .at(CompanyInboxTable.MOBILE_NUMBER)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -184,22 +189,21 @@
                 </td>
                 <td
                   *ngIf="
-                    headers.controls.at(this.headersMap.STATUS)?.get('included')
-                      ?.value
+                    headers.controls
+                      .at(CompanyInboxTable.STATUS)
+                      ?.get('included')?.value
                   "
                   [class]="
-                    headers.controls.at(this.headersMap.STATUS)?.get('included')
-                      ?.value
+                    headers.controls
+                      .at(CompanyInboxTable.STATUS)
+                      ?.get('included')?.value
                       ? ''
                       : 'hidden'
                   "
                   class="text-sm font-inter whitespace-nowrap px-6 py-4"
                 >
-                  <app-approve-company-inbox
-                    #approveDialog
-                  ></app-approve-company-inbox>
                   <button
-                    (click)="approveCompany(approveDialog, company)"
+                    (click)="approveCompany(company)"
                     class="bg-orange-100 hover:bg-orange-200 text-black btn btn-xs"
                   >
                     {{ company.Status }}

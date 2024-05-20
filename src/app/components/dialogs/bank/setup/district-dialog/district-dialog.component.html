@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -19,7 +22,7 @@
           {{ t("region") }}<span class="text-red-600">*</span>
         </p>
         <select
-          formControlName="region"
+          [formControl]="region_id"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -29,8 +32,18 @@
           >
             {{ t("region") }}
           </option>
+          <option
+            *ngFor="
+              let region of regions;
+              trackBy: PerformanceUtils.trackByIndex;
+              index as i
+            "
+            [value]="region.Region_SNO"
+          >
+            {{ region.Region_Name }}
+          </option>
         </select>
-        <span *ngIf="region && region.invalid && region.touched">
+        <span *ngIf="region_id && region_id.invalid && region_id.touched">
           <p
             *transloco="let t; read: 'setup.districtDialog.form.errors'"
             class="text-xs text-red-600"
@@ -49,13 +62,16 @@
         <input
           *transloco="let t; read: 'setup.regionDialog.form.placeholders'"
           #controlNumber
-          formControlName="district"
-          (change)="setDistrictValue(controlNumber.value)"
+          [formControl]="district_name"
           type="text"
           [placeholder]="t('name')"
           class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
         />
-        <span *ngIf="district && district.invalid && district.touched">
+        <span
+          *ngIf="
+            district_name && district_name.invalid && district_name.touched
+          "
+        >
           <p
             *transloco="let t; read: 'setup.districtDialog.form.errors'"
             class="text-xs text-red-600"
@@ -79,9 +95,9 @@
               </span>
               <input
                 type="radio"
-                formControlName="status"
+                [formControl]="district_status"
                 class="radio radio-xs"
-                [value]="true"
+                [value]="'Active'"
                 checked
               />
             </label>
@@ -95,15 +111,21 @@
                 {{ t("inActive") }}
               </span>
               <input
-                formControlName="status"
+                [formControl]="district_status"
                 type="radio"
-                [value]="false"
+                [value]="'InActive'"
                 class="radio radio-xs"
               />
             </label>
           </div>
         </div>
-        <span *ngIf="status && status.invalid && status.touched">
+        <span
+          *ngIf="
+            district_status &&
+            district_status.invalid &&
+            district_status.touched
+          "
+        >
           <p
             *transloco="let t; read: 'setup.districtDialog.form.errors'"
             class="text-xs text-red-600"

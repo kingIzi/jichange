@@ -9,6 +9,8 @@ import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendor
 import { Customer } from 'src/app/core/models/vendors/customer';
 import * as json from 'src/assets/temp/data.json';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-admendments',
@@ -21,6 +23,7 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
     RouterModule,
     TableDateFiltersComponent,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './admendments.component.html',
   styleUrl: './admendments.component.scss',
@@ -33,7 +36,9 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 })
 export class AdmendmentsComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public invoicesList: any[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor(
     private dialog: MatDialog,
     private activatedRoute: ActivatedRoute

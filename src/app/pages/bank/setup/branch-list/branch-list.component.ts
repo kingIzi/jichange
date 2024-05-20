@@ -23,20 +23,24 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import {
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { Branch } from 'src/app/core/models/bank/branch';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { Statuses } from 'src/app/core/models/status';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { TimeoutError, timer } from 'rxjs';
-import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import {
   PageEvent,
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-branch-list',
@@ -53,6 +57,7 @@ import {
     RemoveItemDialogComponent,
     SuccessMessageBoxComponent,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -68,6 +73,7 @@ export class BranchListComponent implements OnInit {
   public branches: Branch[] = [];
   public branchesData: Branch[] = [];
   public branchHeadersForm!: FormGroup;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     SNO: 0,
     BRANCH: 1,
@@ -78,7 +84,7 @@ export class BranchListComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  @ViewChild('alertMsg') alertMsg!: ElementRef;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private branchService: BranchService,
@@ -118,39 +124,45 @@ export class BranchListComponent implements OnInit {
   private createFormHeaders() {
     this.branchHeadersForm = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate(`branch.branchesTable`, {}, this.scope)
-      .subscribe((labels: string[]) => {
-        if (labels && labels.length > 0) {
-          labels.forEach((label, index) => {
-            if (index !== 0) {
-              let header = this.fb.group({
-                label: this.fb.control(label, []),
-                search: this.fb.control('', []),
-                sortAsc: this.fb.control('', []),
-                values: this.fb.array([], []),
-              });
-              header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-                if (value === true) {
-                  this.sortTableAsc(index);
-                } else {
-                  this.sortTableDesc(index);
-                }
-              });
-              this.headers.push(header);
-            }
-          });
-        }
+    TableUtilities.createHeaders(
+      this.tr,
+      `branch.branchesTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      this.branches = this.branchesData.filter((elem) => {
+        return (
+          elem.Name.toLocaleLowerCase().includes(
+            searchText.toLocaleLowerCase()
+          ) ||
+          elem.Location.toLocaleLowerCase().includes(
+            searchText.toLocaleLowerCase()
+          ) ||
+          elem.Status.toLocaleLowerCase().includes(
+            searchText.toLocaleLowerCase()
+          )
+        );
       });
+    } else {
+      this.branches = this.branchesData;
+    }
   }
   private removeBranch(sno: number) {
-    //this.startLoading = true;
     this.tableLoading = true;
     this.branchService
       .removeBranch(sno)
       .then((results: any) => {
-        //this.startLoading = false;
         this.tableLoading = false;
         this.successMessageBox.title = this.tr.translate(
           `setup.branch.form.dialog.removedSuccessfully`
@@ -159,6 +171,7 @@ export class BranchListComponent implements OnInit {
         timer(2000).subscribe(() => {
           this.getBranchList();
           dialog.close();
+          this.cdr.detectChanges();
         });
       })
       .catch((err) => {
@@ -167,8 +180,8 @@ export class BranchListComponent implements OnInit {
         } else {
           AppUtilities.noInternetError(this.displayMessageBox, this.tr);
         }
-        //this.startLoading = false;
         this.tableLoading = false;
+        this.cdr.detectChanges();
         throw err;
       });
   }
@@ -263,43 +276,10 @@ export class BranchListComponent implements OnInit {
       this.removeBranch(branch.Sno);
     });
   }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      this.branches = this.branchesData.filter((elem) => {
-        return (
-          elem.Name.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          ) ||
-          elem.Location.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          ) ||
-          elem.Status.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          )
-        );
-      });
-    } else {
-      this.branches = this.branchesData;
-      //this.getBranchList();
-    }
-  }
-  getActiveStatusStyles(status: string) {
-    return status.toLocaleLowerCase() === 'active'
-      ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
-      : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
-  }
-  sortColumnClicked(index: number) {
-    let sortAsc = this.headers.at(index).get('sortAsc');
-    if (!sortAsc?.value) {
-      this.sortTableDesc(index);
-      sortAsc?.setValue(true);
-    } else {
-      this.sortTableAsc(index);
-      sortAsc?.setValue(false);
-    }
-  }
   get headers() {
     return this.branchHeadersForm.get(`headers`) as FormArray;
+  }
+  get tableSearch() {
+    return this.branchHeadersForm.get('tableSearch') as FormControl;
   }
 }

@@ -1,6 +1,13 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+<!-- <ngx-loading
+  [show]="startLoading"
+  [config]="{ backdropBorderRadius: '1px' }"
+></ngx-loading> -->
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -23,12 +30,11 @@
           *transloco="let t; read: 'setup.bankUser.form.placeholders'"
           type="text"
           [placeholder]="t('employeeId')"
-          class="input input-sm input-bordered font-inter w-full lg:w-1/2"
-          formControlName="employeeId"
+          class="input input-sm input-bordered font-inter"
+          [formControl]="empid"
           #employeeInput
-          (change)="setControlValue(employeeId, employeeInput.value)"
         />
-        <span *ngIf="employeeId && employeeId.invalid && employeeId.touched">
+        <span *ngIf="empid && empid.invalid && empid.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -46,11 +52,10 @@
           type="text"
           [placeholder]="t('firstName')"
           class="input input-sm input-bordered font-inter"
-          formControlName="firstName"
+          [formControl]="fname"
           #firstNameInput
-          (change)="setControlValue(firstName, firstNameInput.value)"
         />
-        <span *ngIf="firstName && firstName.invalid && firstName.touched">
+        <span *ngIf="fname && fname.invalid && fname.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -61,18 +66,17 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
-          {{ t("middleName") }}<span class="text-red-600">*</span>
+          {{ t("middleName") }}
         </p>
         <input
           *transloco="let t; read: 'setup.bankUser.form.placeholders'"
           type="text"
           [placeholder]="t('middleName')"
           class="input input-sm input-bordered font-inter"
-          formControlName="middleName"
+          [formControl]="mname"
           #middleNameInput
-          (change)="setControlValue(middleName, middleNameInput.value)"
         />
-        <span *ngIf="middleName && middleName.invalid && middleName.touched">
+        <span *ngIf="mname && mname.invalid && mname.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -90,11 +94,10 @@
           type="text"
           [placeholder]="t('lastName')"
           class="input input-sm input-bordered font-inter"
-          formControlName="lastName"
+          [formControl]="lname"
           #lastNameInput
-          (change)="setControlValue(lastName, lastNameInput.value)"
         />
-        <span *ngIf="lastName && lastName.invalid && lastName.touched">
+        <span *ngIf="lname && lname.invalid && lname.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -112,11 +115,10 @@
           type="text"
           [placeholder]="t('username')"
           class="input input-sm input-bordered font-inter"
-          formControlName="username"
+          [formControl]="user"
           #usernameInput
-          (change)="setControlValue(username, usernameInput.value)"
         />
-        <span *ngIf="username && username.invalid && username.touched">
+        <span *ngIf="user && user.invalid && user.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -130,7 +132,7 @@
           {{ t("designation") }}<span class="text-red-600">*</span>
         </p>
         <select
-          [formControl]="designation"
+          [formControl]="desg"
           class="select select-sm select-bordered w-full relative"
         >
           <option
@@ -151,7 +153,7 @@
             {{ designation.Desg_Name }}
           </option>
         </select>
-        <span *ngIf="designation && designation.invalid && designation.touched">
+        <span *ngIf="desg && desg.invalid && desg.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -204,11 +206,10 @@
           type="email"
           [placeholder]="t('emailId')"
           class="input input-sm input-bordered font-inter"
-          formControlName="emailId"
+          [formControl]="email"
           #emailIdInput
-          (change)="setControlValue(emailId, emailIdInput.value)"
         />
-        <span *ngIf="emailId && emailId.invalid && emailId.touched">
+        <span *ngIf="email && email.invalid && email.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -219,18 +220,12 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
-          {{ t("mobileNo") }}<span class="text-red-600">*</span>
+          {{ t("mobileNo") }}
         </p>
-        <input
-          *transloco="let t; read: 'setup.bankUser.form.placeholders'"
-          type="email"
-          [placeholder]="t('mobileNo')"
-          class="input input-sm input-bordered font-inter"
-          formControlName="mobileNo"
-          #mobileNoInput
-          (change)="setControlValue(mobileNo, mobileNoInput.value)"
-        />
-        <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+        <app-phone-number-input
+          [mobileNumber]="mobile"
+        ></app-phone-number-input>
+        <span *ngIf="mobile && mobile.invalid && mobile.touched">
           <p
             *transloco="let t; read: 'setup.bankUser.form.errors'"
             class="text-xs text-red-600"
@@ -254,9 +249,9 @@
               </span>
               <input
                 type="radio"
-                formControlName="status"
+                [formControl]="gender"
                 class="radio radio-xs"
-                [value]="true"
+                [value]="'Active'"
                 checked
               />
             </label>
@@ -270,15 +265,15 @@
                 {{ t("inActive") }}
               </span>
               <input
-                formControlName="status"
+                [formControl]="gender"
                 type="radio"
-                [value]="false"
+                [value]="'InActive'"
                 class="radio radio-xs"
               />
             </label>
           </div>
         </div>
-        <span *ngIf="status && status.invalid && status.touched">
+        <span *ngIf="gender && gender.invalid && gender.touched">
           <p
             *transloco="let t; read: 'setup.regionDialog.form.errors'"
             class="text-xs text-red-600"

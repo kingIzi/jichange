@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { RequestClientService } from '../../request-client.service';
 import { lastValueFrom } from 'rxjs';
+import { Company } from 'src/app/core/models/bank/company/company';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +27,10 @@ export class ReportsService {
   }
   public async getCompaniesList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/InvoiceRep/CompList`, body)
+      this.client.performPost<
+        {},
+        HttpDataResponse<Company[] | string | number>
+      >(`/api/InvoiceRep/CompList`, body)
     );
     return data;
   }

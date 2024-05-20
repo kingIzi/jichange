@@ -1,11 +1,12 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { Collapse, Dropdown, Ripple, initTE } from 'tw-elements';
 import { LanguageSelectorComponent } from '../../language-selector/language-selector.component';
 import { Router, RouterModule } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
@@ -21,12 +22,18 @@ import {
 import { ChatAgentComponent } from '../../chat-agent/chat-agent.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BankUserProfileComponent } from '../../dialogs/bank-user-profile/bank-user-profile.component';
+import { LoginService } from 'src/app/core/services/login.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { TimeoutError } from 'rxjs';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     LanguageSelectorComponent,
     RouterModule,
@@ -35,11 +42,13 @@ import { BankUserProfileComponent } from '../../dialogs/bank-user-profile/bank-u
     ReactiveFormsModule,
     ChatAgentComponent,
     MatDialogModule,
+    DisplayMessageBoxComponent,
   ],
 })
 export class HeaderComponent implements OnInit, AfterViewInit {
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
+  public userProfile!: LoginResponse;
   private headersMap = {
     company: 0,
     setup: 1,
@@ -75,18 +84,29 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     userLogReport: 6,
     auditTrails: 7,
   };
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private fb: FormBuilder,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private loginService: LoginService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createHeaders() {
     // let bankHeaders: any[] = this.translocoService.translate('en.bankHeaders');
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    let activeLang = this.translocoService.getActiveLang().toLocaleLowerCase();
-    this.translocoService.selectTranslation(activeLang).subscribe((headers) => {
+    let activeLang = this.tr.getActiveLang().toLocaleLowerCase();
+    this.tr.selectTranslation(activeLang).subscribe((headers) => {
       let bankHeaders: any[] = headers['bankHeaders'];
       bankHeaders.forEach((bankHeader, bankHeaderIndex) => {
         let header = this.fb.group({
@@ -202,12 +222,33 @@ export class HeaderComponent implements OnInit, AfterViewInit {
         return '';
     }
   }
+  private requestLogout() {
+    this.routeLoading = true;
+    this.loginService
+      .logout({ userid: this.userProfile.Usno })
+      .then((result) => {
+        this.routeLoading = false;
+        localStorage.clear();
+        this.cdr.detectChanges();
+        this.router.navigate(['/auth']);
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.routeLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngAfterViewInit(): void {
     //let div = this.desktopSetupDropdown.nativeElement;
     //this.openProfileDialog();
   }
   ngOnInit(): void {
-    initTE({ Collapse, Dropdown, Ripple });
+    this.parseUserProfile();
     this.createHeaders();
   }
   switchRouterLinks(ind: number) {
@@ -225,6 +266,9 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
   routerClicked(ahref: HTMLAnchorElement) {
     ahref.blur();
+  }
+  logout() {
+    this.requestLogout();
   }
   openProfileDialog() {
     let dialogRef = this.dialog.open(BankUserProfileComponent, {

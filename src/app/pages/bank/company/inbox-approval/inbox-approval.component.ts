@@ -19,7 +19,7 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
-import { Company } from 'src/app/core/models/bank/company';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import {
   AbstractControl,
@@ -29,8 +29,8 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
-import { CompanyInboxTableHeaders } from 'src/app/core/enums/bank/company-inbox-table-headers';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
+import { CompanyInboxTable } from 'src/app/core/enums/bank/company/company-inbox-table-headers';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { CompanySummaryDialogComponent } from 'src/app/components/dialogs/bank/company/company-summary-dialog/company-summary-dialog.component';
@@ -46,6 +46,12 @@ import { TimeoutError, throwError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { ApproveCompanyInboxComponent } from 'src/app/components/dialogs/bank/company/approve-company-inbox/approve-company-inbox.component';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approval/approval.service';
+import { CompanyInboxListForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-inbox-list-form';
+import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -59,12 +65,11 @@ import { ApproveCompanyInboxComponent } from 'src/app/components/dialogs/bank/co
     TranslocoModule,
     TableDateFiltersComponent,
     MatPaginatorModule,
-    LoaderRainbowComponent,
     ReactiveFormsModule,
     MatDialogModule,
     SuccessMessageBoxComponent,
     DisplayMessageBoxComponent,
-    ApproveCompanyInboxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -81,21 +86,18 @@ export class InboxApprovalComponent implements OnInit {
   public companiesData: Company[] = [];
   public tableHeadersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public CompanyInboxTable: typeof CompanyInboxTable = CompanyInboxTable;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  public headersMap = {
-    NAME: CompanyInboxTableHeaders.NAME,
-    ADDRESS: CompanyInboxTableHeaders.ADDRESS,
-    EMAIL: CompanyInboxTableHeaders.EMAIL,
-    MOBILE_NUMBER: CompanyInboxTableHeaders.MOBILE_NUMBER,
-    STATUS: CompanyInboxTableHeaders.STATUS,
-  };
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
-    private companyService: CompanyService,
+    //private companyService: CompanyService,
+    private approvalService: ApprovalService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -109,53 +111,45 @@ export class InboxApprovalComponent implements OnInit {
   private createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate('inboxApproval.inboxApprovalTable', {}, this.scope)
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index < 5, []),
-            values: this.fb.array([], []),
-          });
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `inboxApproval.inboxApprovalTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
-      case this.headersMap.NAME:
+      case CompanyInboxTable.NAME:
         this.companies.sort((a: Company, b: Company) =>
           a.CompName.toLocaleLowerCase() > b.CompName.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.ADDRESS:
+      case CompanyInboxTable.ADDRESS:
         this.companies.sort((a: Company, b: Company) =>
           a.Address.toLocaleLowerCase() > b.Address.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case CompanyInboxTable.EMAIL:
         this.companies.sort((a: Company, b: Company) =>
           a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.MOBILE_NUMBER:
+      case CompanyInboxTable.MOBILE_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.MobNo.toLocaleLowerCase() > b.MobNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.STATUS:
+      case CompanyInboxTable.STATUS:
         this.companies.sort((a: Company, b: Company) =>
           a?.Status?.toLocaleLowerCase() > b?.Status?.toLocaleLowerCase()
             ? 1
@@ -168,29 +162,29 @@ export class InboxApprovalComponent implements OnInit {
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
-      case this.headersMap.NAME:
+      case CompanyInboxTable.NAME:
         this.companies.sort((a: Company, b: Company) =>
           a.CompName.toLocaleLowerCase() < b.CompName.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.ADDRESS:
+      case CompanyInboxTable.ADDRESS:
         this.companies.sort((a: Company, b: Company) =>
           a.Address.toLocaleLowerCase() < b.Address.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case CompanyInboxTable.EMAIL:
         this.companies.sort((a: Company, b: Company) =>
           a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.MOBILE_NUMBER:
+      case CompanyInboxTable.MOBILE_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.MobNo.toLocaleLowerCase() < b.MobNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.STATUS:
+      case CompanyInboxTable.STATUS:
         this.companies.sort((a: Company, b: Company) =>
           a?.Status?.toLocaleLowerCase() < b?.Status?.toLocaleLowerCase()
             ? 1
@@ -203,29 +197,29 @@ export class InboxApprovalComponent implements OnInit {
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
-    if (indexes.includes(this.headersMap.NAME)) {
+    if (indexes.includes(CompanyInboxTable.NAME)) {
       keys.push('CompName');
     }
-    if (indexes.includes(this.headersMap.ADDRESS)) {
+    if (indexes.includes(CompanyInboxTable.ADDRESS)) {
       keys.push('Address');
     }
-    if (indexes.includes(this.headersMap.EMAIL)) {
+    if (indexes.includes(CompanyInboxTable.EMAIL)) {
       keys.push('Email');
     }
-    if (indexes.includes(this.headersMap.MOBILE_NUMBER)) {
+    if (indexes.includes(CompanyInboxTable.MOBILE_NUMBER)) {
       keys.push('MobNo');
     }
-    if (indexes.includes(this.headersMap.STATUS)) {
+    if (indexes.includes(CompanyInboxTable.STATUS)) {
       keys.push('Status');
     }
     return keys;
   }
   private requestCompanyInbox() {
     this.tableLoading = true;
-    let inbox = this.companyService.postCompanyInboxList({
+    let inbox = this.approvalService.postCompanyInboxList({
       design: this.userProfile.desig,
       braid: Number(this.userProfile.braid),
-    });
+    } as CompanyInboxListForm);
     inbox
       .then((results: any) => {
         this.companiesData = results.response === 0 ? [] : results.response;
@@ -244,116 +238,7 @@ export class InboxApprovalComponent implements OnInit {
         throw err;
       });
   }
-  private companyApprovedSuccessullyMessage() {
-    let dialog = AppUtilities.openSuccessMessageBox(
-      this.successMessageBox,
-      this.tr.translate(`company.summary.actions.approvedCompanySuccessfully`)
-    );
-  }
-  private failedToApproveCompanyMessage() {
-    let dialog = AppUtilities.openDisplayMessageBox(
-      this.displayMessageBox,
-      this.tr.translate(`defaults.failed`),
-      this.tr.translate(
-        `company.summary.companyForm.dialogs.failedToApproveCompany`
-      )
-    );
-  }
-  private requestApproveCompany(value: {
-    compsno: number;
-    pfx: string;
-    ssno: string;
-    userid: number;
-  }) {
-    this.startLoading = true;
-    this.companyService
-      .approveCompany(value)
-      .then((results: any) => {
-        this.startLoading = false;
-        if (results.response === 0 || typeof results.response !== 'number') {
-          this.failedToApproveCompanyMessage();
-        } else {
-          this.companyApprovedSuccessullyMessage();
-        }
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        this.startLoading = false;
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.cdr.detectChanges();
-        throw err;
-      });
-  }
-  private addedCompanySuccessfully(
-    message: string,
-    dialogRef: MatDialogRef<CompanySummaryDialogComponent, any>
-  ) {
-    dialogRef.componentInstance.companyAddedSuccessfully
-      .asObservable()
-      .subscribe((value) => {
-        if (value) {
-          this.successMessageBox.title = message;
-          this.cdr.detectChanges();
-          this.successMessageBox.openDialog().addEventListener('close', () => {
-            dialogRef.close();
-          });
-        }
-      });
-  }
-  ngOnInit(): void {
-    this.parseUserProfile();
-    this.createTableHeadersFormGroup();
-    this.requestCompanyInbox();
-  }
-  sortColumnClicked(ind: number) {
-    let sortAsc = this.headers.at(ind).get('sortAsc');
-    sortAsc?.setValue(!sortAsc?.value);
-  }
-  getFormControl(control: AbstractControl, name: string) {
-    return control.get(name) as FormControl;
-  }
-  approveCompany(dialog: ApproveCompanyInboxComponent, company: Company) {
-    let payload: {
-      compsno: number;
-      pfx: string;
-      ssno: string;
-      userid: number;
-    } = {
-      compsno: company.CompSno,
-      pfx: '',
-      ssno: '',
-      userid: this.userProfile.Usno,
-    };
-    let dialogRef = dialog.openDialog();
-    dialog.close.asObservable().subscribe(() => {
-      dialogRef.close();
-    });
-    dialog.approve.asObservable().subscribe(() => {
-      this.requestApproveCompany(payload);
-      dialogRef.close();
-    });
-  }
-  openEditCompanySummaryDialog(company: Company) {
-    let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
-      width: '800px',
-      height: '600px',
-      data: {
-        companyData: company,
-      },
-    });
-    this.addedCompanySuccessfully(
-      this.tr.translate(`company.summary.actions.modifiedCompanySuccessfully`),
-      dialogRef
-    );
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
-    });
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
+  private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
       let indexes = this.headers.controls
@@ -370,7 +255,35 @@ export class InboxApprovalComponent implements OnInit {
       this.companies = this.companiesData;
     }
   }
+  ngOnInit(): void {
+    this.parseUserProfile();
+    this.createTableHeadersFormGroup();
+    this.requestCompanyInbox();
+  }
+  sortColumnClicked(ind: number) {
+    let sortAsc = this.headers.at(ind).get('sortAsc');
+    sortAsc?.setValue(!sortAsc?.value);
+  }
+  getFormControl(control: AbstractControl, name: string) {
+    return control.get(name) as FormControl;
+  }
+  approveCompany(company: Company) {
+    let dialogRef = this.dialog.open(ApproveCompanyInboxComponent, {
+      width: '800px',
+      disableClose: true,
+      data: {
+        company: company,
+      },
+    });
+    dialogRef.componentInstance.approved.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestCompanyInbox();
+    });
+  }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableHeadersFormGroup.get('tableSearch') as FormControl;
   }
 }

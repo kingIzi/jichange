@@ -1,0 +1,33 @@
+export class CancelledInvoice {
+  Inv_Mas_Sno!: number;
+  Inv_Det_Sno!: number;
+  Invoice_Date!: Date | null;
+  Payment_Type!: string | null;
+  Invoice_No!: string;
+  Due_Date!: Date | null;
+  Invoice_Expired_Date!: Date | null;
+  Chus_Mas_No!: number;
+  Chus_Name!: string | null;
+  Com_Mas_Sno!: number;
+  Cmpny_Name!: string | null;
+  Customer_Name!: string;
+  Inv_Remarks!: string | null;
+  Remarks!: string | null;
+  vat_category!: string | null;
+  Currency_Code!: string | null;
+  Currency_Name!: string | null;
+  Invoice_Amount!: number;
+  Amment_Amount!: number;
+  Total!: number;
+  Item_Qty!: number;
+  AuditBy!: string | null;
+  Reason!: string | null;
+  goods_status!: string | null;
+  delivery_status!: string | null;
+  Audit_Date!: Date;
+  p_date!: Date;
+  Inv_Can_No!: number;
+  Inv_Amm_No!: number;
+  Cust_Mas_No!: number;
+  Control_No!: string | null;
+}

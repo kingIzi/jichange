@@ -29,6 +29,7 @@ import { CompanyUserService } from 'src/app/core/services/vendor/company-user.se
 import { RoleAct } from 'src/app/core/models/vendors/role-act';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-company-users-dialog',
@@ -42,6 +43,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -54,7 +56,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public roleActs: RoleAct[] = [];
   public companyUsersForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public addedUser = new EventEmitter<any>();
   private userProfile!: LoginResponse;
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
@@ -139,7 +141,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         if (this.roleActs.length === 0) {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
-            this.tr.translate(`errors.errorOccured`),
+            this.tr.translate(`defaults.warning`),
             this.tr.translate(
               `company.companyUsersForm.errors.dialog.noRoleActFound`
             )
@@ -168,7 +170,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
             this.successMessageBox,
             this.tr.translate(`company.companyUsersForm.successMessage`)
           );
-          this.successMessageBox.closeSuccessMessageBox.emit();
+          this.addedUser.emit();
         } else if (typeof results.response === 'string') {
           let dialog = AppUtilities.openSuccessMessageBox(
             this.successMessageBox,
@@ -213,7 +215,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   submitCompanyUsersForm() {
     if (this.companyUsersForm.invalid) {
       this.companyUsersForm.markAllAsTouched();
-      this.formErrors();
+      //this.formErrors();
       return;
     } else {
       this.requestAddRole(this.companyUsersForm.value);

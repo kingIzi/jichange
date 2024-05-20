@@ -15,7 +15,7 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { Company } from 'src/app/core/models/bank/company';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { Ripple, initTE } from 'tw-elements';
 import * as json from 'src/assets/temp/data.json';
 import { CompanySummaryDialogComponent } from 'src/app/components/dialogs/bank/company/company-summary-dialog/company-summary-dialog.component';
@@ -47,7 +47,9 @@ import { TimeoutError, lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { CompanySummaryTable } from 'src/app/core/enums/bank/company/company-summary-table';
 
 @Component({
   selector: 'app-summary',
@@ -82,22 +84,13 @@ export class SummaryComponent implements OnInit {
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
   public includedHeaders: AbstractControl<any, any>[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public CompanySummaryTable: typeof CompanySummaryTable = CompanySummaryTable;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  public headersMap = {
-    NAME: 0,
-    ADDRESS: 1,
-    EMAIL: 2,
-    TIN_NUMBER: 3,
-    MOBILE_NUMBER: 4,
-    STATUS: 5,
-    DIRECTOR_NAME: 6,
-    POST_BOX: 7,
-    TELEPHONE_NUMBER: 8,
-    DATE_POSTED: 9,
-  };
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private client: RequestClientService,
@@ -111,73 +104,75 @@ export class SummaryComponent implements OnInit {
   private createHeadersFormGroup() {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
     this.translocoService
       .selectTranslate('summary.companySummary', {}, this.scope)
       .subscribe((labels: string[]) => {
-        if (labels && labels.length > 0) {
-          labels.forEach((label: string, index: number) => {
-            let header = this.fb.group({
-              label: this.fb.control(label, []),
-              sortAsc: this.fb.control(false, []),
-              included: this.fb.control(index <= 5, []),
-              values: this.fb.array([], []),
-            });
-            (header.get('included') as FormControl).valueChanges.subscribe(
-              (value) => {
-                this.filterIncludedTableHeaders();
-              }
-            );
-            header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-              if (value === true) {
-                this.sortTableAsc(index);
-              } else {
-                this.sortTableDesc(index);
-              }
-            });
-            this.headers.push(header);
+        labels.forEach((label: string, index: number) => {
+          let header = this.fb.group({
+            label: this.fb.control(label, []),
+            sortAsc: this.fb.control(false, []),
+            included: this.fb.control(index <= 5, []),
+            values: this.fb.array([], []),
           });
-          this.filterIncludedTableHeaders();
-        }
+          (header.get('included') as FormControl).valueChanges.subscribe(
+            (value) => {
+              this.filterIncludedTableHeaders();
+            }
+          );
+          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
+            if (value === true) {
+              this.sortTableAsc(index);
+            } else {
+              this.sortTableDesc(index);
+            }
+          });
+          this.headers.push(header);
+        });
+        this.filterIncludedTableHeaders();
       });
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
-      case this.headersMap.NAME:
+      case CompanySummaryTable.NAME:
         this.companies.sort((a: Company, b: Company) =>
           a.CompName.toLocaleLowerCase() > b.CompName.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.ADDRESS:
+      case CompanySummaryTable.ADDRESS:
         this.companies.sort((a: Company, b: Company) =>
           a.Address.toLocaleLowerCase() > b.Address.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case CompanySummaryTable.EMAIL:
         this.companies.sort((a: Company, b: Company) =>
           a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.TIN_NUMBER:
+      case CompanySummaryTable.TIN_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.TinNo.toLocaleLowerCase() > b.TinNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.MOBILE_NUMBER:
+      case CompanySummaryTable.MOBILE_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.MobNo.toLocaleLowerCase() > b.MobNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.STATUS:
+      case CompanySummaryTable.STATUS:
         this.companies.sort((a: Company, b: Company) =>
           a?.Status?.toLocaleLowerCase() > b?.Status?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.DIRECTOR_NAME:
+      case CompanySummaryTable.DIRECTOR_NAME:
         this.companies.sort((a: Company, b: Company) =>
           a.DirectorName.toLocaleLowerCase() >
           b.DirectorName.toLocaleLowerCase()
@@ -185,17 +180,17 @@ export class SummaryComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.POST_BOX:
+      case CompanySummaryTable.POST_BOX:
         this.companies.sort((a: Company, b: Company) =>
           a.PostBox.toLocaleLowerCase() > b.PostBox.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.TELEPHONE_NUMBER:
+      case CompanySummaryTable.TELEPHONE_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.TelNo.toLocaleLowerCase() > b.TelNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.DATE_POSTED:
+      case CompanySummaryTable.DATE_POSTED:
         this.companies.sort((a: Company, b: Company) =>
           a.Posteddate.toLocaleLowerCase() > b.Posteddate.toLocaleLowerCase()
             ? 1
@@ -208,41 +203,41 @@ export class SummaryComponent implements OnInit {
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
-      case this.headersMap.NAME:
+      case CompanySummaryTable.NAME:
         this.companies.sort((a: Company, b: Company) =>
           a.CompName.toLocaleLowerCase() < b.CompName.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.ADDRESS:
+      case CompanySummaryTable.ADDRESS:
         this.companies.sort((a: Company, b: Company) =>
           a.Address.toLocaleLowerCase() < b.Address.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case CompanySummaryTable.EMAIL:
         this.companies.sort((a: Company, b: Company) =>
           a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.TIN_NUMBER:
+      case CompanySummaryTable.TIN_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.TinNo.toLocaleLowerCase() < b.TinNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.MOBILE_NUMBER:
+      case CompanySummaryTable.MOBILE_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.MobNo.toLocaleLowerCase() < b.MobNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.STATUS:
+      case CompanySummaryTable.STATUS:
         this.companies.sort((a: Company, b: Company) =>
           a?.Status?.toLocaleLowerCase() < b?.Status?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.DIRECTOR_NAME:
+      case CompanySummaryTable.DIRECTOR_NAME:
         this.companies.sort((a: Company, b: Company) =>
           a.DirectorName.toLocaleLowerCase() <
           b.DirectorName.toLocaleLowerCase()
@@ -250,17 +245,17 @@ export class SummaryComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.POST_BOX:
+      case CompanySummaryTable.POST_BOX:
         this.companies.sort((a: Company, b: Company) =>
           a.PostBox.toLocaleLowerCase() < b.PostBox.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.TELEPHONE_NUMBER:
+      case CompanySummaryTable.TELEPHONE_NUMBER:
         this.companies.sort((a: Company, b: Company) =>
           a.TelNo.toLocaleLowerCase() < b.TelNo.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.DATE_POSTED:
+      case CompanySummaryTable.DATE_POSTED:
         this.companies.sort((a: Company, b: Company) =>
           a.Posteddate.toLocaleLowerCase() < b.Posteddate.toLocaleLowerCase()
             ? 1
@@ -278,44 +273,44 @@ export class SummaryComponent implements OnInit {
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
-    if (indexes.includes(this.headersMap.NAME)) {
+    if (indexes.includes(CompanySummaryTable.NAME)) {
       keys.push('CompName');
     }
-    if (indexes.includes(this.headersMap.ADDRESS)) {
+    if (indexes.includes(CompanySummaryTable.ADDRESS)) {
       keys.push('Address');
     }
-    if (indexes.includes(this.headersMap.EMAIL)) {
+    if (indexes.includes(CompanySummaryTable.EMAIL)) {
       keys.push('Email');
     }
-    if (indexes.includes(this.headersMap.TIN_NUMBER)) {
+    if (indexes.includes(CompanySummaryTable.TIN_NUMBER)) {
       keys.push('TinNo');
     }
-    if (indexes.includes(this.headersMap.MOBILE_NUMBER)) {
+    if (indexes.includes(CompanySummaryTable.MOBILE_NUMBER)) {
       keys.push('MobNo');
     }
-    if (indexes.includes(this.headersMap.STATUS)) {
+    if (indexes.includes(CompanySummaryTable.STATUS)) {
       keys.push('Status');
     }
-    if (indexes.includes(this.headersMap.DIRECTOR_NAME)) {
+    if (indexes.includes(CompanySummaryTable.DIRECTOR_NAME)) {
       keys.push('DirectorName');
     }
-    if (indexes.includes(this.headersMap.POST_BOX)) {
+    if (indexes.includes(CompanySummaryTable.POST_BOX)) {
       keys.push('PostBox');
     }
-    if (indexes.includes(this.headersMap.TELEPHONE_NUMBER)) {
+    if (indexes.includes(CompanySummaryTable.TELEPHONE_NUMBER)) {
       keys.push('TelNo');
     }
     return keys;
   }
-  private async requestList() {
+  private requestList() {
     this.companiesData = [];
     this.companies = this.companiesData;
     this.tableLoading = true;
-    await this.companyService
+    this.companyService
       .getCustomersList({})
       .then((data) => {
-        let customersList = data as HttpDataResponse<Company[]>;
-        this.companiesData = customersList.response;
+        this.companiesData =
+          typeof data.response === 'number' ? [] : data.response;
         this.companies = this.companiesData;
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -338,92 +333,7 @@ export class SummaryComponent implements OnInit {
       });
     this.cdr.detectChanges();
   }
-  private addedCompanySuccessfully(
-    message: string,
-    dialogRef: MatDialogRef<CompanySummaryDialogComponent, any>
-  ) {
-    dialogRef.componentInstance.companyAddedSuccessfully
-      .asObservable()
-      .subscribe((value) => {
-        if (value) {
-          this.successMessageBox.title = message;
-          this.cdr.detectChanges();
-          this.successMessageBox.openDialog().addEventListener('close', () => {
-            dialogRef.close();
-          });
-        }
-      });
-  }
-
-  async ngOnInit() {
-    this.createHeadersFormGroup();
-    await this.requestList();
-  }
-  sortColumnClicked(ind: number) {
-    let sortAsc = this.headers.at(ind).get('sortAsc');
-    sortAsc?.setValue(!sortAsc?.value);
-  }
-  getValueArray(ind: number) {
-    return this.headers.controls.at(ind)?.get('values') as FormArray;
-  }
-  getFormControl(control: AbstractControl, name: string) {
-    return control.get(name) as FormControl;
-  }
-  openCompanySummaryDialog() {
-    let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
-      width: '800px',
-      height: '600px',
-      data: null,
-      disableClose: true,
-    });
-    this.addedCompanySuccessfully(
-      this.translocoService.translate(
-        `company.summary.actions.addedCompanySuccessfully`
-      ),
-      dialogRef
-    );
-    dialogRef.afterClosed().subscribe(async () => {
-      this.requestList();
-    });
-  }
-  openEditCompanySummaryDialog(company: Company) {
-    let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
-      width: '800px',
-      height: '600px',
-      disableClose: true,
-      data: {
-        companyData: company,
-      },
-    });
-    this.addedCompanySuccessfully(
-      this.translocoService.translate(
-        `company.summary.actions.modifiedCompanySuccessfully`
-      ),
-      dialogRef
-    );
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
-    });
-  }
-  convertDateString(date: string) {
-    return new Date(date).toLocaleDateString();
-  }
-  downloadSheet() {
-    let data = this.companiesData.map((d) => {
-      let t = { ...d };
-      t.Posteddate = AppUtilities.convertDotNetJsonDateToDate(
-        d.Posteddate
-      ).toLocaleDateString();
-      return t;
-    });
-    this.fileHandler.exportAsExcelFile(data, 'company_summary');
-  }
-  getActiveStatusStyles(status: string) {
-    return status?.toLocaleLowerCase() === 'approved'
-      ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
-      : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
+  private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
       let indexes = this.headers.controls
@@ -440,7 +350,58 @@ export class SummaryComponent implements OnInit {
       this.companies = this.companiesData;
     }
   }
+  ngOnInit() {
+    this.createHeadersFormGroup();
+    this.requestList();
+  }
+  getValueArray(ind: number) {
+    return this.headers.controls.at(ind)?.get('values') as FormArray;
+  }
+  getFormControl(control: AbstractControl, name: string) {
+    return control.get(name) as FormControl;
+  }
+  openCompanySummaryDialog() {
+    let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
+      width: '800px',
+      height: '600px',
+      data: null,
+      disableClose: true,
+    });
+    dialogRef.componentInstance.companyAddedSuccessfully
+      .asObservable()
+      .subscribe(() => {
+        this.requestList();
+      });
+  }
+  openEditCompanySummaryDialog(company: Company) {
+    let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
+      width: '800px',
+      height: '600px',
+      disableClose: true,
+      data: {
+        companyData: company,
+      },
+    });
+    dialogRef.componentInstance.companyAddedSuccessfully
+      .asObservable()
+      .subscribe(() => {
+        this.requestList();
+      });
+  }
+  downloadSheet() {
+    let data = this.companiesData.map((d) => {
+      let t = { ...d };
+      t.Posteddate = AppUtilities.convertDotNetJsonDateToDate(
+        d.Posteddate
+      ).toLocaleDateString();
+      return t;
+    });
+    this.fileHandler.exportAsExcelFile(data, 'company_summary');
+  }
   get headers(): FormArray {
     return this.headersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headersFormGroup.get('tableSearch') as FormControl;
   }
 }

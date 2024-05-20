@@ -1,26 +1,22 @@
 <dialog #submitMessageBox id="my_modal_2" class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-sm">{{ title }}</h3>
-    <p class="py-4 text-xs">{{ message }}</p>
+    <h3 class="font-bold text-lg">{{ title }}</h3>
+    <p class="py-4 text-sm">{{ message }}</p>
     <div class="modal-action">
       <div class="flex flex-row items">
         <button
+          *transloco="let t; read: 'defaults'"
           (click)="closeDialog()"
           class="btn btn-ghost btn-xs btn-info text-red-600"
         >
-          Close
+          {{ t("close") }}
         </button>
         <button
-          (click)="attachInvoiceClicked()"
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmClicked()"
           class="btn btn-ghost btn-xs btn-info text-linkBlue"
         >
-          Attach Invoice
-        </button>
-        <button
-          (click)="addCustomerClikced()"
-          class="btn btn-ghost btn-xs btn-info text-linkBlue"
-        >
-          Add customer
+          {{ t("confirm") }}
         </button>
       </div>
     </div>

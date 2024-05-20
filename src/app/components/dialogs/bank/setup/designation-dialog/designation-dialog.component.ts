@@ -23,11 +23,12 @@ import { DisplayMessageBoxComponent } from '../../../display-message-box/display
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { Designation } from 'src/app/core/models/bank/designation';
+import { Designation } from 'src/app/core/models/bank/setup/designation';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
-import { DesignationService } from 'src/app/core/services/bank/setup/designation.service';
+import { DesignationService } from 'src/app/core/services/bank/setup/designation/designation.service';
 import { TimeoutError } from 'rxjs';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-designation-dialog',
@@ -41,6 +42,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {

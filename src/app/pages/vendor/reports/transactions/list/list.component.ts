@@ -15,6 +15,7 @@ import { NgxLoadingModule } from 'ngx-loading';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-list',
@@ -27,6 +28,7 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
     SuccessMessageBoxComponent,
     TranslocoModule,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',

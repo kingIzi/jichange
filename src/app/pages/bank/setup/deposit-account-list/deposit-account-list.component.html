@@ -1,7 +1,4 @@
-<ngx-loading
-  [show]="startLoading"
-  [config]="{ backdropBorderRadius: '3px' }"
-></ngx-loading>
+<app-display-message-box #displayMessageBox></app-display-message-box>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -26,17 +23,22 @@
       </p>
     </button>
   </div>
-  <div class="flex flex-col bg-white shadow px-2 py-4">
+  <div
+    [formGroup]="tableHeadersFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4"
+  >
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
         <div class="relative">
+          <!-- #searchInput
+            (keyup)="searchTable(searchInput.value, paginator)" -->
           <input
             *transloco="let t; read: 'defaults'"
             type="search"
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
             [placeholder]="t('search')"
-            #searchInput
+            [formControl]="tableSearch"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -48,53 +50,162 @@
     </div>
     <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-        <div class="overflow-y-auto">
+        <div class="overflow-y-auto shadow">
           <table
-            #customersTable
+            #depositAccountTable
             class="min-w-full text-left text-sm font-light"
           >
-            <thead class="border-b font-medium">
+            <thead formArrayName="headers" class="border-b font-medium">
               <tr
+                *transloco="let t; read: 'tableData.vendor'"
                 class="bg-lightPurple"
-                *transloco="let t; read: 'setup.depositAccount'"
               >
-                <th
-                  *ngFor="let header of t('depositAccountTable'); index as ind"
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
                 >
-                  <div class="flex flex-row items-center">
-                    <p class="text-sm font-extrabold text-black">
-                      {{ header }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
                       >
-                        unfold_more
-                      </span>
-                    </button>
-                  </div>
-                </th>
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
                 <th
                   *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm font-extrabold text-black"
+                  class="px-6 font-inter text-sm text-right"
                 >
                   {{ t("action") }}
                 </th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              <tr
+                *ngFor="
+                  let depositAccount of depositAccounts
+                    | slice
+                      : 1 + paginator.pageSize * paginator.pageIndex - 1
+                      : 1 +
+                          paginator.pageSize * paginator.pageIndex +
+                          paginator.pageSize -
+                          1;
+                  index as i;
+                  trackBy: PerformanceUtils.trackByIndex
+                "
+                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+              >
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(DepositAccountTable.VENDOR)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(DepositAccountTable.VENDOR)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{ depositAccount.Company }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(DepositAccountTable.ACCOUNT)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(DepositAccountTable.ACCOUNT)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{
+                    depositAccount.Deposit_Acc_No
+                      ? depositAccount.Deposit_Acc_No
+                      : "-"
+                  }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(DepositAccountTable.REASON)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(DepositAccountTable.REASON)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
+                  {{ depositAccount.Reason ? depositAccount.Reason : "-" }}
+                </td>
+                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                  <app-remove-item-dialog
+                    #removeItemDialog
+                  ></app-remove-item-dialog>
+                  <div class="flex flex-row items-center justify-end space-x-2">
+                    <button
+                      (click)="
+                        openRemoveDepositAccount(
+                          depositAccount,
+                          removeItemDialog
+                        )
+                      "
+                      class="btn btn-sm btn-ghost"
+                    >
+                      <span class="material-symbols-outlined text-danger-600">
+                        delete
+                      </span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
           </table>
-          <div *transloco="let t; read: 'errors'">
-            <p
-              *ngIf="depositAccounts.length <= 0"
-              class="text-center text-sm tracking-wide pt-3 pb-1"
-            >
-              {{ t("noDataFound") }}
-            </p>
-          </div>
+          <ng-container *ngIf="!tableLoading">
+            <div *transloco="let t; read: 'errors'">
+              <p
+                *ngIf="depositAccounts.length <= 0"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="tableLoading">
+            <div class="w-full grid place-items-center mt-6">
+              <span
+                class="loading loading-spinner loading-sm bg-darkPurple"
+              ></span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

@@ -24,6 +24,7 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import * as json from 'src/assets/temp/data.json';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-customer-view',
@@ -39,13 +40,13 @@ import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
   imports: [
     CommonModule,
     TranslocoModule,
-    NgxLoadingModule,
     MatDialogModule,
     RouterModule,
     RemoveItemDialogComponent,
     FormsModule,
     ReactiveFormsModule,
     MatPaginatorModule,
+    LoaderInfiniteSpinnerComponent,
   ],
 })
 export class CustomerViewComponent implements OnInit {

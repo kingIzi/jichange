@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,8 +22,14 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { Currency } from 'src/app/core/models/bank/setup/currency';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { CurrencyService } from 'src/app/core/services/bank/setup/currency/currency.service';
+import { AddCurrency } from 'src/app/core/models/bank/forms/setup/currency/add-currency';
+import { TimeoutError } from 'rxjs';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-currency-dialog',
@@ -28,7 +42,9 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -37,8 +53,10 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   ],
 })
 export class CurrencyDialogComponent implements OnInit {
+  public startLoading: boolean = false;
   public currencyForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public added = new EventEmitter<any>();
+  private userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -46,10 +64,102 @@ export class CurrencyDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CurrencyDialogComponent>,
-    private translocoService: TranslocoService
+    private tr: TranslocoService,
+    private currencyService: CurrencyService,
+    private cdr: ChangeDetectorRef,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      currency: Currency;
+    }
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private requestModifyCurrency(form: AddCurrency) {
+    this.startLoading = true;
+    this.currencyService
+      .addCurrency(form)
+      .then((result) => {
+        if (
+          typeof result.response === 'string' &&
+          result.response.toLocaleLowerCase() === '1'.toLocaleLowerCase()
+        ) {
+          let dialog = AppUtilities.openSuccessMessageBox(
+            this.successMessageBox,
+            this.tr.translate(`setup.currency.modifiedCurrencySuccessfully`)
+          );
+          dialog.addEventListener('close', () => {
+            this.added.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.currency.form.dialog.failedToAddCurrency`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private requestAddCurrency(form: AddCurrency) {
+    this.startLoading = true;
+    this.currencyService
+      .addCurrency(form)
+      .then((result) => {
+        if (
+          typeof result.response === 'string' &&
+          result.response.toLocaleLowerCase() ===
+            'Created Successfuly'.toLocaleLowerCase()
+        ) {
+          let dialog = AppUtilities.openSuccessMessageBox(
+            this.successMessageBox,
+            this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
+          );
+          dialog.addEventListener('close', () => {
+            this.added.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.currency.form.dialog.failedToAddCurrency`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
-    this.createForm();
+    this.parseUserProfile();
+    if (this.data.currency) {
+      this.createEditForm(this.data.currency);
+    } else {
+      this.createForm();
+    }
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });
@@ -58,36 +168,50 @@ export class CurrencyDialogComponent implements OnInit {
     control.setValue(value.trim());
   }
   submitCurrencyForm() {
-    if (this.currencyForm.valid) {
-      this.isLoading.emit(this.currencyForm.value);
+    if (this.currencyForm.valid && !this.data.currency) {
+      this.requestAddCurrency(this.currencyForm.value);
+    } else if (this.currencyForm.valid && this.data.currency) {
+      this.requestModifyCurrency(this.currencyForm.value);
+    } else {
+      this.currencyForm.markAllAsTouched();
+      this.formErrors();
     }
-    this.currencyForm.markAllAsTouched();
-    this.formErrors();
   }
   private formErrors(errorsPath: string = 'setup.currency.form.dialog') {
-    if (this.currency.invalid) {
+    if (this.cname.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingName`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingName`)
       );
     }
     if (this.code.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingCode`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingCode`)
       );
     }
   }
   private createForm() {
     this.currencyForm = this.fb.group({
-      currency: this.fb.control('', [Validators.required]),
+      cname: this.fb.control('', [Validators.required]),
       code: this.fb.control('', [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
     });
   }
-  get currency() {
-    return this.currencyForm.get('currency') as FormControl;
+  private createEditForm(currency: Currency) {
+    this.currencyForm = this.fb.group({
+      cname: this.fb.control(currency.Currency_Name, [Validators.required]),
+      code: this.fb.control(currency.Currency_Code, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      sno: this.fb.control(1, [Validators.required]),
+      dummy: this.fb.control(true, [Validators.required]),
+    });
+  }
+  get cname() {
+    return this.currencyForm.get('cname') as FormControl;
   }
   get code() {
     return this.currencyForm.get('code') as FormControl;

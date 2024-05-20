@@ -10,6 +10,7 @@ import {
 import {
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
@@ -40,6 +41,10 @@ import { ReportsService } from 'src/app/core/services/bank/reports/reports.servi
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
+import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 
 @Component({
   selector: 'app-customers-list',
@@ -60,6 +65,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
     MatPaginatorModule,
     DisplayMessageBoxComponent,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -70,6 +76,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 })
 export class CustomersListComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public customersData: Customer[] = [];
   public customers: Customer[] = [];
   public headersFormGroup!: FormGroup;
@@ -85,14 +92,15 @@ export class CustomersListComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private activatedRoute: ActivatedRoute,
     private tr: TranslocoService,
     private fb: FormBuilder,
-    private invoiceService: InvoiceService,
+    private customerService: CustomerService,
     private cdr: ChangeDetectorRef,
-    private reportService: ReportsService,
+    //private reportService: ReportsService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -102,26 +110,64 @@ export class CustomersListComponent implements OnInit {
     }
   }
   private requestCustomerNames() {
-    this.startLoading = true;
-    this.reportService
-      .postCustomerDetailsReport({
+    this.tableLoading = true;
+    this.customerService
+      .getCustomersList({
         Comp: this.userProfile.InstID.toString(),
         reg: '0',
         dist: '0',
       })
-      .then((results: any) => {
-        this.customersData = results.response === 0 ? [] : results.response;
-        this.customers = this.customersData;
-        this.startLoading = false;
+      .then((results) => {
+        if (
+          results.response &&
+          typeof results.response !== 'string' &&
+          typeof results.response !== 'number'
+        ) {
+          this.customersData = results.response;
+          this.customers = this.customersData;
+        }
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private deleteCustomer(body: { sno: number | string }) {
+    this.startLoading = true;
+    this.customerService
+      .deleteCustomer(body)
+      .then((result) => {
+        if (
+          result.response &&
+          typeof result.response === 'number' &&
+          result.response.toString().toLocaleLowerCase() ===
+            body.sno.toString().toLocaleLowerCase()
+        ) {
+          let msg = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate('customer.removedCustomerSuccessfully')
+          );
+          msg.then((res) => {
+            this.requestCustomerNames();
+          });
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -189,24 +235,57 @@ export class CustomersListComponent implements OnInit {
   private buildHeadersForm() {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate('customersTable', {}, this.scope)
-      .subscribe((headers: string[]) => {
-        if (headers && headers.length > 0) {
-          headers.forEach((element) => {
-            let header = this.fb.group({
-              label: this.fb.control(element, []),
-              sortAsc: this.fb.control('', []),
-            });
-            this.headers.push(header);
-          });
-        }
+    TableUtilities.createHeaders(
+      this.tr,
+      `customersTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      this.customers = this.customersData.filter((elem: Customer) => {
+        return (
+          elem.Cust_Name.toLocaleLowerCase().includes(
+            searchText.toLocaleLowerCase()
+          ) ||
+          elem.Email.toLocaleLowerCase().includes(
+            searchText.toLocaleLowerCase()
+          ) ||
+          elem.Phone.toLocaleLowerCase().includes(
+            searchText.toLocaleLowerCase()
+          )
+        );
       });
+    } else {
+      this.customers = this.customersData;
+    }
+  }
+  private openAttachCustomerToInvoiceDialog(customerId: number) {
+    let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
+      width: '600px',
+      data: {
+        invid: null,
+        customerId: customerId,
+        userProfile: this.userProfile,
+      },
+    });
+    dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
+      this.requestCustomerNames();
+      dialogRef.close();
+    });
   }
   ngOnInit(): void {
-    this.buildHeadersForm();
     this.parseUserProfile();
+    this.buildHeadersForm();
     this.requestCustomerNames();
     this.activatedRoute.params.subscribe((params) => {
       if (params['addCustomer']) {
@@ -229,8 +308,16 @@ export class CustomersListComponent implements OnInit {
       width: '800px',
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
+    dialogRef.componentInstance.attachInvoice
+      .asObservable()
+      .subscribe((customerId) => {
+        dialogRef.close();
+        this.openAttachCustomerToInvoiceDialog(customerId);
+        this.requestCustomerNames();
+      });
+    dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestCustomerNames();
     });
   }
   openCustomerEditDialog(customer: Customer) {
@@ -239,8 +326,16 @@ export class CustomersListComponent implements OnInit {
       data: customer,
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
+    dialogRef.componentInstance.attachInvoice
+      .asObservable()
+      .subscribe((customerId) => {
+        dialogRef.close();
+        this.openAttachCustomerToInvoiceDialog(customerId);
+        this.requestCustomerNames();
+      });
+    dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestCustomerNames();
     });
   }
   openRemoveDialog(id: number, removeClient: RemoveItemDialogComponent) {
@@ -248,32 +343,16 @@ export class CustomersListComponent implements OnInit {
     removeClient.message = 'Are you sure you want to delete this customer?';
     removeClient.openDialog();
     removeClient.remove.asObservable().subscribe((event) => {
-      this.customers.splice(id, 1);
-      this.successMessageBox.title = 'Customer deleted successfully';
-      this.successMessageBox.openDialog();
+      // this.customers.splice(id, 1);
+      // this.successMessageBox.title = 'Customer deleted successfully';
+      // this.successMessageBox.openDialog();
+      this.deleteCustomer({ sno: id });
     });
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      this.customers = this.customersData.filter((elem: Customer) => {
-        return (
-          elem.Cust_Name.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          ) ||
-          elem.Email.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          ) ||
-          elem.Phone.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          )
-        );
-      });
-      paginator.firstPage();
-    } else {
-      this.customers = this.customersData;
-    }
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headersFormGroup.get(`tableSearch`) as FormControl;
   }
 }

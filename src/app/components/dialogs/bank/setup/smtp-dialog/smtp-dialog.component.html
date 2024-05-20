@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -20,11 +23,11 @@
           type="email"
           [placeholder]="t('fromAddress')"
           class="input input-sm input-bordered font-inter"
-          formControlName="fromAddress"
-          #fromAddressInput
-          (change)="setControlValue(fromAddress, fromAddressInput.value)"
+          [formControl]="from_address"
         />
-        <span *ngIf="fromAddress && fromAddress.invalid && fromAddress.touched">
+        <span
+          *ngIf="from_address && from_address.invalid && from_address.touched"
+        >
           <p
             *transloco="let t; read: 'setup.smtp.form.errors'"
             class="text-xs text-red-600"
@@ -42,11 +45,12 @@
           type="text"
           [placeholder]="t('address')"
           class="input input-sm input-bordered"
-          formControlName="address"
+          [formControl]="smtp_address"
           #addressInput
-          (change)="setControlValue(address, addressInput.value)"
         />
-        <span *ngIf="address && address.invalid && address.touched">
+        <span
+          *ngIf="smtp_address && smtp_address.invalid && smtp_address.touched"
+        >
           <p
             *transloco="let t; read: 'setup.smtp.form.errors'"
             class="text-xs text-red-600"
@@ -64,11 +68,10 @@
           type="text"
           [placeholder]="t('portNumber')"
           class="input input-sm input-bordered"
-          formControlName="portNumber"
+          [formControl]="smtp_port"
           #portNumberInput
-          (change)="setControlValue(portNumber, portNumberInput.value)"
         />
-        <span *ngIf="portNumber && portNumber.invalid && portNumber.touched">
+        <span *ngIf="smtp_port && smtp_port.invalid && smtp_port.touched">
           <p
             *transloco="let t; read: 'setup.smtp.form.errors'"
             class="text-xs text-red-600"
@@ -86,11 +89,10 @@
           type="text"
           [placeholder]="t('username')"
           class="input input-sm input-bordered"
-          formControlName="username"
+          [formControl]="smtp_uname"
           #usernameInput
-          (change)="setControlValue(username, usernameInput.value)"
         />
-        <span *ngIf="username && username.invalid && username.touched">
+        <span *ngIf="smtp_uname && smtp_uname.invalid && smtp_uname.touched">
           <p
             *transloco="let t; read: 'setup.smtp.form.errors'"
             class="text-xs text-red-600"
@@ -101,18 +103,18 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("password") }}<span class="text-red-600">*</span>
+          {{ t("password")
+          }}<span *ngIf="!data.smtp" class="text-red-600">*</span>
         </p>
         <input
           *transloco="let t; read: 'setup.smtp.form.placeholders'"
           type="password"
           [placeholder]="t('password')"
           class="input input-sm input-bordered font-inter"
-          formControlName="password"
+          [formControl]="smtp_pwd"
           #passwordInput
-          (change)="setControlValue(password, passwordInput.value)"
         />
-        <span *ngIf="password && password.invalid && password.touched">
+        <span *ngIf="smtp_pwd && smtp_pwd.invalid && smtp_pwd.touched">
           <p
             *transloco="let t; read: 'setup.smtp.form.errors'"
             class="text-xs text-red-600"
@@ -136,9 +138,9 @@
               </span>
               <input
                 type="radio"
-                formControlName="sslMode"
+                [formControl]="gender"
                 class="radio radio-xs"
-                [value]="true"
+                [value]="'True'"
                 checked
               />
             </label>
@@ -152,15 +154,15 @@
                 {{ t("disabled") }}
               </span>
               <input
-                formControlName="sslMode"
+                [formControl]="gender"
                 type="radio"
-                [value]="false"
+                [value]="'False'"
                 class="radio radio-xs"
               />
             </label>
           </div>
         </div>
-        <span *ngIf="sslMode && sslMode.invalid && sslMode.touched">
+        <span *ngIf="gender && gender.invalid && gender.touched">
           <p
             *transloco="let t; read: 'setup.smtp.form.errors'"
             class="text-xs text-red-600"

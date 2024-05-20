@@ -13,7 +13,8 @@
     "columns": "Columns",
     "warning": "Warning",
     "any": "Any",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "close": "Close"
   },
   "actions": {
     "submit": "Submit",
@@ -30,12 +31,16 @@
     "noDataFound": "No data found",
     "validDate": "Please select a valid date",
     "contactSupport": "An unexpected error occurred, please try again or contact support.",
-    "timeoutError": "Request timed out. Please verify your connection or try again."
+    "timeoutError": "Request timed out. Please verify your connection or try again.",
+    "invalidForm": "Invalid form"
+  },
+  "dialogs": {
+    "sureSaveChanges": "Are you sure you want to save changes?"
   },
   "bankHeaders": [
     {
-      "name": "Company",
-      "dropdowns": ["Summary", "Inbox Approval"]
+      "name": "Vendor",
+      "dropdowns": ["Summary", "Approvals"]
     },
     {
       "name": "Setup",
@@ -81,7 +86,7 @@
     },
     {
       "name": "Invoices",
-      "dropdowns": ["Amendments", "Cancelled", "Generated"]
+      "dropdowns": ["Created", "Generated"]
     },
     {
       "name": "Reports",
@@ -91,15 +96,69 @@
         "Invoice Details",
         "Payment Details",
         "Amendments Details",
+        "Cancelled invoice(s)",
         "Vendor Report"
       ]
     }
   ],
+  "bankRoutes": {
+    "home": "Home",
+    "profile": "Profile",
+    "company": {
+      "summary": "Vendors list",
+      "inbox": "Vendor approvals"
+    },
+    "setup": {
+      "country": "Country",
+      "region": "Region(s)",
+      "district": "District(s)",
+      "ward": "Ward(s)",
+      "currencies": "Currencies",
+      "designation": "Designation(s)",
+      "branch": "Branch",
+      "question": "Question(s)",
+      "smtp": "SMTP",
+      "email": "Email",
+      "bankUser": "Bank user(s)",
+      "language": "Language(s)",
+      "suspense": "Suspense account",
+      "deposit": "Deposit account"
+    },
+    "reports": {
+      "overview": "Report(s)",
+      "invoice": "Invoice(s)",
+      "userLog": "User Logs",
+      "vendor": "Vendor(s)",
+      "audit": "Audit",
+      "details": "Detail(s)",
+      "payments": "Payment(s)",
+      "amendment": "Amendment(s)",
+      "transaction": "Transaction(s)"
+    }
+  },
+  "vendorRoutes": {
+    "home": "Home",
+    "profile": "Profile",
+    "customer": "Customer(s)",
+    "detail": "Detail(s)",
+    "users": "User(s)",
+    "amendment": "Amendment(s)",
+    "cancelled": "Cancelled",
+    "invoice": "Invoice(s)",
+    "created": "Created Invoice(s)",
+    "overview": "Overview",
+    "transactionsReport": "Transactions Report",
+    "invoiceReport": "Invoice Report",
+    "paymentReport": "Payment Report",
+    "amendmentReport": "Amendment Report",
+    "customerReport": "Customer Report"
+  },
   "roles": {
     "role": "Role",
     "bank": "Bank",
     "vendor": "Vendor",
-    "logout": "Logout"
+    "logout": "Logout",
+    "profile": "Profile"
   },
   "tableData": {
     "itemsPerPage": "Showing",

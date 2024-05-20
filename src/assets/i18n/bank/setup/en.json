@@ -19,11 +19,16 @@
         "modifiedSuccessfully": "Country modified successfully!"
       }
     },
-    "countriesTable": ["Sno", "Country"]
+    "countriesTable": ["Country"]
   },
   "regionDialog": {
     "region": "Region",
     "addRegion": "Add region",
+    "removeRegion": "Remove region",
+    "sureRemoveRegion": "Are you sure you want to remove this region?",
+    "removeRegionSuccessfully": "Removed region successfully!",
+    "addedRegionSuccessfully": "Added region successfully!",
+    "modifiedReginSuccessfully": "Modified region successfully!",
     "form": {
       "placeholders": {
         "name": "Enter region",
@@ -41,11 +46,16 @@
         "missingStatus": "Please select a status"
       }
     },
-    "regionsTable": ["Sno", "Country", "Region", "Status"]
+    "regionsTable": ["Country", "Region", "Status"]
   },
   "districtDialog": {
     "addDistrict": "Add District",
     "district": "District",
+    "removeDistrict": "Remove District",
+    "sureRemoveDistrict": "Are you sure you want to remove this district",
+    "deletedDistrictSuccessfully": "District successfully deleted.",
+    "addedDistrictSuccessfully": "Added district successfully!",
+    "modifiedDistrictSuccessfully": "Modified district successfully!",
     "form": {
       "placeholders": {
         "name": "Enter district",
@@ -63,11 +73,17 @@
         "missingStatus": "Please select a status"
       }
     },
-    "districtsTable": ["Sno", "Region", "District", "Status"]
+    "districtsTable": ["Region", "District", "Status"]
   },
   "wardDialog": {
     "addWard": "Add Ward",
     "ward": "Ward",
+    "removeWard": "Remove ward",
+    "sureRemoveWard": "Are you sure you want to remove ward",
+    "deletedWardSuccessfully": "Deleted ward successfully!",
+    "addedWardSuccessfully": "Added ward successfully!",
+    "modifiedWardSuccessfully": "Modified ward successfully!",
+    "failedToAddWard": "Failed to add ward.",
     "form": {
       "placeholders": {
         "name": "Enter ward",
@@ -85,13 +101,18 @@
         "missingStatus": "Please select a status"
       }
     },
-    "wardsTable": ["Sno", "District", "Ward", "Status"]
+    "wardsTable": ["District", "Ward", "Status"]
   },
   "currency": {
     "addCurrency": "Add Currency",
     "currency": "Currency",
     "currencyName": "Name",
     "code": "Code",
+    "removeCurrency": "Remove currency",
+    "sureRemoveCurrency": "Are you sure you want to remove this currency?",
+    "currencyRemovedSuccessfully": "Currency removed successfully!",
+    "createdCurrencySuccessfully": "Added currency successfully!",
+    "modifiedCurrencySuccessfully": "Currency modified successfully!",
     "form": {
       "placeholders": {
         "code": "Enter currency code",
@@ -104,10 +125,12 @@
       "dialog": {
         "invalidForm": "Invalid form",
         "missingCode": "Please provide a currency code",
-        "missingName": "Please provide the currency name"
+        "missingName": "Please provide the currency name",
+        "failedToAddCurrency": "Failed to add currency.",
+        "failedToModifyCurrency": "Failed to modify currency."
       }
     },
-    "currenciesTable": ["Sno", "Code", "Name"]
+    "currenciesTable": ["Code", "Name"]
   },
   "designation": {
     "addDesignation": "Add Designation",
@@ -162,11 +185,12 @@
         "removedSuccessfully": "Branch deleted successfully!"
       }
     },
-    "branchesTable": ["Sno", "Branch", "Location", "Status"]
+    "branchesTable": ["Branch", "Location", "Status"]
   },
   "questionName": {
     "addQuestionName": "Add question",
     "questionName": "Question name",
+    "addedQuestionSuccessfully": "Added question successfully!",
     "form": {
       "placeholders": {
         "questionName": "Enter question name"
@@ -178,14 +202,24 @@
       "dialog": {
         "invalidForm": "Invalid form",
         "missingQuestionName": "Please provide a question name",
-        "missingStatus": "Please select a status"
+        "missingStatus": "Please select a status",
+        "removeQuestion": "Remove Question",
+        "sureRemoveQuestion": "Are you sure you want to remove this question?",
+        "failedToAddQuestion": "Failed to add question."
       }
     },
-    "questionNamesTable": ["Sno", "Question name", "Status"]
+    "questionNamesTable": ["Question name", "Status"]
   },
   "smtp": {
     "addSmtp": "Add Smtp",
     "smtp": "Simple Mail Transfer Protocol",
+    "removeSmtp": "Remove SMTP",
+    "sureRemoveSmtp": "Are you sure you want to remove this smtp?",
+    "addedSmtp": "Successfully added new smtp",
+    "modifiedSmtp": "Successfully modified smtp",
+    "deletedSmtp": "Successfully removed smtp",
+    "failedToRemoveSmtp": "Failed to remove smtp",
+    "failedToAddSmtp": "Failed to add smtp.",
     "form": {
       "fromAddress": "From Address",
       "address": "Address",
@@ -221,17 +255,24 @@
       }
     },
     "smtpTable": [
-      "Sno",
       "From Address",
-      "SSL Enable",
+      "DATE CREATED",
       "Address",
       "Port number",
-      "Username"
+      "Username",
+      "SSL Enable"
     ]
   },
   "emailText": {
     "addEmailText": "Add email text",
     "emailText": "Email Text",
+    "removeEmailText": "Remove email",
+    "sureRemoveEmailText": "Are you sure you want to remove this email?",
+    "deletedEmailText": "Deleted email text successfully!",
+    "failedToAddEmailText": "Failed to add email text",
+    "addedEmailText": "Added email successfully!",
+    "modifiedEmailText": "Modofied email successfully!",
+    "failedEmailText": "Failed to add email",
     "form": {
       "flowId": "Flow Id",
       "subjectEnglish": "Subject English",
@@ -262,8 +303,7 @@
       }
     },
     "emailTextsTable": [
-      "Sno",
-      "Flow Id",
+      "Created",
       "Subject English",
       "Subject Swahili",
       "Email text",
@@ -274,6 +314,10 @@
     "userDetails": "User details",
     "addBankUser": "Add User",
     "bankUser": "Bank user",
+    "addedBankUserSuccessfully": "Added user successfully!",
+    "modifiedBankUserSuccessfully": "Modified user successfully!",
+    "failedToAddUser": "Failed to add user",
+    "failedToModifyUser": "Failed to modify user",
     "form": {
       "employeeId": "Employee Id",
       "firstName": "First name",
@@ -360,6 +404,9 @@
   "depositAccount": {
     "addDepositAccount": "Add",
     "depositAccount": "Deposit Account",
+    "addedDepositSuccessfully": "Added deposit account successfully!",
+    "modifiedDepositSuccessfully": "Modified deposit account successfully!",
+    "failedToUpdateDeposit": "Failed to update deposit account.",
     "form": {
       "vendor": "Vendor",
       "account": "Account",
@@ -378,9 +425,11 @@
         "invalidForm": "Invalid form",
         "vendor": "You must specify a vendor",
         "account": "You must specify an account",
-        "reason": "Please provide a reason"
+        "reason": "Please provide a reason",
+        "removeAccount": "Remove account",
+        "sureRemoveAccount": "Are you sure you want to remove this account?"
       }
     },
-    "depositAccountTable": ["Sno", "Vendor", "Account", "Reason"]
+    "depositAccountTable": ["Vendor", "Account", "Reason"]
   }
 }

@@ -1,3 +1,31 @@
+<dialog #tempDialog id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Sorry!🥲</h3>
+    <p class="py-4 text-sm">Not Yet Implemented</p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="tempDialog.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="tempDialog.close()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
 <div class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" class="dropdown">
@@ -161,9 +189,9 @@
   </div>
   <div class="navbar-end">
     <div class="flex flex-row items-center">
-      <div>
+      <!-- <div>
         <app-language-selector></app-language-selector>
-      </div>
+      </div> -->
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="avatar placeholder">
@@ -175,16 +203,26 @@
           </div>
         </div>
         <ul
-          *transloco="let t; read: 'roles'"
           tabindex="0"
           class="menu flex flex-col space-y-1 menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
         >
           <li>
-            <a class="flex flex-row items-center">
+            <!-- <a
+              [routerLink]="'/vendor/profile/' + userProfile.Usno"
+              class="flex flex-row items-center"
+            >
               <span class="material-symbols-outlined"> account_circle </span>
-              <p>
-                {{ t("role") }}:
-                <span>{{ t("vendor") }}</span>
+              <p *transloco="let t; read: 'vendorRoutes'">
+                <span>{{ t("profile") }}</span>
+              </p>
+            </a> -->
+            <a
+              (click)="tempDialog.showModal()"
+              class="flex flex-row items-center"
+            >
+              <span class="material-symbols-outlined"> account_circle </span>
+              <p *transloco="let t; read: 'vendorRoutes'">
+                <span>{{ t("profile") }}</span>
               </p>
             </a>
           </li>
@@ -194,7 +232,7 @@
               class="flex flex-row items-center text-red-600"
             >
               <span class="material-symbols-outlined"> logout </span>
-              <p>{{ t("logout") }}</p>
+              <p *transloco="let t; read: 'roles'">{{ t("logout") }}</p>
             </a>
           </li>
         </ul>

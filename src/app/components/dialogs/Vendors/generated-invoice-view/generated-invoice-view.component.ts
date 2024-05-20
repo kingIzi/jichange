@@ -34,6 +34,7 @@ import { DisplayMessageBoxComponent } from '../../display-message-box/display-me
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-generated-invoice-view',
@@ -46,7 +47,7 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
     ReactiveFormsModule,
     CancelledDialogComponent,
     DisplayMessageBoxComponent,
-    LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -63,10 +64,9 @@ export class GeneratedInvoiceViewComponent implements OnInit {
   public invoices: GeneratedInvoice[] = [];
   public generatedInvoice!: GeneratedInvoice;
   public viewReady = new EventEmitter<HTMLFormElement>();
-  //@ViewChild('invoiceView') invoiceView!: ElementRef;
+  public closeView = new EventEmitter<void>();
   @ViewChild('invoiceView', { static: true })
   invoiceView!: ElementRef<HTMLFormElement>;
-  //@ViewChild('cancelledCanvas') cancelledCanvas!: ElementRef;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
@@ -75,7 +75,6 @@ export class GeneratedInvoiceViewComponent implements OnInit {
     private dialogRef: MatDialogRef<GeneratedInvoiceViewComponent>,
     private invoiceService: InvoiceService,
     private cdr: ChangeDetectorRef,
-    private fileHandler: FileHandlerService,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       Inv_Mas_Sno: string;
@@ -108,6 +107,8 @@ export class GeneratedInvoiceViewComponent implements OnInit {
       remark: this.fb.control('', []),
       bankName: this.fb.control('', []),
       accountNo: this.fb.control(''),
+      customerIdType: this.fb.control('', []),
+      customerNo: this.fb.control('', []),
     });
   }
   private appendItems() {
@@ -125,12 +126,18 @@ export class GeneratedInvoiceViewComponent implements OnInit {
     this.invoiceNo.setValue(this.generatedInvoice.Invoice_No);
     this.controlNo.setValue(this.generatedInvoice.Customer_ID_No);
     this.dateIssued.setValue(
-      AppUtilities.dateToFormat(
-        new Date(this.generatedInvoice.Invoice_Date),
-        'dd/MM/yyyy'
-      )
+      this.generatedInvoice.Invoice_Date
+        ? AppUtilities.dateToFormat(
+            new Date(this.generatedInvoice.Invoice_Date),
+            'yyyy-MM-dd'
+          )
+        : ''
     );
-    this.paymentType.setValue('MasterCard');
+    this.paymentType.setValue(
+      this.generatedInvoice.Payment_Type
+        ? this.generatedInvoice.Payment_Type.trim()
+        : ''
+    );
     (this.issuedTo.get('fullName') as FormControl).setValue(
       this.generatedInvoice.Chus_Name
     );
@@ -139,12 +146,42 @@ export class GeneratedInvoiceViewComponent implements OnInit {
     );
     this.discount.setValue('0%');
     this.remark.setValue(this.generatedInvoice.Remarks);
+    this.customerIdType.setValue(
+      this.generatedInvoice.Customer_ID_Type
+        ? this.generatedInvoice.Customer_ID_Type
+        : ''
+    );
+    this.customerNo.setValue(
+      this.generatedInvoice.Customer_ID_Type &&
+        this.generatedInvoice.Customer_ID_No
+        ? this.generatedInvoice.Customer_ID_No
+        : ''
+    );
+    //customerId: this.fb.control('',[]),
+    //customerNo: this.fb.control('',[])
     this.appendItems();
+  }
+  private failedToRetrieveInvoice() {
+    let dialog = AppUtilities.openDisplayMessageBox(
+      this.displayMessageBox,
+      this.tr.translate(`defaults.warning`),
+      this.tr.translate(`generated.failedToRetrieveInvoice`)
+    );
+    dialog.addEventListener('close', () => {
+      this.dialogRef.close();
+    });
+  }
+  private noItemsFoundForInvoice() {
+    AppUtilities.openDisplayMessageBox(
+      this.displayMessageBox,
+      this.tr.translate(`defaults.warning`),
+      this.tr.translate(`generated.noItemsFound`)
+    );
   }
   private async prepareInvoiceView() {
     this.startLoading = true;
     let invoiceDetailsObservable = from(
-      this.invoiceService.invoiceDetailsById({
+      this.invoiceService.getGeneratedInvoicebyId({
         compid: this.data.userProfile.InstID,
         invid: Number(this.data.Inv_Mas_Sno),
       })
@@ -165,23 +202,34 @@ export class GeneratedInvoiceViewComponent implements OnInit {
         })
       )
     )
-      .then((results: Array<any>) => {
-        let [invoiceDetails, invoiceItem] = results;
-        this.generatedInvoice =
-          invoiceDetails.response === 0 ? {} : invoiceDetails.response;
-        this.invoices = invoiceItem.response === 0 ? [] : invoiceItem.response;
-        this.modifyFormGroup();
+      .then((results) => {
+        let [invoiceDetail, invoiceItems] = results;
+        if (
+          typeof invoiceDetail.response === 'string' ||
+          typeof invoiceDetail.response === 'number'
+        ) {
+          this.failedToRetrieveInvoice();
+        } else if (
+          typeof invoiceItems.response === 'string' ||
+          typeof invoiceItems.response === 'number'
+        ) {
+          this.noItemsFoundForInvoice();
+        } else {
+          this.generatedInvoice = invoiceDetail.response;
+          this.invoices = invoiceItems.response;
+          this.modifyFormGroup();
+          this.viewReady.emit(this.invoiceView.nativeElement);
+        }
         this.startLoading = false;
-        this.viewReady.emit(this.invoiceView.nativeElement);
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -238,5 +286,11 @@ export class GeneratedInvoiceViewComponent implements OnInit {
   }
   get accountNo() {
     return this.formGroup.get('accountNo') as FormControl;
+  }
+  get customerIdType() {
+    return this.formGroup.get('customerIdType') as FormControl;
+  }
+  get customerNo() {
+    return this.formGroup.get(`customerNo`) as FormControl;
   }
 }

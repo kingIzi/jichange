@@ -75,13 +75,11 @@
       "addedInvoiceSuccessfully": "Added invoice successfully!"
     }
   },
-  "invoiceDetailsTable": [
-    "Sno",
+  "cancelledInvoiceTable": [
     "Invoice No",
-    "Invoice Date",
     "Customer name",
-    "Total amount",
-    "Remarks"
+    "Amount",
+    "Date Created"
   ],
   "amendments": {
     "amendments": "Amendments"
@@ -95,7 +93,8 @@
       "endDate": "End date",
       "invoiceNo": "Invoice number",
       "placeholders": {
-        "all": "all"
+        "all": "All",
+        "any": "Any"
       },
       "errors": {
         "company": "Please select a company",
@@ -121,5 +120,39 @@
       "With VAT",
       "Without VAT"
     ]
+  },
+  "createdInvoice": {
+    "createdInvoice": "Created Invoice(s)",
+    "createdInvoiceTable": [
+      "Customer name",
+      "Invoice No",
+      "Invoice Date",
+      "Payment type",
+      "Total Amount",
+      "Approval Status",
+      "Approve",
+      "Cancel Invoice"
+    ],
+    "failedToDownloadInvoice": "Failed to download invoice.",
+    "sureCancelInvoice": "Are you sure you want to cancel invoice {}",
+    "sureApproveInvoice": "Are you sure you want to approve invoice {}?",
+    "cancelInvoice": {
+      "label": "Cancel Invoice",
+      "cautionMessage": "Once cancelled, changes can not be undone. Please proceed with caution.",
+      "cancelledSuccessfully": "Cancelled invoice successfully!",
+      "form": {
+        "reason": "Reason",
+        "placeholders": {
+          "reason": "Enter reason"
+        },
+        "errors": {
+          "reason": "Please fill"
+        },
+        "dialog": {
+          "reason": "Please provide a reason for the invoice being cancelled.",
+          "failedToCancelInvoice": "Failed to cancel invoice."
+        }
+      }
+    }
   }
 }

@@ -1,3 +1,5 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
 <div class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50">
@@ -118,7 +120,7 @@
   <div class="navbar-end">
     <div class="flex flex-row items-center space-x-4">
       <!-- <app-chat-agent></app-chat-agent> -->
-      <button
+      <!-- <button
         (click)="openProfileDialog()"
         class="btn btn-ghost btn-circle avatar"
       >
@@ -127,7 +129,48 @@
             <span class="text-xs">UI</span>
           </div>
         </div>
-      </button>
+      </button> -->
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="avatar placeholder">
+            <div
+              class="bg-neutral text-neutral-content rounded-full w-8 md:w-10"
+            >
+              <!-- <span class="text-xs">UI</span> -->
+              <span class="material-symbols-outlined"> person </span>
+            </div>
+          </div>
+        </div>
+        <ul
+          *transloco="let t; read: 'roles'"
+          tabindex="0"
+          class="menu flex flex-col space-y-1 menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+        >
+          <li>
+            <a
+              #profileAhref
+              [routerLink]="'/main/profile/' + userProfile.Usno.toString()"
+              [routerLinkActive]="'bg-lightPurple text-darkPurple'"
+              (click)="routerClicked(profileAhref)"
+              class="flex flex-row items-center"
+            >
+              <span class="material-symbols-outlined"> account_circle </span>
+              <p>
+                {{ t("profile") }}
+              </p>
+            </a>
+          </li>
+          <li>
+            <button
+              (click)="logout()"
+              class="flex flex-row items-center text-red-600"
+            >
+              <span class="material-symbols-outlined"> logout </span>
+              <p>{{ t("logout") }}</p>
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
   <div *ngIf="routeLoading" class="absolute bottom-0 left-0 w-full right-0">

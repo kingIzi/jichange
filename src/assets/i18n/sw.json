@@ -12,7 +12,8 @@
     "columns": "Safuwima",
     "warning": "Onyo",
     "any": "Yoyote",
-    "confirm": "Thibitisha"
+    "confirm": "Thibitisha",
+    "close": "Funga"
   },
   "actions": {
     "submit": "Wasilisha",
@@ -29,13 +30,70 @@
     "noDataFound": "Hakuna taarifa iliyopatikana",
     "validDate": "Tafadhali chagua tarehe halali",
     "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano.",
-    "timeoutError": "Ombi limepitwa na wakati. Tafadhali thibitisha muunganisho wako au jaribu tena."
+    "timeoutError": "Ombi limepitwa na wakati. Tafadhali thibitisha muunganisho wako au jaribu tena.",
+    "invalidForm": "Fomu batili"
+  },
+  "dialogs": {
+    "sureSaveChanges": "Je, una uhakika unataka kuokoa mabadiliko?"
+  },
+  "bankRoutes": {
+    "home": "Nyumbani",
+    "profile": "Umbo",
+    "company": {
+      "summary": "Orodha ya Wauuzaji",
+      "inbox": "Idhini za Muuzaji"
+    },
+    "setup": {
+      "country": "Nchi",
+      "region": "Mkoa(s)",
+      "district": "Wilaya(s)",
+      "ward": "Kata(s)",
+      "currencies": "Sarafu",
+      "designation": "Uteuzi wa Kazi(s)",
+      "branch": "Tawi",
+      "question": "Swali(s)",
+      "smtp": "SMTP",
+      "email": "Barua pepe",
+      "bankUser": "Mtumiaji wa Benki(s)",
+      "language": "Lugha(s)",
+      "suspense": "Akaunti ya Kusubiri",
+      "deposit": "Akaunti ya Amana"
+    },
+    "reports": {
+      "overview": "Ripoti(s)",
+      "invoice": "Muswada(s)",
+      "userLog": "Majedwali ya Watumiaji",
+      "vendor": "Muuzaji(s)",
+      "audit": "Uchunguzi",
+      "details": "Maelezo(s)",
+      "payments": "Malipo(s)",
+      "amendment": "Mabadiliko(s)",
+      "transaction": "Miamala(s)"
+    }
+  },
+  "vendorRoutes": {
+    "home": "Nyumbani",
+    "profile": "Umbo",
+    "customer": "Wateja",
+    "detail": "Maelezo",
+    "users": "Watumiaji",
+    "amendment": "Marekebisho",
+    "cancelled": "Imekatishwa",
+    "invoice": "Ankara",
+    "created": "Ankara zilizoundwa",
+    "overview": "Maelezo",
+    "transactionsReport": "Ripoti ya Miamala",
+    "invoiceReport": "Ripoti ya ankara",
+    "paymentReport": "Ripoti ya Malipo",
+    "amendmentReport": "Ripoti ya Marekebisho",
+    "customerReport": "Ripoti ya Wateja"
   },
   "roles": {
     "role": "Jukumu",
     "bank": "Benki",
     "vendor": "Muuzaji",
-    "logout": "Ondoka"
+    "logout": "Ondoka",
+    "profile": "Umbo"
   },
   "vendorHeaders": [
     {
@@ -48,7 +106,7 @@
     },
     {
       "name": "Makadirio",
-      "dropdowns": ["Mageuzi", "Kufutwa", "Yameundwa"]
+      "dropdowns": ["Aliumba", "Yameundwa"]
     },
     {
       "name": "Ripoti",
@@ -58,14 +116,15 @@
         "Maelezo ya Makadirio",
         "Maelezo ya Malipo",
         "Maelezo ya Mageuzi",
+        "Ankara iliyokatishwa",
         "Ripoti ya Mtoa Huduma"
       ]
     }
   ],
   "bankHeaders": [
     {
-      "name": "Kampuni",
-      "dropdowns": ["Muhtasari", "Idhini ya Kikasha"]
+      "name": "Muuzaji",
+      "dropdowns": ["Muhtasari", "Idhini"]
     },
     {
       "name": "Usanidi",

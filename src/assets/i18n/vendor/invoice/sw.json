@@ -63,7 +63,9 @@
       "maximumItemDetails": "Idadi kubwa ya bidhaa {} imefikiwa.",
       "status": "Unapaswa kutoa hali.",
       "total": "Lazima angalau uongeze kipengee kimoja ili kuongeza ankara.",
-      "invoiceRemark": "Lazima ubainishe alama ya ankara."
+      "invoiceRemark": "Lazima ubainishe alama ya ankara.",
+      "invoiceExists": "Imeshindwa kuongeza ankara kwa sababu tayari ipo.",
+      "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!"
     }
   },
   "invoiceDetailsTable": [
@@ -86,7 +88,8 @@
       "endDate": "Tarehe ya Mwisho",
       "invoiceNo": "Nambari ya ankara",
       "placeholders": {
-        "all": "yote"
+        "all": "yote",
+        "any": "Yoyote"
       },
       "errors": {
         "company": "Tafadhali chagua kampuni",
@@ -104,13 +107,45 @@
         }
       }
     },
-    "invoiceDetailsTable": [
+    "cancelledInvoiceTable": [
       "Nambari ya Bili",
-      "Tarehe",
-      "Mteja",
-      "Jumla",
-      "Kwa VAT",
-      "Bila VAT"
+      "Jina la Mteja",
+      "Kiasi",
+      "Tarehe Iliyoundwa"
     ]
+  },
+  "createdInvoice": {
+    "createdInvoice": "Ankara zilizoundwa",
+    "createdInvoiceTable": [
+      "Jina la Mteja",
+      "Nambari ya Bili",
+      "Tarehe ya Bili",
+      "Aina ya Malipo",
+      "Jumla",
+      "Hali ya idhini",
+      "idhinisha",
+      "Katisha Ankara"
+    ],
+    "failedToDownloadInvoice": "Imeshindwa kupakua ankara.",
+    "sureCancelInvoice": "Una uhakika unataka kughairi ankara {}",
+    "sureApproveInvoice": "Je, una uhakika unataka kuidhinisha ankara {}?",
+    "cancelInvoice": {
+      "label": "Ghairi Ankara",
+      "cautionMessage": "Marakani ikighairiwa, mabadiliko hayawezi kurejeshwa. Tafadhali endelea kwa tahadhari.",
+      "cancelledSuccessfully": "Ankara iliyokatishwa kwa mafanikio!",
+      "form": {
+        "reason": "Sababu",
+        "placeholders": {
+          "reason": "Ingiza sababu"
+        },
+        "errors": {
+          "reason": "Tafadhali jaza"
+        },
+        "dialog": {
+          "reason": "Ni lazima utoe sababu ya kughairi",
+          "failedToCancelInvoice": "Imeshindwa kughairi ankara."
+        }
+      }
+    }
   }
 }

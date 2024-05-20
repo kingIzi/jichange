@@ -40,6 +40,7 @@ import { TimeoutError, timer } from 'rxjs';
 import { UserRoles } from 'src/app/core/enums/bank/user-roles';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { LoginService } from 'src/app/core/services/login.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-sign-in',
@@ -57,6 +58,7 @@ import { LoginService } from 'src/app/core/services/login.service';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -69,9 +71,8 @@ export class SignInComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   constructor(
     private dialog: MatDialog,
-    private requestService: RequestClientService,
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private loginService: LoginService
@@ -86,14 +87,14 @@ export class SignInComponent implements OnInit {
     if (this.userName.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidFormError`),
-        this.translocoService.translate(`${errorsPath}.missingUsername`)
+        this.tr.translate(`${errorsPath}.invalidFormError`),
+        this.tr.translate(`${errorsPath}.missingUsername`)
       );
     } else if (this.password.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidFormError`),
-        this.translocoService.translate(`${errorsPath}.missingPassword`)
+        this.tr.translate(`${errorsPath}.invalidFormError`),
+        this.tr.translate(`${errorsPath}.missingPassword`)
       );
     }
   }
@@ -117,10 +118,8 @@ export class SignInComponent implements OnInit {
   private loginFailedMessageDialog() {
     AppUtilities.openDisplayMessageBox(
       this.displayMessageBox,
-      this.translocoService.translate(
-        `auth.loginForm.errors.dialogs.loginFailed`
-      ),
-      this.translocoService.translate(
+      this.tr.translate(`auth.loginForm.errors.dialogs.loginFailed`),
+      this.tr.translate(
         `auth.loginForm.errors.dialogs.usernamePasswordIncorrect`
       )
     );
@@ -133,17 +132,17 @@ export class SignInComponent implements OnInit {
       .then((results: any) => {
         if (!results.response.Usno) {
           this.loginFailedMessageDialog();
-          return;
+        } else {
+          this.switchUserLogin(results.response);
         }
         this.startLoading = false;
         this.cdr.detectChanges();
-        this.switchUserLogin(results.response);
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
-          this.translocoService
+          this.tr
         );
         this.startLoading = false;
         this.cdr.detectChanges();

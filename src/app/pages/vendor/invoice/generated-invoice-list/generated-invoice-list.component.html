@@ -1,6 +1,9 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-8 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -8,13 +11,13 @@
       {{ t("generatedInvoice") }}
     </h2>
     <div class="flex flex-row items-center space-x-2">
-      <a
+      <!-- <a
         (click)="openGeneratedInvoiceChart()"
         class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
       >
         <span class="material-symbols-outlined text-warning"> bar_chart </span>
-      </a>
-      <a
+      </a> -->
+      <!-- <a
         (click)="openInvoiceDetailsDialog()"
         class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
       >
@@ -27,7 +30,7 @@
         >
           {{ t("addInvoice") }}
         </p>
-      </a>
+      </a> -->
     </div>
   </div>
   <div
@@ -75,8 +78,7 @@
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
             [placeholder]="t('search')"
-            #searchInput
-            (keyup)="searchTable(searchInput.value, paginator)"
+            [formControl]="tableSearch"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -115,7 +117,11 @@
                       <p>
                         {{ header?.get("label")?.value }}
                       </p>
-                      <button (click)="sortColumnClicked(ind)">
+                      <button
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
+                      >
                         <span
                           class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
                         >
@@ -151,12 +157,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.CUSTOMER_NAME)
+                      .at(InvoiceListTable.CUSTOMER_NAME)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.CUSTOMER_NAME)
+                      .at(InvoiceListTable.CUSTOMER_NAME)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -168,12 +174,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.INVOICE_NUMBER)
+                      .at(InvoiceListTable.INVOICE_NUMBER)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.INVOICE_NUMBER)
+                      .at(InvoiceListTable.INVOICE_NUMBER)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -185,12 +191,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.INVOICE_DATE)
+                      .at(InvoiceListTable.INVOICE_DATE)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.INVOICE_DATE)
+                      .at(InvoiceListTable.INVOICE_DATE)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -198,20 +204,20 @@
                   class="text-sm font-inter whitespace-nowrap px-6 py-4"
                 >
                   {{
-                    convertDotNetJSONDate(
-                      generatedInvoice.Invoice_Date.toString()
-                    )
+                    PerformanceUtils.convertDateStringToDate(
+                      generatedInvoice.Invoice_Date
+                    ).toLocaleDateString()
                   }}
                 </td>
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.PAYMENT_TYPE)
+                      .at(InvoiceListTable.PAYMENT_TYPE)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.PAYMENT_TYPE)
+                      .at(InvoiceListTable.PAYMENT_TYPE)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -233,12 +239,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.TOTAL_AMOUNT)
+                      .at(InvoiceListTable.TOTAL_AMOUNT)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.TOTAL_AMOUNT)
+                      .at(InvoiceListTable.TOTAL_AMOUNT)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -246,7 +252,9 @@
                   class="text-sm font-inter whitespace-nowrap px-6 py-4 text-right"
                 >
                   {{
-                    moneyFormat(generatedInvoice.Total.toString()) +
+                    PerformanceUtils.moneyFormat(
+                      generatedInvoice.Total.toString()
+                    ) +
                       " " +
                       generatedInvoice.Currency_Code
                   }}
@@ -254,17 +262,17 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.DELIVERY_STATUS)
+                      .at(InvoiceListTable.DELIVERY_STATUS)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.DELIVERY_STATUS)
+                      .at(InvoiceListTable.DELIVERY_STATUS)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
                   "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-right"
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
                 >
                   {{
                     generatedInvoice.delivery_status
@@ -284,19 +292,9 @@
                         visibility
                       </span>
                     </button>
-                    <button (click)="openInvoiceDetailsView(generatedInvoice)">
-                      <span class="material-symbols-outlined text-info">
-                        edit
-                      </span>
-                    </button>
                     <button (click)="downloadInvoice(generatedInvoice)">
                       <span class="material-symbols-outlined text-linkBlue">
                         download
-                      </span>
-                    </button>
-                    <button (click)="cancelInvoice(i, cancelGeneratedInvoice)">
-                      <span class="material-symbols-outlined text-danger-600">
-                        close
                       </span>
                     </button>
                   </div>
@@ -304,14 +302,23 @@
               </tr>
             </tbody>
           </table>
-          <div *transloco="let t; read: 'errors'">
-            <p
-              *ngIf="generatedInvoices.length <= 0"
-              class="text-center text-sm tracking-wide pt-3 pb-1"
-            >
-              {{ t("noDataFound") }}
-            </p>
-          </div>
+          <ng-container *ngIf="!tableLoading">
+            <div *transloco="let t; read: 'errors'">
+              <p
+                *ngIf="generatedInvoices.length <= 0"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="tableLoading">
+            <div class="w-full grid place-items-center mt-6">
+              <span
+                class="loading loading-spinner loading-sm bg-darkPurple"
+              ></span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

@@ -23,6 +23,17 @@ const routes: Routes = [
               ).then((c) => c.DashboardComponent),
           },
           {
+            path: 'profile/:id',
+            data: {
+              breadcrumb: { alias: 'profile', skip: false },
+              animationState: 'profile',
+            },
+            loadComponent: () =>
+              import('../../../pages/vendor/profile/profile.component').then(
+                (p) => p.ProfileComponent
+              ),
+          },
+          {
             path: 'customers',
             data: { breadcrumb: { skip: true } },
             children: [
@@ -34,7 +45,7 @@ const routes: Routes = [
                   ).then((c) => c.CustomersListComponent),
                 data: {
                   breadcrumb: { alias: 'customers', skip: false },
-                  animationState: 'isLeft',
+                  animationState: 'isLeft-1',
                 },
               },
               {
@@ -45,7 +56,7 @@ const routes: Routes = [
                   ).then((c) => c.CustomerViewComponent),
                 data: {
                   breadcrumb: { alias: 'view-customer', skip: false },
-                  animationState: 'isRight',
+                  animationState: 'isRight-1',
                 },
               },
             ],
@@ -72,25 +83,14 @@ const routes: Routes = [
             data: { breadcrumb: { skip: true } },
             children: [
               {
-                path: 'amendments',
+                path: 'list',
                 loadComponent: () =>
                   import(
-                    '../../../pages/vendor/invoice/admendments/admendments.component'
-                  ).then((c) => c.AdmendmentsComponent),
+                    '../../../pages/vendor/invoice/created-invoice-list/created-invoice-list.component'
+                  ).then((l) => l.CreatedInvoiceListComponent),
                 data: {
-                  breadcrumb: { alias: 'invoice-amendments', skip: false },
+                  breadcrumb: { alias: 'invoice-created', skip: false },
                   animationState: 'invoice-module-1',
-                },
-              },
-              {
-                path: 'cancelled',
-                loadComponent: () =>
-                  import(
-                    '../../../pages/vendor/invoice/invoice-cancelled/invoice-cancelled.component'
-                  ).then((c) => c.InvoiceCancelledComponent),
-                data: {
-                  breadcrumb: { alias: 'invoice-cancelled', skip: false },
-                  animationState: 'invoice-module-2',
                 },
               },
               {
@@ -101,7 +101,7 @@ const routes: Routes = [
                   ).then((c) => c.GeneratedInvoiceListComponent),
                 data: {
                   breadcrumb: { alias: 'invoice-generated', skip: false },
-                  animationState: 'invoice-module-3',
+                  animationState: 'invoice-module-2',
                 },
               },
             ],
@@ -141,7 +141,7 @@ const routes: Routes = [
                       ).then((c) => c.ListComponent),
                     data: {
                       breadcrumb: { alias: 'transactions', skip: false },
-                      animationState: 'isLeft',
+                      animationState: 'isLeft-2',
                     },
                   },
                   {
@@ -152,7 +152,7 @@ const routes: Routes = [
                       ).then((c) => c.DetailsComponent),
                     data: {
                       breadcrumb: { alias: 'transactions-id', skip: false },
-                      animationState: 'isRight',
+                      animationState: 'isRight-2',
                     },
                   },
                 ],
@@ -191,10 +191,21 @@ const routes: Routes = [
                   ).then((a) => a.AmendmentsComponent),
               },
               {
+                path: 'cancelled',
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/reports/invoice-cancelled/invoice-cancelled.component'
+                  ).then((c) => c.InvoiceCancelledComponent),
+                data: {
+                  breadcrumb: { alias: 'invoice-cancelled', skip: false },
+                  animationState: 'reports-module-6',
+                },
+              },
+              {
                 path: 'customer',
                 data: {
                   breadcrumb: { alias: 'customer', skip: false },
-                  animationState: 'reports-module-6',
+                  animationState: 'reports-module-7',
                 },
                 loadComponent: () =>
                   import(

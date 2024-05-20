@@ -39,7 +39,7 @@
         "emailId": "You must enter email address",
         "userPosition": "You must enter user position",
         "fullName": "You must enter a Full name",
-        "noRoleActFound": "No Role acts found in your institution.",
+        "noRoleActFound": "No Roles found for this institution.",
         "FailedToAddCompany": "Failed to add company because {}"
       }
     }

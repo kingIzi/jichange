@@ -1,0 +1,12 @@
+export enum CompanySummaryTable {
+  NAME,
+  ADDRESS,
+  EMAIL,
+  TIN_NUMBER,
+  MOBILE_NUMBER,
+  STATUS,
+  DIRECTOR_NAME,
+  POST_BOX,
+  TELEPHONE_NUMBER,
+  DATE_POSTED,
+}

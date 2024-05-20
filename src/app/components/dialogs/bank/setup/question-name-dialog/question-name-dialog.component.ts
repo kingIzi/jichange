@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,9 +22,15 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BranchDialogComponent } from '../branch-dialog/branch-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { QuestionName } from 'src/app/core/models/bank/setup/question-name';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { QuestionNameService } from 'src/app/core/services/bank/setup/question-name/question-name.service';
+import { AddQuestionName } from 'src/app/core/models/bank/forms/setup/question-name/add-question-name';
+import { TimeoutError } from 'rxjs';
 
 @Component({
   selector: 'app-question-name-dialog',
@@ -29,7 +43,9 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -38,19 +54,106 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   ],
 })
 export class QuestionNameDialogComponent implements OnInit {
+  public startLoading: boolean = false;
+  private userProfile!: LoginResponse;
   public questionNameForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public added = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   constructor(
+    private questionNameService: QuestionNameService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
-    private translocoService: TranslocoService
+    private tr: TranslocoService,
+    private cdr: ChangeDetectorRef,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      questionName: QuestionName;
+    }
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private formErrors(errorsPath: string = 'setup.questionName.form.dialog') {
+    if (this.q_name.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingQuestionName`)
+      );
+    }
+    if (this.q_qstatus.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingStatus`)
+      );
+    }
+  }
+  private createForm() {
+    this.questionNameForm = this.fb.group({
+      q_name: this.fb.control('', [Validators.required]),
+      q_qstatus: this.fb.control('', [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+    });
+  }
+  private createEditForm(questionName: QuestionName) {
+    this.questionNameForm = this.fb.group({
+      q_name: this.fb.control(questionName.Q_Name, [Validators.required]),
+      q_qstatus: this.fb.control(questionName.Q_Status, [Validators.required]),
+      sno: this.fb.control(questionName.SNO, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+    });
+  }
+  private requestPostQuestioName(form: AddQuestionName) {
+    this.startLoading = true;
+    this.questionNameService
+      .addQuestionName(form)
+      .then((result) => {
+        this.startLoading = false;
+        if (typeof result.response === 'number' && result.response > 0) {
+          let dialog = AppUtilities.openSuccessMessageBox(
+            this.successMessageBox,
+            this.tr.translate(`setup.questionName.addedQuestionSuccessfully`)
+          );
+          dialog.addEventListener('close', () => {
+            this.added.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(
+              `setup.questionName.form.dialog.failedToAddQuestion`
+            )
+          );
+        }
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
-    this.createForm();
+    this.parseUserProfile();
+    if (this.data.questionName) {
+      this.createEditForm(this.data.questionName);
+    } else {
+      this.createForm();
+    }
   }
   setControlValue(control: FormControl, value: string) {
     control.setValue(value.trim());
@@ -60,37 +163,15 @@ export class QuestionNameDialogComponent implements OnInit {
   }
   submitQuestionNameForm() {
     if (this.questionNameForm.valid) {
-      this.isLoading.emit(this.questionNameForm.value);
+      this.requestPostQuestioName(this.questionNameForm.value);
     }
     this.questionNameForm.markAllAsTouched();
     this.formErrors();
   }
-  private formErrors(errorsPath: string = 'setup.questionName.form.dialog') {
-    if (this.questionName.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingQuestionName`)
-      );
-    }
-    if (this.status.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingStatus`)
-      );
-    }
+  get q_name() {
+    return this.questionNameForm.get('q_name') as FormControl;
   }
-  private createForm() {
-    this.questionNameForm = this.fb.group({
-      questionName: this.fb.control('', [Validators.required]),
-      status: this.fb.control(false, [Validators.required]),
-    });
-  }
-  get questionName() {
-    return this.questionNameForm.get('questionName') as FormControl;
-  }
-  get status() {
-    return this.questionNameForm.get('status') as FormControl;
+  get q_qstatus() {
+    return this.questionNameForm.get('q_qstatus') as FormControl;
   }
 }

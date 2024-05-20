@@ -1,8 +1,8 @@
 {
   "summary": {
-    "name": "Muhtasari",
+    "name": "Wachuuzi",
     "actions": {
-      "addCompany": "Ongeza Kampuni",
+      "addCompany": "Ongeza muuzaji",
       "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
       "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!",
       "approvedCompanySuccessfully": "Kampuni imefanikiwa kwa mafanikio!"
@@ -21,7 +21,8 @@
     ],
     "companyForm": {
       "company": "Kampuni",
-      "customer": "Mteja",
+      "addVendor": "Ongeza muuzaji",
+      "customer": "Jina la Vendor",
       "mobileNo": "Nambari ya Simu",
       "branch": "Tawi",
       "makerChecker": "Muumba/Chunguzi",
@@ -38,6 +39,10 @@
       "telephoneNo": "Nambari ya Simu",
       "bankDetails": "Maelezo ya Benki",
       "accountNo": "Nambari ya Akaunti",
+      "accountType": "Aina ya akaunti",
+      "accountName": "Jina la akaunti",
+      "suspenseAccount": "Akaunti ya Suspense",
+      "vendorAccount": "Akaunti ya Vendor",
       "areYouSureYouWantToApproveCompany": "Una uhakika unataka kampuni hii iidhinishwe?",
       "placeholders": {
         "customer": "Ingiza jina la kampuni",
@@ -90,18 +95,36 @@
         "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu.",
         "noWardForDistrict": "Hakuna kata zilizogunduliwa katika wilaya hii.",
         "failedToAddCompany": "Imeshindwa kuongeza kampuni, tafadhali jaribu tena au msaada wa mawasiliano.",
-        "failedToApproveCompany": "Imeshindwa kuikubali kampuni."
+        "failedToApproveCompany": "Imeshindwa kuikubali kampuni.",
+        "emailAddressExists": "Anwani ya Barua Pepe tayari ipo.",
+        "mobileNumberAlreadyExists": "Namba ya Simu tayari ipo."
       }
     }
   },
   "inboxApproval": {
     "name": "Idhini ya Kikasha",
-    "inboxApprovalTable": [
-      "Jina",
-      "Anwani",
-      "Barua pepe",
-      "Nambari ya Simu",
-      "Hali"
-    ]
+    "companyApproval": "Idhini ya Kampuni",
+    "approvedSuccessfully": "Kampuni imeidhinishwa kwa mafanikio!",
+    "form": {
+      "pleaseSelect": "Tafadhali chagua",
+      "suspense": "Akaunti ya Kutungwa",
+      "deposit": "Akaunti ya Amana",
+      "account": "Akaunti",
+      "placeholders": {
+        "account": "Chagua akaunti"
+      },
+      "errors": {
+        "account": "Tafadhali chagua akaunti",
+        "chooseAccount": "Tafadhali chagua akaunti"
+      },
+      "dialog": {
+        "invalidForm": "Fomu isiyo halali",
+        "account": "Lazima uchague akaunti inayofanya kazi.",
+        "chooseAccount": "Lazima uchague hifadhi ya akaunti ya kuchagua kutoka.",
+        "accountNumberNotFound": "Hakuna namba ya akaunti iliyopatikana kwa kampuni.",
+        "failedToApprove": "Kushindwa kuidhinisha kampuni."
+      }
+    },
+    "inboxApprovalTable": ["Jina", "Anuani", "Barua pepe", "Simu", "Hali"]
   }
 }

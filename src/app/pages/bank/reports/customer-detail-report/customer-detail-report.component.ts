@@ -30,7 +30,7 @@ import {
   toArray,
   zip,
 } from 'rxjs';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import {
   AbstractControl,
   FormArray,
@@ -40,16 +40,17 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Company } from 'src/app/core/models/bank/company';
-import { Region } from 'src/app/core/models/bank/region';
+import { Company } from 'src/app/core/models/bank/company/company';
+import { Region } from 'src/app/core/models/bank/setup/region';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { District } from 'src/app/core/models/bank/district';
+import { District } from 'src/app/core/models/bank/setup/district';
 import { Customer } from 'src/app/core/models/bank/customer';
-import { VendorDetailsReportTable } from 'src/app/core/enums/bank/vendor-details-report-table';
+import { VendorDetailsReportTable } from 'src/app/core/enums/bank/reports/vendor-details-report-table';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -65,6 +66,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     ReactiveFormsModule,
     LoaderRainbowComponent,
     DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -83,14 +85,16 @@ export class CustomerDetailReportComponent implements OnInit {
   public districts: District[] = [];
   public customers: Customer[] = [];
   public customersData: Customer[] = [];
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public headersMap = {
-    CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
-    CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
-    EMAIL: VendorDetailsReportTable.EMAIL,
-    ADDRESS: VendorDetailsReportTable.ADDRESS,
-    DATE_POSTED: VendorDetailsReportTable.DATE_POSTED,
-  };
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public VendorDetailsReportTable: typeof VendorDetailsReportTable =
+    VendorDetailsReportTable;
+  // public headersMap = {
+  //   CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
+  //   CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
+  //   EMAIL: VendorDetailsReportTable.EMAIL,
+  //   ADDRESS: VendorDetailsReportTable.ADDRESS,
+  //   DATE_POSTED: VendorDetailsReportTable.DATE_POSTED,
+  // };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
@@ -240,31 +244,31 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
-      case this.headersMap.CUSTOMER_NAME:
+      case VendorDetailsReportTable.CUSTOMER_NAME:
         this.customers.sort((a: Customer, b: Customer) =>
           a.Cust_Name.toLocaleLowerCase() > b.Cust_Name.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.CONTACT_PERSON:
+      case VendorDetailsReportTable.CONTACT_PERSON:
         this.customers.sort((a: Customer, b: Customer) =>
           a?.ConPerson?.toLocaleLowerCase() > b?.ConPerson?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case VendorDetailsReportTable.EMAIL:
         this.customers.sort((a: Customer, b: Customer) =>
           a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.ADDRESS:
+      case VendorDetailsReportTable.ADDRESS:
         this.customers.sort((a: Customer, b: Customer) =>
           a.Address.toLocaleLowerCase() > b.Address.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.DATE_POSTED:
+      case VendorDetailsReportTable.DATE_POSTED:
         this.customers.sort((a: Customer, b: Customer) =>
           new Date(a.Posted_Date) > new Date(b.Posted_Date) ? 1 : -1
         );
@@ -275,31 +279,31 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
-      case this.headersMap.CUSTOMER_NAME:
+      case VendorDetailsReportTable.CUSTOMER_NAME:
         this.customers.sort((a: Customer, b: Customer) =>
           a.Cust_Name.toLocaleLowerCase() < b.Cust_Name.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.CONTACT_PERSON:
+      case VendorDetailsReportTable.CONTACT_PERSON:
         this.customers.sort((a: Customer, b: Customer) =>
           a?.ConPerson?.toLocaleLowerCase() < b?.ConPerson?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case VendorDetailsReportTable.EMAIL:
         this.customers.sort((a: Customer, b: Customer) =>
           a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.ADDRESS:
+      case VendorDetailsReportTable.ADDRESS:
         this.customers.sort((a: Customer, b: Customer) =>
           a.Address.toLocaleLowerCase() < b.Address.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.DATE_POSTED:
+      case VendorDetailsReportTable.DATE_POSTED:
         this.customers.sort((a: Customer, b: Customer) =>
           new Date(a.Posted_Date) < new Date(b.Posted_Date) ? 1 : -1
         );
@@ -334,16 +338,16 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   private customerKeys(indexes: number[]) {
     let keys: string[] = [];
-    if (indexes.includes(this.headersMap.CUSTOMER_NAME)) {
+    if (indexes.includes(VendorDetailsReportTable.CUSTOMER_NAME)) {
       keys.push('Cust_Name');
     }
-    if (indexes.includes(this.headersMap.ADDRESS)) {
+    if (indexes.includes(VendorDetailsReportTable.ADDRESS)) {
       keys.push('Address');
     }
-    if (indexes.includes(this.headersMap.EMAIL)) {
+    if (indexes.includes(VendorDetailsReportTable.EMAIL)) {
       keys.push('Email');
     }
-    if (indexes.includes(this.headersMap.CONTACT_PERSON)) {
+    if (indexes.includes(VendorDetailsReportTable.CONTACT_PERSON)) {
       keys.push('ConPerson');
     }
     return keys;

@@ -9,6 +9,9 @@
     "Jumla",
     "Hali ya Uwasilishaji"
   ],
+  "failedToRetrieveInvoice": "Imeshindwa kurejesha ankara iliyozalishwa.",
+  "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!",
+  "noItemsFound": "Hakuna vipengee vilivyopatikana kwa ankara {}",
   "generateInvoiceView": {
     "viewTable": ["Maelezo", "Kiasi", "Bei", "Jumla"]
   },

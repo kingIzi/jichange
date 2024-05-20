@@ -1,6 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="w-full h-full relative">
   <div class="py-10 px-10 flex flex-col divide-y">
@@ -36,22 +38,10 @@
         <h6 class="text-left text-sm">
           {{ t("mobileNo") }} <span class="text-red-600">*</span>
         </h6>
-        <span class="relative">
-          <select
-            #phonePrefix
-            class="select select-bordered select-disabled w-24 absolute"
-          >
-            <option selected class="font-inter text-xs" value="+255">
-              +255
-            </option>
-          </select>
-          <input
-            type="tel"
-            placeholder="(0)"
-            class="input input-bordered w-full pl-[6.2rem] bg-transparent text-black font-inter"
-            [formControl]="mob"
-          />
-        </span>
+        <app-phone-number-input
+          [inputSize]="''"
+          [mobileNumber]="mob"
+        ></app-phone-number-input>
         <span *ngIf="mob && mob.invalid && mob.touched">
           <p class="text-xs text-red-600">
             {{ t("errors.mobileNo") }}

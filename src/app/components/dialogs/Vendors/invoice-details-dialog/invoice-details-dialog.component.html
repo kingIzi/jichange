@@ -1,9 +1,13 @@
-<app-loader-rainbow [show]="startLoading"></app-loader-rainbow>
+<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
 <app-confirm-add-customer-dialog
   #confirmAddCustomer
 ></app-confirm-add-customer-dialog>
+<app-submit-message-box #submitMessageBox></app-submit-message-box>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -26,7 +30,6 @@
           class="input input-sm input-bordered font-inter"
           [formControl]="invno"
           #invoiceNoInput
-          (change)="setControlValue(invno, invoiceNoInput.value)"
         />
         <span *ngIf="invno && invno.invalid && invno.touched">
           <p
@@ -205,7 +208,7 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-          {{ t("invoiceRemark") }}<span class="text-red-600">*</span>
+          {{ t("invoiceRemark") }}
         </p>
         <input
           *transloco="let t; read: 'invoice.form.placeholders'"
@@ -214,7 +217,6 @@
           class="input input-sm input-bordered font-inter"
           [formControl]="Inv_remark"
           #InvRemark
-          (change)="setControlValue(invno, InvRemark.value)"
         />
         <span *ngIf="Inv_remark && Inv_remark.invalid && Inv_remark.touched">
           <p
@@ -429,10 +431,15 @@
                           add
                         </span>
                       </button>
+                      <!-- [class]="
+                          ind === details.controls.length - 1 ? 'hidden' : ''
+                        " -->
                       <button
                         (click)="removeItemDetail(ind)"
                         [class]="
-                          ind === details.controls.length - 1 ? 'hidden' : ''
+                          ind === 0 && details.controls.length === 1
+                            ? 'hidden'
+                            : ''
                         "
                       >
                         <span class="material-symbols-outlined text-danger-600">

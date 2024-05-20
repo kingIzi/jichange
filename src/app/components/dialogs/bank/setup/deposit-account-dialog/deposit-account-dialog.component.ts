@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,16 +22,21 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { RegionDialogComponent } from '../region-dialog/region-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account.service';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { TimeoutError, catchError, from, lastValueFrom, map, zip } from 'rxjs';
-import { Company } from 'src/app/core/models/bank/company';
-import { SuspenseAccount } from 'src/app/core/models/bank/suspense-account';
+import { Company } from 'src/app/core/models/bank/company/company';
+import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { DepositAccount } from 'src/app/core/models/bank/setup/deposit-account';
+import { AddDepositAccount } from 'src/app/core/models/bank/forms/setup/deposit/add-deposit-account';
+import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-account/deposit-account.service';
 
 @Component({
   selector: 'app-deposit-account-dialog',
@@ -36,8 +49,9 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
-    LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -47,9 +61,11 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 })
 export class DepositAccountDialogComponent implements OnInit {
   public startLoading: boolean = false;
+  public userProfile!: LoginResponse;
   public depositAccountForm!: FormGroup;
   public customers: Company[] = [];
   public accounts: SuspenseAccount[] = [];
+  public added = new EventEmitter<any>();
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -61,10 +77,53 @@ export class DepositAccountDialogComponent implements OnInit {
     private translocoService: TranslocoService,
     private suspenseAccountService: SuspenseAccountService,
     private companyService: CompanyService,
-    private tr: TranslocoService
+    private tr: TranslocoService,
+    private depositAccountService: DepositAccountService,
+    private cdr: ChangeDetectorRef,
+    @Inject(MAT_DIALOG_DATA) public data: { depositAccount: DepositAccount }
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private requestAddDepositAccount(body: AddDepositAccount) {
+    this.startLoading = true;
+    this.depositAccountService
+      .addDepositAccount(body)
+      .then((result) => {
+        if (typeof result.response === 'number' && result.response > 0) {
+          let dialog = AppUtilities.openSuccessMessageBox(
+            this.successMessageBox,
+            this.tr.translate(`setup.depositAccount.addedDepositSuccessfully`)
+          );
+          dialog.addEventListener('close', () => {
+            this.added.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.depositAccount.failedToUpdateDeposit`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   private formErrors(errorsPath: string = 'setup.depositAccount.form.dialog') {
-    if (this.vendor.invalid) {
+    if (this.csno.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.translocoService.translate(`${errorsPath}.invalidForm`),
@@ -88,9 +147,11 @@ export class DepositAccountDialogComponent implements OnInit {
   }
   private createForm() {
     this.depositAccountForm = this.fb.group({
-      vendor: this.fb.control('', [Validators.required]),
+      csno: this.fb.control(0, [Validators.required]),
       account: this.fb.control('', [Validators.required]),
       reason: this.fb.control('', [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
     });
   }
   private buildPage() {
@@ -118,6 +179,7 @@ export class DepositAccountDialogComponent implements OnInit {
         this.startLoading = false;
         this.customers = customers.response === 0 ? [] : customers.response;
         this.accounts = accounts.response === 0 ? [] : accounts.response;
+        this.cdr.detectChanges();
       })
       .catch((err) => {
         if (err instanceof TimeoutError) {
@@ -126,17 +188,21 @@ export class DepositAccountDialogComponent implements OnInit {
           AppUtilities.noInternetError(this.displayMessageBox, this.tr);
         }
         this.startLoading = false;
+        this.cdr.detectChanges();
         throw err;
       });
   }
   ngOnInit(): void {
-    this.createForm();
+    this.parseUserProfile();
     this.buildPage();
+    if (this.data.depositAccount) {
+    } else {
+      this.createForm();
+    }
   }
   submitDepositForm() {
     if (this.depositAccountForm.valid) {
-      //this.isLoading.emit(this.depositAccountForm.value);
-      console.log(this.depositAccountForm.value);
+      this.requestAddDepositAccount(this.depositAccountForm.value);
     }
     this.depositAccountForm.markAllAsTouched();
     this.formErrors();
@@ -147,8 +213,8 @@ export class DepositAccountDialogComponent implements OnInit {
   setControlValue(control: FormControl, value: string) {
     control.setValue(value.trim());
   }
-  get vendor() {
-    return this.depositAccountForm.get('vendor') as FormControl;
+  get csno() {
+    return this.depositAccountForm.get('csno') as FormControl;
   }
   get account() {
     return this.depositAccountForm.get('account') as FormControl;

@@ -1,6 +1,50 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
 <app-submit-message-box #submitMessagBox></app-submit-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+<dialog #addCustomerDialog id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3
+      class="font-bold text-lg"
+      *transloco="let t; read: 'customer.form.actions'"
+    >
+      {{ t("sureToAddCustomer") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'customer.form.actions'">
+      {{ t("addInvoiceAsWell") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="addCustomerDialog.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          (click)="addCustomer(true, addCustomerDialog)"
+          *transloco="let t; read: 'customer.form.actions'"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("attachInvoice") }}
+        </button>
+        <button
+          (click)="addCustomer(false, addCustomerDialog)"
+          *transloco="let t; read: 'customer.form.actions'"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("addCustomer") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -19,15 +63,12 @@
         <input
           *transloco="let t; read: 'customer.form.placeholders'"
           #controlNumber
-          formControlName="customerName"
-          (change)="setControlValue(customerName, controlNumber.value)"
+          [formControl]="CName"
           type="text"
           [placeholder]="t('customerName')"
           class="input input-bordered w-full bg-transparent text-black"
         />
-        <span
-          *ngIf="customerName && customerName.invalid && customerName.touched"
-        >
+        <span *ngIf="CName && CName.invalid && CName.touched">
           <p
             *transloco="let t; read: 'customer.form.errors'"
             class="text-xs text-red-600"
@@ -38,7 +79,7 @@
       </div>
       <div class="flex flex-col col-span-full lg:col-span-1 space-y-1 w-full">
         <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
-          {{ t("mobileNo") }} <span class="text-red-600">*</span>
+          {{ t("mobileNo") }}
         </h6>
         <span class="relative">
           <select
@@ -49,17 +90,16 @@
               +255
             </option>
           </select>
-          <input
-            *transloco="let t; read: 'customer.form.placeholders'"
-            type="tel"
-            placeholder="(0)"
-            (change)="updatePhoneNumberPrefix(phonePrefix.value, mobileNo)"
-            class="input input-bordered w-full pl-[6.2rem] bg-transparent text-black font-inter"
-            formControlName="mobileNo"
-            pattern="[0-9]{12}"
-          />
+          <app-phone-number-input
+            [mobileNumber]="Mobile_Number"
+            [inputSize]="''"
+          ></app-phone-number-input>
         </span>
-        <span *ngIf="mobileNo && mobileNo.invalid && mobileNo.touched">
+        <span
+          *ngIf="
+            Mobile_Number && Mobile_Number.invalid && Mobile_Number.touched
+          "
+        >
           <p
             *transloco="let t; read: 'customer.form.errors'"
             class="text-xs text-red-600"
@@ -70,18 +110,17 @@
       </div>
       <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
         <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
-          {{ t("emailId") }}
+          {{ t("emailId") }} <span class="text-red-600">*</span>
         </h6>
         <input
           *transloco="let t; read: 'customer.form.placeholders'"
           #emailInput
-          formControlName="emailId"
-          (change)="setControlValue(emailId, emailInput.value)"
+          [formControl]="Mail"
           type="email"
           [placeholder]="t('emailId')"
           class="input font-inter input-bordered w-full bg-transparent text-black"
         />
-        <span *ngIf="emailId && emailId.invalid && emailId.touched">
+        <span *ngIf="Mail && Mail.invalid && Mail.touched">
           <p
             *transloco="let t; read: 'customer.form.errors'"
             class="text-xs text-red-600"
@@ -102,7 +141,7 @@
       </button>
       <button
         *transloco="let t; read: 'actions'"
-        (click)="submitCountryForm()"
+        (click)="submitCustomerForm(addCustomerDialog)"
         type="submit"
         form="control-number-form"
         class="btn text-xs btn-outline font-inter btn-success w-24"

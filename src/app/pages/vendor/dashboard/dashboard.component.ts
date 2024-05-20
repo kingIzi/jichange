@@ -21,10 +21,16 @@ import { VendorDashboardOverviewCardComponent } from 'src/app/components/cards/v
 import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
 //import { Chart } from 'tw-elements';
 import Chart from 'chart.js/auto';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
+import {
+  Form,
   FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
@@ -34,6 +40,11 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TimeoutError } from 'rxjs';
+import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
+import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/generated-invoice-list-table';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-dashboard',
@@ -51,6 +62,7 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
     MatPaginatorModule,
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -68,7 +80,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   public tableHeadersFormGroup!: FormGroup;
   public generatedInvoices: GeneratedInvoice[] = [];
   public generatedInvoicesData: GeneratedInvoice[] = [];
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public GeneratedInvoiceListTable: typeof GeneratedInvoiceListTable =
+    GeneratedInvoiceListTable;
   public headersMap = {
     CUSTOMER_NAME: 0,
     INVOICE_NUMBER: 1,
@@ -77,12 +91,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     TOTAL_AMOUNT: 4,
     DELIVERY_STATUS: 5,
   };
-  public overviewCards = [
+  public overviewCards: {
+    imgUrl: string;
+    viewMoreLink: string;
+    increase: boolean;
+    statistic: number;
+    lang: string;
+    label: string;
+  }[] = [
     {
       statistic: 12,
       label: 'Paid Invoice',
       imgUrl: 'assets/img/transaction.png',
-      link: '/vendor/invoice/generated',
+      viewMoreLink: '/vendor/invoice/generated',
       increase: true,
       lang: 'paidInvoice',
     },
@@ -90,7 +111,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       statistic: 0,
       label: 'Due Invoice',
       imgUrl: 'assets/img/check-mark.png',
-      link: '/vendor/invoice/amendments',
+      viewMoreLink: '/vendor/invoice/amendments',
       increase: false,
       lang: 'dueInvoice',
     },
@@ -98,7 +119,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       statistic: 18,
       label: 'Invoice expired',
       imgUrl: 'assets/img/customer-review.png',
-      link: '/vendor/invoice/cancelled',
+      viewMoreLink: '/vendor/invoice/cancelled',
       increase: false,
       lang: 'invoiceExpire',
     },
@@ -106,7 +127,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       statistic: 23,
       label: 'Customers',
       imgUrl: 'assets/img/man.png',
-      link: '/vendor/customers',
+      viewMoreLink: '/vendor/customers',
       increase: true,
       lang: 'customers',
     },
@@ -115,6 +136,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('operationsChart') operationsChart!: ElementRef;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -202,12 +224,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.tableLoading = true;
     this.invoiceService
       .postSignedDetails({ compid: this.userProfile.InstID })
-      .then((results: any) => {
-        this.generatedInvoicesData =
-          results.response === 0 ? [] : results.response;
-        this.generatedInvoices = this.generatedInvoicesData;
+      .then((results) => {
+        if (typeof results.response === 'string') {
+        } else {
+          this.generatedInvoicesData = results.response;
+          this.generatedInvoices = this.generatedInvoicesData;
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
+        // this.generatedInvoicesData =
+        //   results.response === 0 ? [] : results.response;
+        // this.generatedInvoices = this.generatedInvoicesData;
+        // this.tableLoading = false;
+        // this.cdr.detectChanges();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
@@ -223,29 +252,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private createHeadersForm() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate(`dashboard.latestTransactionsTable`, {}, this.scope)
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            search: this.fb.control('', []),
-            sortAsc: this.fb.control('', []),
-            values: this.fb.array([], []),
-            included: this.fb.control(index < 5, []),
-          });
-          this.tableHeaderFilterValues(header, index);
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `dashboard.latestTransactionsTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   //creates a name and an active state FormControl, filtering data when the active state changes
   private tableHeaderFilterValues(header: FormGroup, index: number) {
@@ -415,10 +434,29 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow'
       : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
   }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.toLocaleLowerCase();
+      this.generatedInvoices = this.generatedInvoicesData.filter(
+        (elem: GeneratedInvoice) => {
+          return (
+            elem?.Chus_Name?.toLocaleLowerCase().includes(text) ||
+            elem.Invoice_No.toLocaleLowerCase().includes(text)
+          );
+        }
+      );
+    } else {
+      this.generatedInvoices = this.generatedInvoicesData;
+    }
+  }
   moneyFormat(value: string) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableHeadersFormGroup.get('tableSearch') as FormControl;
   }
 }

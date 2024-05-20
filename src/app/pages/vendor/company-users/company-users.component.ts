@@ -30,9 +30,12 @@ import { CompanyUsersDialogComponent } from 'src/app/components/dialogs/Vendors/
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-company-users',
@@ -45,6 +48,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     TranslocoModule,
     MatDialogModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './company-users.component.html',
   styleUrl: './company-users.component.scss',
@@ -62,6 +66,7 @@ export class CompanyUsersComponent implements OnInit {
   public companUsersData: CompanyUser[] = [];
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     USER_NAME: 0,
     USER_TYPE: 1,
@@ -71,6 +76,7 @@ export class CompanyUsersComponent implements OnInit {
   };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -86,13 +92,16 @@ export class CompanyUsersComponent implements OnInit {
     }
   }
   private requestCompanyUsers() {
-    this.startLoading = true;
+    this.tableLoading = true;
     this.companyService
       .postCompanyUsersList({ compid: this.userProfile.InstID })
-      .then((results: any) => {
-        this.startLoading = false;
-        this.companUsersData = results.response === 0 ? [] : results.response;
-        this.companUsers = this.companUsersData;
+      .then((results) => {
+        if (typeof results.response === 'string') {
+        } else {
+          this.companUsersData = results.response;
+          this.companUsers = this.companUsersData;
+        }
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -101,7 +110,7 @@ export class CompanyUsersComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -109,27 +118,19 @@ export class CompanyUsersComponent implements OnInit {
   private createHeadersFormGroup() {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate('companyTable', {}, this.scope)
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index < 5, []),
-            values: this.fb.array([], []),
-          });
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      'companyTable',
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   //returns a form control given a name
   getFormControl(control: AbstractControl, name: string) {
@@ -213,6 +214,21 @@ export class CompanyUsersComponent implements OnInit {
         break;
     }
   }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.toLocaleLowerCase();
+      this.companUsers = this.companUsersData.filter((elem: CompanyUser) => {
+        return (
+          elem?.Username.toLocaleLowerCase().includes(text) ||
+          elem?.Fullname.toLocaleLowerCase().includes(text) ||
+          elem?.Email.toLocaleLowerCase().includes(text)
+        );
+      });
+    } else {
+      this.companUsers = this.companUsersData;
+    }
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeadersFormGroup();
@@ -227,26 +243,15 @@ export class CompanyUsersComponent implements OnInit {
       width: '800px',
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
+    dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestCompanyUsers();
     });
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      let text = searchText.toLocaleLowerCase();
-      this.companUsers = this.companUsersData.filter((elem: CompanyUser) => {
-        return (
-          elem?.Username.toLocaleLowerCase().includes(text) ||
-          elem?.Fullname.toLocaleLowerCase().includes(text) ||
-          elem?.Email.toLocaleLowerCase().includes(text)
-        );
-      });
-      paginator.firstPage();
-    } else {
-      this.companUsers = this.companUsersData;
-    }
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headersFormGroup.get('tableSearch') as FormControl;
   }
 }

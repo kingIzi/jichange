@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,7 +20,10 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
+import { TimeoutError } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import { LoginService } from 'src/app/core/services/login.service';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 
@@ -23,6 +32,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgxLoadingModule,
     ReactiveFormsModule,
@@ -30,6 +40,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     CommonModule,
     RouterModule,
     DisplayMessageBoxComponent,
+    SuccessMessageBoxComponent,
   ],
   providers: [{ provide: TRANSLOCO_SCOPE, useValue: 'auth' }],
 })
@@ -38,11 +49,14 @@ export class ForgotPasswordComponent implements OnInit {
   public formGroup!: FormGroup;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('successMessageBox')
+  successMessageBox!: SuccessMessageBoxComponent;
   constructor(
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
-    private requestService: RequestClientService,
-    private router: Router
+    private tr: TranslocoService,
+    private loginService: LoginService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
   ngOnInit(): void {
     this.createForm();
@@ -50,41 +64,61 @@ export class ForgotPasswordComponent implements OnInit {
 
   private createForm() {
     this.formGroup = this.fb.group({
-      Sno: this.fb.control('', [Validators.required, Validators.email]),
+      name: this.fb.control('', [Validators.required, Validators.email]),
     });
   }
 
-  private sendPasswordReset(value: { Sno: string }) {
+  private sendPasswordReset(form: { name: string }) {
     this.startLoading = true;
-    this.requestService.performPost(`/Forgot/Getemail`, value).subscribe({
-      next: (result) => {
+    this.loginService
+      .sendResetPasswordLink(form)
+      .then((result) => {
+        if (
+          typeof result.response === 'string' &&
+          result.response.toLocaleLowerCase() === form.name.toLocaleLowerCase()
+        ) {
+          let dialog = this.sendPasswordSuccessfull();
+          dialog.addEventListener('close', () => {
+            this.router.navigate(['/auth']);
+          });
+        } else {
+          this.sendPasswordFailed();
+        }
         this.startLoading = false;
-        this.router.navigate(['/auth']);
-      },
-      error: (err) => {
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        } else {
+          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        }
         this.startLoading = false;
-        this.submitFailed();
+        this.cdr.detectChanges();
         throw err;
-      },
-    });
+      });
   }
-
-  private submitFailed() {
-    AppUtilities.openDisplayMessageBox(
-      this.displayMessageBox,
-      this.translocoService.translate(`errors.errorOccured`),
-      this.translocoService.translate(`errors.verifyConnection`)
+  private sendPasswordSuccessfull() {
+    return AppUtilities.openSuccessMessageBox(
+      this.successMessageBox,
+      this.tr.translate(`auth.forgotPassword.resetPasswordSuccessfull`)
     );
   }
-
+  private sendPasswordFailed() {
+    AppUtilities.openDisplayMessageBox(
+      this.displayMessageBox,
+      this.tr.translate(`errors.errorOccured`),
+      this.tr.translate(`auth.forgotPassword.resetPasswordFailed`)
+    );
+  }
   private formErrors(
     errorsPath: string = 'auth.forgotPassword.form.errors.dialogs'
   ) {
-    if (this.Sno.invalid) {
+    if (this.name.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidFormError`),
-        this.translocoService.translate(`${errorsPath}.missingEmail`)
+        this.tr.translate(`${errorsPath}.invalidFormError`),
+        this.tr.translate(`${errorsPath}.missingEmail`)
       );
     }
   }
@@ -92,13 +126,13 @@ export class ForgotPasswordComponent implements OnInit {
   submitForm() {
     if (this.formGroup.valid) {
       this.sendPasswordReset(this.formGroup.value);
-      return;
+    } else {
+      this.formGroup.markAllAsTouched();
+      this.formErrors();
     }
-    this.formGroup.markAllAsTouched();
-    this.formErrors();
   }
 
-  get Sno() {
-    return this.formGroup.get('Sno') as FormControl;
+  get name() {
+    return this.formGroup.get('name') as FormControl;
   }
 }

@@ -2,6 +2,8 @@
   "customer": "Customer(s)",
   "addCustomer": "Add Customer",
   "customersTable": ["Customer name", "Email Id", "Mobile No"],
+  "addedCustomerSuccessfully": "Added customer successfully!",
+  "removedCustomerSuccessfully": "Removed customer successfully!",
   "form": {
     "customerName": "Customer name",
     "mobileNo": "Mobile No",
@@ -9,9 +11,11 @@
     "addNewCustomer": "Add new customer",
     "actions": {
       "sureToAddCustomer": "Are you sure you want to add this customer?",
-      "addInvoiceAsWell": "Would you also want to attach an invoice to this customer?",
+      "addInvoiceAsWell": "Would you also like to attach an invoice to this customer?",
       "confirm": "Confirm",
-      "areYouSureYouWantToAddANewCustomer": "Are you sure you want to add a new customer?"
+      "areYouSureYouWantToAddANewCustomer": "Are you sure you want to add a new customer?",
+      "attachInvoice": "Yes, attach invoice",
+      "addCustomer": "just add Customer"
     },
     "placeholders": {
       "customerName": "Enter customer name",
@@ -27,7 +31,9 @@
       "invalidForm": "Invalid form",
       "customerName": "Please provide a customer name",
       "mobileNo": "Please provide a valid mobile number",
-      "emailId": "Please provide a valid email Id"
+      "emailId": "Please provide a valid email Id",
+      "failedToAddCustomer": "Failed to add customer.",
+      "addFailedCustomerMappedToInvoice": "You cannot modify a customer mapped to an invoice."
     }
   },
   "customerView": {

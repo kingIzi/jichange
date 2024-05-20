@@ -1,0 +1,29 @@
+<div class="relative">
+  <select
+    #phonePrefix
+    [class]="inputSize ? 'select-' + inputSize : ''"
+    class="select select-bordered select-disabled w-20 absolute"
+  >
+    <option
+      *ngFor="
+        let prefix of prefixes;
+        index as ind;
+        trackBy: PerformanceUtils.trackByIndex
+      "
+      selected
+      class="font-inter text-xs"
+      [value]="prefix"
+    >
+      +{{ prefix }}
+    </option>
+  </select>
+  <input
+    type="tel"
+    placeholder="(0) 111-000-333"
+    [formControl]="mobileNumber"
+    (change)="setControl(input.value, phonePrefix.value)"
+    #input
+    [class]="inputSize ? 'input-' + inputSize : ''"
+    class="input input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
+  />
+</div>

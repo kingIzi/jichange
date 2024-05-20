@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,9 +22,15 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BranchDialogComponent } from '../branch-dialog/branch-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { EmailText } from 'src/app/core/models/bank/setup/email-text';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { AddEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/add-email-text-form';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { EmailTextService } from 'src/app/core/services/bank/setup/email-text/email-text.service';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-email-text-dialog',
@@ -29,7 +43,9 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
+    LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -38,8 +54,18 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   ],
 })
 export class EmailTextDialogComponent implements OnInit {
+  public flows: string[] = [
+    'On Registration',
+    'User Registration',
+    'On Approve',
+    'On Return',
+    'OTP Activation',
+  ];
   public emailTextForm!: FormGroup;
-  public isLoading = new EventEmitter<any>();
+  public userProfile!: LoginResponse;
+  public startLoading: boolean = false;
+  public addedEmailText = new EventEmitter<any>();
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -47,83 +73,152 @@ export class EmailTextDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
-    private translocoService: TranslocoService
+    private tr: TranslocoService,
+    private emailTextService: EmailTextService,
+    private cdr: ChangeDetectorRef,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      emailText: EmailText;
+    }
   ) {}
-  ngOnInit(): void {
-    this.createForm();
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
   }
-  setControlValue(control: FormControl, value: string) {
-    control.setValue(value.trim());
+  private createForm() {
+    this.emailTextForm = this.fb.group({
+      flow: this.fb.control('', [Validators.required]),
+      text: this.fb.control('', [Validators.required]),
+      loctext: this.fb.control('', [Validators.required]),
+      sub: this.fb.control('', [Validators.required]),
+      subloc: this.fb.control('', [Validators.required]),
+      sno: this.fb.control(0, []),
+      userid: this.fb.control(this.userProfile.Usno, []),
+    });
+  }
+  private createEditForm(email: EmailText) {
+    this.emailTextForm = this.fb.group({
+      flow: this.fb.control(email.Flow_Id, [Validators.required]),
+      text: this.fb.control(email.Local_subject, [Validators.required]),
+      loctext: this.fb.control(email.Local_Text, [Validators.required]),
+      sub: this.fb.control(email.Subject, [Validators.required]),
+      subloc: this.fb.control(email.Local_subject, [Validators.required]),
+      sno: this.fb.control(email.SNO, []),
+      userid: this.fb.control(this.userProfile.Usno, []),
+    });
+  }
+  private formErrors(errorsPath: string = 'setup.emailText.form.dialog') {
+    if (this.flow.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.flowId`)
+      );
+    }
+    if (this.text.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.subjectEnglish`)
+      );
+    }
+    if (this.loctext.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.subjectSwahili`)
+      );
+    }
+    if (this.sub.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.emailText`)
+      );
+    }
+    if (this.subloc.invalid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.emailSwahili`)
+      );
+    }
+  }
+  private requestInsertEmailText(
+    body: AddEmailTextForm,
+    successMessage: string
+  ) {
+    this.startLoading = true;
+    this.emailTextService
+      .insertEmailText(body)
+      .then((result) => {
+        if (result.response && typeof result.response !== 'boolean') {
+          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+          sal.then((res) => {
+            this.addedEmailText.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.emailText.failedToAddEmailText`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  ngOnInit(): void {
+    this.parseUserProfile();
+    if (this.data.emailText) {
+      this.createEditForm(this.data.emailText);
+    } else {
+      this.createForm();
+    }
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitEmailTextForm() {
-    if (this.emailTextForm.valid) {
-      this.isLoading.emit(this.emailTextForm.value);
-    }
-    this.emailTextForm.markAllAsTouched();
-    this.formErrors();
-  }
-  private createForm() {
-    this.emailTextForm = this.fb.group({
-      flowId: this.fb.control('', [Validators.required]),
-      subjectEnglish: this.fb.control('', [Validators.required]),
-      subjectSwahili: this.fb.control('', [Validators.required]),
-      emailText: this.fb.control('', [Validators.required]),
-      emailSwahili: this.fb.control('', [Validators.required]),
-    });
-  }
-  private formErrors(errorsPath: string = 'setup.emailText.form.dialog') {
-    if (this.flowId.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.flowId`)
+    if (this.emailTextForm.valid && this.data.emailText) {
+      this.requestInsertEmailText(
+        this.emailTextForm.value,
+        this.tr.translate(`setup.emailText.modifiedEmailText`)
       );
-    }
-    if (this.subjectEnglish.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.subjectEnglish`)
+    } else if (this.emailTextForm.valid && !this.data.emailText) {
+      this.requestInsertEmailText(
+        this.emailTextForm.value,
+        this.tr.translate(`setup.emailText.addedEmailText`)
       );
-    }
-    if (this.subjectSwahili.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.subjectSwahili`)
-      );
-    }
-    if (this.emailText.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.emailText`)
-      );
-    }
-    if (this.emailSwahili.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.emailSwahili`)
-      );
+    } else {
+      this.emailTextForm.markAllAsTouched();
     }
   }
-  get flowId() {
-    return this.emailTextForm.get('flowId') as FormControl;
+  get flow() {
+    return this.emailTextForm.get('flow') as FormControl;
   }
-  get subjectEnglish() {
-    return this.emailTextForm.get('subjectEnglish') as FormControl;
+  get text() {
+    return this.emailTextForm.get('text') as FormControl;
   }
-  get subjectSwahili() {
-    return this.emailTextForm.get('subjectSwahili') as FormControl;
+  get loctext() {
+    return this.emailTextForm.get('loctext') as FormControl;
   }
-  get emailText() {
-    return this.emailTextForm.get('emailText') as FormControl;
+  get sub() {
+    return this.emailTextForm.get('sub') as FormControl;
   }
-  get emailSwahili() {
-    return this.emailTextForm.get('emailSwahili') as FormControl;
+  get subloc() {
+    return this.emailTextForm.get('subloc') as FormControl;
   }
 }

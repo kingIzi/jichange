@@ -31,9 +31,10 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
-import { UserLog } from 'src/app/core/models/bank/user-log';
-import { UserLogReportTable } from 'src/app/core/enums/bank/user-log-report-table';
+import { UserLog } from 'src/app/core/models/bank/reports/user-log';
+import { UserLogReportTable } from 'src/app/core/enums/bank/reports/user-log-report-table';
 import { TimeoutError } from 'rxjs';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
 @Component({
   selector: 'app-user-log-report',
@@ -49,6 +50,7 @@ import { TimeoutError } from 'rxjs';
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {

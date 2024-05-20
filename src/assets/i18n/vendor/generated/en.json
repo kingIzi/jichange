@@ -9,6 +9,9 @@
     "Total Amount",
     "Delivery Status"
   ],
+  "failedToRetrieveInvoice": "Failed to retrieve generated invoice.",
+  "addedInvoiceSuccessfully": "Added invoice successfully!",
+  "noItemsFound": "No items found for invoice {}",
   "generateInvoiceView": {
     "viewTable": ["Description", "Quantity", "Unit Price", "Subtotal"]
   },

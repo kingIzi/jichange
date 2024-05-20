@@ -22,11 +22,12 @@ import { GeneratedInvoiceDialogComponent } from 'src/app/components/dialogs/Vend
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { TransactionDetailsEditComponent } from 'src/app/components/dialogs/bank/reports/transaction-details-edit/transaction-details-edit.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
-import { TransactionDetailsTableHeadersMap } from 'src/app/core/enums/bank/transaction-details-table-headers-map';
+import { TransactionDetailsTableHeadersMap } from 'src/app/core/enums/bank/reports/transaction-details-table-headers-map';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import * as json from 'src/assets/temp/data.json';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-transaction-details',
@@ -37,7 +38,6 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     CommonModule,
     RemoveItemDialogComponent,
     TableDateFiltersComponent,
-    NgxLoadingModule,
     SuccessMessageBoxComponent,
     ReactiveFormsModule,
     TranslocoModule,
@@ -54,10 +54,12 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 })
 export class TransactionDetailsComponent implements OnInit {
   public headersFormGroup!: FormGroup;
+  public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public includedHeaders: any[] = [];
   public transactions: any[] = [];
   public transactionsData: any[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headersMap = {
     DATE: TransactionDetailsTableHeadersMap.DATE,
     INVOICE_NUMBER: TransactionDetailsTableHeadersMap.INVOICE_NUMBER,

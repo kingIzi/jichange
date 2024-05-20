@@ -75,8 +75,7 @@
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
             [placeholder]="t('search')"
-            #searchInput
-            (keyup)="searchTable(searchInput.value, paginator)"
+            [formControl]="tableSearch"
           />
           <span
             class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -88,18 +87,15 @@
     </div>
     <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-        <div class="overflow-y-auto">
+        <div class="overflow-y-auto shadow">
           <table
             #customersTable
             class="min-w-full text-left text-sm font-light"
           >
-            <thead
-              formArrayName="headers"
-              class="border-b font-medium dark:border-neutral-500"
-            >
+            <thead formArrayName="headers" class="border-b font-medium">
               <tr
                 *transloco="let t; read: 'tableData.vendor'"
-                class="bg-lightPurple"
+                class="bg-lightPurple rounded-tl-lg w-full"
               >
                 <ng-container
                   *ngFor="let header of headers.controls; index as ind"
@@ -115,7 +111,11 @@
                       <p>
                         {{ header?.get("label")?.value }}
                       </p>
-                      <button (click)="sortColumnClicked(ind)">
+                      <button
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
+                      >
                         <span
                           class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
                         >
@@ -144,18 +144,21 @@
                             paginator.pageSize * paginator.pageIndex +
                             paginator.pageSize -
                             1;
-                    index as i
+                    index as i;
+                    trackBy: PerformanceUtils.trackByIndex
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                 >
                   <td
                     *ngIf="
-                      headers.controls.at(this.headersMap.NAME)?.get('included')
-                        ?.value
+                      headers.controls
+                        .at(CompanySummaryTable.NAME)
+                        ?.get('included')?.value
                     "
                     [class]="
-                      headers.controls.at(this.headersMap.NAME)?.get('included')
-                        ?.value
+                      headers.controls
+                        .at(CompanySummaryTable.NAME)
+                        ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
@@ -166,12 +169,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.ADDRESS)
+                        .at(CompanySummaryTable.ADDRESS)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.ADDRESS)
+                        .at(CompanySummaryTable.ADDRESS)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -183,12 +186,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.EMAIL)
+                        .at(CompanySummaryTable.EMAIL)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.EMAIL)
+                        .at(CompanySummaryTable.EMAIL)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -200,12 +203,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.TIN_NUMBER)
+                        .at(CompanySummaryTable.TIN_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.TIN_NUMBER)
+                        .at(CompanySummaryTable.TIN_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -217,12 +220,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.MOBILE_NUMBER)
+                        .at(CompanySummaryTable.MOBILE_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.MOBILE_NUMBER)
+                        .at(CompanySummaryTable.MOBILE_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -234,31 +237,38 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.STATUS)
+                        .at(CompanySummaryTable.STATUS)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.STATUS)
+                        .at(CompanySummaryTable.STATUS)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    <button [class]="getActiveStatusStyles(company.Status)">
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          company.Status,
+                          'Approved'
+                        )
+                      "
+                    >
                       {{ company.Status }}
                     </button>
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.DIRECTOR_NAME)
+                        .at(CompanySummaryTable.DIRECTOR_NAME)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.DIRECTOR_NAME)
+                        .at(CompanySummaryTable.DIRECTOR_NAME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -270,12 +280,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.POST_BOX)
+                        .at(CompanySummaryTable.POST_BOX)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.POST_BOX)
+                        .at(CompanySummaryTable.POST_BOX)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -287,12 +297,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.TELEPHONE_NUMBER)
+                        .at(CompanySummaryTable.TELEPHONE_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.TELEPHONE_NUMBER)
+                        .at(CompanySummaryTable.TELEPHONE_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -304,19 +314,23 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.DATE_POSTED)
+                        .at(CompanySummaryTable.DATE_POSTED)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.DATE_POSTED)
+                        .at(CompanySummaryTable.DATE_POSTED)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ convertDateString(company.Posteddate) }}
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        company.Posteddate
+                      ).toLocaleDateString()
+                    }}
                   </td>
                   <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
                     <div

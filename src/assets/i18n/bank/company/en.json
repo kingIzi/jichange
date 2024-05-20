@@ -1,8 +1,8 @@
 {
   "summary": {
-    "name": "Summary",
+    "name": "Vendors",
     "actions": {
-      "addCompany": "Add Company",
+      "addCompany": "Add Vendor",
       "addedCompanySuccessfully": "Added Company successfully!",
       "modifiedCompanySuccessfully": "Modified company successfully!",
       "approvedCompanySuccessfully": "Company approved successfully!"
@@ -21,7 +21,8 @@
     ],
     "companyForm": {
       "company": "Company",
-      "customer": "Customer",
+      "addVendor": "Add vendor",
+      "customer": "Vendor name",
       "mobileNo": "Mobile N°",
       "branch": "Branch",
       "makerChecker": "Maker/Checker",
@@ -38,6 +39,10 @@
       "telephoneNo": "Telephone N°",
       "bankDetails": "Bank Details",
       "accountNo": "Account Number",
+      "accountType": "Account type",
+      "accountName": "Account name",
+      "suspenseAccount": "Suspense account",
+      "vendorAccount": "Vendor account",
       "areYouSureYouWantToApproveCompany": "Are you sure you want this company approved?",
       "placeholders": {
         "customer": "Enter company name",
@@ -90,12 +95,36 @@
         "noDistrictForRegion": "There are no districts found for this region.",
         "noWardForDistrict": "There are no wards found this district.",
         "failedToAddCompany": "Failed to add company, please try again or contact support.",
-        "failedToApproveCompany": "Failed to approve company."
+        "failedToApproveCompany": "Failed to approve company.",
+        "emailAddressExists": "Email Address already Exist.",
+        "mobileNumberAlreadyExists": "Mobile number already Exist."
       }
     }
   },
   "inboxApproval": {
     "name": "Inbox Approval",
+    "companyApproval": "Company Approval",
+    "approvedSuccessfully": "Company approved successfully!",
+    "form": {
+      "pleaseSelect": "Please select",
+      "suspense": "Suspense account",
+      "deposit": "Deposit account",
+      "account": "Account",
+      "placeholders": {
+        "account": "Select account"
+      },
+      "errors": {
+        "account": "Please select an account",
+        "chooseAccount": "Please choose an account"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "account": "You must select an active account.",
+        "chooseAccount": "You must select the pool of accounts to select from.",
+        "accountNumberNotFound": "No account number found for company.",
+        "failedToApprove": "Failed to approve company."
+      }
+    },
     "inboxApprovalTable": ["Name", "Address", "Email", "Mobile No", "Status"]
   }
 }

@@ -23,9 +23,11 @@ import {
 } from '@ngneat/transloco';
 import { firstValueFrom } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { Company } from 'src/app/core/models/bank/company';
+import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-amendment',
@@ -36,6 +38,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     ReactiveFormsModule,
     TranslocoModule,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './amendment.component.html',
   styleUrl: './amendment.component.scss',
@@ -57,6 +60,7 @@ export class AmendmentComponent implements OnInit {
   public statuses: string[] = ['Paid', 'Pending', 'Cancelled'];
   public paymentTypes: string[] = ['Fixed', 'Flexible'];
   public amendments: any[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(

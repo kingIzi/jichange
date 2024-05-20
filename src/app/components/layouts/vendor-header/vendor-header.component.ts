@@ -14,6 +14,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-vendor-header',
@@ -31,20 +32,25 @@ import { firstValueFrom } from 'rxjs';
 export class VendorHeaderComponent implements OnInit {
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
+  public userProfile!: LoginResponse;
   private reportsMap = {
     overview: 0,
     transactionDetails: 1,
     invoiceDetails: 2,
     paymentDetails: 3,
     amendmentDetails: 4,
-    customerDetailReport: 5,
+    cancelledDetails: 5,
+    customerDetailReport: 6,
   };
   constructor(
     private translocoService: TranslocoService,
     private fb: FormBuilder
   ) {}
-  ngOnInit(): void {
-    this.createHeaders();
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
   }
   private switchRouterLinks(ind: number) {
     switch (ind) {
@@ -114,6 +120,8 @@ export class VendorHeaderComponent implements OnInit {
         return '/vendor/reports/payments';
       case this.reportsMap.amendmentDetails:
         return '/vendor/reports/amendment';
+      case this.reportsMap.cancelledDetails:
+        return '/vendor/reports/cancelled';
       case this.reportsMap.customerDetailReport:
         return '/vendor/reports/customer';
       default:
@@ -123,14 +131,20 @@ export class VendorHeaderComponent implements OnInit {
   private switchInvoiceReportsLink(index: number) {
     switch (index) {
       case 0:
-        return '/vendor/invoice/amendments';
+        return '/vendor/invoice/list';
+      // case 1:
+      //   return '/vendor/invoice/amendments';
+      // case 2:
+      //   return '/vendor/invoice/cancelled';
       case 1:
-        return '/vendor/invoice/cancelled';
-      case 2:
         return '/vendor/invoice/generated';
       default:
         return '';
     }
+  }
+  ngOnInit(): void {
+    this.parseUserProfile();
+    this.createHeaders();
   }
   getHeaderDropdownArray(index: number) {
     return this.headers.at(index).get('dropdowns') as FormArray;

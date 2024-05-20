@@ -4,9 +4,11 @@ import { SuccessMessageBoxComponent } from '../components/dialogs/success-messag
 import { FormControl } from '@angular/forms';
 import { SubmitMessageBoxComponent } from '../components/dialogs/submit-message-box/submit-message-box.component';
 import { formatDate } from '@angular/common';
-import { TimeoutError } from 'rxjs';
+import { Observable, TimeoutError, catchError, lastValueFrom, map } from 'rxjs';
+import Swal from 'sweetalert2';
 
 export class AppUtilities {
+  static phoneNumberPrefixRegex: any = /^(?:[67]\d{8}|255\d{9})$/;
   static openDisplayMessageBox(
     dialog: DisplayMessageBoxComponent,
     title: string,
@@ -15,6 +17,16 @@ export class AppUtilities {
     dialog.title = title;
     dialog.message = message;
     return dialog.openDialog();
+  }
+
+  static sweetAlertSuccessMessage(message: string) {
+    return Swal.fire({
+      position: 'top-end',
+      icon: 'success',
+      title: message,
+      showConfirmButton: false,
+      timer: 3000,
+    });
   }
 
   static openTimeoutError(
@@ -39,7 +51,8 @@ export class AppUtilities {
   ) {
     dialog.title = title;
     dialog.message = message;
-    return dialog.openDialog();
+    dialog.openDialog();
+    return dialog;
   }
 
   static openSuccessMessageBox(
@@ -142,7 +155,9 @@ export class AppUtilities {
   }
 
   static phoneNumberPrefixes() {
-    [{ code: 'tz', regex: /^(255|\+255|0)[67]\d{8}$/ }];
+    return {
+      tz: /^[67]\d{8}$/,
+    };
   }
 
   static reformatDate(values: string[]) {

@@ -8,13 +8,14 @@ import { Component, ElementRef, Input, Output, ViewChild } from '@angular/core';
 })
 export class DisplayMessageBoxComponent {
   @Output()
-  @ViewChild('displayMessageDialog')
-  displayMessageDialog!: ElementRef;
+  @ViewChild('displayMessageDialog', { static: true })
+  displayMessageDialog!: ElementRef<HTMLDialogElement>;
   @Input() title: string = 'Message Title';
   @Input() message: string = 'Enter error message here';
 
   openDialog() {
-    let dialog = this.displayMessageDialog.nativeElement as HTMLDialogElement;
-    return dialog.showModal();
+    let dialog = this.displayMessageDialog.nativeElement;
+    dialog.showModal();
+    return dialog;
   }
 }

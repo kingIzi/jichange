@@ -1,5 +1,8 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="flex flex-col w-full h-full">
   <form
@@ -24,13 +27,12 @@
         <input
           *transloco="let t; read: 'setup.currency.form.placeholders'"
           #currencyNumber
-          formControlName="currency"
-          (change)="setCurrencyValue(currency, currencyNumber.value)"
+          [formControl]="cname"
           type="text"
           [placeholder]="t('name')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"
         />
-        <span *ngIf="currency && currency.invalid && currency.touched">
+        <span *ngIf="cname && cname.invalid && cname.touched">
           <p
             *transloco="let t; read: 'setup.currency.form.errors'"
             class="text-xs text-red-600"
@@ -49,8 +51,7 @@
         <input
           *transloco="let t; read: 'setup.currency.form.placeholders'"
           #currencyNumber
-          formControlName="code"
-          (change)="setCurrencyValue(code, currencyNumber.value)"
+          [formControl]="code"
           type="text"
           [placeholder]="t('code')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black"

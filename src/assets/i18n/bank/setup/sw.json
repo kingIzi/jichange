@@ -19,11 +19,16 @@
         "modifiedSuccessfully": "Nchi iliyobadilishwa kwa mafanikio!"
       }
     },
-    "countriesTable": ["Nambari", "Nchi"]
+    "countriesTable": ["Nchi"]
   },
   "regionDialog": {
     "addRegion": "Ongeza mkoa",
     "region": "Mkoa",
+    "removeRegion": "Ondoa eneo",
+    "sureRemoveRegion": "Una uhakika unataka kuondoa eneo hili?",
+    "removeRegionSuccessfully": "Mkoa ulioondolewa kwa mafanikio!",
+    "addedRegionSuccessfully": "Mkoa ulioongezwa kwa mafanikio!",
+    "modifiedReginSuccessfully": "Mkoa limebadilishiwa kwa mafanikio!",
     "form": {
       "placeholders": {
         "name": "Ingiza mkoa",
@@ -40,11 +45,16 @@
         "missingStatus": "Tafadhali chagua hali"
       }
     },
-    "regionsTable": ["Sno", "Nchi", "Mkoa", "Hali"]
+    "regionsTable": ["Nchi", "Mkoa", "Hali"]
   },
   "districtDialog": {
     "addDistrict": "Ongeza Wilaya",
     "district": "Wilaya",
+    "removeDistrict": "Ondoa Wilaya",
+    "sureRemoveDistrict": "Je, una uhakika unataka kuondoa wilaya hii",
+    "deletedDistrictSuccessfully": "Wilaya ilifanikiwa kufutwa.",
+    "addedDistrictSuccessfully": "Wilaya imeongezwa kwa mafanikio!",
+    "modifiedDistrictSuccessfully": "Wilaya imebadilishwa kwa mafanikio!",
     "form": {
       "placeholders": {
         "name": "Wilaya ya Ingiza",
@@ -62,11 +72,17 @@
         "missingStatus": "Tafadhali chagua hali"
       }
     },
-    "districtsTable": ["Sno", "Mkoa", "Wilaya", "Hali"]
+    "districtsTable": ["Mkoa", "Wilaya", "Hali"]
   },
   "wardDialog": {
     "addWard": "Ongeza Kata",
     "ward": "Kata",
+    "removeWard": "Ondoa kata",
+    "sureRemoveWard": "Je, una uhakika unataka kuondoa kata",
+    "deletedWardSuccessfully": "Kata imeondolewa kwa mafanikio!",
+    "addedWardSuccessfully": "Kata imeongezwa kwa mafanikio!",
+    "modifiedWardSuccessfully": "Kata imebadilishwa kwa mafanikio!",
+    "failedToAddWard": "Imeshindwa kuongeza kata.",
     "form": {
       "placeholders": {
         "name": "Ingiza kata",
@@ -84,13 +100,18 @@
         "missingStatus": "Tafadhali chagua hali"
       }
     },
-    "wardsTable": ["Sno", "Wilaya", "Kata", "Hali"]
+    "wardsTable": ["Wilaya", "Kata", "Hali"]
   },
   "currency": {
     "addCurrency": "Ongeza Fedha",
     "currency": "Fedha",
     "currencyName": "Fedha",
     "code": "Msimbo",
+    "removeCurrency": "Ondoa sarafu",
+    "sureRemoveCurrency": "Una uhakika unataka kuondoa sarafu hii?",
+    "currencyRemovedSuccessfully": "Sarafu imeondolewa kwa mafanikio!",
+    "createdCurrencySuccessfully": "Added currency successfully!",
+    "modifiedCurrencySuccessfully": "Sarafu imebadilishwa kwa mafanikio!",
     "form": {
       "placeholders": {
         "code": "Ingiza msimbo wa sarafu",
@@ -103,10 +124,12 @@
       "dialog": {
         "invalidForm": "Fomu batili",
         "missingCode": "Tafadhali toa msimbo wa sarafu",
-        "missingName": "Tafadhali toa jina la fedha"
+        "missingName": "Tafadhali toa jina la fedha",
+        "failedToAddCurrency": "Imeshindwa kuongeza sarafu.",
+        "failedToModifyCurrency": "Imeshindwa kubadilisha sarafu."
       }
     },
-    "currenciesTable": ["Sno", "Msimbo", "Jina"]
+    "currenciesTable": ["Msimbo", "Jina"]
   },
   "designation": {
     "addDesignation": "Ongeza Uteuzi",
@@ -120,6 +143,7 @@
       },
       "dialog": {
         "invalidForm": "Fomu batili",
+        "failed": "Imeshindwa",
         "missingDesignation": "Tafadhali toa jina la jina",
         "removeDesignation": "Ondoa cheo",
         "sureDelete": "Una uhakika unataka kufuta hii?",
@@ -158,11 +182,12 @@
         "removedSuccessfully": "Tawi lilifutwa kwa mafanikio!"
       }
     },
-    "branchesTable": ["Sno", "Tawi", "Mahali", "Hali"]
+    "branchesTable": ["Tawi", "Mahali", "Hali"]
   },
   "questionName": {
     "addQuestionName": "Ongeza swali",
     "questionName": "Swali",
+    "addedQuestionSuccessfully": "Swali limeongezwa kwa mafanikio!",
     "form": {
       "placeholders": {
         "questionName": "Ingiza jina la swali"
@@ -174,14 +199,24 @@
       "dialog": {
         "invalidForm": "Fomu batili",
         "missingQuestionName": "Tafadhali toa jina la swali",
-        "missingStatus": "Tafadhali chagua hali"
+        "missingStatus": "Tafadhali chagua hali",
+        "removeQuestion": "Ondoa Swali",
+        "sureRemoveQuestion": "Je, una uhakika unataka kufuta hii?",
+        "failedToAddQuestion": "Swali imeshindwa ku ongezewa."
       }
     },
-    "questionNamesTable": ["Sno", "Jina la swali", "Hali"]
+    "questionNamesTable": ["Jina la swali", "Hali"]
   },
   "smtp": {
     "addSmtp": "Ongeza Smtp",
     "smtp": "Itifaki ya Uhamisho wa Barua Rahisi",
+    "removeSmtp": "Ondoa SMTP",
+    "sureRemoveSmtp": "Je, una uhakika unataka kuondoa SMTP hii?",
+    "addedSmtp": "SMTP mpya imeongezwa kwa mafanikio",
+    "modifiedSmtp": "SMTP imebadilishwa kwa mafanikio",
+    "deletedSmtp": "SMTP imeondolewa kwa mafanikio",
+    "failedToRemoveSmtp": "Imeshindikana kuondoa SMTP",
+    "failedToAddSmtp": "Imeshindwa kuongeza smtp.",
     "form": {
       "fromAddress": "Kutoka kwa Anwani",
       "address": "Anwani",
@@ -217,17 +252,24 @@
       }
     },
     "smtpTable": [
-      "Sno",
       "Kutoka kwa Anwani",
-      "Wezesha SSL",
+      "TAREHE YA KUUNDWA",
       "Anwani",
       "Namba ya bandari",
-      "Jina la mtumiaji"
+      "Jina la mtumiaji",
+      "Wezesha SSL"
     ]
   },
   "emailText": {
     "addEmailText": "Ongeza maandishi ya barua pepe",
     "emailText": "Matini ya Barua pepe",
+    "removeEmailText": "Ondoa barua pepe",
+    "sureRemoveEmailText": "Una uhakika unataka kuondoa barua pepe hii?",
+    "deletedEmailText": "Nakala ya barua pepe iliyofutwa kwa mafanikio!",
+    "failedToAddEmailText": "Imeshindwa kuongeza maandishi ya barua pepe",
+    "addedEmailText": "Barua pepe iliyoongezwa kwa mafanikio!",
+    "modifiedEmailText": "Barua pepe limebadilishiwa kwa mafanikio!",
+    "failedEmailText": "Imeshindwa kuongeza barua pepe.",
     "form": {
       "flowId": "Id ya Mtiririko",
       "subjectEnglish": "Kiingereza cha somo",
@@ -258,8 +300,7 @@
       }
     },
     "emailTextsTable": [
-      "Sno",
-      "Id ya Mtiririko",
+      "Ilifanyika",
       "Kiingereza cha somo",
       "Mada ya Kiswahili",
       "Matini ya barua pepe",
@@ -270,6 +311,10 @@
     "userDetails": "Maelezo ya mtumiaji",
     "addBankUser": "Ongeza Mtumiaji",
     "bankUser": "Mtumiaji wa benki",
+    "addedBankUserSuccessfully": "Mteja ameongezwa kwa mafanikio!",
+    "modifiedBankUserSuccessfully": "Mteja amebadilishwa kwa mafanikio!",
+    "failedToAddUser": "Kushindwa kuongeza mteja",
+    "failedToModifyUser": "Kushindwa kubadilisha mteja",
     "form": {
       "employeeId": "Id ya Mfanyakazi",
       "firstName": "Jina la kwanza",
@@ -355,6 +400,9 @@
   "depositAccount": {
     "addDepositAccount": "Ongeza",
     "depositAccount": "Akaunti ya amana",
+    "addedDepositSuccessfully": "Akaunti ya amana limeongezwa kwa mafanikio!",
+    "modifiedDepositSuccessfully": "Akaunti ya amana limebadilishwa kwa mafanikio!",
+    "failedToUpdateDeposit": "Imeshindwa ku ongezwa Akaunti ya amana.",
     "form": {
       "vendor": "Muuzaji",
       "account": "Akaunti",
@@ -373,9 +421,11 @@
         "invalidForm": "Fomu batili",
         "vendor": "Lazima ubainishe muuzaji",
         "account": "Lazima ubainishe akaunti",
-        "reason": "Tafadhali toa sababu"
+        "reason": "Tafadhali toa sababu",
+        "removeAccount": "Ondoa Akaunti",
+        "sureRemoveAccount": "Je, una uhakika unataka kufuta akaunti hii?"
       }
     },
-    "depositAccountTable": ["Sno", "Muuzaji", "Akaunti", "Sababu"]
+    "depositAccountTable": ["Muuzaji", "Akaunti", "Sababu"]
   }
 }

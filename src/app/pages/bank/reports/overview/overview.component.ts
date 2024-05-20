@@ -11,8 +11,8 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import Chart from 'chart.js/auto';
-import { BranchService } from 'src/app/core/services/bank/setup/branch.service';
-import { Branch } from 'src/app/core/models/bank/branch';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
 
 @Component({
   selector: 'app-overview',

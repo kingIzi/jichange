@@ -38,6 +38,8 @@ import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { Currency } from 'src/app/core/models/vendors/currency';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { SubmitMessageBoxComponent } from '../../submit-message-box/submit-message-box.component';
 
 @Component({
   selector: 'app-invoice-details-dialog',
@@ -53,6 +55,8 @@ import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-fo
     TranslocoModule,
     ConfirmAddCustomerDialogComponent,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
+    SubmitMessageBoxComponent,
   ],
   providers: [
     {
@@ -78,6 +82,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('confirmAddCustomer')
   confirmAddCustomer!: ConfirmAddCustomerDialogComponent;
+  @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -86,7 +91,11 @@ export class InvoiceDetailsDialogComponent implements OnInit {
     private invoiceService: InvoiceService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
-    public data: { userProfile: LoginResponse; invid: number } //@Inject(MAT_DIALOG_DATA) public data: any
+    public data: {
+      userProfile: LoginResponse;
+      invid: number;
+      customerId: number;
+    } //@Inject(MAT_DIALOG_DATA) public data: any
   ) {}
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
@@ -97,16 +106,49 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   private modifyInvoiceDetailsForm() {
     this.invno.setValue(this.generatedInvoice.Invoice_No);
     this.date.setValue(
-      AppUtilities.dateToFormat(
-        new Date(this.generatedInvoice.Invoice_Date),
-        'yyyy-MM-dd'
-      )
+      this.generatedInvoice.Invoice_Date
+        ? AppUtilities.dateToFormat(
+            new Date(this.generatedInvoice.Invoice_Date),
+            'yyyy-MM-dd'
+          )
+        : ''
     );
-    this.edate.setValue('');
-    this.iedate.setValue('');
-    this.ptype.setValue('MasterCard');
-    this.chus.setValue(this.generatedInvoice.Chus_Mas_No);
+    this.edate.setValue(
+      this.generatedInvoice.Due_Date
+        ? AppUtilities.dateToFormat(
+            new Date(this.generatedInvoice.Due_Date),
+            'yyyy-MM-dd'
+          )
+        : ''
+    );
+    this.iedate.setValue(
+      this.generatedInvoice.Invoice_Expired_Date
+        ? AppUtilities.dateToFormat(
+            new Date(this.generatedInvoice.Invoice_Expired_Date),
+            'yyyy-MM-dd'
+          )
+        : ''
+    );
+    this.ptype.setValue(
+      this.generatedInvoice.Payment_Type
+        ? this.generatedInvoice.Payment_Type
+        : ''
+    );
+    if (this.data.customerId && this.data.customerId > 0) {
+      console.log(this.data.customerId);
+      this.chus.setValue(this.data.customerId);
+      //this.chus.disable();
+    } else {
+      console.log('somehow there is nothing');
+      this.chus.setValue(this.generatedInvoice.Chus_Mas_No ?? '');
+      //this.chus.disable();
+    }
+    //this.goods_status.setValue(this.generatedInvoice.goods_status);
     this.ccode.setValue(this.generatedInvoice.Currency_Code);
+    this.Inv_remark.setValue(
+      this.generatedInvoice.Remarks ? this.generatedInvoice.Remarks.trim() : ''
+    );
+    this.sno.setValue(this.generatedInvoice.Inv_Mas_Sno);
     this.appendItems();
   }
   private appendItems() {
@@ -146,22 +188,31 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       )
     );
     res
-      .then((results: Array<any>) => {
-        let [invoiceDetails, invoiceItem] = results;
-        this.generatedInvoice =
-          invoiceDetails.response === 0 ? {} : invoiceDetails.response;
-        this.invoices = invoiceItem.response === 0 ? [] : invoiceItem.response;
+      .then((results) => {
+        let [invoiceDetail, invoiceItems] = results;
+        let hasInvoiceDetail =
+          invoiceDetail.response &&
+          typeof invoiceDetail.response !== 'string' &&
+          typeof invoiceDetail.response !== 'number';
+        let hasInvoiceItems =
+          invoiceItems.response &&
+          typeof invoiceItems.response !== 'string' &&
+          typeof invoiceItems.response !== 'number';
+        if (hasInvoiceDetail && hasInvoiceItems) {
+          this.generatedInvoice = invoiceDetail.response;
+          this.invoices = invoiceItems.response;
+          this.modifyInvoiceDetailsForm();
+        }
         this.startLoading = false;
-        this.modifyInvoiceDetailsForm();
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -185,8 +236,10 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       cino: this.fb.control('0', [Validators.required]),
       twvat: this.fb.control(0, [Validators.required]),
       vtamou: this.fb.control(0, [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
       lastrow: this.fb.control(0, [Validators.required]),
-      Inv_remark: this.fb.control('', [Validators.required]),
+      Inv_remark: this.fb.control('', []),
+      //goods_status: this.fb.control('', []),
       total: this.fb.control('', [Validators.required]),
       details: this.fb.array([], [Validators.required]),
     });
@@ -279,12 +332,19 @@ export class InvoiceDetailsDialogComponent implements OnInit {
     this.invoiceService
       .addInvoice(value)
       .then((results: any) => {
-        this.startLoading = false;
         if (results.response === 0 || results.response === 'EXIST') {
           this.invoiceFormExistsMessage();
         } else {
-          this.invoiceAddedSuccesfullyMessage();
+          //this.invoiceAddedSuccesfullyMessage();
+          // this.addedInvoice.emit();
+          let m = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate('invoice.form.dialog.addedInvoiceSuccessfully')
+          );
+          m.then((res) => {
+            this.addedInvoice.emit();
+          });
         }
+        this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -325,12 +385,12 @@ export class InvoiceDetailsDialogComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -398,16 +458,24 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   }
   submitInvoiceDetailsForm() {
     if (this.invoiceDetailsForm.valid) {
-      this.requestAddInvoiceForm(
-        this.invoiceDetailsForm.value as AddInvoiceForm
+      let d = AppUtilities.openSubmitMessageBox(
+        this.submitMessageBox,
+        this.tr.translate('defaults.confirm'),
+        this.tr.translate('dialogs.sureSaveChanges')
       );
-      return;
+      d.confirm.asObservable().subscribe(() => {
+        this.requestAddInvoiceForm(
+          this.invoiceDetailsForm.value as AddInvoiceForm
+        );
+      });
+    } else {
+      this.invoiceDetailsForm.markAllAsTouched();
     }
-    this.invoiceDetailsForm.markAllAsTouched();
-    this.formErrors();
   }
   removeItemDetail(ind: number) {
-    this.details.removeAt(ind);
+    if (ind > 0) {
+      this.details.removeAt(ind);
+    }
   }
   accumulateData() {
     let sumAmount = this.details.controls.reduce(
@@ -470,4 +538,10 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   get company() {
     return this.invoiceDetailsForm.get('company') as FormControl;
   }
+  get sno() {
+    return this.invoiceDetailsForm.get('sno') as FormControl;
+  }
+  // private get goods_status() {
+  //   return this.invoiceDetailsForm.get('goods_status') as FormControl;
+  // }
 }

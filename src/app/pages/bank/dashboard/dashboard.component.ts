@@ -26,8 +26,8 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
-import { Company } from 'src/app/core/models/bank/company';
-import { CompanyService } from 'src/app/core/services/bank/company/company.service';
+import { Company } from 'src/app/core/models/bank/company/company';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TimeoutError, catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -42,13 +42,17 @@ import {
   Validators,
 } from '@angular/forms';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import { Region } from 'src/app/core/models/bank/region';
-import { District } from 'src/app/core/models/bank/district';
+import { Region } from 'src/app/core/models/bank/setup/region';
+import { District } from 'src/app/core/models/bank/setup/district';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { Customer } from 'src/app/core/models/bank/customer';
-import { VendorDetailsReportTable } from 'src/app/core/enums/bank/vendor-details-report-table';
+import { VendorDetailsReportTable } from 'src/app/core/enums/bank/reports/vendor-details-report-table';
 import { ApproveCompanyInboxComponent } from 'src/app/components/dialogs/bank/company/approve-company-inbox/approve-company-inbox.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
+import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approval/approval.service';
+import { CompanyInboxListForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-inbox-list-form';
 
 @Component({
   selector: 'app-dashboard',
@@ -67,6 +71,7 @@ import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-m
     ReactiveFormsModule,
     ApproveCompanyInboxComponent,
     SuccessMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [
     {
@@ -123,14 +128,18 @@ export class DashboardComponent implements OnInit {
   public transactions: any[] = [];
   public tableHeadersFormGroup!: FormGroup;
   public vendorReportForm!: FormGroup;
-  public headersMap = {
-    CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
-    CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
-    EMAIL: VendorDetailsReportTable.EMAIL,
-    ADDRESS: VendorDetailsReportTable.ADDRESS,
-    DATE_POSTED: VendorDetailsReportTable.DATE_POSTED,
-  };
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  //public MoneyUtils: typeof MoneyUtils = MoneyUtils;
+  public VendorDetailsReportTable: typeof VendorDetailsReportTable =
+    VendorDetailsReportTable;
+  @ViewChild('paginator') paginator!: MatPaginator;
+  // public headersMap = {
+  //   CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
+  //   CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
+  //   EMAIL: VendorDetailsReportTable.EMAIL,
+  //   ADDRESS: VendorDetailsReportTable.ADDRESS,
+  //   DATE_POSTED: VendorDetailsReportTable.DATE_POSTED,
+  // };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -139,6 +148,7 @@ export class DashboardComponent implements OnInit {
     private tr: TranslocoService,
     private breadcrumbService: BreadcrumbService,
     private companyService: CompanyService,
+    private approvalService: ApprovalService,
     private reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
@@ -180,16 +190,16 @@ export class DashboardComponent implements OnInit {
   }
   private sortTableAsc(index: number) {
     switch (index) {
-      case this.headersMap.CUSTOMER_NAME:
+      case VendorDetailsReportTable.CUSTOMER_NAME:
         this.customers.sort((a, b) => (a.Cust_Name > b.Cust_Name ? 1 : -1));
         break;
-      case this.headersMap.CONTACT_PERSON:
+      case VendorDetailsReportTable.CONTACT_PERSON:
         this.customers.sort((a, b) => (a.ConPerson > b.ConPerson ? 1 : -1));
         break;
-      case this.headersMap.EMAIL:
+      case VendorDetailsReportTable.EMAIL:
         this.customers.sort((a, b) => (a.Email > b.Email ? 1 : -1));
         break;
-      case this.headersMap.ADDRESS:
+      case VendorDetailsReportTable.ADDRESS:
         this.customers.sort((a, b) => (a.Address > b.Address ? 1 : -1));
         break;
       default:
@@ -198,16 +208,16 @@ export class DashboardComponent implements OnInit {
   }
   private sortTableDesc(index: number) {
     switch (index) {
-      case this.headersMap.CUSTOMER_NAME:
+      case VendorDetailsReportTable.CUSTOMER_NAME:
         this.customers.sort((a, b) => (a.Cust_Name < b.Cust_Name ? 1 : -1));
         break;
-      case this.headersMap.CONTACT_PERSON:
+      case VendorDetailsReportTable.CONTACT_PERSON:
         this.customers.sort((a, b) => (a.ConPerson < b.ConPerson ? 1 : -1));
         break;
-      case this.headersMap.EMAIL:
+      case VendorDetailsReportTable.EMAIL:
         this.customers.sort((a, b) => (a.Email < b.Email ? 1 : -1));
         break;
-      case this.headersMap.ADDRESS:
+      case VendorDetailsReportTable.ADDRESS:
         this.customers.sort((a, b) => (a.Address < b.Address ? 1 : -1));
         break;
       default:
@@ -217,6 +227,7 @@ export class DashboardComponent implements OnInit {
   private createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
     this.tr
       .selectTranslate(
@@ -242,6 +253,9 @@ export class DashboardComponent implements OnInit {
           this.headers.push(header);
         });
       });
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchVendorDetailTable(value, this.paginator);
+    });
   }
   private fetchDistricts(body: { Sno: string }) {
     this.companyService
@@ -319,11 +333,11 @@ export class DashboardComponent implements OnInit {
   }
   private requestInboxApprovals() {
     this.inboxApprovalLoading = true;
-    this.companyService
+    this.approvalService
       .postCompanyInboxList({
         design: this.userProfile.desig,
         braid: Number(this.userProfile.braid),
-      })
+      } as CompanyInboxListForm)
       .then((results: any) => {
         this.inboxApprovalLoading = false;
         this.inboxApprovals = results.response === 0 ? [] : results.response;
@@ -365,16 +379,16 @@ export class DashboardComponent implements OnInit {
   }
   private customerKeys(indexes: number[]) {
     let keys: string[] = [];
-    if (indexes.includes(this.headersMap.CUSTOMER_NAME)) {
+    if (indexes.includes(VendorDetailsReportTable.CUSTOMER_NAME)) {
       keys.push('Cust_Name');
     }
-    if (indexes.includes(this.headersMap.ADDRESS)) {
+    if (indexes.includes(VendorDetailsReportTable.ADDRESS)) {
       keys.push('Address');
     }
-    if (indexes.includes(this.headersMap.EMAIL)) {
+    if (indexes.includes(VendorDetailsReportTable.EMAIL)) {
       keys.push('Email');
     }
-    if (indexes.includes(this.headersMap.CONTACT_PERSON)) {
+    if (indexes.includes(VendorDetailsReportTable.CONTACT_PERSON)) {
       keys.push('ConPerson');
     }
     return keys;
@@ -394,34 +408,22 @@ export class DashboardComponent implements OnInit {
       )
     );
   }
-  private requestApproveCompany(value: {
-    compsno: number;
-    pfx: string;
-    ssno: string;
-    userid: number;
-  }) {
-    this.startLoading = true;
-    this.companyService
-      .approveCompany(value)
-      .then((results: any) => {
-        this.startLoading = false;
-        if (results.response === 0 || typeof results.response !== 'number') {
-          this.failedToApproveCompanyMessage();
-        } else {
-          this.companyApprovedSuccessullyMessage();
-        }
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        this.startLoading = false;
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.cdr.detectChanges();
-        throw err;
+  private searchVendorDetailTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let indexes = this.headers.controls
+        .map((control, index) => {
+          return control.get('included')?.value ? index : -1;
+        })
+        .filter((num) => num !== -1);
+      let keys = this.customerKeys(indexes);
+      let text = searchText.trim().toLowerCase();
+      this.customers = this.customersData.filter((customer: any) => {
+        return keys.some((key) => customer[key]?.toLowerCase().includes(text));
       });
+    } else {
+      this.customers = this.customersData;
+    }
   }
   ngOnInit(): void {
     this.createVendorReportForm();
@@ -488,43 +490,18 @@ export class DashboardComponent implements OnInit {
       console.log(`Dialog result: ${result}`);
     });
   }
-  approveCompany(dialog: ApproveCompanyInboxComponent, company: Company) {
-    let payload: {
-      compsno: number;
-      pfx: string;
-      ssno: string;
-      userid: number;
-    } = {
-      compsno: company.CompSno,
-      pfx: '',
-      ssno: '',
-      userid: this.userProfile.Usno,
-    };
-    let dialogRef = dialog.openDialog();
-    dialog.close.asObservable().subscribe(() => {
-      dialogRef.close();
+  approveCompany(dcompany: Company) {
+    let dialogRef = this.dialog.open(ApproveCompanyInboxComponent, {
+      width: '800px',
+      disableClose: true,
+      data: {
+        company: dcompany,
+      },
     });
-    dialog.approve.asObservable().subscribe(() => {
-      this.requestApproveCompany(payload);
+    dialogRef.componentInstance.approved.asObservable().subscribe(() => {
       dialogRef.close();
+      this.requestInboxApprovals();
     });
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let keys = this.customerKeys(indexes);
-      let text = searchText.trim().toLowerCase();
-      this.customers = this.customersData.filter((customer: any) => {
-        return keys.some((key) => customer[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.customers = this.customersData;
-    }
   }
   determineDate(date: Date) {
     let today = new Date();
@@ -561,5 +538,8 @@ export class DashboardComponent implements OnInit {
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableHeadersFormGroup.get('tableSearch') as FormControl;
   }
 }
