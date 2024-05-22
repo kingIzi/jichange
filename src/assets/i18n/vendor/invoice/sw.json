@@ -65,7 +65,10 @@
       "total": "Lazima angalau uongeze kipengee kimoja ili kuongeza ankara.",
       "invoiceRemark": "Lazima ubainishe alama ya ankara.",
       "invoiceExists": "Imeshindwa kuongeza ankara kwa sababu tayari ipo.",
-      "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!"
+      "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!",
+      "modifiedSuccessfully": "Ankara imebadilika kwa mafanikio!",
+      "failedToApproveInvoice": "Imeshindwa kuidhinisha ankara",
+      "invoiceApprovedSuccessfully": "Ankara imeidhinishwa kwa mafanikio"
     }
   },
   "invoiceDetailsTable": [

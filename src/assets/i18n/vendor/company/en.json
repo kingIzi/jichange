@@ -1,6 +1,7 @@
 {
   "companyUsers": "Company users",
   "addCompanyButton": "Add company users",
+  "failedToRetrieveCompanyUser": "Failed to retrieve company user.",
   "companyTable": [
     "User name",
     "User type",
@@ -15,7 +16,7 @@
     "mobileNo": "Mobile No",
     "emailId": "Email ID",
     "userPosition": "User position",
-    "successMessage": "Company added successfully!",
+    "successMessage": "User added successfully!",
     "placeholder": {
       "role": "Select role",
       "username": "Enter User name",

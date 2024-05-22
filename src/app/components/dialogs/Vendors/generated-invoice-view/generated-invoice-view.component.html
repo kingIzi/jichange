@@ -20,9 +20,12 @@
         <h6 class="text-xs lg:text-sm font-normal">
           {{ invoiceNo.value }}
         </h6>
-        <h6 class="text-xs lg:text-sm font-bold">
-          {{ customerIdType.value + ":" }}
-          <span class="font-normal">{{ customerNo.value }}</span>
+        <h6
+          *transloco="let t; read: 'generated'"
+          class="text-xs lg:text-sm font-bold"
+        >
+          {{ t("contorolNumber") }}:
+          <span class="font-normal">{{ controlNo.value }}</span>
         </h6>
       </div>
       <div class="flex flex-col space-y-1">

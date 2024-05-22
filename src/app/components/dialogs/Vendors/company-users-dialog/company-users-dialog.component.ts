@@ -4,6 +4,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  Inject,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -21,7 +22,7 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../success-message-box/success-message-box.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CountryDialogComponent } from '../../bank/setup/country-dialog/country-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { LoginResponse } from 'src/app/core/models/login-response';
@@ -30,6 +31,9 @@ import { RoleAct } from 'src/app/core/models/vendors/role-act';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 
 @Component({
   selector: 'app-company-users-dialog',
@@ -44,6 +48,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
     TranslocoModule,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    PhoneNumberInputComponent,
   ],
   providers: [
     {
@@ -56,6 +61,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public roleActs: RoleAct[] = [];
   public companyUsersForm!: FormGroup;
+  public companyUser!: CompanyUser;
   public addedUser = new EventEmitter<any>();
   private userProfile!: LoginResponse;
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -67,8 +73,12 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
     private tr: TranslocoService,
-    private companyUser: CompanyUserService,
-    private cdr: ChangeDetectorRef
+    private companyUserService: CompanyUserService,
+    private cdr: ChangeDetectorRef,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      companyUserId: number | string;
+    }
   ) {}
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
@@ -117,12 +127,12 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   }
   private createForm() {
     this.companyUsersForm = this.fb.group({
-      pos: this.fb.control('', []),
+      pos: this.fb.control('', [Validators.required]),
       auname: this.fb.control('', [Validators.required]),
       uname: this.fb.control('', [Validators.required]),
       mob: this.fb.control('', [
         Validators.required,
-        Validators.pattern(/^(255|\+255|0)[67]\d{8}$/),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       mail: this.fb.control('', [Validators.required, Validators.email]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
@@ -130,12 +140,72 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       compid: this.fb.control(this.userProfile.InstID.toString(), [
         Validators.required,
       ]),
+      chname: this.fb.control('', []),
     });
+  }
+  private modifyForm() {
+    this.pos.setValue(this.companyUser.Userpos);
+    this.auname.setValue(this.companyUser.Username),
+      this.uname.setValue(this.companyUser.Fullname),
+      this.mob.setValue(this.companyUser.Mobile),
+      this.mail.setValue(this.companyUser.Email);
+    this.sno.setValue(this.companyUser.CompuserSno);
+    this.chname.setValue('00' + this.pos.value);
+  }
+  private buildPage() {
+    this.startLoading = true;
+    let companyUserObservable = from(
+      this.companyUserService.getCompanyUserByid({
+        sno: this.data.companyUserId,
+      })
+    );
+    let mergedObservable = zip(companyUserObservable);
+    let res = lastValueFrom(
+      mergedObservable.pipe(
+        map((result) => {
+          return result;
+        }),
+        catchError((err) => {
+          throw err;
+        })
+      )
+    );
+    res
+      .then((results) => {
+        let [companyUser] = results;
+        if (
+          companyUser.response &&
+          typeof companyUser.response !== 'string' &&
+          typeof companyUser.response !== 'number' &&
+          typeof companyUser.response !== 'boolean'
+        ) {
+          this.companyUser = companyUser.response;
+          this.modifyForm();
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`errors.errorOccured`),
+            this.tr.translate(`company.failedToRetrieveCompanyUser`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private requestRolesAct() {
     this.startLoading = true;
-    this.companyUser
-      .requestRolesAct({ compid: this.userProfile.InstID })
+    this.companyUserService
+      .requestRolesAct({ compid: 67 }) //permanently at 67
       .then((results: any) => {
         this.roleActs = results.response === 0 ? [] : results.response;
         if (this.roleActs.length === 0) {
@@ -160,20 +230,22 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       });
   }
-  private requestAddRole(form: any) {
+  private requestAddCompanyUser(form: any) {
     this.startLoading = true;
-    this.companyUser
-      .requestAddRolesAct(form)
+    this.companyUserService
+      .requestAddCompanyUser(form)
       .then((results: any) => {
         if (typeof results.response === 'number' && results.response > 0) {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`company.companyUsersForm.successMessage`)
           );
-          this.addedUser.emit();
+          sal.then((res) => {
+            this.addedUser.emit();
+          });
         } else if (typeof results.response === 'string') {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
             this.tr
               .translate(
                 `company.companyUsersForm.errors.dialog.FailedToAddCompany`
@@ -196,8 +268,16 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   }
   ngOnInit(): void {
     this.parseUserProfile();
-    this.createForm();
     this.requestRolesAct();
+    this.createForm();
+    if (this.data.companyUserId) {
+      this.buildPage();
+    }
+    // if (this.data.companyUserId) {
+    //   this.createEditForm();
+    // } else {
+    //   this.createForm();
+    // }
   }
   ngAfterViewInit(): void {
     this.successMessageBox.closeSuccessMessageBox
@@ -215,10 +295,11 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   submitCompanyUsersForm() {
     if (this.companyUsersForm.invalid) {
       this.companyUsersForm.markAllAsTouched();
-      //this.formErrors();
       return;
     } else {
-      this.requestAddRole(this.companyUsersForm.value);
+      console.log(this.companyUsersForm.value);
+      this.chname.setValue('00' + this.pos.value);
+      this.requestAddCompanyUser(this.companyUsersForm.value);
     }
   }
   get pos() {
@@ -235,5 +316,11 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   }
   get mail() {
     return this.companyUsersForm.get('mail') as FormControl;
+  }
+  get sno() {
+    return this.companyUsersForm.get('sno') as FormControl;
+  }
+  get chname() {
+    return this.companyUsersForm.get('chname') as FormControl;
   }
 }

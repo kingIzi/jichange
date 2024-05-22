@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -66,6 +67,8 @@ export class DistrictDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddDistrict', { static: true })
+  confirmAddDistrict!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DistrictDialogComponent>,
@@ -96,7 +99,7 @@ export class DistrictDialogComponent implements OnInit {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
             this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.wardDialog.failedToAddWard`)
+            this.tr.translate(`setup.districtDialog.failedToAddDistrict`)
           );
         }
         this.startLoading = false;
@@ -213,19 +216,23 @@ export class DistrictDialogComponent implements OnInit {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitRegionForm() {
-    if (this.districtForm.valid && !this.data.district) {
+    if (this.districtForm.valid) {
+      this.confirmAddDistrict.nativeElement.showModal();
+    } else {
+      this.districtForm.markAllAsTouched();
+    }
+  }
+  addDistrict() {
+    if (!this.data?.district) {
       this.requestInsertDistrict(
         this.districtForm.value,
         this.tr.translate(`setup.districtDialog.addedDistrictSuccessfully`)
       );
-    } else if (this.districtForm.valid && this.data.district) {
+    } else {
       this.requestInsertDistrict(
         this.districtForm.value,
         this.tr.translate(`setup.districtDialog.modifiedDistrictSuccessfully`)
       );
-    } else {
-      this.districtForm.markAllAsTouched();
-      //this.formErrors();
     }
   }
   get district_name() {

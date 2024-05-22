@@ -14,6 +14,7 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -23,6 +24,7 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
+import { from, zip, lastValueFrom, map, catchError } from 'rxjs';
 import { CancelGeneratedInvoiceComponent } from 'src/app/components/dialogs/Vendors/cancel-generated-invoice/cancel-generated-invoice.component';
 import { GeneratedInvoiceDialogComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-dialog/generated-invoice-dialog.component';
 import { GeneratedInvoiceViewComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-view/generated-invoice-view.component';
@@ -33,6 +35,7 @@ import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-mes
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
@@ -198,10 +201,6 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.invoiceService
       .getCreatedInvoiceList({ compid: this.userProfile.InstID })
       .then((result) => {
-        // this.invoiceListData = result.response;
-        // this.invoiceList = this.invoiceListData;
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
         if (typeof result.response === 'string') {
         } else {
           this.invoiceListData = result.response;
@@ -219,6 +218,207 @@ export class CreatedInvoiceListComponent implements OnInit {
           this.tr
         );
         this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private prepareInvoiceFormGroup() {
+    let form = this.fb.group({
+      user_id: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      compid: this.fb.control(this.userProfile.InstID.toString(), [
+        Validators.required,
+      ]),
+      auname: this.fb.control('', [Validators.required]),
+      invno: this.fb.control('', [Validators.required]),
+      date: this.fb.control('', [Validators.required]),
+      edate: this.fb.control('', [Validators.required]),
+      iedate: this.fb.control('', [Validators.required]),
+      ptype: this.fb.control('', [Validators.required]),
+      chus: this.fb.control('', [Validators.required]),
+      ccode: this.fb.control('', [Validators.required]),
+      comno: this.fb.control(0, [Validators.required]),
+      ctype: this.fb.control('0', [Validators.required]),
+      cino: this.fb.control('0', [Validators.required]),
+      twvat: this.fb.control(0, [Validators.required]),
+      vtamou: this.fb.control(0, [Validators.required]),
+      sno: this.fb.control(0, [Validators.required]),
+      lastrow: this.fb.control(0, [Validators.required]),
+      Inv_remark: this.fb.control('', []),
+      goods_status: this.fb.control('', []),
+      total: this.fb.control('', [Validators.required]),
+      details: this.fb.array([], [Validators.required]),
+    });
+    return form;
+  }
+  private modifyInvoiceDetailsForm(
+    formGroup: FormGroup,
+    invoice: GeneratedInvoice,
+    items: GeneratedInvoice[]
+  ) {
+    formGroup.get('invno')?.setValue(invoice.Invoice_No);
+    formGroup
+      .get('date')
+      ?.setValue(
+        invoice.Invoice_Date
+          ? AppUtilities.dateToFormat(
+              new Date(invoice.Invoice_Date),
+              'yyyy-MM-dd'
+            )
+          : ''
+      );
+    formGroup
+      .get('edate')
+      ?.setValue(
+        invoice.Due_Date
+          ? AppUtilities.dateToFormat(new Date(invoice.Due_Date), 'yyyy-MM-dd')
+          : ''
+      );
+    formGroup
+      .get('iedate')
+      ?.setValue(
+        invoice.Invoice_Expired_Date
+          ? AppUtilities.dateToFormat(
+              new Date(invoice.Invoice_Expired_Date),
+              'yyyy-MM-dd'
+            )
+          : ''
+      );
+    formGroup.get('ptype')?.setValue(invoice.Payment_Type ?? '');
+    formGroup.get('chus')?.setValue(invoice.Chus_Mas_No);
+    formGroup.get('ccode')?.setValue(invoice.Currency_Code);
+    formGroup.get('Inv_remark')?.setValue(invoice.Remarks ?? '');
+    formGroup.get('sno')?.setValue(invoice.Inv_Mas_Sno);
+    formGroup.get('goods_status')?.setValue('Approve');
+    formGroup
+      .get('total')
+      ?.setValue(AppUtilities.moneyFormat(invoice.Total.toString()));
+    formGroup
+      .get('auname')
+      ?.setValue(AppUtilities.moneyFormat(invoice.Total.toString()));
+    this.addApprovalInvoiceItemDetails(formGroup, items);
+  }
+  private addApprovalInvoiceItemDetails(
+    formGroup: FormGroup,
+    items: GeneratedInvoice[]
+  ) {
+    items.forEach((item) => {
+      let group = this.fb.group({
+        item_description: this.fb.control(item?.Item_Description?.trim(), []),
+        item_qty: this.fb.control(Math.floor(item?.Item_Qty), []),
+        item_unit_price: this.fb.control(item.Item_Unit_Price, []),
+        item_total_amount: this.fb.control(item.Item_Total_Amount, []),
+        remarks: this.fb.control(item?.Remarks?.trim()),
+      });
+      (formGroup.get('details') as FormArray).push(group);
+      this.itemDetailQuantityPriceChanged(group);
+    });
+  }
+  private itemDetailQuantityPriceChanged(group: FormGroup) {
+    group.get('item_unit_price')?.valueChanges.subscribe((value) => {
+      let itemQtyControl = group.get('item_qty');
+      if (value && itemQtyControl?.value && value > 0) {
+        let acc = value * itemQtyControl?.value;
+        group.get('item_total_amount')?.setValue(acc);
+      }
+    });
+    group.get('item_qty')?.valueChanges.subscribe((value) => {
+      let itemUnitPriceCOntrol = group.get('item_unit_price');
+      if (value && itemUnitPriceCOntrol?.value && value > 0) {
+        let acc = value * itemUnitPriceCOntrol?.value;
+        group.get('item_total_amount')?.setValue(acc);
+      }
+    });
+  }
+  private failedToApproveInvoice() {
+    AppUtilities.openDisplayMessageBox(
+      this.displayMessageBox,
+      this.tr.translate(`defaults.failed`),
+      this.tr.translate(`invoice.form.dialog.invoiceExists`)
+    );
+  }
+  private requestAddInvoiceForm(value: AddInvoiceForm) {
+    this.startLoading = true;
+    this.invoiceService
+      .addInvoice(value)
+      .then((results: any) => {
+        if (results.response === 0 || results.response === 'EXIST') {
+          this.failedToApproveInvoice();
+        } else {
+          let m = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate('invoice.form.dialog.invoiceApprovedSuccessfully')
+          );
+          m.then((res) => {
+            this.requestCreatedInvoiceList();
+          });
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private requestApproveCompany(invoice: GeneratedInvoice) {
+    this.startLoading = true;
+    let invoiceDetailsObservable = from(
+      this.invoiceService.invoiceDetailsById({
+        compid: this.userProfile.InstID,
+        invid: Number(invoice.Inv_Mas_Sno),
+      })
+    );
+    let invoiceItemObservable = from(
+      this.invoiceService.invoiceItemDetails({
+        invid: Number(invoice.Inv_Mas_Sno),
+      })
+    );
+    let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
+    let res = lastValueFrom(
+      mergedObservable.pipe(
+        map((result) => {
+          return result;
+        }),
+        catchError((err) => {
+          throw err;
+        })
+      )
+    );
+    res
+      .then((results) => {
+        let [invoiceDetail, invoiceItems] = results;
+        let hasInvoiceDetail =
+          invoiceDetail.response &&
+          typeof invoiceDetail.response !== 'string' &&
+          typeof invoiceDetail.response !== 'number';
+        let hasInvoiceItems =
+          invoiceItems.response &&
+          typeof invoiceItems.response !== 'string' &&
+          typeof invoiceItems.response !== 'number';
+        if (hasInvoiceDetail && hasInvoiceItems) {
+          let formGroup = this.prepareInvoiceFormGroup();
+          this.modifyInvoiceDetailsForm(
+            formGroup,
+            invoiceDetail.response,
+            invoiceItems.response
+          );
+          this.requestAddInvoiceForm(formGroup.value as any);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -249,14 +449,6 @@ export class CreatedInvoiceListComponent implements OnInit {
   }
   //opens invoice view
   openInvoiceReportView(generatedInvoice: GeneratedInvoice) {
-    // let dialogRef = this.dialog.open(GeneratedInvoiceViewComponent, {
-    //   width: '800px',
-    //   height: '700px',
-    //   data: {
-    //     Inv_Mas_Sno: generatedInvoice.Inv_Mas_Sno,
-    //     userProfile: this.userProfile,
-    //   },
-    // });
     let dialogRef = this.dialog.open(InvoiceDetailsViewComponent, {
       width: '800px',
       height: '700px',
@@ -332,9 +524,19 @@ export class CreatedInvoiceListComponent implements OnInit {
       .replace('{}', invoice.Invoice_No);
     dialog.openDialog();
     dialog.confirm.asObservable().subscribe(() => {
-      alert(`approved invoice`);
+      this.requestApproveCompany(invoice);
       dialog.closeDialog();
     });
+  }
+  determineApprovalStatus(status: string) {
+    if (!status) {
+      return '-';
+    } else if (status.trim().toLocaleLowerCase() == '1') {
+      return 'Approve';
+    } else if (status.trim().toLocaleLowerCase() == '2') {
+      return 'Done';
+    }
+    return '-';
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

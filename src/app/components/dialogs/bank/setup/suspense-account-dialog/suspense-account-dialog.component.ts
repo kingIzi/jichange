@@ -58,6 +58,7 @@ export class SuspenseAccountDialogComponent implements OnInit {
   public suspenseAccountForm!: FormGroup;
   public startLoading: boolean = false;
   private userProfile!: LoginResponse;
+  public addedSuspenseAccount = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -125,14 +126,13 @@ export class SuspenseAccountDialogComponent implements OnInit {
             )
           );
         } else if (typeof res.response === 'string' && res.response === '0') {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(
               `setup.suspenseAccount.addedSuspenseAccountSuccessfully`
             )
           );
-          dialog.addEventListener('close', () => {
-            this.closeDialog();
+          sal.then((res) => {
+            this.addedSuspenseAccount.emit();
           });
         }
         this.startLoading = false;

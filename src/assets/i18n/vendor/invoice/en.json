@@ -72,7 +72,10 @@
       "total": "You must at least add one item to add an invoice.",
       "invoiceRemark": "You must specify an invoice remark",
       "invoiceExists": "Failed to add invoice because it already exists.",
-      "addedInvoiceSuccessfully": "Added invoice successfully!"
+      "addedInvoiceSuccessfully": "Added invoice successfully!",
+      "modifiedSuccessfully": "Invoice modified successfully!",
+      "failedToApproveInvoice": "Failed to approve invoice",
+      "invoiceApprovedSuccessfully": "Invoice successfully approved"
     }
   },
   "cancelledInvoiceTable": [

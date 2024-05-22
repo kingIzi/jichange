@@ -43,6 +43,9 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Component({
   selector: 'app-invoice-details',
@@ -88,11 +91,13 @@ export class InvoiceDetailsComponent implements OnInit {
   };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private tr: TranslocoService,
     private dialog: MatDialog,
     private client: RequestClientService,
     private reportsService: ReportsService,
+    private invoiceReportService: InvoiceReportServiceService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private fileHandler: FileHandlerService,
@@ -127,12 +132,13 @@ export class InvoiceDetailsComponent implements OnInit {
     this.formGroup = this.fb.group({
       Comp: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
-      stdate: this.fb.control('', [Validators.required]),
-      enddate: this.fb.control('', [Validators.required]),
+      stdate: this.fb.control('', []),
+      enddate: this.fb.control('', []),
     });
     this.companyChangedEventHandler();
   }
   private companyChangedEventHandler() {
+    this.startLoading = true;
     this.Comp.valueChanges.subscribe((value) => {
       this.startLoading = true;
       let companyList = this.reportsService.getCustomerDetailsList({
@@ -164,36 +170,39 @@ export class InvoiceDetailsComponent implements OnInit {
         });
     });
   }
-  private async createHeaderGroup() {
+  private createHeaderGroup() {
     this.headerFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    let labels = (await firstValueFrom(
-      this.tr.selectTranslate(
-        `invoiceDetails.invoiceDetailsTable`,
-        {},
-        this.scope
-      )
-    )) as string[];
-    labels.forEach((label, index) => {
-      let header = this.fb.group({
-        label: this.fb.control(label, []),
-        sortAsc: this.fb.control(false, []),
-        included: this.fb.control(index <= 5, []),
-        values: this.fb.array([], []),
-      });
-      this.sortTableHeaderEventHandler(header, index);
-      this.headers.push(header);
+    TableUtilities.createHeaders(
+      this.tr,
+      `invoiceDetails.invoiceDetailsTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
     });
   }
-  private sortTableHeaderEventHandler(header: FormGroup, index: number) {
-    header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-      if (value === true) {
-        this.sortTableAsc(index);
-      } else {
-        this.sortTableDesc(index);
-      }
-    });
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let indexes = this.headers.controls
+        .map((control, index) => {
+          return control.get('included')?.value ? index : -1;
+        })
+        .filter((num) => num !== -1);
+      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
+      let keys = this.invoiceReportKeys(indexes);
+      this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
+        return keys.some((key) => company[key]?.toLowerCase().includes(text));
+      });
+    } else {
+      this.invoiceReports = this.invoiceReportsData;
+    }
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
@@ -323,23 +332,28 @@ export class InvoiceDetailsComponent implements OnInit {
     }
     return keys;
   }
-  private requestInvoiceDetails(value: any) {
+  private requestInvoiceDetails(body: InvoiceReportForm) {
     this.tableLoading = true;
-    this.reportsService
-      .requestInvoiceReport(value)
-      .then((results: any) => {
-        this.invoiceReportsData =
-          results.response === 0 ? [] : results.response;
-        this.invoiceReports = this.invoiceReportsData;
+    this.invoiceReportService
+      .getInvoiceReport(body)
+      .then((result) => {
+        if (
+          result.response &&
+          typeof result.response !== 'number' &&
+          result.response !== 'string'
+        ) {
+          this.invoiceReportsData = result.response as InvoiceReport[];
+          this.invoiceReports = this.invoiceReportsData;
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -354,15 +368,16 @@ export class InvoiceDetailsComponent implements OnInit {
   submitForm() {
     if (this.formGroup.valid) {
       let form = { ...this.formGroup.value };
-      (form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'))),
-        (form.enddate = AppUtilities.reformatDate(
-          this.enddate.value.split('-')
-        ));
-      // this.invoiceReportsData = [];
-      // this.invoiceReports = this.invoiceReportsData;
+      if (form.stdate) {
+        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+      }
+      if (form.enddate) {
+        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+      }
       this.requestInvoiceDetails(form);
     } else {
-      this.formErrors();
+      this.formGroup.markAllAsTouched();
+      //this.formErrors();
     }
   }
   downloadSheet() {
@@ -404,23 +419,6 @@ export class InvoiceDetailsComponent implements OnInit {
       index === this.headersMap.WITHOUT_VAT
     );
   }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
-      let keys = this.invoiceReportKeys(indexes);
-      this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.invoiceReports = this.invoiceReportsData;
-    }
-  }
   openInvoiceDetailsGraph() {
     let dialogRef = this.dialog.open(GeneratedInvoiceDialogComponent, {
       width: '800px',
@@ -449,5 +447,8 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   get headers() {
     return this.headerFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headerFormGroup.get(`tableSearch`) as FormControl;
   }
 }

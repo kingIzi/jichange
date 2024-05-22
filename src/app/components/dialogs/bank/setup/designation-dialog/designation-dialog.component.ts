@@ -55,7 +55,7 @@ export class DesignationDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public designationForm!: FormGroup;
   public userProfile!: LoginResponse;
-  public isLoading = new EventEmitter<any>();
+  public addedDesignation = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -114,12 +114,18 @@ export class DesignationDialogComponent implements OnInit {
       .addDesignation(form)
       .then((res: any) => {
         if (typeof res.response === 'number' && res.response > 0) {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          // let dialog = AppUtilities.openSuccessMessageBox(
+          //   this.successMessageBox,
+          //   this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
+          // );
+          // dialog.addEventListener('close', () => {
+          //   this.closeDialog();
+          // });
+          let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
           );
-          dialog.addEventListener('close', () => {
-            this.closeDialog();
+          sal.then((res) => {
+            this.addedDesignation.emit();
           });
         } else if (typeof res.response === 'boolean' && res.response) {
           AppUtilities.openDisplayMessageBox(
@@ -134,11 +140,11 @@ export class DesignationDialogComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;

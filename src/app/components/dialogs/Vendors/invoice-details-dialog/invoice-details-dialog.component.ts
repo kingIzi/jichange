@@ -135,13 +135,9 @@ export class InvoiceDetailsDialogComponent implements OnInit {
         : ''
     );
     if (this.data.customerId && this.data.customerId > 0) {
-      console.log(this.data.customerId);
       this.chus.setValue(this.data.customerId);
-      //this.chus.disable();
     } else {
-      console.log('somehow there is nothing');
       this.chus.setValue(this.generatedInvoice.Chus_Mas_No ?? '');
-      //this.chus.disable();
     }
     //this.goods_status.setValue(this.generatedInvoice.goods_status);
     this.ccode.setValue(this.generatedInvoice.Currency_Code);
@@ -161,6 +157,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
         remarks: this.fb.control(item?.Remarks?.trim()),
       });
       this.details.push(group);
+      this.itemDetailQuantityPriceChanged(group);
     });
   }
   private createGeneratedInvoiceViewForm() {
@@ -335,10 +332,11 @@ export class InvoiceDetailsDialogComponent implements OnInit {
         if (results.response === 0 || results.response === 'EXIST') {
           this.invoiceFormExistsMessage();
         } else {
-          //this.invoiceAddedSuccesfullyMessage();
-          // this.addedInvoice.emit();
+          let message = this.data.invid
+            ? `invoice.form.dialog.modifiedSuccessfully`
+            : `invoice.form.dialog.addedInvoiceSuccessfully`;
           let m = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate('invoice.form.dialog.addedInvoiceSuccessfully')
+            this.tr.translate(message)
           );
           m.then((res) => {
             this.addedInvoice.emit();
@@ -395,6 +393,22 @@ export class InvoiceDetailsDialogComponent implements OnInit {
         throw err;
       });
   }
+  private itemDetailQuantityPriceChanged(group: FormGroup) {
+    group.get('item_unit_price')?.valueChanges.subscribe((value) => {
+      let itemQtyControl = group.get('item_qty');
+      if (value && itemQtyControl?.value && value > 0) {
+        let acc = value * itemQtyControl?.value;
+        group.get('item_total_amount')?.setValue(acc);
+      }
+    });
+    group.get('item_qty')?.valueChanges.subscribe((value) => {
+      let itemUnitPriceCOntrol = group.get('item_unit_price');
+      if (value && itemUnitPriceCOntrol?.value && value > 0) {
+        let acc = value * itemUnitPriceCOntrol?.value;
+        group.get('item_total_amount')?.setValue(acc);
+      }
+    });
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createForm();
@@ -416,30 +430,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       item_total_amount: this.fb.control(0, [Validators.required]),
       remarks: this.fb.control('', []),
     });
-    group.get('item_unit_price')?.valueChanges.subscribe((value) => {
-      let itemQtyControl = group.get('item_qty');
-      if (
-        value &&
-        itemQtyControl?.value &&
-        value > 0 &&
-        itemQtyControl?.value > 0
-      ) {
-        let acc = value * itemQtyControl?.value;
-        group.get('item_total_amount')?.setValue(acc);
-      }
-    });
-    group.get('item_qty')?.valueChanges.subscribe((value) => {
-      let itemUnitPriceCOntrol = group.get('item_unit_price');
-      if (
-        value &&
-        itemUnitPriceCOntrol?.value &&
-        value > 0 &&
-        itemUnitPriceCOntrol?.value > 0
-      ) {
-        let acc = value * itemUnitPriceCOntrol?.value;
-        group.get('item_total_amount')?.setValue(acc);
-      }
-    });
+    this.itemDetailQuantityPriceChanged(group);
     if (this.details.length === 0) {
       this.details.push(group);
     } else {

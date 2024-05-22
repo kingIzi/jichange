@@ -1,6 +1,7 @@
 {
   "generatedInvoice": "Generated Invoice",
   "addInvoice": "Add Invoice",
+  "contorolNumber": "Control number",
   "generatedInvoicesTable": [
     "Customer name",
     "Invoice No",

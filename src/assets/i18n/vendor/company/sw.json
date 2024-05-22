@@ -1,6 +1,7 @@
 {
   "companyUsers": "Watumiaji wa Kampuni",
   "addCompanyButton": "Ongeza watumiaji wa kampuni",
+  "failedToRetrieveCompanyUser": "Imeshindwa kupata mtumiaji wa kampuni.",
   "companyTable": [
     "Jina la mtumiaji",
     "Aina ya mtumiaji",

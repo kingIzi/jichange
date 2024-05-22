@@ -19,7 +19,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -36,6 +41,8 @@ import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account
 import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
 import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approval/approval.service';
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
+import { SubmitMessageBoxComponent } from '../../../submit-message-box/submit-message-box.component';
+import { SuspenseAccountDialogComponent } from '../../setup/suspense-account-dialog/suspense-account-dialog.component';
 
 //type AccountType = 'Suspense Account' | 'Deposit Account';
 
@@ -50,6 +57,8 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
     FormsModule,
     LoaderInfiniteSpinnerComponent,
     SuccessMessageBoxComponent,
+    SubmitMessageBoxComponent,
+    MatDialogModule,
   ],
   templateUrl: './approve-company-inbox.component.html',
   styleUrl: './approve-company-inbox.component.scss',
@@ -73,7 +82,11 @@ export class ApproveCompanyInboxComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
+  @ViewChild('noSuspenseAccountFoundDilog', { static: true })
+  noSuspenseAccountFoundDilog!: ElementRef<HTMLDialogElement>;
   constructor(
+    private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
@@ -119,9 +132,19 @@ export class ApproveCompanyInboxComponent implements OnInit {
   private requestAccountPool() {
     this.startLoading = true;
     this.suspenseAccountService
-      .getSuspenseActiveAccountList({})
+      .getAvailableSuspenseAccounts({})
       .then((result) => {
-        this.selectAccountList = result.response;
+        if (
+          result.message.toLocaleLowerCase() == 'failed'.toLocaleLowerCase()
+        ) {
+          this.noSuspenseAccountFoundDilog.nativeElement.showModal();
+        } else if (
+          result.message.toLocaleLowerCase() === 'success' &&
+          typeof result.response !== 'number' &&
+          typeof result.response !== 'string'
+        ) {
+          this.selectAccountList = result.response;
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -172,11 +195,10 @@ export class ApproveCompanyInboxComponent implements OnInit {
       .approveCompany(form)
       .then((result) => {
         if (typeof result.response === 'number') {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          let m = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`company.inboxApproval.approvedSuccessfully`)
           );
-          dialog.addEventListener('close', () => {
+          m.then((res) => {
             this.approved.emit();
           });
         } else {
@@ -217,6 +239,21 @@ export class ApproveCompanyInboxComponent implements OnInit {
       this.formGroup.markAllAsTouched();
       this.formErrors();
     }
+  }
+  addSuspenseAccount() {
+    let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        suspenseAccount: null,
+      },
+    });
+    dialogRef.componentInstance.addedSuspenseAccount
+      .asObservable()
+      .subscribe(() => {
+        dialogRef.close();
+        this.requestAccountPool();
+      });
   }
   closeDialog() {
     this.dialogRef.close();

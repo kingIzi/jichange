@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -89,6 +90,8 @@ export class CompanySummaryDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddCompany', { static: true })
+  confirmAddCompany!: ElementRef<HTMLDialogElement>;
   public companyAddedSuccessfully = new EventEmitter<void>();
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor(
@@ -127,11 +130,11 @@ export class CompanySummaryDialogComponent implements OnInit {
           return results;
         }),
         catchError((err) => {
-          if (err instanceof TimeoutError) {
-            AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-          } else {
-            AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-          }
+          AppUtilities.requestFailedCatchError(
+            err,
+            this.displayMessageBox,
+            this.tr
+          );
           this.startLoading = false;
           this.cdr.detectChanges();
           throw err;
@@ -267,7 +270,13 @@ export class CompanySummaryDialogComponent implements OnInit {
             this.cdr.detectChanges();
           })
           .catch((err) => {
+            AppUtilities.requestFailedCatchError(
+              err,
+              this.displayMessageBox,
+              this.tr
+            );
             this.startLoading = false;
+            this.cdr.detectChanges();
             throw err;
           });
       }
@@ -280,23 +289,35 @@ export class CompanySummaryDialogComponent implements OnInit {
       });
       if (district) {
         this.startLoading = true;
-        this.wardService.postWardList(district.SNO.toString()).then((data) => {
-          let res = data as HttpDataResponse<Ward[]>;
-          if (typeof res.response === 'number') {
-            this.wards = [];
-            AppUtilities.openDisplayMessageBox(
+        this.wardService
+          .postWardList(district.SNO.toString())
+          .then((data) => {
+            let res = data as HttpDataResponse<Ward[]>;
+            if (typeof res.response === 'number') {
+              this.wards = [];
+              AppUtilities.openDisplayMessageBox(
+                this.displayMessageBox,
+                this.tr.translate(`defaults.warning`),
+                this.tr.translate(
+                  `company.summary.companyForm.dialogs.noWardForDistrict`
+                )
+              );
+            } else {
+              this.wards = res.response;
+            }
+            this.startLoading = false;
+            this.cdr.detectChanges();
+          })
+          .catch((err) => {
+            AppUtilities.requestFailedCatchError(
+              err,
               this.displayMessageBox,
-              this.tr.translate(`defaults.warning`),
-              this.tr.translate(
-                `company.summary.companyForm.dialogs.noWardForDistrict`
-              )
+              this.tr
             );
-          } else {
-            this.wards = res.response;
-          }
-          this.startLoading = false;
-          this.cdr.detectChanges();
-        });
+            this.startLoading = false;
+            this.cdr.detectChanges();
+            throw err;
+          });
       }
     });
   }
@@ -473,11 +494,16 @@ export class CompanySummaryDialogComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        // if (err instanceof TimeoutError) {
+        //   AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        // } else {
+        //   AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+        // }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -517,17 +543,23 @@ export class CompanySummaryDialogComponent implements OnInit {
     this.dialogRef.close('Vendor dialog closed');
   }
   submitCompanySummary() {
-    if (this.companySummaryForm.valid && !this.data?.companyData) {
+    if (this.companySummaryForm.valid) {
+      this.confirmAddCompany.nativeElement.showModal();
+    } else {
+      this.companySummaryForm.markAllAsTouched();
+    }
+  }
+  addCompany() {
+    if (!this.data?.companyData) {
+      this.confirmAddCompany.nativeElement.close();
       this.requestAddCompany(
         this.tr.translate(`company.summary.actions.addedCompanySuccessfully`)
       );
-    } else if (this.companySummaryForm.valid && this.data?.companyData) {
+    } else {
+      this.confirmAddCompany.nativeElement.close();
       this.requestAddCompany(
         this.tr.translate(`company.summary.actions.modifiedCompanySuccessfully`)
       );
-    } else {
-      this.companySummaryForm.markAllAsTouched();
-      this.formErrors();
     }
   }
   get compsno() {

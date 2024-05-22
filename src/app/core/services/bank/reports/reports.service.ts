@@ -3,6 +3,7 @@ import { RequestClientService } from '../../request-client.service';
 import { lastValueFrom } from 'rxjs';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { Customer } from 'src/app/core/models/bank/customer';
 
 @Injectable({
   providedIn: 'root',
@@ -19,9 +20,12 @@ export class ReportsService {
     );
     return data;
   }
-  public async getCustomerDetailsList(body: { Sno: string }) {
+  public async getCustomerDetailsList(body: { Sno: string | number }) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/InvoiceRep/getcustdetails`, body)
+      this.client.performPost<
+        { Sno: string | number },
+        HttpDataResponse<Customer[] | number | string>
+      >(`/api/InvoiceRep/getcustdetails`, body)
     );
     return data;
   }

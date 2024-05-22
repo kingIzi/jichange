@@ -83,9 +83,9 @@
         </div>
       </div>
     </div>
-    <div class="overflow-x-auto relative">
-      <div class="inline-block min-w-full py-2">
-        <div class="overflow-y-auto">
+    <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="overflow-y-auto shadow">
           <table
             #generatedInvoiceTable
             class="min-w-full text-left text-sm font-light"
@@ -152,6 +152,7 @@
                   index as i
                 "
                 class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
               >
                 <td
                   *ngIf="
@@ -302,19 +303,35 @@
                   "
                   class="text-sm font-inter whitespace-nowrap px-6 py-4"
                 >
-                  <app-submit-message-box
-                    #submitMessageBox
-                  ></app-submit-message-box>
-                  <button
-                    (click)="approveInvoice(invoice, submitMessageBox)"
-                    class="text-white rounded-sm px-4 py-1 shadow btn btn-success btn-xs"
+                  <ng-container
+                    *ngIf="
+                      userProfile.Usno.toString().toLocaleLowerCase() !==
+                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
+                    "
                   >
-                    {{
+                    <app-submit-message-box
+                      #submitMessageBox
+                    ></app-submit-message-box>
+                    <button
+                      (click)="approveInvoice(invoice, submitMessageBox)"
+                      class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
+                    >
+                      <!-- {{
                       invoice.approval_status
                         ? invoice?.approval_status?.trim()
                         : "Approve"
-                    }}
-                  </button>
+                    }} -->
+                      {{ determineApprovalStatus(invoice.approval_status) }}
+                    </button>
+                  </ng-container>
+                  <ng-container
+                    *ngIf="
+                      userProfile.Usno.toString().toLocaleLowerCase() ===
+                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
+                    "
+                  >
+                    <mark class="p-1">No Access</mark>
+                  </ng-container>
                 </td>
                 <td
                   *ngIf="

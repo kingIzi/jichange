@@ -343,9 +343,6 @@ export class CustomersListComponent implements OnInit {
     removeClient.message = 'Are you sure you want to delete this customer?';
     removeClient.openDialog();
     removeClient.remove.asObservable().subscribe((event) => {
-      // this.customers.splice(id, 1);
-      // this.successMessageBox.title = 'Customer deleted successfully';
-      // this.successMessageBox.openDialog();
       this.deleteCustomer({ sno: id });
     });
   }

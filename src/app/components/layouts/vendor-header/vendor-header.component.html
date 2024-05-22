@@ -207,7 +207,7 @@
           class="menu flex flex-col space-y-1 menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
         >
           <li>
-            <!-- <a
+            <a
               [routerLink]="'/vendor/profile/' + userProfile.Usno"
               class="flex flex-row items-center"
             >
@@ -215,8 +215,8 @@
               <p *transloco="let t; read: 'vendorRoutes'">
                 <span>{{ t("profile") }}</span>
               </p>
-            </a> -->
-            <a
+            </a>
+            <!-- <a
               (click)="tempDialog.showModal()"
               class="flex flex-row items-center"
             >
@@ -224,7 +224,7 @@
               <p *transloco="let t; read: 'vendorRoutes'">
                 <span>{{ t("profile") }}</span>
               </p>
-            </a>
+            </a> -->
           </li>
           <li>
             <a

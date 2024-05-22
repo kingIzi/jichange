@@ -5,7 +5,9 @@
       "addCompany": "Ongeza muuzaji",
       "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
       "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!",
-      "approvedCompanySuccessfully": "Kampuni imefanikiwa kwa mafanikio!"
+      "approvedCompanySuccessfully": "Kampuni imefanikiwa kwa mafanikio!",
+      "noSuspenseAccountsAvailable": "Hakuna akaunti za mashaka zinazopatikana. Je, ungependa kuunda moja?",
+      "createSuspenseAccount": "Ongeza Akaunti ya Suspense"
     },
     "companySummary": [
       "Jina",

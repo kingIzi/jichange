@@ -1,5 +1,38 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-submit-message-box #submitMessageBox></app-submit-message-box>
+<dialog #noSuspenseAccountFoundDilog id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("warning") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'company.summary.actions'">
+      {{ t("noSuspenseAccountsAvailable") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="noSuspenseAccountFoundDilog.close(); closeDialog()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'company.summary.actions'"
+          (click)="noSuspenseAccountFoundDilog.close(); addSuspenseAccount()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("createSuspenseAccount") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>

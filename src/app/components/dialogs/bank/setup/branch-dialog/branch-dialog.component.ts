@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -27,6 +30,8 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { AddBranchForm } from 'src/app/core/models/bank/forms/setup/branch/add-branch-form';
 
 @Component({
   selector: 'app-branch-dialog',
@@ -42,6 +47,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -52,7 +58,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 export class BranchDialogComponent implements OnInit {
   public branchForm!: FormGroup;
   public startLoading: boolean = false;
-  public addedBranch = new EventEmitter<Branch>();
+  public addedBranch = new EventEmitter<void>();
   private userProfile = JSON.parse(
     localStorage.getItem('userProfile') as string
   ) as LoginResponse;
@@ -60,11 +66,15 @@ export class BranchDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddBranch', { static: true })
+  confirmAddBranch!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
-    private translocoService: TranslocoService,
-    private client: RequestClientService,
+    private tr: TranslocoService,
+    //private client: RequestClientService,
+    private branchService: BranchService,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       branch: Branch;
@@ -74,22 +84,22 @@ export class BranchDialogComponent implements OnInit {
     if (this.Name.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingBranch`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingBranch`)
       );
     }
     if (this.Location.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingLocation`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingLocation`)
       );
     }
     if (this.Status.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingStatus`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingStatus`)
       );
     }
   }
@@ -111,25 +121,36 @@ export class BranchDialogComponent implements OnInit {
       Branch_Sno: this.fb.control(branch.Branch_Sno, [Validators.required]),
     });
   }
-  private addNewBranch(value: any) {
+  private addNewBranch(body: AddBranchForm, successMessage: string) {
     this.startLoading = true;
-    this.client.performPost(`/api/Branch/AddBranch`, value).subscribe({
-      next: (result: any) => {
+    this.branchService
+      .addBranch(body)
+      .then((result) => {
+        if (typeof result.response === 'number' && result.response > 0) {
+          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+          sal.then((res) => {
+            this.addedBranch.emit();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`setup.branch.form.dialog.failedToAddBranch`)
+          );
+        }
         this.startLoading = false;
-        this.addedBranch.emit(value);
-      },
-      error: (err) => {
-        this.startLoading = false;
-        AppUtilities.openDisplayMessageBox(
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
           this.displayMessageBox,
-          this.translocoService.translate(`defaults.failed`),
-          this.translocoService.translate(
-            `setup.branch.form.dialog.failedToAddBranch`
-          )
+          this.tr
         );
+        this.startLoading = false;
+        this.cdr.detectChanges();
         throw err;
-      },
-    });
+      });
   }
   ngOnInit(): void {
     if (this.data && this.data.branch) {
@@ -146,10 +167,23 @@ export class BranchDialogComponent implements OnInit {
   }
   submitBranchForm() {
     if (this.branchForm.valid) {
-      this.addNewBranch(this.branchForm.value);
+      this.confirmAddBranch.nativeElement.showModal();
+    } else {
+      this.branchForm.markAllAsTouched();
     }
-    this.branchForm.markAllAsTouched();
-    this.formErrors();
+  }
+  addBranch() {
+    if (!this.data?.branch) {
+      this.addNewBranch(
+        this.branchForm.value,
+        this.tr.translate(`setup.branch.form.dialog.addedSuccessfully`)
+      );
+    } else {
+      this.addNewBranch(
+        this.branchForm.value,
+        this.tr.translate(`setup.branch.form.dialog.updated`)
+      );
+    }
   }
   get Name() {
     return this.branchForm.get('Name') as FormControl;

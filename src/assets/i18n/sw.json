@@ -20,7 +20,8 @@
     "close": "Funga",
     "ok": "Sawa",
     "reset": "Weka upya",
-    "download": "Pakua"
+    "download": "Pakua",
+    "saveChanges": "Save changes?"
   },
   "errors": {
     "errorOccured": "Kosa limetokea",

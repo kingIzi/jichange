@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -66,6 +67,8 @@ export class WardDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddWard', { static: true })
+  confirmAddWard!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<WardDialogComponent>,
@@ -222,18 +225,23 @@ export class WardDialogComponent implements OnInit {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitWardForm() {
-    if (this.wardForm.valid && this.data.ward) {
+    if (this.wardForm.valid) {
+      this.confirmAddWard.nativeElement.showModal();
+    } else {
+      this.wardForm.markAllAsTouched();
+    }
+  }
+  addWard() {
+    if (this.data.ward) {
       this.requestInsertWard(
         this.wardForm.value,
         this.tr.translate(`setup.wardDialog.modifiedWardSuccessfully`)
       );
-    } else if (this.wardForm.valid && !this.data.ward) {
+    } else {
       this.requestInsertWard(
         this.wardForm.value,
         this.tr.translate(`setup.wardDialog.addedWardSuccessfully`)
       );
-    } else {
-      this.wardForm.markAllAsTouched();
     }
   }
   get district_sno() {

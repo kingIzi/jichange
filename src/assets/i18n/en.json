@@ -21,7 +21,8 @@
     "close": "Close",
     "ok": "Ok",
     "reset": "Reset",
-    "download": "Download"
+    "download": "Download",
+    "saveChanges": "Save changes?"
   },
   "errors": {
     "errorOccured": "Error occured",

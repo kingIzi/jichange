@@ -6,6 +6,7 @@ import {
   ViewChild,
   ChangeDetectorRef,
   ElementRef,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import {
@@ -59,6 +60,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatPaginatorModule,
     LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -94,7 +96,6 @@ export class BranchListComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private getBranchList() {
-    //this.startLoading = true;
     this.tableLoading = true;
     this.branchService
       .postBranchList({})
@@ -106,18 +107,17 @@ export class BranchListComponent implements OnInit {
           this.branchesData = [];
           this.branches = this.branchesData;
         }
-        //this.startLoading = false;
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
-        //this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
+        this.cdr.detectChanges();
         throw err;
       });
   }
@@ -175,11 +175,11 @@ export class BranchListComponent implements OnInit {
         });
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -240,12 +240,10 @@ export class BranchListComponent implements OnInit {
       width: '600px',
       disableClose: true,
     });
-    dialogRef.componentInstance.addedBranch
-      .asObservable()
-      .subscribe((value: Branch) => {
-        this.getBranchList();
-        dialogRef.close();
-      });
+    dialogRef.componentInstance.addedBranch.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.getBranchList();
+    });
   }
   openEditBranchForm(branch: Branch) {
     let dialogRef = this.dialog.open(BranchDialogComponent, {
@@ -255,17 +253,9 @@ export class BranchListComponent implements OnInit {
         branch: branch,
       },
     });
-    dialogRef.componentInstance.addedBranch.asObservable().subscribe((id) => {
-      this.getBranchList();
-      this.successMessageBox.title = this.tr.translate(
-        `setup.branch.form.dialog.updated`
-      );
-      let dialog = this.successMessageBox.openDialog();
+    dialogRef.componentInstance.addedBranch.asObservable().subscribe(() => {
       dialogRef.close();
-      timer(2000).subscribe(() => {
-        this.getBranchList();
-        dialog.close();
-      });
+      this.getBranchList();
     });
   }
   openRemoveDialog(branch: Branch, dialog: RemoveItemDialogComponent) {

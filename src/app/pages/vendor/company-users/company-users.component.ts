@@ -242,6 +242,22 @@ export class CompanyUsersComponent implements OnInit {
     let dialogRef = this.dialog.open(CompanyUsersDialogComponent, {
       width: '800px',
       disableClose: true,
+      data: {
+        companyUser: null,
+      },
+    });
+    dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestCompanyUsers();
+    });
+  }
+  openEditCompanyUserDialog(companyUser: CompanyUser) {
+    let dialogRef = this.dialog.open(CompanyUsersDialogComponent, {
+      width: '800px',
+      disableClose: true,
+      data: {
+        companyUserId: companyUser.CompuserSno,
+      },
     });
     dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
       dialogRef.close();

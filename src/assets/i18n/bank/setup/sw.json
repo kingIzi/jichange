@@ -55,6 +55,7 @@
     "deletedDistrictSuccessfully": "Wilaya ilifanikiwa kufutwa.",
     "addedDistrictSuccessfully": "Wilaya imeongezwa kwa mafanikio!",
     "modifiedDistrictSuccessfully": "Wilaya imebadilishwa kwa mafanikio!",
+    "failedToAddDistrict": "Imeshindwa kuongeza wilaya.",
     "form": {
       "placeholders": {
         "name": "Wilaya ya Ingiza",

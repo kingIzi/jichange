@@ -5,7 +5,9 @@
       "addCompany": "Add Vendor",
       "addedCompanySuccessfully": "Added Company successfully!",
       "modifiedCompanySuccessfully": "Modified company successfully!",
-      "approvedCompanySuccessfully": "Company approved successfully!"
+      "approvedCompanySuccessfully": "Company approved successfully!",
+      "noSuspenseAccountsAvailable": "No suspense accounts available. Would you like to create one?",
+      "createSuspenseAccount": "Add Suspense Account"
     },
     "companySummary": [
       "Name",

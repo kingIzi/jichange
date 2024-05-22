@@ -109,10 +109,10 @@ export class SuspenseAccountListComponent implements OnInit {
         break;
     }
   }
-  private requestSuspenseAccountList(form: {}) {
+  private requestSuspenseAccountList() {
     this.tableLoading = true;
     this.suspenseAccountService
-      .getSuspenseAccountList(form)
+      .getSuspenseAccountList({})
       .then((res: any) => {
         this.suspenseAccountsData = res.response === 0 ? [] : res.response;
         this.suspenseAccounts = this.suspenseAccountsData;
@@ -146,7 +146,7 @@ export class SuspenseAccountListComponent implements OnInit {
   }
   ngOnInit(): void {
     this.createHeadersFormGroup();
-    this.requestSuspenseAccountList({});
+    this.requestSuspenseAccountList();
   }
   openAddSuspenseAccountDialog() {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
@@ -156,9 +156,12 @@ export class SuspenseAccountListComponent implements OnInit {
         suspenseAccount: null,
       },
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
-    });
+    dialogRef.componentInstance.addedSuspenseAccount
+      .asObservable()
+      .subscribe(() => {
+        dialogRef.close();
+        this.requestSuspenseAccountList();
+      });
   }
   openEditSuspenseAccountDialog(suspenseAccount: SuspenseAccount) {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
@@ -168,6 +171,12 @@ export class SuspenseAccountListComponent implements OnInit {
         suspenseAccount: suspenseAccount,
       },
     });
+    dialogRef.componentInstance.addedSuspenseAccount
+      .asObservable()
+      .subscribe(() => {
+        dialogRef.close();
+        this.requestSuspenseAccountList();
+      });
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

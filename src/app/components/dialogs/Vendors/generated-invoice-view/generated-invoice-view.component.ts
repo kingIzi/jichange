@@ -124,7 +124,7 @@ export class GeneratedInvoiceViewComponent implements OnInit {
   }
   private modifyFormGroup() {
     this.invoiceNo.setValue(this.generatedInvoice.Invoice_No);
-    this.controlNo.setValue(this.generatedInvoice.Customer_ID_No);
+    this.controlNo.setValue(this.generatedInvoice.Control_No);
     this.dateIssued.setValue(
       this.generatedInvoice.Invoice_Date
         ? AppUtilities.dateToFormat(

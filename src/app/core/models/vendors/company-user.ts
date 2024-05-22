@@ -21,7 +21,7 @@ export class CompanyUser {
   Localization: any; // Assuming Localization can be null
   Flag: any; // Assuming Flag can be null
   Ctime!: string;
-  Userpos: any; // Assuming Userpos can be null
+  Userpos!: number | string; // Assuming Userpos can be null
   Mail_sta!: number;
   PostedBy: any; // Assuming PostedBy can be null
   PostedDate!: string;

@@ -177,8 +177,16 @@ export class DesignationListComponent implements OnInit {
     let dialogRef = this.dialog.open(DesignationDialogComponent, {
       width: '600px',
       disableClose: true,
+      data: {
+        designationData: null,
+      },
     });
-    dialogRef.afterClosed().subscribe((result) => {});
+    dialogRef.componentInstance.addedDesignation
+      .asObservable()
+      .subscribe(() => {
+        dialogRef.close();
+        this.requestDesignationList();
+      });
   }
   openEditDesignationDialog(designation: Designation) {
     let dialogRef = this.dialog.open(DesignationDialogComponent, {
@@ -188,7 +196,12 @@ export class DesignationListComponent implements OnInit {
         designationData: designation,
       },
     });
-    dialogRef.afterClosed().subscribe((result) => {});
+    dialogRef.componentInstance.addedDesignation
+      .asObservable()
+      .subscribe(() => {
+        dialogRef.close();
+        this.requestDesignationList();
+      });
   }
   openRemoveDialog(
     designation: Designation,
@@ -202,7 +215,7 @@ export class DesignationListComponent implements OnInit {
     );
     dialog.openDialog();
     dialog.remove.asObservable().subscribe(() => {
-      console.log(`Item deleted`);
+      alert('delete deisgnation.');
     });
   }
   get headers() {

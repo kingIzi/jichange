@@ -178,4 +178,18 @@ export class AppUtilities {
       AppUtilities.noInternetError(dialog, tr);
     }
   }
+
+  static pipedObservables<T>(merged: Observable<T>) {
+    let res = lastValueFrom(
+      merged.pipe(
+        map((result) => {
+          return result;
+        }),
+        catchError((err) => {
+          throw err;
+        })
+      )
+    );
+    return res;
+  }
 }

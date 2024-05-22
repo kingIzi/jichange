@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -70,6 +71,8 @@ export class RegionDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddRegion', { static: true })
+  confirmAddRegion!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RegionDialogComponent>,
@@ -229,26 +232,27 @@ export class RegionDialogComponent implements OnInit {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitRegionForm() {
-    if (this.regionForm.valid && !this.data.region) {
+    if (this.regionForm.valid) {
       let country = this.countries.find((e) => {
         return e.SNO == this.csno.value;
       });
       this.country.setValue(country?.Country_Name);
+      this.confirmAddRegion.nativeElement.showModal();
+    } else {
+      this.regionForm.markAllAsTouched();
+    }
+  }
+  addRegion() {
+    if (!this.data?.region) {
       this.requestAddRegion(
         this.regionForm.value,
         this.tr.translate(`setup.regionDialog.addedRegionSuccessfully`)
       );
-    } else if (this.regionForm.valid && this.data.region) {
-      let country = this.countries.find((e) => {
-        return e.SNO == this.csno.value;
-      });
-      this.country.setValue(country?.Country_Name);
+    } else {
       this.requestAddRegion(
         this.regionForm.value,
         this.tr.translate(`setup.regionDialog.modifiedReginSuccessfully`)
       );
-    } else {
-      this.regionForm.markAllAsTouched();
     }
   }
   get csno() {

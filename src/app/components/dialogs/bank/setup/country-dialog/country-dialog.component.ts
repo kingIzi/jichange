@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -64,10 +65,12 @@ export class CountryDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddCountry', { static: true })
+  confirmAddCountry!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private countryService: CountryService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
@@ -105,12 +108,12 @@ export class CountryDialogComponent implements OnInit {
     if (this.country_name.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.missingCountry`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.missingCountry`)
       );
     }
   }
-  private requestAddCountry(form: AddCountryForm) {
+  private requestAddCountry(form: AddCountryForm, successMessage: string) {
     this.startLoading = true;
     this.countryService
       .addCountry(form)
@@ -120,11 +123,7 @@ export class CountryDialogComponent implements OnInit {
           typeof result.response === 'number' &&
           result.response > 0
         ) {
-          let m = AppUtilities.sweetAlertSuccessMessage(
-            this.translocoService.translate(
-              `setup.countryDialog.form.dialog.addedSuccessfully`
-            )
-          );
+          let m = AppUtilities.sweetAlertSuccessMessage(successMessage);
           m.then((res) => {
             this.addedCountry.emit();
           });
@@ -153,12 +152,25 @@ export class CountryDialogComponent implements OnInit {
   }
   submitCountryForm() {
     if (this.countryForm.valid) {
-      this.requestAddCountry(this.countryForm.value);
-      //this.addedCountry.emit(this.countryForm.value);
+      this.confirmAddCountry.nativeElement.showModal();
     } else {
       this.countryForm.markAllAsTouched();
     }
-    //this.formErrors();
+  }
+  addCountry() {
+    if (!this.data?.country) {
+      this.requestAddCountry(
+        this.countryForm.value,
+        this.tr.translate(`setup.countryDialog.form.dialog.addedSuccessfully`)
+      );
+    } else {
+      this.requestAddCountry(
+        this.countryForm.value,
+        this.tr.translate(
+          `setup.countryDialog.form.dialog.modifiedSuccessfully`
+        )
+      );
+    }
   }
   get country_name() {
     return this.countryForm.get('country_name') as FormControl;

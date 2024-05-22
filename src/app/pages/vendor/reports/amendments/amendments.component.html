@@ -228,9 +228,9 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto">
+          <div class="overflow-y-auto shadow">
             <table
               [formGroup]="tableFormGroup"
               class="min-w-full text-left text-sm font-light"
@@ -285,9 +285,10 @@
                             paginator.pageSize * paginator.pageIndex +
                             paginator.pageSize -
                             1;
-                    index as ind
+                    index as i
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
                 ></tr>
               </tbody>
             </table>

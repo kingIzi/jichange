@@ -164,7 +164,7 @@
         </button>
       </div>
     </form>
-    <div class="flex flex-col px-2 py-4">
+    <div [formGroup]="headerFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-end">
         <div class="flex flex-row items-center space-x-2">
           <div class="dropdown">
@@ -206,8 +206,7 @@
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
               [placeholder]="t('search')"
-              #searchInput
-              (keyup)="searchTable(searchInput.value, paginator)"
+              [formControl]="tableSearch"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -220,10 +219,7 @@
       <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
-            <table
-              [formGroup]="headerFormGroup"
-              class="min-w-full text-left text-sm font-light"
-            >
+            <table class="min-w-full text-left text-sm font-light">
               <thead formArrayName="headers" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
@@ -256,12 +252,12 @@
                       </div>
                     </th>
                   </ng-container>
-                  <th
+                  <!-- <th
                     *transloco="let t; read: 'defaults'"
                     class="px-6 font-inter text-sm text-right"
                   >
                     {{ t("action") }}
-                  </th>
+                  </th> -->
                 </tr>
               </thead>
               <tbody>
@@ -277,6 +273,7 @@
                     index as ind
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                  [class]="ind % 2 !== 0 ? 'bg-neutral-50' : ''"
                 >
                   <td
                     *ngIf="
@@ -399,43 +396,26 @@
                     }}
                     TZS
                   </td>
-                  <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
-                    <div
-                      class="flex flex-row items-center justify-end space-x-2"
-                    >
-                      <button class="btn btn-sm bg-transparent">
-                        <span class="material-symbols-outlined text-info">
-                          edit
-                        </span>
-                      </button>
-                      <button class="btn btn-sm bg-transparent">
-                        <span class="material-symbols-outlined text-danger-600">
-                          cancel
-                        </span>
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               </tbody>
             </table>
             <ng-container *ngIf="!tableLoading">
               <div *transloco="let t; read: 'errors'">
                 <p
-                  *ngIf="invoiceReports.length <= 0"
+                  *ngIf="companies.length <= 0"
                   class="text-center text-sm tracking-wide pt-3 pb-1"
                 >
                   {{ t("noDataFound") }}
                 </p>
               </div>
             </ng-container>
-            <div
-              *ngIf="tableLoading"
-              class="w-full grid place-items-center mt-6"
-            >
-              <span
-                class="loading loading-spinner loading-sm bg-darkPurple"
-              ></span>
-            </div>
+            <ng-container *ngIf="tableLoading">
+              <div class="w-full grid place-items-center mt-6">
+                <span
+                  class="loading loading-spinner loading-sm bg-darkPurple"
+                ></span>
+              </div>
+            </ng-container>
           </div>
         </div>
       </div>
