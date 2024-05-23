@@ -30,7 +30,7 @@ export class RequestClientService {
   public performGet<T>(url: string) {
     return this.get(url).pipe(
       map((result) => {
-        return result;
+        return result as T;
       })
     );
   }

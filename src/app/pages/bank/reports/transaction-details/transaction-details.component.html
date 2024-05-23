@@ -90,43 +90,6 @@
             </li>
           </ul>
         </div>
-        <div class="dropdown">
-          <button
-            tabindex="0"
-            role="button"
-            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
-          >
-            <span class="material-symbols-outlined text-sm"> label </span>
-            <p
-              *transloco="let t; read: 'tableData.vendor'"
-              class="lg:block hidden"
-            >
-              {{ headers.at(headersMap.STATUS).get("label")?.value }}
-            </p>
-            <span class="material-symbols-outlined lg:block hidden">
-              arrow_drop_down
-            </span>
-          </button>
-          <ul
-            tabindex="0"
-            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-          >
-            <li
-              *ngFor="let control of getValueArray(headersMap.STATUS)?.controls"
-            >
-              <label class="label cursor-pointer">
-                <span class="label-text text-xs font-normal">{{
-                  control.get("name")?.value
-                }}</span>
-                <input
-                  type="checkbox"
-                  [formControl]="getFormControl(control, 'isActive')"
-                  class="checkbox checkbox-xs"
-                />
-              </label>
-            </li>
-          </ul>
-        </div>
         <div class="relative">
           <input
             *transloco="let t; read: 'defaults'"

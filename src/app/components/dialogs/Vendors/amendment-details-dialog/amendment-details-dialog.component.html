@@ -1,18 +1,44 @@
-<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
+<app-display-message-box #displayMessageBox></app-display-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
-<app-display-message-box #displayMessageBox></app-display-message-box>
-<app-success-message-box #successMessageBox></app-success-message-box>
-<app-confirm-add-customer-dialog
-  #confirmAddCustomer
-></app-confirm-add-customer-dialog>
-<app-submit-message-box #submitMessageBox></app-submit-message-box>
+
+<dialog #confirmAddAmendment id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("confirm") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'actions'">
+      {{ t("saveChanges") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddAmendment.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddAmendment.close(); addAmendment()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("confirm") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
 
 <div class="flex flex-col w-full h-full">
   <form
     id="control-number-form"
-    [formGroup]="invoiceDetailsForm"
+    [formGroup]="formGroup"
     class="py-10 px-10 flex flex-col divide-y h-full"
   >
     <h1 *transloco="let t; read: 'invoice'" class="text-xl md:text-2xl p-0">
@@ -109,7 +135,6 @@
         </p>
         <select
           #customerInput
-          (change)="changeCustomer(customerInput.value)"
           [formControl]="chus"
           class="select select-sm select-bordered w-full font-normal"
         >
@@ -224,6 +249,26 @@
             class="text-xs text-red-600"
           >
             {{ t("invoiceRemark") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'generated.form'" class="text-xs">
+          {{ t("reason") }}
+        </p>
+        <input
+          *transloco="let t; read: 'generated.form.placeholders'"
+          type="text"
+          [placeholder]="t('reason')"
+          class="input input-sm input-bordered font-inter"
+          [formControl]="reason"
+        />
+        <span *ngIf="reason && reason.invalid && reason.touched">
+          <p
+            *transloco="let t; read: 'generated.form.errors'"
+            class="text-xs text-red-600"
+          >
+            {{ t("reason") }}
           </p>
         </span>
       </div>

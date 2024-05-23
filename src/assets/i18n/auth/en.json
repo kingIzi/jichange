@@ -2,17 +2,17 @@
   "loginForm": {
     "welcomeMessage": "Sign in to your account",
     "signInMessage": "Enter your email & password to login",
-    "username": "Email address",
+    "username": "Username",
     "password": "Password",
     "placeholders": {
-      "username": "Enter email address",
+      "username": "Enter username",
       "password": "Enter password"
     },
     "success": {
       "loginSuccess": "Logged in successfully"
     },
     "errors": {
-      "usernameError": "Please enter a valid email",
+      "usernameError": "Please enter your username",
       "passwordError": "Please enter your password",
       "dialogs": {
         "invalidFormError": "Invalid form",

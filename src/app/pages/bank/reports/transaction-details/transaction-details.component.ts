@@ -24,7 +24,7 @@ import { TransactionDetailsEditComponent } from 'src/app/components/dialogs/bank
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { TransactionDetailsTableHeadersMap } from 'src/app/core/enums/bank/reports/transaction-details-table-headers-map';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
-import * as json from 'src/assets/temp/data.json';
+//import * as json from 'src/assets/temp/data.json';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -216,9 +216,9 @@ export class TransactionDetailsComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    let data = JSON.parse(JSON.stringify(json));
-    this.transactionsData = data.transactionDetails;
-    this.transactions = this.transactionsData;
+    //let data = JSON.parse(JSON.stringify(json));
+    //this.transactionsData = data.transactionDetails;
+    //this.transactions = this.transactionsData;
     this.createHeadersFormGroup();
   }
   //returns true if column index as cash amount as values

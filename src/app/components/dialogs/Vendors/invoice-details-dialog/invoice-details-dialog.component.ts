@@ -23,7 +23,12 @@ import {
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from '../../display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from '../../success-message-box/success-message-box.component';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { BranchDialogComponent } from '../../bank/setup/branch-dialog/branch-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import * as json from 'src/assets/temp/data.json';
@@ -40,6 +45,8 @@ import { Currency } from 'src/app/core/models/vendors/currency';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { SubmitMessageBoxComponent } from '../../submit-message-box/submit-message-box.component';
+import { CustomersDialogComponent } from '../customers-dialog/customers-dialog.component';
+import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 
 @Component({
   selector: 'app-invoice-details-dialog',
@@ -57,6 +64,7 @@ import { SubmitMessageBoxComponent } from '../../submit-message-box/submit-messa
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
     SubmitMessageBoxComponent,
+    MatDialogModule,
   ],
   providers: [
     {
@@ -70,7 +78,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   private userProfile!: LoginResponse;
   public generatedInvoice!: GeneratedInvoice;
   public invoices: GeneratedInvoice[] = [];
-  public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
+  public customers: CustomerName[] = [];
   public currencies: Currency[] = [];
   public companies!: { Comp_Mas_Sno: number; Company_Name: string };
   public invoiceDetailsForm!: FormGroup;
@@ -84,6 +92,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   confirmAddCustomer!: ConfirmAddCustomerDialogComponent;
   @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
   constructor(
+    private dialog: MatDialog,
     private fb: FormBuilder,
     private router: Router,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
@@ -95,7 +104,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       userProfile: LoginResponse;
       invid: number;
       customerId: number;
-    } //@Inject(MAT_DIALOG_DATA) public data: any
+    }
   ) {}
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
@@ -315,15 +324,6 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       this.tr.translate(`invoice.form.dialog.invoiceExists`)
     );
   }
-  private invoiceAddedSuccesfullyMessage() {
-    let dialog = AppUtilities.openSuccessMessageBox(
-      this.successMessageBox,
-      this.tr.translate('invoice.form.dialog.addedInvoiceSuccessfully')
-    );
-    dialog.addEventListener('close', () => {
-      this.closeDialog();
-    });
-  }
   private requestAddInvoiceForm(value: AddInvoiceForm) {
     this.startLoading = true;
     this.invoiceService
@@ -485,13 +485,23 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   }
   changeCustomer(value: string) {
     let addCustomer = this.tr.translate(`invoice.form.addNewCustomer`);
-    if (value.toLocaleLowerCase() === addCustomer.toLocaleLowerCase()) {
-      this.openAddCustomerConfirmForm();
-      this.confirmAddCustomer.confirm.asObservable().subscribe(() => {
-        this.router.navigate(['/vendor/customers', { addCustomer: true }]);
-        this.closeDialog();
-      });
+    if (value.toLocaleLowerCase() != addCustomer.toLocaleLowerCase()) {
+      return;
     }
+    let dialogRef = this.dialog.open(CustomersDialogComponent, {
+      width: '800px',
+      disableClose: true,
+    });
+    dialogRef.componentInstance.attachInvoice
+      .asObservable()
+      .subscribe((customerId) => {
+        dialogRef.close();
+        this.buildPage();
+      });
+    dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.buildPage();
+    });
   }
   get invno() {
     return this.invoiceDetailsForm.get('invno') as FormControl;

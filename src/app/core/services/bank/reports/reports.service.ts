@@ -4,17 +4,14 @@ import { lastValueFrom } from 'rxjs';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Customer } from 'src/app/core/models/bank/customer';
+import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/vendor-details-report-form';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReportsService {
   constructor(private client: RequestClientService) {}
-  public async postCustomerDetailsReport(body: {
-    Comp: string;
-    reg: string;
-    dist: string;
-  }) {
+  public async postCustomerDetailsReport(body: VendorDetailsReportForm) {
     let data = await lastValueFrom(
       this.client.performPost(`/api/RepCustomer/getcustdetreport`, body)
     );

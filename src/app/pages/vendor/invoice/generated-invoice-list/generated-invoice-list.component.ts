@@ -48,6 +48,7 @@ import { CancelGeneratedInvoiceComponent } from 'src/app/components/dialogs/Vend
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/generated-invoice-list-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { AmendmentDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/amendment-details-dialog/amendment-details-dialog.component';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -88,14 +89,6 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public InvoiceListTable: typeof GeneratedInvoiceListTable =
     GeneratedInvoiceListTable;
-  // public headersMap = {
-  //   CUSTOMER_NAME: 0,
-  //   INVOICE_NUMBER: 1,
-  //   INVOICE_DATE: 2,
-  //   PAYMENT_TYPE: 3,
-  //   TOTAL_AMOUNT: 4,
-  //   DELIVERY_STATUS: 5,
-  // };
   @ViewChild('generatedInvoiceTable', { static: true })
   generatedInvoiceTable!: ElementRef<HTMLTableElement>;
   @ViewChild('successMessageBox')
@@ -334,8 +327,20 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       );
       m.then((res) => {
         this.requestGeneratedInvoice();
-        //this.requestCreatedInvoiceList();
       });
+    });
+  }
+  openAmmendInvoiceDialog(invoice: GeneratedInvoice) {
+    let dialogRef = this.dialog.open(AmendmentDetailsDialogComponent, {
+      width: '800px',
+      disableClose: true,
+      data: {
+        invid: invoice.Inv_Mas_Sno,
+      },
+    });
+    dialogRef.componentInstance.amended.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestGeneratedInvoice();
     });
   }
   getActiveStatusStyles(status: string) {

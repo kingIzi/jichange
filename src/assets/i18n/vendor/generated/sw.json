@@ -10,11 +10,23 @@
     "Jumla",
     "Hali ya Uwasilishaji"
   ],
+  "invoiceAmendedSuccessfully": "Ankara iliyorekebishwa kwa mafanikio!",
   "failedToRetrieveInvoice": "Imeshindwa kurejesha ankara iliyozalishwa.",
   "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!",
   "noItemsFound": "Hakuna vipengee vilivyopatikana kwa ankara {}",
   "generateInvoiceView": {
     "viewTable": ["Maelezo", "Kiasi", "Bei", "Jumla"]
+  },
+  "noCustomersFound": "Hakuna Wateja waliopatikana!",
+  "noCurrenciesFound": "Hakuna sarafu zilizopatikana!",
+  "form": {
+    "reason": "Sababu",
+    "placeholders": {
+      "reason": "Weka sababu"
+    },
+    "errors": {
+      "reason": "Tafadhali weka sababu"
+    }
   },
   "errors": {
     "noCustomersFound": "Hakuna wateja waliopatikana.",

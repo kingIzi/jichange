@@ -362,33 +362,30 @@
                 </td>
                 <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
                   <div class="flex flex-row items-center justify-between">
-                    <button (click)="openInvoiceReportView(invoice)">
+                    <button
+                      class="btn btn-xs btn-ghost"
+                      (click)="openInvoiceReportView(invoice)"
+                    >
                       <span class="material-symbols-outlined text-warning">
                         visibility
                       </span>
                     </button>
-                    <button (click)="openEditInvoiceDialog(invoice)">
+                    <button
+                      class="btn btn-xs btn-ghost"
+                      (click)="openEditInvoiceDialog(invoice)"
+                    >
                       <span class="material-symbols-outlined text-info">
                         edit
                       </span>
                     </button>
-                    <button (click)="downloadInvoice(invoice)">
+                    <button
+                      class="btn btn-xs btn-ghost"
+                      (click)="downloadInvoice(invoice)"
+                    >
                       <span class="material-symbols-outlined text-linkBlue">
                         download
                       </span>
                     </button>
-                    <!-- <button
-                      (click)="
-                        cancelInvoice(
-                          invoice.Invoice_No,
-                          cancelGeneratedInvoice
-                        )
-                      "
-                    >
-                      <span class="material-symbols-outlined text-danger-600">
-                        close
-                      </span>
-                    </button> -->
                   </div>
                 </td>
               </tr>

@@ -6,6 +6,8 @@ import { HttpDataResponse } from '../../models/http-data-response';
 import { GeneratedInvoice } from '../../models/vendors/generated-invoice';
 import { AddCancelForm } from '../../models/vendors/forms/add-cancel-form';
 import { CustomerName } from '../../models/vendors/customer-name';
+import { AmendInvoiceForm } from '../../models/vendors/forms/amend-invoice-form';
+import { Currency } from '../../models/vendors/currency';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +39,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: number | string; invid: number | string },
-        HttpDataResponse<GeneratedInvoice>
+        HttpDataResponse<GeneratedInvoice | string>
       >(`/api/Invoice/GetSignedInvoiceByid`, body)
     );
     return data;
@@ -62,7 +64,9 @@ export class InvoiceService {
   }
   public async getCurrencyCodes() {
     let data = await lastValueFrom(
-      this.client.performGet(`/api/Invoice/GetCurrency`)
+      this.client.performGet<HttpDataResponse<Currency[] | number>>(
+        `/api/Invoice/GetCurrency`
+      )
     );
     return data;
   }
@@ -93,6 +97,15 @@ export class InvoiceService {
         `/api/Invoice/AddCancel`,
         body
       )
+    );
+    return data;
+  }
+  public async addAmendment(body: AmendInvoiceForm) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        AmendInvoiceForm,
+        HttpDataResponse<number | string>
+      >(`/api/Invoice/AddAmend`, body)
     );
     return data;
   }

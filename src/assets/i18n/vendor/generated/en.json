@@ -10,11 +10,23 @@
     "Total Amount",
     "Delivery Status"
   ],
+  "invoiceAmendedSuccessfully": "Amended invoice successfully!",
   "failedToRetrieveInvoice": "Failed to retrieve generated invoice.",
   "addedInvoiceSuccessfully": "Added invoice successfully!",
   "noItemsFound": "No items found for invoice {}",
   "generateInvoiceView": {
     "viewTable": ["Description", "Quantity", "Unit Price", "Subtotal"]
+  },
+  "noCustomersFound": "No Customers found!",
+  "noCurrenciesFound": "No currencies found!",
+  "form": {
+    "reason": "Reason",
+    "placeholders": {
+      "reason": "Enter reason"
+    },
+    "errors": {
+      "reason": "Please enter reason"
+    }
   },
   "errors": {
     "noCustomersFound": "No customers found.",

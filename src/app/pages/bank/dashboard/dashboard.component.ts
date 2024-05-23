@@ -20,7 +20,7 @@ import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-f
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Chart, initTE } from 'tw-elements';
 import { BreadcrumbService } from 'xng-breadcrumb';
-import * as json from 'src/assets/temp/data.json';
+//import * as json from 'src/assets/temp/data.json';
 import {
   PageEvent,
   MatPaginatorModule,
@@ -53,6 +53,8 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
 import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approval/approval.service';
 import { CompanyInboxListForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-inbox-list-form';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/vendor-details-report-form';
 
 @Component({
   selector: 'app-dashboard',
@@ -129,17 +131,9 @@ export class DashboardComponent implements OnInit {
   public tableHeadersFormGroup!: FormGroup;
   public vendorReportForm!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  //public MoneyUtils: typeof MoneyUtils = MoneyUtils;
   public VendorDetailsReportTable: typeof VendorDetailsReportTable =
     VendorDetailsReportTable;
   @ViewChild('paginator') paginator!: MatPaginator;
-  // public headersMap = {
-  //   CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
-  //   CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
-  //   EMAIL: VendorDetailsReportTable.EMAIL,
-  //   ADDRESS: VendorDetailsReportTable.ADDRESS,
-  //   DATE_POSTED: VendorDetailsReportTable.DATE_POSTED,
-  // };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -157,9 +151,9 @@ export class DashboardComponent implements OnInit {
   ) {}
   private createVendorReportForm() {
     this.vendorReportForm = this.fb.group({
-      Comp: this.fb.control('', [Validators.required]),
-      reg: this.fb.control('', [Validators.required]),
-      dist: this.fb.control('', [Validators.required]),
+      Comp: this.fb.control('0', [Validators.required]),
+      reg: this.fb.control('0', [Validators.required]),
+      dist: this.fb.control('0', [Validators.required]),
     });
     this.regionChangeEventHandler();
   }
@@ -229,30 +223,14 @@ export class DashboardComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate(
-        'dashboard.customerDetailReport.customerDetailReportTable',
-        {},
-        this.scope
-      )
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index < 5, []),
-            values: this.fb.array([], []),
-          });
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `dashboard.customerDetailReport.customerDetailReportTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchVendorDetailTable(value, this.paginator);
     });
@@ -354,7 +332,7 @@ export class DashboardComponent implements OnInit {
         throw err;
       });
   }
-  private requestCustomerDetails(form: any) {
+  private requestCustomerDetails(form: VendorDetailsReportForm) {
     this.customersData = [];
     this.customers = this.customersData;
     this.tableLoading = true;
@@ -393,21 +371,6 @@ export class DashboardComponent implements OnInit {
     }
     return keys;
   }
-  private companyApprovedSuccessullyMessage() {
-    let dialog = AppUtilities.openSuccessMessageBox(
-      this.successMessageBox,
-      this.tr.translate(`company.summary.actions.approvedCompanySuccessfully`)
-    );
-  }
-  private failedToApproveCompanyMessage() {
-    let dialog = AppUtilities.openDisplayMessageBox(
-      this.displayMessageBox,
-      this.tr.translate(`defaults.failed`),
-      this.tr.translate(
-        `company.summary.companyForm.dialogs.failedToApproveCompany`
-      )
-    );
-  }
   private searchVendorDetailTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
@@ -431,9 +394,10 @@ export class DashboardComponent implements OnInit {
     this.createTableHeadersFormGroup();
     this.buildPage();
     this.breadcrumbService.set('@dashboard', 'Child One');
-    let data = JSON.parse(JSON.stringify(json));
-    this.transactions = data.transactionDetails;
+    //let data = JSON.parse(JSON.stringify(json));
+    //this.transactions = data.transactionDetails;
     this.requestInboxApprovals();
+    this.requestCustomerDetails(this.vendorReportForm.value);
   }
   transactionsLatest(): any[] {
     let groupedByDate = this.transactions.reduce((acc, obj) => {
@@ -469,11 +433,11 @@ export class DashboardComponent implements OnInit {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
   submitTableFilterForm() {
-    if (!this.vendorReportForm.valid) {
-      this.formErrors();
-      return;
+    if (this.vendorReportForm.valid) {
+      this.requestCustomerDetails(this.vendorReportForm.value);
+    } else {
+      this.vendorReportForm.markAllAsTouched();
     }
-    this.requestCustomerDetails(this.vendorReportForm.value);
   }
   dateToFormat(date: string) {
     return new Date(date);

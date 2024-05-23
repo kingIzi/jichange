@@ -287,16 +287,23 @@
                   ></app-cancel-generated-invoice>
                   <div class="flex flex-row items-center justify-between">
                     <button
+                      class="btn btn-xs btn-ghost"
                       (click)="openGeneratedInvoiceView(generatedInvoice)"
                     >
                       <span class="material-symbols-outlined text-warning">
                         visibility
                       </span>
                     </button>
-                    <button>
+                    <button
+                      (click)="openAmmendInvoiceDialog(generatedInvoice)"
+                      class="btn btn-xs btn-ghost"
+                    >
                       <span class="material-symbols-outlined"> cached </span>
                     </button>
-                    <button (click)="downloadInvoice(generatedInvoice)">
+                    <button
+                      class="btn btn-xs btn-ghost"
+                      (click)="downloadInvoice(generatedInvoice)"
+                    >
                       <span class="material-symbols-outlined text-linkBlue">
                         download
                       </span>
