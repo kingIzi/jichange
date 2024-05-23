@@ -4,7 +4,7 @@
   [show]="startLoading"
 ></app-loader-infinite-spinner>
 
-<div
+<!-- <div
   class="absolute py-2 top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4"
 >
   <div class="w-full h-full flex flex-col xl:flex-row space-x-2 relative">
@@ -559,12 +559,12 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
-<!-- <div
+<div
   class="absolute py-2 top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-4 overflow-y-auto"
 >
-  <div
+  <!-- <div
     class="w-full col-span-full row-span-12 lg:row-span-4 lg:col-span-8 flex flex-col space-y-2"
   >
     <div class="flex flex-row w-full items-center justify-between">
@@ -576,7 +576,7 @@
       </p>
     </div>
     <div
-      class="w-full h-fit flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden"
+      class="w-full h-fit py-12 flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden"
     >
       <app-dashboard-overview-card
         *ngFor="let overviewCard of overviewCards; index as i"
@@ -587,6 +587,46 @@
         [increase]="overviewCard.increase"
         [lang]="overviewCard.lang"
       ></app-dashboard-overview-card>
+    </div>
+  </div> -->
+  <div
+    class="w-full col-span-full row-span-12 lg:row-span-4 lg:col-span-8 flex flex-col space-y-2 relative"
+  >
+    <div class="absolute top-0 left-0 right-0 bottom-0 flex flex-col">
+      <div class="flex flex-row flex-none w-full items-center justify-between">
+        <p
+          *transloco="let t; read: 'dashboard.dashboard.overview'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("name") }}
+        </p>
+      </div>
+      <div
+        class="grow flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden"
+      >
+        <app-dashboard-overview-card
+          *ngFor="let overviewCard of overviewCards; index as i"
+          [imgUrl]="overviewCard.imgUrl"
+          [label]="overviewCard.label"
+          [viewMoreLink]="overviewCard.link"
+          [statistic]="overviewCard.statistic"
+          [increase]="overviewCard.increase"
+          [lang]="overviewCard.lang"
+        ></app-dashboard-overview-card>
+      </div>
+      <!-- <div
+        class="w-full h-fit grow flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden"
+      >
+        <app-dashboard-overview-card
+          *ngFor="let overviewCard of overviewCards; index as i"
+          [imgUrl]="overviewCard.imgUrl"
+          [label]="overviewCard.label"
+          [viewMoreLink]="overviewCard.link"
+          [statistic]="overviewCard.statistic"
+          [increase]="overviewCard.increase"
+          [lang]="overviewCard.lang"
+        ></app-dashboard-overview-card>
+      </div> -->
     </div>
   </div>
   <div
@@ -1100,4 +1140,4 @@
       </div>
     </div>
   </div>
-</div> -->
+</div>

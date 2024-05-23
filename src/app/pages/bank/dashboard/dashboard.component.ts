@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewChecked,
   AfterViewInit,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -61,6 +62,7 @@ import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
@@ -322,11 +324,11 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.inboxApprovalLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -338,18 +340,29 @@ export class DashboardComponent implements OnInit {
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
-      .then((results: any) => {
+      .then((results) => {
+        if (
+          typeof results.response !== 'string' &&
+          typeof results.response !== 'number'
+        ) {
+          this.customersData = results.response;
+          this.customers = this.customersData;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`defaults.errors.noDataFound`)
+          );
+        }
         this.tableLoading = false;
-        this.customersData = results.response === 0 ? [] : results.response;
-        this.customers = this.customersData;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -394,8 +407,6 @@ export class DashboardComponent implements OnInit {
     this.createTableHeadersFormGroup();
     this.buildPage();
     this.breadcrumbService.set('@dashboard', 'Child One');
-    //let data = JSON.parse(JSON.stringify(json));
-    //this.transactions = data.transactionDetails;
     this.requestInboxApprovals();
     this.requestCustomerDetails(this.vendorReportForm.value);
   }

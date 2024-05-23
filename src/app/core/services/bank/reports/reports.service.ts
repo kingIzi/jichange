@@ -13,7 +13,10 @@ export class ReportsService {
   constructor(private client: RequestClientService) {}
   public async postCustomerDetailsReport(body: VendorDetailsReportForm) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/RepCustomer/getcustdetreport`, body)
+      this.client.performPost<
+        VendorDetailsReportForm,
+        HttpDataResponse<Customer[] | string | number>
+      >(`/api/RepCustomer/getcustdetreport`, body)
     );
     return data;
   }
