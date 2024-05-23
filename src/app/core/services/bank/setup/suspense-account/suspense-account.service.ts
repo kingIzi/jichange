@@ -11,10 +11,10 @@ export class SuspenseAccountService {
   constructor(private client: RequestClientService) {}
   public async getSuspenseAccountList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<any, HttpDataResponse<SuspenseAccount[]>>(
-        `/api/SuspenseA/GetAccount`,
-        body
-      )
+      this.client.performPost<
+        any,
+        HttpDataResponse<SuspenseAccount[] | number | string>
+      >(`/api/SuspenseA/GetAccount`, body)
     );
     return data;
   }

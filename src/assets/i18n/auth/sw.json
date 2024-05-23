@@ -49,7 +49,7 @@
         "mobileNo": "Tafadhali ongeza nambari halali ya simu",
         "branch": "Tafadhali bainisha",
         "accountNo": "Ingiza namba halali ya akaunti",
-        "invalidAccountNo": "Namba ya akaunti batili",
+        "invalidAccountNo": "Nambari ya akaunti si sahihi. Lazima ianze na 015, 012, au 01J na iwe na vibambo 13.",
         "dialogs": {
           "invalidFormError": "Fomu batili",
           "missingVendorName": "Tafadhali toa jina la muuzaji",
@@ -57,7 +57,9 @@
           "missingBranchName": "Tafadhali toa jina la Tawi",
           "missingAccountNo": "Tafadhali toa namba ya akaunti",
           "makerChecker": "Tafadhali, taja hitaji la idhini ya ombi lako",
-          "invalidAccounntNo": "Namba ya akaunti uliyoingiza ni batili."
+          "invalidAccounntNo": "Namba ya akaunti uliyoingiza ni batili.",
+          "mobileNumberExists": "Nambari ya simu uliyoweka tayari ipo.",
+          "vendorExists": "Jina la mchuuzi ambalo umeingiza tayari lipo."
         }
       },
       "success": {

@@ -86,19 +86,31 @@ export class DepositAccountListComponent implements OnInit {
     this.depositAccountService
       .getDepositAccountList({})
       .then((result) => {
-        this.tableLoading = false;
-        this.depositAccountsData = result.response;
-        this.depositAccounts = this.depositAccountsData;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
+        if (
+          typeof result.response !== 'number' &&
+          typeof result.response !== 'string'
+        ) {
+          this.depositAccountsData = result.response;
+          this.depositAccounts = this.depositAccountsData;
         } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
       });
   }
   private createTableHeadersFormGroup() {

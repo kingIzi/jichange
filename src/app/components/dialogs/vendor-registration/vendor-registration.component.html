@@ -25,7 +25,7 @@
         <input
           type="text"
           [placeholder]="t('placeholders.vendorName')"
-          class="input input-bordered w-full max-w-lg bg-transparent text-black"
+          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
           [formControl]="compname"
         />
         <span *ngIf="compname && compname.invalid && compname.touched">
@@ -39,7 +39,7 @@
           {{ t("mobileNo") }} <span class="text-red-600">*</span>
         </h6>
         <app-phone-number-input
-          [inputSize]="''"
+          [inputSize]="'sm'"
           [mobileNumber]="mob"
         ></app-phone-number-input>
         <span *ngIf="mob && mob.invalid && mob.touched">
@@ -54,7 +54,7 @@
         </h6>
         <select
           [formControl]="branch"
-          class="select select-bordered w-full max-w-xs"
+          class="select select-sm select-bordered w-full max-w-xs"
         >
           <option
             disabled
@@ -86,7 +86,7 @@
           type="text"
           [formControl]="accno"
           [placeholder]="t('placeholders.accountNo')"
-          class="input input-bordered w-full max-w-lg bg-transparent text-black font-inter"
+          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black font-inter"
         />
         <span *ngIf="accno && accno.invalid && accno.touched">
           <p *ngIf="accno.hasError('required')" class="text-xs text-red-600">
@@ -114,7 +114,7 @@
                 type="radio"
                 name="Checker"
                 [formControl]="check_status"
-                class="radio radio-xs"
+                class="radio radio-sm"
                 [value]="t('makerOptions.yes')"
                 checked
               />
@@ -130,7 +130,7 @@
                 type="radio"
                 name="Checker"
                 [value]="t('makerOptions.no')"
-                class="radio radio-xs"
+                class="radio radio-sm"
               />
             </label>
           </div>

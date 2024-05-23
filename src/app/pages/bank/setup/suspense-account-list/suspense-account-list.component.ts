@@ -113,19 +113,30 @@ export class SuspenseAccountListComponent implements OnInit {
     this.tableLoading = true;
     this.suspenseAccountService
       .getSuspenseAccountList({})
-      .then((res: any) => {
-        this.suspenseAccountsData = res.response === 0 ? [] : res.response;
-        this.suspenseAccounts = this.suspenseAccountsData;
+      .then((result) => {
+        if (
+          typeof result.response !== 'number' &&
+          typeof result.response !== 'string'
+        ) {
+          this.suspenseAccountsData = result.response;
+          this.suspenseAccounts = this.suspenseAccountsData;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
         this.cdr.detectChanges();
         throw err;
       });

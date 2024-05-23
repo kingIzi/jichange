@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { RequestClientService } from '../../../request-client.service';
 import { lastValueFrom } from 'rxjs';
-import { AddCompanyL } from 'src/app/core/models/bank/forms/company/summary/add-company-l';
+import { AddCompanyL as AddCompanyLForm } from 'src/app/core/models/bank/forms/company/summary/add-company-l';
 import { AddCompany } from 'src/app/core/models/bank/forms/company/summary/add-company';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Company } from 'src/app/core/models/bank/company/company';
@@ -18,9 +18,12 @@ export class CompanyService {
     );
     return data;
   }
-  public async addCompanyL(body: AddCompanyL) {
+  public async addCompanyL(body: AddCompanyLForm) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Company/AddCompanyBankL`, body)
+      this.client.performPost<
+        AddCompanyLForm,
+        HttpDataResponse<number | string | boolean>
+      >(`/api/Company/AddCompanyBankL`, body)
     );
     return data;
   }

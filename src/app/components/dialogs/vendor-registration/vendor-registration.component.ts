@@ -140,8 +140,39 @@ export class VendorRegistrationComponent implements OnInit {
     this.companyService
       .addCompanyL(form)
       .then((results) => {
-        console.log(results);
-        this.submitSuccessfull();
+        if (
+          typeof results.response === 'string' &&
+          results.response.toLocaleLowerCase() ==
+            'Mobile number already exist'.toLocaleLowerCase()
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(
+              `auth.vendorRegistration.form.errors.dialogs.mobileNumberExists`
+            )
+          );
+        } else if (
+          typeof results.response === 'string' &&
+          results.response.toLocaleLowerCase() == 'EXIST'.toLocaleLowerCase()
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(
+              `auth.vendorRegistration.form.errors.dialogs.vendorExists`
+            )
+          );
+        } else {
+          let sal = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(
+              `auth.vendorRegistration.form.success.vendorAddedSuccessfully`
+            )
+          );
+          sal.then((res) => {
+            this.closeDialog();
+          });
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
       })
