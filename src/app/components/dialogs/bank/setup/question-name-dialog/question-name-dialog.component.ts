@@ -101,6 +101,7 @@ export class QuestionNameDialogComponent implements OnInit {
       q_qstatus: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      dummy: this.fb.control(true, []),
     });
   }
   private createEditForm(questionName: QuestionName) {
@@ -109,6 +110,7 @@ export class QuestionNameDialogComponent implements OnInit {
       q_qstatus: this.fb.control(questionName.Q_Status, [Validators.required]),
       sno: this.fb.control(questionName.SNO, [Validators.required]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      dummy: this.fb.control(true, []),
     });
   }
   private requestPostQuestioName(form: AddQuestionName) {
@@ -118,11 +120,10 @@ export class QuestionNameDialogComponent implements OnInit {
       .then((result) => {
         this.startLoading = false;
         if (typeof result.response === 'number' && result.response > 0) {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.questionName.addedQuestionSuccessfully`)
           );
-          dialog.addEventListener('close', () => {
+          sal.then((res) => {
             this.added.emit();
           });
         } else {

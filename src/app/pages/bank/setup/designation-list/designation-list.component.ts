@@ -43,6 +43,9 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/district/remove-district-form';
+import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-designation-list',
@@ -70,6 +73,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
   ],
 })
 export class DesignationListComponent implements OnInit {
+  public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public designations: Designation[] = [];
@@ -87,6 +91,12 @@ export class DesignationListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
@@ -165,7 +175,48 @@ export class DesignationListComponent implements OnInit {
       this.requestDesignationList();
     }
   }
+  private requestDeleteDesignation(body: RemoveDesignationForm) {
+    this.startLoading = true;
+    this.designationService
+      .deleteDesignation(body)
+      .then((result) => {
+        if (
+          typeof result.response === 'number' &&
+          result.response == body.sno
+        ) {
+          let sal = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(
+              `setup.designation.form.dialog.removedSuccessfully`
+            )
+          );
+          sal.then((res) => {
+            this.requestDesignationList();
+          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate('defaults.failed'),
+            this.tr.translate(
+              `setup.designation.form.dialog.failedToAddDesignation`
+            )
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestDesignationList();
   }
@@ -215,7 +266,11 @@ export class DesignationListComponent implements OnInit {
     );
     dialog.openDialog();
     dialog.remove.asObservable().subscribe(() => {
-      alert('delete deisgnation.');
+      let body = {
+        sno: designation.Desg_Id,
+        userid: this.userProfile.Usno,
+      };
+      this.requestDeleteDesignation(body);
     });
   }
   get headers() {

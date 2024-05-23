@@ -114,13 +114,6 @@ export class DesignationDialogComponent implements OnInit {
       .addDesignation(form)
       .then((res: any) => {
         if (typeof res.response === 'number' && res.response > 0) {
-          // let dialog = AppUtilities.openSuccessMessageBox(
-          //   this.successMessageBox,
-          //   this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
-          // );
-          // dialog.addEventListener('close', () => {
-          //   this.closeDialog();
-          // });
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
           );

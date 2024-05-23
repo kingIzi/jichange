@@ -150,9 +150,9 @@
         "missingDesignation": "Please provide a designation name",
         "removeDesignation": "Remove designation",
         "sureDelete": "Are you sure you want to delete this?",
-        "removedSuccessfully": "Country deleted successfully!",
-        "addedSuccessfully": "Country added successfully!",
-        "modifiedSuccessfully": "Country modified successfully!",
+        "removedSuccessfully": "Designation deleted successfully!",
+        "addedSuccessfully": "Designation added successfully!",
+        "modifiedSuccessfully": "Designation modified successfully!",
         "failedToAddDesignation": "Failed to add designation."
       }
     },

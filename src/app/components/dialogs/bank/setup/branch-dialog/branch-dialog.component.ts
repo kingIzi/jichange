@@ -126,7 +126,11 @@ export class BranchDialogComponent implements OnInit {
     this.branchService
       .addBranch(body)
       .then((result) => {
-        if (typeof result.response === 'number' && result.response > 0) {
+        if (
+          (typeof result.response === 'string' &&
+            Number(result.response) > 0) ||
+          Number(result.response) == 0
+        ) {
           let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
           sal.then((res) => {
             this.addedBranch.emit();

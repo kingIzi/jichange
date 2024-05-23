@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { RequestClientService } from '../../../request-client.service';
 import { lastValueFrom } from 'rxjs';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +23,18 @@ export class DesignationService {
   }) {
     let data = await lastValueFrom(
       this.client.performPost(`/api/Designation/Adddesg`, form)
+    );
+    return data;
+  }
+  public async deleteDesignation(body: {
+    sno: number | string;
+    userid: number | string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        RemoveDesignationForm,
+        HttpDataResponse<number | string>
+      >(`/api/Designation/Deletedesg`, body)
     );
     return data;
   }
