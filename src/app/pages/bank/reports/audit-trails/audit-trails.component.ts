@@ -39,6 +39,8 @@ import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-tra
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { AuditTrailsTable } from 'src/app/core/enums/bank/reports/audit-trails-table';
 
 @Component({
   selector: 'app-audit-trails',
@@ -87,6 +89,7 @@ export class AuditTrailsComponent implements OnInit {
   public auditTrailsData: AuditTrail[] = [];
   public headersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public AuditTrailsTable: typeof AuditTrailsTable = AuditTrailsTable;
   public headersMap = {
     ACTIONS: 0,
     COLUMN_NAME: 1,
@@ -97,9 +100,10 @@ export class AuditTrailsComponent implements OnInit {
   };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     //private client: RequestClientService,
     private auditTrailsService: AuditTrailsService,
     private cdf: ChangeDetectorRef,
@@ -108,30 +112,19 @@ export class AuditTrailsComponent implements OnInit {
   private createHeadersGroup() {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.translocoService
-      .selectTranslate('auditTrails.auditTrailsTable', {}, this.scope)
-      .subscribe((labels: string[]) => {
-        if (labels && labels.length > 0) {
-          labels.forEach((label, index) => {
-            let header = this.fb.group({
-              label: this.fb.control(label, []),
-              search: this.fb.control('', []),
-              sortAsc: this.fb.control(false, []),
-              values: this.fb.array([], []),
-            });
-            header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-              if (value === true) {
-                this.sortTableAsc(index);
-              } else {
-                this.sortTableDesc(index);
-              }
-            });
-            this.headers.push(header);
-          });
-          this.submitFilter();
-        }
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `auditTrails.auditTrailsTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
@@ -233,29 +226,29 @@ export class AuditTrailsComponent implements OnInit {
     if (this.tbname.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.selectPage`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.selectPage`)
       );
     }
     if (this.act.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.action`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.action`)
       );
     }
     if (this.Startdate.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.validDate`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.validDate`)
       );
     }
     if (this.Enddate.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.translocoService.translate(`${errorsPath}.invalidForm`),
-        this.translocoService.translate(`${errorsPath}.validDate`)
+        this.tr.translate(`${errorsPath}.invalidForm`),
+        this.tr.translate(`${errorsPath}.validDate`)
       );
     }
   }
@@ -280,15 +273,32 @@ export class AuditTrailsComponent implements OnInit {
         this.cdf.detectChanges();
       })
       .catch((err) => {
-        this.startLoading = false;
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
-          this.translocoService
+          this.tr
         );
+        this.startLoading = false;
         this.cdf.detectChanges();
         throw err;
       });
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let search = searchText.toLocaleLowerCase();
+      this.auditTrails = this.auditTrails.filter((elem: AuditTrail) => {
+        return (
+          elem.ovalue?.toLocaleLowerCase().includes(search) ||
+          elem.nvalue?.toLocaleLowerCase().includes(search) ||
+          elem.atype?.toLocaleLowerCase().includes(search) ||
+          elem.colname?.toLocaleLowerCase().includes(search) ||
+          elem.aby?.toLocaleLowerCase().includes(search)
+        );
+      });
+    } else {
+      this.auditTrails = this.auditTrailsData;
+    }
   }
   ngOnInit(): void {
     this.createForm();
@@ -309,24 +319,7 @@ export class AuditTrailsComponent implements OnInit {
       );
       this.filterAuditTrailsRequest(value);
     } else {
-      this.formErrors();
-    }
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let search = searchText.toLocaleLowerCase();
-      this.auditTrails = this.auditTrails.filter((elem: AuditTrail) => {
-        return (
-          elem.ovalue?.toLocaleLowerCase().includes(search) ||
-          elem.nvalue?.toLocaleLowerCase().includes(search) ||
-          elem.atype?.toLocaleLowerCase().includes(search) ||
-          elem.colname?.toLocaleLowerCase().includes(search) ||
-          elem.aby?.toLocaleLowerCase().includes(search)
-        );
-      });
-    } else {
-      this.auditTrails = this.auditTrailsData;
+      this.formGroup.markAllAsTouched();
     }
   }
   get tbname() {
@@ -343,5 +336,8 @@ export class AuditTrailsComponent implements OnInit {
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headersFormGroup.get(`tableSearch`) as FormControl;
   }
 }

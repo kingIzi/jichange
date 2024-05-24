@@ -1,3 +1,5 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
 <dialog #tempDialog id="my_modal_2" class="modal">
   <div class="modal-box">
     <h3 class="font-bold text-lg">Sorry!🥲</h3>
@@ -216,24 +218,15 @@
                 <span>{{ t("profile") }}</span>
               </p>
             </a>
-            <!-- <a
-              (click)="tempDialog.showModal()"
-              class="flex flex-row items-center"
-            >
-              <span class="material-symbols-outlined"> account_circle </span>
-              <p *transloco="let t; read: 'vendorRoutes'">
-                <span>{{ t("profile") }}</span>
-              </p>
-            </a> -->
           </li>
           <li>
-            <a
-              [routerLink]="'/auth'"
+            <button
+              (click)="logout()"
               class="flex flex-row items-center text-red-600"
             >
               <span class="material-symbols-outlined"> logout </span>
               <p *transloco="let t; read: 'roles'">{{ t("logout") }}</p>
-            </a>
+            </button>
           </li>
         </ul>
       </div>

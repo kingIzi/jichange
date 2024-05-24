@@ -12,7 +12,10 @@ export class BranchService {
   constructor(private client: RequestClientService) {}
   public async postBranchList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Branch/GetBranchLists`, body)
+      this.client.performPost<{}, HttpDataResponse<Branch[] | number | string>>(
+        `/api/Branch/GetBranchLists`,
+        body
+      )
     );
     return data;
   }

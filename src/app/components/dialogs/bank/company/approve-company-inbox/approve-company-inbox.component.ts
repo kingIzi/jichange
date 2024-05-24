@@ -44,8 +44,6 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { SubmitMessageBoxComponent } from '../../../submit-message-box/submit-message-box.component';
 import { SuspenseAccountDialogComponent } from '../../setup/suspense-account-dialog/suspense-account-dialog.component';
 
-//type AccountType = 'Suspense Account' | 'Deposit Account';
-
 @Component({
   selector: 'app-approve-company-inbox',
   standalone: true,
@@ -149,11 +147,11 @@ export class ApproveCompanyInboxComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -214,11 +212,11 @@ export class ApproveCompanyInboxComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;

@@ -1,6 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, Output } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { LanguageSelectorComponent } from '../../language-selector/language-selector.component';
 import {
   TRANSLOCO_SCOPE,
@@ -15,18 +23,23 @@ import {
 } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { LoginService } from 'src/app/core/services/login.service';
+import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
 
 @Component({
   selector: 'app-vendor-header',
   templateUrl: './vendor-header.component.html',
   styleUrls: ['./vendor-header.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
     LanguageSelectorComponent,
     TranslocoModule,
     ReactiveFormsModule,
+    DisplayMessageBoxComponent,
   ],
 })
 export class VendorHeaderComponent implements OnInit {
@@ -42,15 +55,41 @@ export class VendorHeaderComponent implements OnInit {
     cancelledDetails: 5,
     customerDetailReport: 6,
   };
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
-    private translocoService: TranslocoService,
-    private fb: FormBuilder
+    private tr: TranslocoService,
+    private loginService: LoginService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
     if (userProfile) {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
+  }
+  private requestLogout() {
+    this.routeLoading = true;
+    this.loginService
+      .logout({ userid: this.userProfile.Usno })
+      .then((result) => {
+        this.routeLoading = false;
+        localStorage.clear();
+        this.cdr.detectChanges();
+        this.router.navigate(['/auth']);
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.routeLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private switchRouterLinks(ind: number) {
     switch (ind) {
@@ -70,29 +109,27 @@ export class VendorHeaderComponent implements OnInit {
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    this.translocoService
-      .selectTranslate('vendorHeaders')
-      .subscribe((headers: any[]) => {
-        headers.forEach((header, index) => {
-          let group = this.fb.group({
-            label: this.fb.control(header.name, []),
-            dropdowns: this.fb.array([], []),
-            rootLink: this.fb.control(this.switchRouterLinks(index), []),
-          });
-          (header.dropdowns as any[]).forEach((e, dropdownIndex) => {
-            let dropdown = this.fb.group({
-              label: this.fb.control(e, []),
-              routerLink: this.fb.control(
-                this.getHeaderRouterLink(index, dropdownIndex),
-                []
-              ),
-              isActive: this.fb.control(false, []),
-            });
-            (group.get('dropdowns') as FormArray).push(dropdown);
-          });
-          this.headers.push(group);
+    this.tr.selectTranslate('vendorHeaders').subscribe((headers: any[]) => {
+      headers.forEach((header, index) => {
+        let group = this.fb.group({
+          label: this.fb.control(header.name, []),
+          dropdowns: this.fb.array([], []),
+          rootLink: this.fb.control(this.switchRouterLinks(index), []),
         });
+        (header.dropdowns as any[]).forEach((e, dropdownIndex) => {
+          let dropdown = this.fb.group({
+            label: this.fb.control(e, []),
+            routerLink: this.fb.control(
+              this.getHeaderRouterLink(index, dropdownIndex),
+              []
+            ),
+            isActive: this.fb.control(false, []),
+          });
+          (group.get('dropdowns') as FormArray).push(dropdown);
+        });
+        this.headers.push(group);
       });
+    });
   }
   private getHeaderRouterLink(bankIndex: number, dropdownIndex: number) {
     switch (bankIndex) {
@@ -132,10 +169,6 @@ export class VendorHeaderComponent implements OnInit {
     switch (index) {
       case 0:
         return '/vendor/invoice/list';
-      // case 1:
-      //   return '/vendor/invoice/amendments';
-      // case 2:
-      //   return '/vendor/invoice/cancelled';
       case 1:
         return '/vendor/invoice/generated';
       default:
@@ -154,6 +187,9 @@ export class VendorHeaderComponent implements OnInit {
   }
   verifyCurrentRoute(path: string) {
     return location.pathname.includes(path);
+  }
+  logout() {
+    this.requestLogout();
   }
   get headers() {
     return this.formGroup.get('headers') as FormArray;

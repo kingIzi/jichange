@@ -158,17 +158,11 @@ export class SignInComponent implements OnInit {
       width: '600px',
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
-    });
   }
   openVendorRegistrationDialog() {
     let dialogRef = this.dialog.open(VendorRegistrationComponent, {
       width: '600px',
       disableClose: true,
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Vendor registration closed: ${result}`);
     });
   }
   submitSignInForm() {

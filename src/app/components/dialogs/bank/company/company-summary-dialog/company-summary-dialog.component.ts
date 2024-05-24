@@ -115,64 +115,89 @@ export class CompanySummaryDialogComponent implements OnInit {
   }
   private async prepareEditForm(company: Company) {
     this.startLoading = true;
+    let regSno = company.RegId ? company?.RegId.toString() : '0';
+    let wardSno = company.WardSno ? company?.WardSno.toString() : '0';
     let branchList = from(this.branchService.postBranchList({}));
     let regionsList = from(this.regionService.getRegionList());
-    let regSno = company.RegId.toString();
     let districtList = from(
       this.districtService.getDistrictByRegion({ Sno: regSno })
     );
-    let wardSno = company.WardSno.toString();
     let wardList = from(this.wardService.postWardList(wardSno));
     let mergedRes = zip(branchList, regionsList, districtList, wardList);
-    let res = await lastValueFrom(
-      mergedRes.pipe(
-        map((results) => {
-          return results;
-        }),
-        catchError((err) => {
-          AppUtilities.requestFailedCatchError(
-            err,
-            this.displayMessageBox,
-            this.tr
-          );
-          this.startLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        })
-      )
-    );
-    let [branches, regions, districts, wards] = res as any;
-    this.branches = branches.response === 0 ? [] : branches.response;
-    this.regions = regions.response === 0 ? [] : regions.response;
-    this.districts = districts.response === 0 ? [] : districts.response;
-    this.wards = wards.response === 0 ? [] : wards.response;
-    this.createEditForm(company);
-    this.startLoading = false;
-    this.cdr.detectChanges();
+    try {
+      let results = await AppUtilities.pipedObservables(mergedRes);
+      let [branches, regions, districts, wards] = results;
+      if (
+        typeof branches.response !== 'number' &&
+        typeof branches.response !== 'string'
+      ) {
+        this.branches = branches.response;
+      }
+      if (
+        typeof regions.response !== 'number' &&
+        typeof regions.response !== 'string'
+      ) {
+        this.regions = regions.response;
+      }
+      if (
+        typeof districts.response !== 'number' &&
+        typeof districts.response !== 'string'
+      ) {
+        this.districts = districts.response;
+      }
+      if (
+        typeof wards.response !== 'number' &&
+        typeof wards.response !== 'string'
+      ) {
+        this.wards = wards.response;
+      }
+      this.createEditForm(company);
+      this.startLoading = false;
+      this.cdr.detectChanges();
+    } catch (err) {
+      AppUtilities.requestFailedCatchError(
+        err,
+        this.displayMessageBox,
+        this.tr
+      );
+      this.startLoading = false;
+      this.cdr.detectChanges();
+      throw err;
+    }
   }
   private async prepareCreateForm() {
     this.startLoading = true;
     let branchList = from(this.branchService.postBranchList({}));
     let regionsList = from(this.regionService.getRegionList());
     let mergedRes = zip(branchList, regionsList);
-    let res = await lastValueFrom(
-      mergedRes.pipe(
-        map((results) => {
-          return results;
-        }),
-        catchError((err) => {
-          this.startLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        })
-      )
-    );
-    let [branches, regions] = res as any;
-    this.branches = branches.response === 0 ? [] : branches.response;
-    this.regions = regions.response === 0 ? [] : regions.response;
-    this.createForm();
-    this.startLoading = false;
-    this.cdr.detectChanges();
+    try {
+      let results = await AppUtilities.pipedObservables(mergedRes);
+      let [branches, regions] = results;
+      if (
+        typeof branches.response !== 'number' &&
+        typeof branches.response !== 'string'
+      ) {
+        this.branches = branches.response;
+      }
+      if (
+        typeof regions.response !== 'number' &&
+        typeof regions.response !== 'string'
+      ) {
+        this.regions = regions.response;
+      }
+      this.createForm();
+      this.startLoading = false;
+      this.cdr.detectChanges();
+    } catch (err) {
+      AppUtilities.requestFailedCatchError(
+        err,
+        this.displayMessageBox,
+        this.tr
+      );
+      this.startLoading = false;
+      this.cdr.detectChanges();
+      throw err;
+    }
   }
   private async prepareForm() {
     this.startLoading = true;
@@ -181,6 +206,8 @@ export class CompanySummaryDialogComponent implements OnInit {
     } else {
       await this.prepareCreateForm();
     }
+    this.updateDistrictList();
+    this.updateWardList();
     this.startLoading = false;
     this.isReady = true;
     this.cdr.detectChanges();
@@ -196,38 +223,21 @@ export class CompanySummaryDialogComponent implements OnInit {
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
-      branch: this.fb.control(
-        this.branches.find((b) => b.Sno === company.Branch_Sno)?.Branch_Sno,
-        [Validators.required]
-      ),
+      branch: this.fb.control(company.Branch_Sno ?? '', [Validators.required]),
       check_status: this.fb.control(company.Checker, [Validators.required]),
       fax: this.fb.control(company.FaxNo, []),
       pbox: this.fb.control(company.PostBox, []),
       addr: this.fb.control(company.Address, []),
-      rsno: this.fb.control(
-        this.regions
-          .find((r) => {
-            return r.Region_SNO === company.RegId;
-          })
-          ?.Region_SNO.toString(),
-        [Validators.required]
-      ),
-      dsno: this.fb.control(
-        this.districts
-          .find((d) => {
-            return d.SNO === company.DistSno;
-          })
-          ?.SNO.toString(),
-        [Validators.required]
-      ),
-      wsno: this.fb.control(company.WardSno.toString(), [Validators.required]),
-      tin: this.fb.control(company.TinNo, []),
+      rsno: this.fb.control(company.RegId ?? '', []),
+      dsno: this.fb.control(company.DistSno ?? '', []),
+      wsno: this.fb.control(company.WardSno ?? '', []),
+      tin: this.fb.control(company.TinNo, [Validators.required]),
       vat: this.fb.control(company.VatNo, []),
       dname: this.fb.control(company.DirectorName, []),
       telno: this.fb.control(company.TelNo, [
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      email: this.fb.control(company.Email, [Validators.email]),
+      email: this.fb.control(company.Email, []),
       dummy: this.fb.control(true, [Validators.required]),
       details: this.fb.array(
         [
@@ -238,8 +248,8 @@ export class CompanySummaryDialogComponent implements OnInit {
         []
       ),
     });
-    this.updateDistrictList();
-    this.updateWardList();
+    // this.updateDistrictList();
+    // this.updateWardList();
     this.companySummaryForm.markAllAsTouched();
   }
   private updateDistrictList() {
@@ -335,118 +345,118 @@ export class CompanySummaryDialogComponent implements OnInit {
       fax: this.fb.control('', []),
       pbox: this.fb.control('', []),
       addr: this.fb.control('', []),
-      rsno: this.fb.control('', [Validators.required]),
-      dsno: this.fb.control('', [Validators.required]),
-      wsno: this.fb.control('', [Validators.required]),
-      tin: this.fb.control('', []),
+      rsno: this.fb.control('', []),
+      dsno: this.fb.control('', []),
+      wsno: this.fb.control('', []),
+      tin: this.fb.control('', [Validators.required]),
       vat: this.fb.control('', []),
       dname: this.fb.control('', []),
       telno: this.fb.control('', [
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      email: this.fb.control('', [Validators.email]),
+      email: this.fb.control('', []),
       dummy: this.fb.control(true, [Validators.required]),
       details: this.fb.array([], []),
     });
-    this.updateDistrictList();
-    this.updateWardList();
+    // this.updateDistrictList();
+    // this.updateWardList();
     this.addBankDetail();
   }
-  private formErrors(
-    errorsPath: string = 'company.summary.companyForm.dialogs'
-  ) {
-    if (this.compname.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.customer`)
-      );
-    } else if (this.mob.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.mobileNo`)
-      );
-    } else if (this.branch.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.branch`)
-      );
-    } else if (this.check_status.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.makerChecker`)
-      );
-    } else if (this.fax.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.faxNo`)
-      );
-    } else if (this.vat.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.vatNo`)
-      );
-    } else if (this.pbox.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.postBoxNo`)
-      );
-    } else if (this.addr.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.address`)
-      );
-    } else if (this.rsno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.region`)
-      );
-    } else if (this.dsno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.district`)
-      );
-    } else if (this.wsno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.ward`)
-      );
-    } else if (this.tin.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.tinNo`)
-      );
-    } else if (this.dname.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.directorName`)
-      );
-    } else if (this.telno.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.telephoneNo`)
-      );
-    } else if (this.email.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.emailId`)
-      );
-    }
-  }
+  // private formErrors(
+  //   errorsPath: string = 'company.summary.companyForm.dialogs'
+  // ) {
+  //   if (this.compname.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.customer`)
+  //     );
+  //   } else if (this.mob.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.mobileNo`)
+  //     );
+  //   } else if (this.branch.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.branch`)
+  //     );
+  //   } else if (this.check_status.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.makerChecker`)
+  //     );
+  //   } else if (this.fax.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.faxNo`)
+  //     );
+  //   } else if (this.vat.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.vatNo`)
+  //     );
+  //   } else if (this.pbox.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.postBoxNo`)
+  //     );
+  //   } else if (this.addr.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.address`)
+  //     );
+  //   } else if (this.rsno.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.region`)
+  //     );
+  //   } else if (this.dsno.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.district`)
+  //     );
+  //   } else if (this.wsno.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.ward`)
+  //     );
+  //   } else if (this.tin.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.tinNo`)
+  //     );
+  //   } else if (this.dname.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.directorName`)
+  //     );
+  //   } else if (this.telno.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.telephoneNo`)
+  //     );
+  //   } else if (this.email.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.emailId`)
+  //     );
+  //   }
+  // }
   private determineAddCompanyErrorMessage(message: string) {
     if (
       message.toLocaleLowerCase() ===
@@ -494,11 +504,6 @@ export class CompanySummaryDialogComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        // if (err instanceof TimeoutError) {
-        //   AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        // } else {
-        //   AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        // }
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
@@ -550,6 +555,7 @@ export class CompanySummaryDialogComponent implements OnInit {
     }
   }
   addCompany() {
+    console.log(this.data.companyData);
     if (!this.data?.companyData) {
       this.confirmAddCompany.nativeElement.close();
       this.requestAddCompany(

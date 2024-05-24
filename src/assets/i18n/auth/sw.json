@@ -34,7 +34,8 @@
       "mobileNo": "Nambari ya Simu ya Mkononi",
       "branch": "Tawi",
       "accountNo": "Nambari ya Akaunti",
-      "makerCheckerApproval": "Muumba - Checker kwa idhini ya ankara?",
+      "makerCheckerApproval": "Checker kwa idhini ya ankara?",
+      "email": "Barua pepe",
       "makerOptions": {
         "yes": "Ndio",
         "no": "Apana"
@@ -42,7 +43,8 @@
       "placeholders": {
         "vendorName": "Ingiza nambari ya muuzaji",
         "branch": "Chagua maelezo ya Tawi",
-        "accountNo": "Ingiza nambari ya Akaunti"
+        "accountNo": "Ingiza nambari ya Akaunti",
+        "email": "Ingiza barua pepe"
       },
       "errors": {
         "vendorName": "Tafadhali taja jina",
@@ -50,6 +52,7 @@
         "branch": "Tafadhali bainisha",
         "accountNo": "Ingiza namba halali ya akaunti",
         "invalidAccountNo": "Nambari ya akaunti si sahihi. Lazima ianze na 015, 012, au 01J na iwe na vibambo 13.",
+        "email": "Tafadhali ingiza barua pepe",
         "dialogs": {
           "invalidFormError": "Fomu batili",
           "missingVendorName": "Tafadhali toa jina la muuzaji",

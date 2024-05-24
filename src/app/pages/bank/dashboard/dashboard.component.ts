@@ -96,7 +96,7 @@ export class DashboardComponent implements OnInit {
     },
     {
       statistic: 0,
-      label: 'Pending approval',
+      label: 'Pending',
       imgUrl: 'assets/img/check-mark.png',
       link: '/main/company/inbox',
       increase: false,
@@ -255,11 +255,11 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.cdr.detectChanges();
         throw err;
       });
@@ -286,11 +286,11 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.cdr.detectChanges();
         throw err;
       });

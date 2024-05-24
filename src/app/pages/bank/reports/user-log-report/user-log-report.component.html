@@ -68,7 +68,7 @@
         </button>
       </div>
     </form>
-    <div class="flex flex-col px-2 py-4">
+    <div [formGroup]="tableHeadersFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-end">
         <div class="flex flex-row items-center space-x-2">
           <div class="dropdown">
@@ -110,8 +110,7 @@
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
               [placeholder]="t('search')"
-              #searchInput
-              (keyup)="searchTable(searchInput.value, paginator)"
+              [formControl]="tableSearch"
             />
             <span
               class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
@@ -124,10 +123,7 @@
       <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
-            <table
-              [formGroup]="tableHeadersFormGroup"
-              class="min-w-full text-left text-sm font-light"
-            >
+            <table class="min-w-full text-left text-sm font-light">
               <thead formArrayName="headers" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
@@ -175,7 +171,8 @@
                             paginator.pageSize * paginator.pageIndex +
                             paginator.pageSize -
                             1;
-                    index as i
+                    index as i;
+                    trackBy: PerformanceUtils.trackByIndex
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
@@ -183,12 +180,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.USERNAME)
+                        .at(UserLogReportTable.USERNAME)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.USERNAME)
+                        .at(UserLogReportTable.USERNAME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -200,12 +197,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.IP_ADDRESS)
+                        .at(UserLogReportTable.IP_ADDRESS)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.IP_ADDRESS)
+                        .at(UserLogReportTable.IP_ADDRESS)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -217,12 +214,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.USER_GROUP)
+                        .at(UserLogReportTable.USER_GROUP)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.USER_GROUP)
+                        .at(UserLogReportTable.USER_GROUP)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -234,12 +231,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.LOGIN_TIME)
+                        .at(UserLogReportTable.LOGIN_TIME)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.LOGIN_TIME)
+                        .at(UserLogReportTable.LOGIN_TIME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -247,20 +244,22 @@
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
                     {{
-                      dateToFormat(
-                        userReportLog.Login_Time
-                      ).toLocaleDateString()
+                      userReportLog.Login_Time
+                        ? PerformanceUtils.convertDateStringToDate(
+                            userReportLog.Login_Time
+                          ).toLocaleDateString()
+                        : "-"
                     }}
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.LOGOUT_TIME)
+                        .at(UserLogReportTable.LOGOUT_TIME)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.LOGOUT_TIME)
+                        .at(UserLogReportTable.LOGOUT_TIME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -269,9 +268,9 @@
                   >
                     {{
                       userReportLog.Logout_Time
-                        ? dateToFormat(
+                        ? PerformanceUtils.convertDateStringToDate(
                             userReportLog.Logout_Time
-                          ).toLocaleDateString()
+                          )
                         : "-"
                     }}
                   </td>

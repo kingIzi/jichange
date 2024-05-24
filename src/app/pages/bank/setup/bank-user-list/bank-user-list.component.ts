@@ -186,7 +186,6 @@ export class BankUserListComponent implements OnInit {
     }
   }
   private requestBankDetails() {
-    //this.startLoading = true;
     this.tableLoading = true;
     this.bankService
       .postEmployeeDetails({})
@@ -194,18 +193,16 @@ export class BankUserListComponent implements OnInit {
         this.employeeDetailsData =
           results.response === 0 ? [] : results.response;
         this.employeeDetails = this.employeeDetailsData;
-        //this.startLoading = false;
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        //this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
         this.cdr.detectChanges();
         throw err;
       });

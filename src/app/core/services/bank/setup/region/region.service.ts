@@ -12,7 +12,9 @@ export class RegionService {
   constructor(private client: RequestClientService) {}
   public async getRegionList() {
     let data = await lastValueFrom(
-      this.client.performGet(`/api/Company/GetRegionDetails`)
+      this.client.performGet<HttpDataResponse<Region[] | number | string>>(
+        `/api/Company/GetRegionDetails`
+      )
     );
     return data;
   }

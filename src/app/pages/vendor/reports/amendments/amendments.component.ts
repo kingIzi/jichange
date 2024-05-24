@@ -16,7 +16,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -31,6 +35,7 @@ import {
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { AmendmentReportTable } from 'src/app/core/enums/vendor/reports/amendment-report-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { LoginResponse } from 'src/app/core/models/login-response';
@@ -39,8 +44,11 @@ import { ReportsService } from 'src/app/core/services/bank/reports/reports.servi
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { AmendmentsService } from 'src/app/core/services/vendor/reports/amendments.service';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-amendments',
@@ -52,6 +60,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     ReactiveFormsModule,
     LoaderRainbowComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   templateUrl: './amendments.component.html',
   styleUrl: './amendments.component.scss',
@@ -68,13 +77,18 @@ export class AmendmentsComponent implements OnInit {
   public tableLoading: boolean = false;
   public filterFormGroup!: FormGroup;
   public tableFormGroup!: FormGroup;
-  public amendments: any[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public AmendmentReportTable: typeof AmendmentReportTable =
+    AmendmentReportTable;
+  public amendments: GeneratedInvoice[] = [];
+  public amendmentsData: GeneratedInvoice[] = [];
   public companies: Company[] = [];
   public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
   public invoices: GeneratedInvoice[] = [];
   public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
@@ -93,28 +107,27 @@ export class AmendmentsComponent implements OnInit {
   private createFilterForm() {
     this.filterFormGroup = this.fb.group({
       compid: this.fb.control(this.userProfile.InstID, [Validators.required]),
-      cust: this.fb.control('', [Validators.required]),
+      cust: this.fb.control('all', [Validators.required]),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
-      invno: this.fb.control('', [Validators.required]),
+      invno: this.fb.control('', []),
     });
   }
   private async createHeaderGroup() {
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    let labels = (await firstValueFrom(
-      this.tr.selectTranslate(`amendmentDetails.amendmentTable`, {}, this.scope)
-    )) as string[];
-    labels.forEach((label, index) => {
-      let header = this.fb.group({
-        label: this.fb.control(label, []),
-        sortAsc: this.fb.control(false, []),
-        included: this.fb.control(index <= 5, []),
-        values: this.fb.array([], []),
-      });
-      this.sortTableHeaderEventHandler(header, index);
-      this.tableHeaders.push(header);
+    TableUtilities.createHeaders(
+      this.tr,
+      `amendmentDetails.amendmentTable`,
+      this.scope,
+      this.tableHeaders,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
     });
   }
   private sortTableAsc(ind: number) {
@@ -123,17 +136,8 @@ export class AmendmentsComponent implements OnInit {
   private sortTableDesc(ind: number) {
     throw Error('unimplemented method');
   }
-  private sortTableHeaderEventHandler(header: FormGroup, index: number) {
-    header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-      if (value === true) {
-        this.sortTableAsc(index);
-      } else {
-        this.sortTableDesc(index);
-      }
-    });
-  }
   private buildPage() {
-    this.tableLoading = true;
+    this.startLoading = true;
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
@@ -181,7 +185,8 @@ export class AmendmentsComponent implements OnInit {
         ) {
           this.invoices = invoices.response;
         }
-        this.tableLoading = false;
+        console.log(companies);
+        this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -190,7 +195,7 @@ export class AmendmentsComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.tableLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -220,15 +225,27 @@ export class AmendmentsComponent implements OnInit {
   }
   private reformatDate(values: string[]) {
     let [year, month, date] = values;
-    return `${month}/${date}/${year}`;
+    return `${date}/${month}/${year}`;
   }
   private requestAmendmentsReport(value: any) {
-    this.startLoading = true;
+    this.tableLoading = true;
     this.amendmentService
       .getAmendmentsReport(value)
-      .then((results: any) => {
-        this.amendments = results.response === 0 ? [] : results.response;
-        this.startLoading = false;
+      .then((results) => {
+        if (
+          typeof results.response === 'string' &&
+          typeof results.response === 'number'
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        } else {
+          this.amendmentsData = results.response as GeneratedInvoice[];
+          this.amendments = this.amendmentsData;
+        }
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -237,11 +254,12 @@ export class AmendmentsComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
+  private searchTable(searchtext: string, paginator: MatPaginator) {}
   ngOnInit(): void {
     this.parseUserProfile();
     this.createFilterForm();
@@ -260,16 +278,7 @@ export class AmendmentsComponent implements OnInit {
       this.requestAmendmentsReport(value);
     } else {
       this.filterFormGroup.markAllAsTouched();
-      //this.formErrors();
     }
-  }
-  getFormControl(control: AbstractControl, name: string) {
-    return control.get(name) as FormControl;
-  }
-  searchTable(searchtext: string) {}
-  sortColumnClicked(ind: number) {
-    let sortAsc = this.tableHeaders.at(ind).get('sortAsc');
-    sortAsc?.setValue(!sortAsc?.value);
   }
   get compid() {
     return this.filterFormGroup.get('compid') as FormControl;
@@ -288,5 +297,8 @@ export class AmendmentsComponent implements OnInit {
   }
   get tableHeaders() {
     return this.tableFormGroup.get('tableHeaders') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableFormGroup.get('tableSearch') as FormControl;
   }
 }

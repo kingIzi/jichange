@@ -51,6 +51,7 @@ import { Customer } from 'src/app/core/models/bank/customer';
 import { VendorDetailsReportTable } from 'src/app/core/enums/bank/reports/vendor-details-report-table';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -88,15 +89,9 @@ export class CustomerDetailReportComponent implements OnInit {
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public VendorDetailsReportTable: typeof VendorDetailsReportTable =
     VendorDetailsReportTable;
-  // public headersMap = {
-  //   CUSTOMER_NAME: VendorDetailsReportTable.CUSTOMER_NAME,
-  //   CONTACT_PERSON: VendorDetailsReportTable.CONTACT_PERSON,
-  //   EMAIL: VendorDetailsReportTable.EMAIL,
-  //   ADDRESS: VendorDetailsReportTable.ADDRESS,
-  //   DATE_POSTED: VendorDetailsReportTable.DATE_POSTED,
-  // };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private fb: FormBuilder,
     private reportsService: ReportsService,
@@ -116,31 +111,19 @@ export class CustomerDetailReportComponent implements OnInit {
   private async createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.tr
-      .selectTranslate(
-        'customerDetailReport.customerDetailReportTable',
-        {},
-        this.scope
-      )
-      .subscribe((labels: string[]) => {
-        labels.forEach((label, index) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index < 5, []),
-            values: this.fb.array([], []),
-          });
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `customerDetailReport.customerDetailReportTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
   private fetchDistricts(body: { Sno: string }) {
     this.startLoading = true;
@@ -163,11 +146,11 @@ export class CustomerDetailReportComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -207,11 +190,11 @@ export class CustomerDetailReportComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -313,24 +296,21 @@ export class CustomerDetailReportComponent implements OnInit {
     }
   }
   private requestCustomerDetails(form: any) {
-    //this.startLoading = true;
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
       .then((results: any) => {
-        //this.startLoading = false;
         this.tableLoading = false;
         this.customersData = results.response === 0 ? [] : results.response;
         this.customers = this.customersData;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
-        //this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -351,6 +331,23 @@ export class CustomerDetailReportComponent implements OnInit {
       keys.push('ConPerson');
     }
     return keys;
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let indexes = this.headers.controls
+        .map((control, index) => {
+          return control.get('included')?.value ? index : -1;
+        })
+        .filter((num) => num !== -1);
+      let keys = this.customerKeys(indexes);
+      let text = searchText.trim().toLowerCase();
+      this.customers = this.customersData.filter((customer: any) => {
+        return keys.some((key) => customer[key]?.toLowerCase().includes(text));
+      });
+    } else {
+      this.customers = this.customersData;
+    }
   }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
@@ -376,24 +373,6 @@ export class CustomerDetailReportComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let keys = this.customerKeys(indexes);
-      let text = searchText.trim().toLowerCase();
-      this.customers = this.customersData.filter((customer: any) => {
-        return keys.some((key) => customer[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.customers = this.customersData;
-      //this.requestCustomerDetails(this.tableFilterFormGroup.value);
-    }
-  }
   get Comp() {
     return this.tableFilterFormGroup.get('Comp') as FormControl;
   }
@@ -405,5 +384,8 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableHeadersFormGroup.get('tableSearch') as FormControl;
   }
 }

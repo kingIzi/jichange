@@ -81,7 +81,7 @@
         "invalidForm": "Invalid form",
         "customer": "Please provide the company name",
         "mobileNo": "Please provide a valid mobile number",
-        "branch": "Please specify a branch",
+        "branch": "",
         "makerChecker": "Please specify a Maker/Checker value",
         "faxNo": "Please provide a fax number",
         "postBoxNo": "Please provide the PoBox number",
@@ -99,7 +99,8 @@
         "failedToAddCompany": "Failed to add company, please try again or contact support.",
         "failedToApproveCompany": "Failed to approve company.",
         "emailAddressExists": "Email Address already Exist.",
-        "mobileNumberAlreadyExists": "Mobile number already Exist."
+        "mobileNumberAlreadyExists": "Mobile number already Exist.",
+        "noBranch": "No branches found."
       }
     }
   },

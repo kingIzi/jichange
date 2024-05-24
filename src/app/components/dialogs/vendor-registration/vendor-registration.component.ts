@@ -82,11 +82,11 @@ export class VendorRegistrationComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -245,12 +245,8 @@ export class VendorRegistrationComponent implements OnInit {
     });
   }
 
-  updatePhoneNumberPrefix(prefix: string, control: FormControl) {
-    AppUtilities.mobileNumberFormat(prefix, control);
-  }
-
   closeDialog() {
-    this.dialogRef.close('Vendor dialog closed');
+    this.dialogRef.close();
   }
 
   submitSuccessfull() {
@@ -274,20 +270,19 @@ export class VendorRegistrationComponent implements OnInit {
   get compname() {
     return this.vendorFormGroup.get('compname') as FormControl;
   }
-
   get mob() {
     return this.vendorFormGroup.get('mob') as FormControl;
   }
-
   get branch() {
     return this.vendorFormGroup.get('branch') as FormControl;
   }
-
   get accno() {
     return this.vendorFormGroup.get('accno') as FormControl;
   }
-
   get check_status() {
     return this.vendorFormGroup.get('check_status') as FormControl;
+  }
+  get email() {
+    return this.vendorFormGroup.get(`email`) as FormControl;
   }
 }

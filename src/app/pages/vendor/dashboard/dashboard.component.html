@@ -4,36 +4,35 @@
 ></app-loader-infinite-spinner>
 
 <!-- <div
-  class="absolute top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-12 overflow-y-auto"
-> -->
-<div
   class="absolute top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 pt-2 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-12 overflow-y-auto"
 >
   <div
-    class="w-full col-span-full row-span-4 lg:row-span-4 lg:col-span-8 flex flex-col space-y-2"
+    class="w-full col-span-full row-span-12 lg:row-span-4 lg:col-span-8 flex flex-col space-y-2 relative"
   >
-    <div class="flex flex-row w-full items-center justify-between">
-      <p
-        *transloco="let t; read: 'panel.dashboard.overview'"
-        class="text-black font-bold tracking-wide text-lg"
+    <div class="absolute top-0 left-0 right-0 bottom-0 flex flex-col">
+      <div class="flex flex-row flex-none w-full items-center justify-between">
+        <p
+          *transloco="let t; read: 'panel.dashboard.overview'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("overview") }}
+        </p>
+        <a
+          (click)="openInvoiceDetailsDialog()"
+          *transloco="let t; read: 'panel.dashboard.overview'"
+          class="btn btn-sm btn-ghost bg-lightPurple text-darkPurple"
+        >
+          {{ t("createInvoice") }}
+        </a>
+      </div>
+      <div
+        class="grow flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden relative"
       >
-        {{ t("overview") }}
-      </p>
-      <a
-        (click)="openInvoiceDetailsDialog()"
-        *transloco="let t; read: 'panel.dashboard.overview'"
-        class="btn btn-sm btn-ghost bg-lightPurple text-darkPurple"
-      >
-        {{ t("createInvoice") }}
-      </a>
-    </div>
-    <div
-      class="w-full h-fit flex flex-row items-center justify-between overflow-x-auto overflow-y-hidden"
-    >
-      <app-vendor-dashboard-overview-card
-        *ngFor="let overviewCard of overviewCards; index as i"
-        [overviewCard]="overviewCard"
-      ></app-vendor-dashboard-overview-card>
+        <app-vendor-dashboard-overview-card
+          *ngFor="let overviewCard of overviewCards; index as i"
+          [overviewCard]="overviewCard"
+        ></app-vendor-dashboard-overview-card>
+      </div>
     </div>
   </div>
   <div
@@ -213,11 +212,6 @@
                       "
                       class="text-sm font-inter whitespace-nowrap px-6 py-4"
                     >
-                      <!-- {{
-                        PerformanceUtils.convertDotNetJSONDate(
-                          generatedInvoice.Invoice_Date.toString()
-                        )
-                      }} -->
                       {{
                         PerformanceUtils.convertDateStringToDate(
                           generatedInvoice.Invoice_Date
@@ -239,17 +233,6 @@
                       "
                       class="text-sm font-inter whitespace-nowrap px-6 py-4"
                     >
-                      <!-- <button
-                        [class]="
-                          getActiveStatusStyles(generatedInvoice.Payment_Type)
-                        "
-                      >
-                        {{
-                          generatedInvoice.Payment_Type
-                            ? generatedInvoice.Payment_Type.trim()
-                            : "-"
-                        }}
-                      </button> -->
                       <button
                         [class]="
                           PerformanceUtils.getActiveStatusStyles(
@@ -350,4 +333,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

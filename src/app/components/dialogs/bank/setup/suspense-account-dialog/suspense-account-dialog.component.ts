@@ -110,6 +110,7 @@ export class SuspenseAccountDialogComponent implements OnInit {
       sno: this.fb.control(suspenseAccount.Sus_Acc_Sno, [Validators.required]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
       status: this.fb.control(suspenseAccount.Status, [Validators.required]),
+      dummy: this.fb.control(true, []),
     });
   }
   private requestPostSuspenseAccount(form: any) {

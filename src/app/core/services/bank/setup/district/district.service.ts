@@ -13,7 +13,10 @@ export class DistrictService {
   constructor(private client: RequestClientService) {}
   public async getDistrictByRegion(body: { Sno: string }) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Company/GetDistDetails`, body)
+      this.client.performPost<
+        { Sno: string },
+        HttpDataResponse<District[] | number | string>
+      >(`/api/Company/GetDistDetails`, body)
     );
     return data;
   }

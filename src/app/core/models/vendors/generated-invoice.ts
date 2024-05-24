@@ -1,11 +1,11 @@
 export class GeneratedInvoice {
   Inv_Mas_Sno!: number;
   Inv_Det_Sno!: number;
-  Invoice_Date!: string | string;
+  Invoice_Date!: string;
   Payment_Type!: string;
   Invoice_No!: string;
-  Due_Date!: string | Date;
-  Invoice_Expired_Date!: string | Date;
+  Due_Date!: string;
+  Invoice_Expired_Date!: string;
   Chus_Mas_No!: number;
   Chus_Name!: string;
   Com_Mas_Sno!: number;

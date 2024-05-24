@@ -3,9 +3,9 @@
     "overview": {
       "name": "Overview",
       "transaction": "Transaction(s)",
-      "pendingApproval": "Pending Approval",
-      "customers": "Customers",
-      "users": "Users",
+      "pendingApproval": "Pending",
+      "customers": "Customer(s)",
+      "users": "User(s)",
       "viewMore": "View more"
     },
     "inboxApproval": {

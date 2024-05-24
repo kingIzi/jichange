@@ -28,8 +28,14 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-payment-details',
@@ -59,6 +65,7 @@ export class PaymentDetailsComponent implements OnInit {
   public payments: any[] = [];
   public filterForm!: FormGroup;
   public tableFormGroup!: FormGroup;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersMap = {
@@ -78,6 +85,7 @@ export class PaymentDetailsComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -138,19 +146,32 @@ export class PaymentDetailsComponent implements OnInit {
   private async createHeaderGroup() {
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    let labels = (await firstValueFrom(
-      this.tr.selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
-    )) as string[];
-    labels.forEach((label, index) => {
-      let header = this.fb.group({
-        label: this.fb.control(label, []),
-        sortAsc: this.fb.control(false, []),
-        included: this.fb.control(index <= 5, []),
-        values: this.fb.array([], []),
-      });
-      this.sortTableHeaderEventHandler(header, index);
-      this.tableHeaders.push(header);
+
+    // let labels = (await firstValueFrom(
+    //   this.tr.selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
+    // )) as string[];
+    // labels.forEach((label, index) => {
+    //   let header = this.fb.group({
+    //     label: this.fb.control(label, []),
+    //     sortAsc: this.fb.control(false, []),
+    //     included: this.fb.control(index <= 5, []),
+    //     values: this.fb.array([], []),
+    //   });
+    //   this.sortTableHeaderEventHandler(header, index);
+    //   this.tableHeaders.push(header);
+    // });
+    TableUtilities.createHeaders(
+      this.tr,
+      `paymentDetails.paymentsTable`,
+      this.scope,
+      this.tableHeaders,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
     });
   }
   private sortTableAsc(ind: number) {
@@ -168,6 +189,7 @@ export class PaymentDetailsComponent implements OnInit {
       }
     });
   }
+  private searchTable(searchText: string, paginator: MatPaginator) {}
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
@@ -185,7 +207,6 @@ export class PaymentDetailsComponent implements OnInit {
     let sortAsc = this.tableHeaders.at(ind).get('sortAsc');
     sortAsc?.setValue(!sortAsc?.value);
   }
-  searchTable(searchText: string) {}
   isCashAmountColumn(index: number) {
     return (
       index === this.headersMap.AMOUNT || index === this.headersMap.BALANCE
@@ -205,5 +226,8 @@ export class PaymentDetailsComponent implements OnInit {
   }
   get tableHeaders() {
     return this.tableFormGroup.get('tableHeaders') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableFormGroup.get('tableSearch') as FormControl;
   }
 }

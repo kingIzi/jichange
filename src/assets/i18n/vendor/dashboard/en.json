@@ -2,9 +2,9 @@
   "dashboard": {
     "overview": {
       "overview": "Overview",
-      "paidInvoice": "Paid Invoice",
-      "dueInvoice": "Invoice due",
-      "invoiceExpire": "Invoice(s) Expired",
+      "paidInvoice": "Paid",
+      "dueInvoice": "Due",
+      "invoiceExpire": "Expired",
       "customers": "Customer(s)",
       "viewMore": "View more",
       "createInvoice": "Create invoice"

@@ -13,7 +13,10 @@ export class WardService {
   constructor(private client: RequestClientService) {}
   public async postWardList(sno: string) {
     let wards = await lastValueFrom(
-      this.client.performPost(`/api/Company/GetWard?sno=${sno}`, {})
+      this.client.performPost<any, HttpDataResponse<Ward[] | number | string>>(
+        `/api/Company/GetWard?sno=${sno}`,
+        {}
+      )
     );
     return wards;
   }

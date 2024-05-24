@@ -50,6 +50,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { CompanySummaryTable } from 'src/app/core/enums/bank/company/company-summary-table';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-summary',
@@ -97,7 +98,7 @@ export class SummaryComponent implements OnInit {
     private companyService: CompanyService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -106,32 +107,14 @@ export class SummaryComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    this.translocoService
-      .selectTranslate('summary.companySummary', {}, this.scope)
-      .subscribe((labels: string[]) => {
-        labels.forEach((label: string, index: number) => {
-          let header = this.fb.group({
-            label: this.fb.control(label, []),
-            sortAsc: this.fb.control(false, []),
-            included: this.fb.control(index <= 5, []),
-            values: this.fb.array([], []),
-          });
-          (header.get('included') as FormControl).valueChanges.subscribe(
-            (value) => {
-              this.filterIncludedTableHeaders();
-            }
-          );
-          header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-            if (value === true) {
-              this.sortTableAsc(index);
-            } else {
-              this.sortTableDesc(index);
-            }
-          });
-          this.headers.push(header);
-        });
-        this.filterIncludedTableHeaders();
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `summary.companySummary`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this
+    );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
@@ -316,18 +299,12 @@ export class SummaryComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(
-            this.displayMessageBox,
-            this.translocoService
-          );
-        } else {
-          AppUtilities.noInternetError(
-            this.displayMessageBox,
-            this.translocoService
-          );
-        }
         this.cdr.detectChanges();
         throw err;
       });

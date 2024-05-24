@@ -43,7 +43,7 @@
   "invoiceDetails": {
     "invoiceDetails": "Invoice details",
     "form": {
-      "company": "Company",
+      "company": "Vendor",
       "customer": "Customer",
       "startDate": "Start date",
       "endDate": "End date",

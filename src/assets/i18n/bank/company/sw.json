@@ -99,7 +99,8 @@
         "failedToAddCompany": "Imeshindwa kuongeza kampuni, tafadhali jaribu tena au msaada wa mawasiliano.",
         "failedToApproveCompany": "Imeshindwa kuikubali kampuni.",
         "emailAddressExists": "Anwani ya Barua Pepe tayari ipo.",
-        "mobileNumberAlreadyExists": "Namba ya Simu tayari ipo."
+        "mobileNumberAlreadyExists": "Namba ya Simu tayari ipo.",
+        "noBranch": "Hakuna matawi yaliyopatikana."
       }
     }
   },

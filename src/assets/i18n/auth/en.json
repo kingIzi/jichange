@@ -37,7 +37,8 @@
       "mobileNo": "Mobile Number",
       "branch": "Branch",
       "accountNo": "Account Number",
-      "makerCheckerApproval": "Maker - Checker for invoice approval?",
+      "makerCheckerApproval": "Checker for invoice approval?",
+      "email": "Email Address",
       "makerOptions": {
         "yes": "Yes",
         "no": "No"
@@ -45,7 +46,8 @@
       "placeholders": {
         "vendorName": "Enter vendor number",
         "branch": "Select branch detail",
-        "accountNo": "Enter account number"
+        "accountNo": "Enter account number",
+        "email": "Enter email address"
       },
       "errors": {
         "vendorName": "Please specify a name",
@@ -53,6 +55,7 @@
         "branch": "Please specify",
         "accountNo": "Enter valid account number",
         "invalidAccountNo": "Invalid account number. Must start with 015, 012, or 01J and be 13 characters.",
+        "email": "Please enter email address",
         "dialogs": {
           "invalidFormError": "Invalid form",
           "missingVendorName": "Please provide a vendor name",

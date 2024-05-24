@@ -24,10 +24,4 @@ export class VendorDashboardOverviewCardComponent {
     lang: string;
     label: string;
   };
-  // @Input() statistic: number = 0;
-  // @Input() label: string = 'Transaction';
-  // @Input() imgUrl: string = '';
-  // @Input() viewMoreLink: string = '';
-  // @Input() increase: boolean = true;
-  // @Input() lang: string = '';
 }

@@ -15,7 +15,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -28,6 +32,7 @@ import { Customer } from 'src/app/core/models/bank/customer';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-amendment',
@@ -63,6 +68,7 @@ export class AmendmentComponent implements OnInit {
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
@@ -110,19 +116,18 @@ export class AmendmentComponent implements OnInit {
   private async createHeaderGroup() {
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    let labels = (await firstValueFrom(
-      this.tr.selectTranslate(`amendmentDetails.amendmentTable`, {}, this.scope)
-    )) as string[];
-    labels.forEach((label, index) => {
-      let header = this.fb.group({
-        label: this.fb.control(label, []),
-        sortAsc: this.fb.control(false, []),
-        included: this.fb.control(index <= 5, []),
-        values: this.fb.array([], []),
-      });
-      this.sortTableHeaderEventHandler(header, index);
-      this.tableHeaders.push(header);
+    TableUtilities.createHeaders(
+      this.tr,
+      `amendmentDetails.amendmentTable`,
+      this.scope,
+      this.tableHeaders,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
     });
   }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
@@ -155,6 +160,7 @@ export class AmendmentComponent implements OnInit {
       );
     }
   }
+  private searchTable(searchText: string, paginator: MatPaginator) {}
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
@@ -165,10 +171,9 @@ export class AmendmentComponent implements OnInit {
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
     } else {
-      this.formErrors();
+      this.filterFormGroup.markAllAsTouched();
     }
   }
-  searchTable(searchText: string) {}
   sortColumnClicked(ind: number) {
     let sortAsc = this.tableHeaders.at(ind).get('sortAsc');
     sortAsc?.setValue(!sortAsc?.value);
@@ -193,5 +198,8 @@ export class AmendmentComponent implements OnInit {
   }
   get tableHeaders() {
     return this.tableFormGroup.get('tableHeaders') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableFormGroup.get('tableSearch') as FormControl;
   }
 }

@@ -367,7 +367,7 @@
     "bankUserTable": [
       "Full name",
       "Designation",
-      "Username",
+      "Email",
       "Mobile number",
       "Status"
     ]
