@@ -21,7 +21,10 @@
       </p>
     </a>
   </div>
-  <div class="flex flex-col bg-white shadow px-2 py-4">
+  <div
+    [formGroup]="headersFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4"
+  >
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
         <div class="relative">
@@ -48,7 +51,7 @@
             #customersTable
             class="min-w-full text-left text-sm font-light"
           >
-            <thead [formGroup]="headersFormGroup" class="border-b font-medium">
+            <!-- <thead class="border-b font-medium">
               <ng-container formArrayName="headers">
                 <tr class="bg-lightPurple">
                   <th
@@ -78,6 +81,47 @@
                   </th>
                 </tr>
               </ng-container>
+            </thead> -->
+            <thead formArrayName="headers" class="border-b font-medium">
+              <tr
+                *transloco="let t; read: 'tableData.vendor'"
+                class="bg-lightPurple"
+              >
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
+                >
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
+                      >
+                        <span
+                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        >
+                          unfold_more
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
+                <th
+                  *transloco="let t; read: 'defaults'"
+                  class="px-6 font-inter text-sm text-right"
+                >
+                  {{ t("action") }}
+                </th>
+              </tr>
             </thead>
             <tbody>
               <tr
@@ -115,25 +159,34 @@
                   <app-remove-item-dialog
                     #removeItemDialog
                   ></app-remove-item-dialog>
-                  <div
-                    class="flex flex-row items-center justify-start space-x-4"
-                  >
+                  <div class="flex flex-row items-center justify-end space-x-4">
                     <button
+                      *transloco="let t; read: 'actions'"
                       [routerLink]="'/vendor/customers/' + customer.Cust_Sno"
+                      class="btn btn-sm btn-ghost tooltip"
+                      [attr.data-tip]="t('view')"
                     >
                       <span class="material-symbols-outlined text-warning">
                         visibility
                       </span>
                     </button>
-                    <button (click)="openCustomerEditDialog(customer)">
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      (click)="openCustomerEditDialog(customer)"
+                      class="btn btn-sm btn-ghost tooltip"
+                      [attr.data-tip]="t('edit')"
+                    >
                       <span class="material-symbols-outlined text-info">
                         edit
                       </span>
                     </button>
                     <button
+                      *transloco="let t; read: 'actions'"
                       (click)="
                         openRemoveDialog(customer.Cust_Sno, removeItemDialog)
                       "
+                      class="btn btn-sm btn-ghost tooltip"
+                      [attr.data-tip]="t('delete')"
                     >
                       <span class="material-symbols-outlined text-danger-600">
                         delete

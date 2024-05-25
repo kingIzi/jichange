@@ -22,6 +22,8 @@
       "Tarehe Iliyotumwa"
     ],
     "companyForm": {
+      "details": "Details",
+      "addressInformation": "Address information",
       "company": "Kampuni",
       "addVendor": "Ongeza muuzaji",
       "customer": "Jina la Vendor",

@@ -120,8 +120,9 @@ export class CustomersDialogComponent implements OnInit {
       Tinno: this.fb.control('', []),
       VatNo: this.fb.control('', []),
       CoPerson: this.fb.control('', []),
-      Mail: this.fb.control('', [Validators.required, Validators.email]),
+      Mail: this.fb.control('', [Validators.email]),
       Mobile_Number: this.fb.control('', [
+        Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       dummy: this.fb.control(true, []),
@@ -142,11 +143,9 @@ export class CustomersDialogComponent implements OnInit {
       Tinno: this.fb.control('', []),
       VatNo: this.fb.control('', []),
       CoPerson: this.fb.control('', []),
-      Mail: this.fb.control(this.data.Email, [
-        Validators.required,
-        Validators.email,
-      ]),
+      Mail: this.fb.control(this.data.Email, [Validators.email]),
       Mobile_Number: this.fb.control(this.data.Phone, [
+        Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       dummy: this.fb.control(true, []),

@@ -22,7 +22,10 @@
     "ok": "Ok",
     "reset": "Reset",
     "download": "Download",
-    "saveChanges": "Save changes?"
+    "saveChanges": "Save changes?",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "errors": {
     "errorOccured": "Error occured",

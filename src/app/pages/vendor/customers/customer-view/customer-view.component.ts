@@ -22,7 +22,7 @@ import { CustomerInvoice } from 'src/app/core/models/vendors/customer-invoice';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import * as json from 'src/assets/temp/data.json';
+//import * as json from 'src/assets/temp/data.json';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 
@@ -82,9 +82,9 @@ export class CustomerViewComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    let data = JSON.parse(JSON.stringify(json));
-    this.customerInvoicesData = data.customerInvoices;
-    this.customerInvoices = this.customerInvoicesData;
+    // let data = JSON.parse(JSON.stringify(json));
+    // this.customerInvoicesData = data.customerInvoices;
+    // this.customerInvoices = this.customerInvoicesData;
     this.buildFormHeaders();
   }
   convertDate(date: string) {

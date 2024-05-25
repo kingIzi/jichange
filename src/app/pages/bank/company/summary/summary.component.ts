@@ -341,7 +341,9 @@ export class SummaryComponent implements OnInit {
     let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
       width: '800px',
       height: '600px',
-      data: null,
+      data: {
+        companyData: null,
+      },
       disableClose: true,
     });
     dialogRef.componentInstance.companyAddedSuccessfully

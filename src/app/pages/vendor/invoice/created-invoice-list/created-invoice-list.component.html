@@ -363,7 +363,9 @@
                 <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
                   <div class="flex flex-row items-center justify-between">
                     <button
-                      class="btn btn-xs btn-ghost"
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('view')"
+                      class="btn btn-sm btn-ghost tooltip"
                       (click)="openInvoiceReportView(invoice)"
                     >
                       <span class="material-symbols-outlined text-warning">
@@ -371,7 +373,9 @@
                       </span>
                     </button>
                     <button
-                      class="btn btn-xs btn-ghost"
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('edit')"
+                      class="btn btn-sm btn-ghost tooltip"
                       (click)="openEditInvoiceDialog(invoice)"
                     >
                       <span class="material-symbols-outlined text-info">
@@ -379,7 +383,9 @@
                       </span>
                     </button>
                     <button
-                      class="btn btn-xs btn-ghost"
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('download')"
+                      class="btn btn-sm btn-ghost tooltip"
                       (click)="downloadInvoice(invoice)"
                     >
                       <span class="material-symbols-outlined text-linkBlue">

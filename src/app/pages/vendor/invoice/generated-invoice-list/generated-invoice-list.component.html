@@ -285,9 +285,11 @@
                   <app-cancel-generated-invoice
                     #cancelGeneratedInvoice
                   ></app-cancel-generated-invoice>
-                  <div class="flex flex-row items-center justify-between">
+                  <div class="flex flex-row items-center justify-end">
                     <button
-                      class="btn btn-xs btn-ghost"
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('view')"
+                      class="btn btn-sm btn-ghost tooltip"
                       (click)="openGeneratedInvoiceView(generatedInvoice)"
                     >
                       <span class="material-symbols-outlined text-warning">
@@ -295,13 +297,17 @@
                       </span>
                     </button>
                     <button
+                      *transloco="let t; read: 'generated'"
+                      [attr.data-tip]="t('amend')"
                       (click)="openAmmendInvoiceDialog(generatedInvoice)"
-                      class="btn btn-xs btn-ghost"
+                      class="btn btn-sm btn-ghost tooltip"
                     >
                       <span class="material-symbols-outlined"> cached </span>
                     </button>
                     <button
-                      class="btn btn-xs btn-ghost"
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('download')"
+                      class="btn btn-sm btn-ghost tooltip"
                       (click)="downloadInvoice(generatedInvoice)"
                     >
                       <span class="material-symbols-outlined text-linkBlue">

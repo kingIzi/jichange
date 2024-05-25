@@ -222,8 +222,10 @@
                   ></app-remove-item-dialog> -->
                   <div class="flex flex-row items-center justify-end space-x-2">
                     <button
+                      *transloco="let t; read: 'actions'"
+                      class="btn btn-sm btn-ghost tooltip"
+                      [attr.data-tip]="t('edit')"
                       (click)="openEditCompanyUserDialog(companUser)"
-                      class="btn btn-sm btn-ghost"
                     >
                       <span class="material-symbols-outlined text-info">
                         edit

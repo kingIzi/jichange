@@ -57,6 +57,14 @@
   <div
     class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full w-full overflow-y-auto relative py-4"
   >
+    <div class="col-span-full">
+      <h4
+        *transloco="let t; read: 'company.summary.companyForm'"
+        class="text-sm font-bold"
+      >
+        {{ t("details") }}
+      </h4>
+    </div>
     <div class="flex flex-col space-y-1">
       <h6
         *transloco="let t; read: 'company.summary.companyForm'"
@@ -160,6 +168,52 @@
         </p>
       </span>
     </div>
+    <div class="flex flex-col space-y-1">
+      <h6
+        *transloco="let t; read: 'company.summary.companyForm'"
+        class="text-left text-sm"
+      >
+        {{ t("emailId") }}
+      </h6>
+      <input
+        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+        [formControl]="email"
+        [placeholder]="t('emailId')"
+        type="text"
+        class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+      />
+      <span *ngIf="email && email.invalid && email.touched">
+        <p
+          *transloco="let t; read: 'company.summary.companyForm.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("emailId") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <h6
+        *transloco="let t; read: 'company.summary.companyForm'"
+        class="text-left text-sm"
+      >
+        {{ t("directorName") }}
+      </h6>
+      <input
+        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
+        [formControl]="dname"
+        [placeholder]="t('directorName')"
+        type="text"
+        class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
+      />
+      <span *ngIf="dname && dname.invalid && dname.touched">
+        <p
+          *transloco="let t; read: 'company.summary.companyForm.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("directorName") }}
+        </p>
+      </span>
+    </div>
     <div class="flex flex-col space-y-1 w-full">
       <h6
         *transloco="let t; read: 'company.summary.companyForm'"
@@ -215,29 +269,6 @@
         </p>
       </span>
     </div>
-    <div class="flex flex-col space-y-1">
-      <h6
-        *transloco="let t; read: 'company.summary.companyForm'"
-        class="text-left text-sm"
-      >
-        {{ t("emailId") }}
-      </h6>
-      <input
-        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-        [formControl]="email"
-        [placeholder]="t('emailId')"
-        type="text"
-        class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
-      />
-      <span *ngIf="email && email.invalid && email.touched">
-        <p
-          *transloco="let t; read: 'company.summary.companyForm.errors'"
-          class="text-xs text-red-600"
-        >
-          {{ t("emailId") }}
-        </p>
-      </span>
-    </div>
 
     <!-- <div class="flex flex-col space-y-1">
       <h6
@@ -285,6 +316,14 @@
         </p>
       </span>
     </div> -->
+    <div class="col-span-full">
+      <h4
+        *transloco="let t; read: 'company.summary.companyForm'"
+        class="text-sm font-bold"
+      >
+        {{ t("addressInformation") }}
+      </h4>
+    </div>
     <div class="flex flex-col space-y-1">
       <h6
         *transloco="let t; read: 'company.summary.companyForm'"
@@ -448,29 +487,6 @@
         </p>
       </span>
     </div> -->
-    <div class="flex flex-col space-y-1">
-      <h6
-        *transloco="let t; read: 'company.summary.companyForm'"
-        class="text-left text-sm"
-      >
-        {{ t("directorName") }}
-      </h6>
-      <input
-        *transloco="let t; read: 'company.summary.companyForm.placeholders'"
-        [formControl]="dname"
-        [placeholder]="t('directorName')"
-        type="text"
-        class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
-      />
-      <span *ngIf="dname && dname.invalid && dname.touched">
-        <p
-          *transloco="let t; read: 'company.summary.companyForm.errors'"
-          class="text-xs text-red-600"
-        >
-          {{ t("directorName") }}
-        </p>
-      </span>
-    </div>
     <div class="col-span-full w-full flex flex-col space-y-2">
       <p
         *transloco="let t; read: 'company.summary.companyForm'"

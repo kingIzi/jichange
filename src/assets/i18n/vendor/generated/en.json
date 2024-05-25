@@ -10,6 +10,7 @@
     "Total Amount",
     "Delivery Status"
   ],
+  "amend": "Amend",
   "invoiceAmendedSuccessfully": "Amended invoice successfully!",
   "failedToRetrieveInvoice": "Failed to retrieve generated invoice.",
   "addedInvoiceSuccessfully": "Added invoice successfully!",

@@ -22,6 +22,8 @@
       "Posted"
     ],
     "companyForm": {
+      "details": "Details",
+      "addressInformation": "Address information",
       "company": "Company",
       "addVendor": "Add vendor",
       "customer": "Vendor name",

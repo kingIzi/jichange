@@ -555,7 +555,6 @@ export class CompanySummaryDialogComponent implements OnInit {
     }
   }
   addCompany() {
-    console.log(this.data.companyData);
     if (!this.data?.companyData) {
       this.confirmAddCompany.nativeElement.close();
       this.requestAddCompany(

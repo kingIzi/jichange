@@ -21,7 +21,10 @@
     "ok": "Sawa",
     "reset": "Weka upya",
     "download": "Pakua",
-    "saveChanges": "Save changes?"
+    "saveChanges": "Save changes?",
+    "view": "Tazama",
+    "edit": "Hariri",
+    "delete": "Futa"
   },
   "errors": {
     "errorOccured": "Kosa limetokea",
