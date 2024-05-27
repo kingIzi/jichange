@@ -1,4 +1,12 @@
 {
+  "sessionManagement": {
+    "userLogedOut": "Mtumiaji ametoka nje",
+    "timedOut": {
+      "timedOutTitle": "Muda Umekwisha",
+      "timeOutMessage": "Kipindi chako kimekwisha na unahitaji kuingia tena!",
+      "timeOutInXSeconds": "Utaisha baada ya sekunde {}!"
+    }
+  },
   "loginForm": {
     "welcomeMessage": "Ingia kwenye akaunti yako",
     "signInMessage": "Ingiza barua pepe yako na nenosiri kuingia",

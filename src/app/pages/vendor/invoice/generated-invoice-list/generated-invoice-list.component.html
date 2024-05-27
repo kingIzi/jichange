@@ -281,6 +281,35 @@
                       : "-"
                   }}
                 </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(InvoiceListTable.CANCEL_INVOICE)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(InvoiceListTable.CANCEL_INVOICE)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  <app-cancel-generated-invoice
+                    [invoiceId]="generatedInvoice.Inv_Mas_Sno"
+                    [userId]="userProfile.Usno"
+                    #cancelGeneratedInvoice
+                  ></app-cancel-generated-invoice>
+                  <button
+                    (click)="
+                      cancelInvoice(generatedInvoice, cancelGeneratedInvoice)
+                    "
+                    class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
+                  >
+                    Cancel
+                  </button>
+                </td>
                 <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
                   <app-cancel-generated-invoice
                     #cancelGeneratedInvoice

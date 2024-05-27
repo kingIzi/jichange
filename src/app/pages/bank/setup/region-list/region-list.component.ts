@@ -92,6 +92,7 @@ export class RegionListComponent implements OnInit {
     }
   }
   private requestRegionList() {
+    this.tableLoading = true;
     this.regionService
       .getAllRegionsList({})
       .then((result) => {

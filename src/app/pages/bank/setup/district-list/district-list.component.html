@@ -174,16 +174,20 @@
                   ></app-remove-item-dialog>
                   <div class="flex flex-row items-center justify-end space-x-2">
                     <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('edit')"
                       (click)="openEditDistrictDialog(district)"
-                      class="btn btn-sm btn-ghost"
+                      class="btn btn-sm btn-ghost tooltip"
                     >
                       <span class="material-symbols-outlined text-info">
                         edit
                       </span>
                     </button>
                     <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('delete')"
                       (click)="openRemoveDialog(district, removeItemDialog)"
-                      class="btn btn-sm btn-ghost"
+                      class="btn btn-sm btn-ghost tooltip"
                     >
                       <span class="material-symbols-outlined text-danger-600">
                         delete

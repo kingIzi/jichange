@@ -75,6 +75,7 @@
         "ward": "Tafadhali chagua kata",
         "tinNo": "Tafadhali ingiza nambari ya TIN",
         "vatNo": "Tafadhali ingiza nambari ya VAT",
+        "invalidTin": "TIN si sahihi. Lazima iwe na urefu wa herufi 9.",
         "directorName": "Tafadhali ingiza jina la mkurugenzi",
         "emailId": "Tafadhali ingiza anwani ya barua pepe",
         "telephoneNo": "Tafadhali ingiza nambari ya simu yenye sahihi"

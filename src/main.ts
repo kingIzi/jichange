@@ -15,6 +15,7 @@ import {
   provideNoopAnimations,
 } from '@angular/platform-browser/animations';
 import { clientInterceptor } from './app/core/interceptors/client.interceptor';
+import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -22,6 +23,7 @@ bootstrapApplication(AppComponent, {
       AppRoutingModule,
       HttpClientModule,
       TranslocoRootModule,
+      NgIdleKeepaliveModule.forRoot(),
     ]),
     provideAnimations(),
     provideHttpClient(withInterceptors([clientInterceptor])),

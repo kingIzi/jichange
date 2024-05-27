@@ -19,7 +19,7 @@ export class FileHandlerService {
     );
     return doc.html(element, {
       callback: function (pdf: jsPDF) {
-        pdf.deletePage(pdf.getNumberOfPages());
+        //pdf.deletePage(pdf.getNumberOfPages());
         pdf.save(filename);
       },
     });

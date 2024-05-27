@@ -9,7 +9,11 @@ import {
 } from '@angular/core';
 import { LanguageSelectorComponent } from '../../language-selector/language-selector.component';
 import { Router, RouterModule } from '@angular/router';
-import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import {
+  TRANSLOCO_SCOPE,
+  TranslocoModule,
+  TranslocoService,
+} from '@ngneat/transloco';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -27,6 +31,9 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { TimeoutError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
+import { NgxLoadingModule } from 'ngx-loading';
+import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
+import { Keepalive } from '@ng-idle/keepalive';
 
 @Component({
   selector: 'app-header',
@@ -34,6 +41,7 @@ import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/di
   styleUrls: ['./header.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [{ provide: TRANSLOCO_SCOPE, useValue: { scope: 'auth' } }],
   imports: [
     LanguageSelectorComponent,
     RouterModule,
@@ -43,9 +51,13 @@ import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/di
     ChatAgentComponent,
     MatDialogModule,
     DisplayMessageBoxComponent,
+    NgxLoadingModule,
   ],
 })
-export class HeaderComponent implements OnInit, AfterViewInit {
+export class HeaderComponent implements OnInit {
+  private idleState = 'Not started.';
+  private timedOut = false;
+  private lastPing!: Date;
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
   public userProfile!: LoginResponse;
@@ -86,14 +98,74 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('timeoutWarning') timeoutWarning!: DisplayMessageBoxComponent;
+  @ViewChild('timeOut') timeOut!: DisplayMessageBoxComponent;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
     private dialog: MatDialog,
     private loginService: LoginService,
     private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+    private router: Router,
+    private idle: Idle,
+    private keepalive: Keepalive
+  ) {
+    let systemDefaultTimeout = 15 * 60;
+    this.idle.setIdle(systemDefaultTimeout);
+    this.idle.setTimeout(systemDefaultTimeout);
+    this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
+
+    this.idle.onIdleEnd.subscribe(() => {
+      this.idleState = 'No longer idle.';
+      this.timeoutWarning.closeDialog();
+    });
+
+    this.idle.onTimeout.subscribe(() => {
+      this.idleState = 'Timed out!';
+      this.timedOut = true;
+      this.timeoutWarning.closeDialog();
+      let timeOut = AppUtilities.openDisplayMessageBox(
+        this.timeOut,
+        this.tr.translate(`auth.sessionManagement.timedOut.timedOutTitle`),
+        this.tr.translate(`auth.sessionManagement.timedOut.timeOutMessage`)
+      );
+      timeOut.addEventListener('close', () => {
+        this.requestLogout();
+      });
+      this.cdr.detectChanges();
+    });
+
+    this.idle.onIdleStart.subscribe(() => {
+      this.idleState = "You've gone idle!";
+    });
+
+    this.idle.onTimeoutWarning.subscribe((countdown) => {
+      this.idleState = 'You will time out in ' + countdown + ' seconds!';
+      AppUtilities.openDisplayMessageBox(
+        this.timeoutWarning,
+        this.tr.translate(`auth.sessionManagement.timedOut.timedOutTitle`),
+        this.tr
+          .translate(`auth.sessionManagement.timedOut.timeOutInXSeconds`)
+          .replace('{}', countdown.toString())
+      );
+      this.cdr.detectChanges();
+    });
+
+    let interval = 30;
+    this.keepalive.interval(interval);
+    this.keepalive.onPing.subscribe(() => {
+      this.lastPing = new Date();
+    });
+
+    this.router.events.subscribe((val) => {
+      let currentPath = location.pathname;
+      if (currentPath.includes('/main')) {
+        this.idle.watch();
+      } else {
+        this.idle.stop();
+      }
+    });
+  }
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
     if (userProfile) {
@@ -101,7 +173,6 @@ export class HeaderComponent implements OnInit, AfterViewInit {
     }
   }
   private createHeaders() {
-    // let bankHeaders: any[] = this.translocoService.translate('en.bankHeaders');
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
@@ -233,19 +304,15 @@ export class HeaderComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/auth']);
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.routeLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  ngAfterViewInit(): void {
-    //let div = this.desktopSetupDropdown.nativeElement;
-    //this.openProfileDialog();
   }
   ngOnInit(): void {
     this.parseUserProfile();

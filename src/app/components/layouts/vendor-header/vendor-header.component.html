@@ -1,4 +1,10 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-display-message-box #timeoutWarning></app-display-message-box>
+<app-display-message-box #timeOut></app-display-message-box>
+<ngx-loading
+  [show]="routeLoading"
+  [config]="{ backdropBorderRadius: '0.5px' }"
+></ngx-loading>
 
 <dialog #tempDialog id="my_modal_2" class="modal">
   <div class="modal-box">
@@ -232,7 +238,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="routeLoading" class="absolute bottom-0 left-0 w-full right-0">
-    <progress class="progress w-full h-0.5 progress-accent"></progress>
-  </div>
+  <!-- <div *ngIf="routeLoading" class="absolute bottom-0 left-0 w-full right-0">
+    <progress class="progress w-full h-0.5"></progress>
+  </div> -->
 </div>

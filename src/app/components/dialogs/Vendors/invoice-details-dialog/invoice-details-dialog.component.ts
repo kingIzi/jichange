@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -91,6 +92,8 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   @ViewChild('confirmAddCustomer')
   confirmAddCustomer!: ConfirmAddCustomerDialogComponent;
   @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
+  @ViewChild('confirmAddInvoiceDetail')
+  confirmAddInvoiceDetail!: ElementRef<HTMLDialogElement>;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -154,6 +157,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       this.generatedInvoice.Remarks ? this.generatedInvoice.Remarks.trim() : ''
     );
     this.sno.setValue(this.generatedInvoice.Inv_Mas_Sno);
+
     this.appendItems();
   }
   private appendItems() {
@@ -249,15 +253,6 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       total: this.fb.control('', [Validators.required]),
       details: this.fb.array([], [Validators.required]),
     });
-  }
-  private openAddCustomerConfirmForm() {
-    AppUtilities.openDialog(
-      this.confirmAddCustomer,
-      this.tr.translate('invoice.form.actions.confirm'),
-      this.tr.translate(
-        'invoice.form.actions.areYouSureYouWantToAddANewCustomer'
-      )
-    );
   }
   private formErrors(errorsPath: string = 'invoice.form.dialog') {
     if (this.invno.invalid) {
@@ -449,19 +444,13 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   }
   submitInvoiceDetailsForm() {
     if (this.invoiceDetailsForm.valid) {
-      let d = AppUtilities.openSubmitMessageBox(
-        this.submitMessageBox,
-        this.tr.translate('defaults.confirm'),
-        this.tr.translate('dialogs.sureSaveChanges')
-      );
-      d.confirm.asObservable().subscribe(() => {
-        this.requestAddInvoiceForm(
-          this.invoiceDetailsForm.value as AddInvoiceForm
-        );
-      });
+      this.confirmAddInvoiceDetail.nativeElement.showModal();
     } else {
       this.invoiceDetailsForm.markAllAsTouched();
     }
+  }
+  addInvoice() {
+    this.requestAddInvoiceForm(this.invoiceDetailsForm.value);
   }
   removeItemDetail(ind: number) {
     if (ind > 0) {

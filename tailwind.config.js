@@ -29,5 +29,3 @@ module.exports = {
     themes: ["light"],
   },
 };
-
-// require("daisyui")

@@ -165,14 +165,20 @@
                 <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
                   <div class="flex flex-row items-center justify-end space-x-2">
                     <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('edit')"
                       (click)="openEditSuspenseAccountDialog(suspenseAccount)"
-                      class="btn btn-sm btn-ghost"
+                      class="btn btn-sm btn-ghost tooltip"
                     >
                       <span class="material-symbols-outlined text-info">
                         edit
                       </span>
                     </button>
-                    <button class="btn btn-sm btn-ghost">
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('delete')"
+                      class="btn btn-sm btn-ghost tooltip"
+                    >
                       <span class="material-symbols-outlined text-danger-600">
                         delete
                       </span>

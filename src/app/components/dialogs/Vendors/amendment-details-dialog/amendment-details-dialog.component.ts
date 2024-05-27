@@ -374,9 +374,10 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     }
   }
   addAmendment() {
-    if (this.data?.invid) {
-      this.requestAmendInvoice(this.formGroup.value);
-    }
+    // if (this.data?.invid) {
+    //   this.requestAmendInvoice(this.formGroup.value);
+    // }
+    this.requestAmendInvoice(this.formGroup.value);
   }
   get invno() {
     return this.formGroup.get('invno') as FormControl;

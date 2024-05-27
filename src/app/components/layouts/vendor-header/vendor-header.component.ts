@@ -26,6 +26,9 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoginService } from 'src/app/core/services/login.service';
 import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { NgxLoadingModule } from 'ngx-loading';
+import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
+import { Keepalive } from '@ng-idle/keepalive';
 
 @Component({
   selector: 'app-vendor-header',
@@ -33,6 +36,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   styleUrls: ['./vendor-header.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [{ provide: TRANSLOCO_SCOPE, useValue: { scope: 'auth' } }],
   imports: [
     CommonModule,
     RouterModule,
@@ -40,9 +44,13 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     TranslocoModule,
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
+    NgxLoadingModule,
   ],
 })
 export class VendorHeaderComponent implements OnInit {
+  private idleState = 'Not started.';
+  private timedOut = false;
+  private lastPing!: Date;
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
   public userProfile!: LoginResponse;
@@ -57,13 +65,73 @@ export class VendorHeaderComponent implements OnInit {
   };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('timeoutWarning') timeoutWarning!: DisplayMessageBoxComponent;
+  @ViewChild('timeOut') timeOut!: DisplayMessageBoxComponent;
   constructor(
     private tr: TranslocoService,
     private loginService: LoginService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+    private router: Router,
+    private idle: Idle,
+    private keepalive: Keepalive
+  ) {
+    let systemDefaultTimeout = 15 * 60;
+    this.idle.setIdle(systemDefaultTimeout);
+    this.idle.setTimeout(systemDefaultTimeout);
+    this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
+
+    this.idle.onIdleEnd.subscribe(() => {
+      this.idleState = 'No longer idle.';
+      this.timeoutWarning.closeDialog();
+    });
+
+    this.idle.onTimeout.subscribe(() => {
+      this.idleState = 'Timed out!';
+      this.timedOut = true;
+      this.timeoutWarning.closeDialog();
+      let timeOut = AppUtilities.openDisplayMessageBox(
+        this.timeOut,
+        this.tr.translate(`auth.sessionManagement.timedOut.timedOutTitle`),
+        this.tr.translate(`auth.sessionManagement.timedOut.timeOutMessage`)
+      );
+      timeOut.addEventListener('close', () => {
+        this.requestLogout();
+      });
+      this.cdr.detectChanges();
+    });
+
+    this.idle.onIdleStart.subscribe(() => {
+      this.idleState = "You've gone idle!";
+    });
+
+    this.idle.onTimeoutWarning.subscribe((countdown) => {
+      this.idleState = 'You will time out in ' + countdown + ' seconds!';
+      AppUtilities.openDisplayMessageBox(
+        this.timeoutWarning,
+        this.tr.translate(`auth.sessionManagement.timedOut.timedOutTitle`),
+        this.tr
+          .translate(`auth.sessionManagement.timedOut.timeOutInXSeconds`)
+          .replace('{}', countdown.toString())
+      );
+      this.cdr.detectChanges();
+    });
+
+    let interval = 30;
+    this.keepalive.interval(interval);
+    this.keepalive.onPing.subscribe(() => {
+      this.lastPing = new Date();
+    });
+
+    this.router.events.subscribe((val) => {
+      let currentPath = location.pathname;
+      if (currentPath.includes('/vendor')) {
+        this.idle.watch();
+      } else {
+        this.idle.stop();
+      }
+    });
+  }
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
     if (userProfile) {

@@ -1,4 +1,10 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-display-message-box #timeoutWarning></app-display-message-box>
+<app-display-message-box #timeOut></app-display-message-box>
+<ngx-loading
+  [show]="routeLoading"
+  [config]="{ backdropBorderRadius: '0.5px' }"
+></ngx-loading>
 
 <div class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
@@ -173,7 +179,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="routeLoading" class="absolute bottom-0 left-0 w-full right-0">
+  <!-- <div *ngIf="routeLoading" class="absolute bottom-0 left-0 w-full right-0">
     <progress class="progress w-full h-0.5 progress-info"></progress>
-  </div>
+  </div> -->
 </div>

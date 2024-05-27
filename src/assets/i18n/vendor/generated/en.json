@@ -8,9 +8,11 @@
     "Invoice Date",
     "Payment type",
     "Total Amount",
-    "Delivery Status"
+    "Delivery Status",
+    "Cancel invoice"
   ],
   "amend": "Amend",
+  "amendInvoice": "Amend Invoice",
   "invoiceAmendedSuccessfully": "Amended invoice successfully!",
   "failedToRetrieveInvoice": "Failed to retrieve generated invoice.",
   "addedInvoiceSuccessfully": "Added invoice successfully!",

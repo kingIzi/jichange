@@ -1,25 +1,52 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   Inject,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { TranslocoModule } from '@ngneat/transloco';
+import { Router, RouterModule } from '@angular/router';
+import {
+  TRANSLOCO_SCOPE,
+  TranslocoModule,
+  TranslocoService,
+} from '@ngneat/transloco';
 import { CommonModule } from '@angular/common';
+import { LoginService } from './core/services/login.service';
+import { AppUtilities } from './utilities/app-utilities';
+import { DisplayMessageBoxComponent } from './components/dialogs/display-message-box/display-message-box.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   standalone: true,
-  imports: [RouterModule, TranslocoModule, CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterModule,
+    TranslocoModule,
+    CommonModule,
+    DisplayMessageBoxComponent,
+  ],
+  providers: [{ provide: TRANSLOCO_SCOPE, useValue: { scope: 'auth' } }],
 })
 export class AppComponent implements OnInit {
+  private idleState = 'Not started.';
+  private timedOut = false;
+  lastPing?: Date = undefined;
   @ViewChild('noInternetModal') noInternetModal!: ElementRef;
   @ViewChild('connectedModal') connectedModal!: ElementRef;
-  constructor() {}
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('sessionTimedOut') sessionTimedOut!: DisplayMessageBoxComponent;
+  constructor(
+    private tr: TranslocoService,
+    private loginService: LoginService,
+    private router: Router
+  ) {}
   private verifyInternet() {
     window.addEventListener('online', () => {
       (this.connectedModal.nativeElement as HTMLDialogElement).showModal();

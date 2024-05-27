@@ -6,6 +6,10 @@ import { SubmitMessageBoxComponent } from '../components/dialogs/submit-message-
 import { formatDate } from '@angular/common';
 import { Observable, TimeoutError, catchError, lastValueFrom, map } from 'rxjs';
 import Swal from 'sweetalert2';
+import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
+import { Keepalive } from '@ng-idle/keepalive';
+import { Router } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 
 export class AppUtilities {
   static phoneNumberPrefixRegex: any = /^(?:[67]\d{8}|255\d{9})$/;

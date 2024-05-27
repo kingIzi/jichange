@@ -75,6 +75,7 @@
         "ward": "Please select a ward",
         "tinNo": "Please enter TIN number",
         "vatNo": "Please enter VAT number",
+        "invalidTin": "Invalid TIN. Must be 9 numeric characters long.",
         "directorName": "Please enter director name",
         "emailId": "Please enter a valid email",
         "telephoneNo": "Please enter a valid phone number"

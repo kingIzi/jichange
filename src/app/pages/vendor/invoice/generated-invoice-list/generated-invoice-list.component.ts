@@ -80,7 +80,7 @@ import { AmendmentDetailsDialogComponent } from 'src/app/components/dialogs/Vend
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
-  private userProfile!: LoginResponse;
+  public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public generatedInvoices: GeneratedInvoice[] = [];
@@ -272,7 +272,7 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
   openGeneratedInvoiceView(generatedInvoice: GeneratedInvoice) {
     let dialogRef = this.dialog.open(GeneratedInvoiceViewComponent, {
       width: '800px',
-      height: '700px',
+      //height: '700px',
       data: {
         Inv_Mas_Sno: generatedInvoice.Inv_Mas_Sno,
         userProfile: this.userProfile,
@@ -283,6 +283,7 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
   downloadInvoice(generatedInvoice: GeneratedInvoice) {
     let dialogRef = this.dialog.open(GeneratedInvoiceViewComponent, {
       width: '800px',
+      height: '700px',
       data: {
         Inv_Mas_Sno: generatedInvoice.Inv_Mas_Sno,
         userProfile: this.userProfile,
@@ -352,6 +353,22 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
   }
   isCashAmountColumn(index: number) {
     return index === GeneratedInvoiceListTable.TOTAL_AMOUNT;
+  }
+  cancelInvoice(
+    invoice: GeneratedInvoice,
+    dialog: CancelGeneratedInvoiceComponent
+  ) {
+    dialog.title = this.tr.translate(`defaults.warning`);
+    dialog.message = this.tr
+      .translate(`invoice.createdInvoice.sureCancelInvoice`)
+      .replace('{}', invoice.Invoice_No);
+    dialog.userId = this.userProfile.Usno;
+    dialog.invoiceId = invoice.Inv_Mas_Sno;
+    dialog.cancelledInvoice.asObservable().subscribe(() => {
+      this.requestGeneratedInvoice();
+      //this.requestCreatedInvoiceList();
+    });
+    dialog.openDialog();
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

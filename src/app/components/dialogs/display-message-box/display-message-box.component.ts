@@ -18,4 +18,9 @@ export class DisplayMessageBoxComponent {
     dialog.showModal();
     return dialog;
   }
+  closeDialog() {
+    if (this.displayMessageDialog.nativeElement.open) {
+      this.displayMessageDialog.nativeElement.close();
+    }
+  }
 }

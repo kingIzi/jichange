@@ -130,7 +130,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
   private requestAccountPool() {
     this.startLoading = true;
     this.suspenseAccountService
-      .getAvailableSuspenseAccounts({})
+      .getSuspenseActiveAccountList({})
       .then((result) => {
         if (
           result.message.toLocaleLowerCase() == 'failed'.toLocaleLowerCase()

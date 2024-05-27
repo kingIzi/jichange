@@ -1,4 +1,12 @@
 {
+  "sessionManagement": {
+    "userLogedOut": "User logged out",
+    "timedOut": {
+      "timedOutTitle": "Timed out",
+      "timeOutMessage": "Your session has timed out and you need to log in again!",
+      "timeOutInXSeconds": "You will time out in {} seconds!"
+    }
+  },
   "loginForm": {
     "welcomeMessage": "Sign in to your account",
     "signInMessage": "Enter your email & password to login",

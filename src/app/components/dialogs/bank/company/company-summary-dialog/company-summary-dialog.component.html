@@ -103,12 +103,22 @@
         class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
       />
       <span *ngIf="tin && tin.invalid && tin.touched">
-        <p
+        <!-- <p
           *transloco="let t; read: 'company.summary.companyForm.errors'"
           class="text-xs text-red-600"
         >
           {{ t("tinNo") }}
-        </p>
+        </p> -->
+        <ng-container
+          *transloco="let t; read: 'company.summary.companyForm.errors'"
+        >
+          <p class="text-xs text-red-600" *ngIf="tin.hasError('required')">
+            {{ t("tinNo") }}
+          </p>
+          <p class="text-xs text-red-600" *ngIf="tin.hasError('pattern')">
+            {{ t("invalidTin") }}
+          </p>
+        </ng-container>
       </span>
     </div>
     <div class="flex flex-col space-y-1 w-full">
@@ -329,7 +339,7 @@
         *transloco="let t; read: 'company.summary.companyForm'"
         class="text-left text-sm"
       >
-        {{ t("address") }}
+        {{ t("address") }}<span class="text-red-600">*</span>
       </h6>
       <input
         *transloco="let t; read: 'company.summary.companyForm.placeholders'"

@@ -8,9 +8,11 @@
     "Tarehe ya Bili",
     "Aina ya Malipo",
     "Jumla",
-    "Hali ya Uwasilishaji"
+    "Hali ya Uwasilishaji",
+    "Ghairi ankara"
   ],
   "amend": "Amend",
+  "amendInvoice": "Rekebisha ankara",
   "invoiceAmendedSuccessfully": "Ankara iliyorekebishwa kwa mafanikio!",
   "failedToRetrieveInvoice": "Imeshindwa kurejesha ankara iliyozalishwa.",
   "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!",

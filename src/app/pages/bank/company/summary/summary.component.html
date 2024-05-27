@@ -338,18 +338,24 @@
                       class="flex flex-row items-center justify-end space-x-2"
                     >
                       <button
+                        *transloco="let t; read: 'actions'"
                         (click)="openEditCompanySummaryDialog(company)"
-                        class="btn btn-sm bg-transparent"
+                        class="btn btn-sm bg-transparent tooltip"
+                        [attr.data-tip]="t('edit')"
                       >
                         <span class="material-symbols-outlined text-info">
                           edit
                         </span>
                       </button>
-                      <button class="btn btn-sm bg-transparent">
+                      <!-- <button
+                        *transloco="let t; read: 'actions'"
+                        [attr.data-tip]="t('delete')"
+                        class="btn btn-sm bg-transparent tooltip"
+                      >
                         <span class="material-symbols-outlined text-danger-600">
                           cancel
                         </span>
-                      </button>
+                      </button> -->
                     </div>
                   </td>
                 </tr>

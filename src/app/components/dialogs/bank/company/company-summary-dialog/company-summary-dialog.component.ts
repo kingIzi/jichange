@@ -227,11 +227,14 @@ export class CompanySummaryDialogComponent implements OnInit {
       check_status: this.fb.control(company.Checker, [Validators.required]),
       fax: this.fb.control(company.FaxNo, []),
       pbox: this.fb.control(company.PostBox, []),
-      addr: this.fb.control(company.Address, []),
+      addr: this.fb.control(company.Address, [Validators.required]),
       rsno: this.fb.control(company.RegId ?? '', []),
       dsno: this.fb.control(company.DistSno ?? '', []),
       wsno: this.fb.control(company.WardSno ?? '', []),
-      tin: this.fb.control(company.TinNo, [Validators.required]),
+      tin: this.fb.control(company.TinNo, [
+        Validators.required,
+        Validators.pattern(/^\d{9}$/),
+      ]),
       vat: this.fb.control(company.VatNo, []),
       dname: this.fb.control(company.DirectorName, []),
       telno: this.fb.control(company.TelNo, [
@@ -344,11 +347,14 @@ export class CompanySummaryDialogComponent implements OnInit {
       check_status: this.fb.control('', [Validators.required]),
       fax: this.fb.control('', []),
       pbox: this.fb.control('', []),
-      addr: this.fb.control('', []),
+      addr: this.fb.control('', [Validators.required]),
       rsno: this.fb.control('', []),
       dsno: this.fb.control('', []),
       wsno: this.fb.control('', []),
-      tin: this.fb.control('', [Validators.required]),
+      tin: this.fb.control('', [
+        Validators.required,
+        Validators.pattern(/^\d{9}$/),
+      ]),
       vat: this.fb.control('', []),
       dname: this.fb.control('', []),
       telno: this.fb.control('', [
@@ -556,6 +562,7 @@ export class CompanySummaryDialogComponent implements OnInit {
   }
   addCompany() {
     if (!this.data?.companyData) {
+      console.log(this.companySummaryForm.value);
       this.confirmAddCompany.nativeElement.close();
       this.requestAddCompany(
         this.tr.translate(`company.summary.actions.addedCompanySuccessfully`)
