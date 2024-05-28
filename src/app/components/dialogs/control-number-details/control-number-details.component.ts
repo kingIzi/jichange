@@ -29,6 +29,7 @@ import { LoginService } from 'src/app/core/services/login.service';
 import { GetControlResponse } from 'src/app/core/models/vendors/get-control-response';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TimeoutError } from 'rxjs';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-control-number-details',
@@ -51,6 +52,7 @@ export class ControlNumberDetailsComponent implements OnInit {
   public startLoading: boolean = false;
   public controlNumberFormGroup!: FormGroup;
   public foundFormGroup!: FormGroup;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @Output() public isLoading = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;

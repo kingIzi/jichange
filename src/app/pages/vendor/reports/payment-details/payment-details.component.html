@@ -1,5 +1,4 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -238,10 +237,7 @@
               [formGroup]="tableFormGroup"
               class="min-w-full text-left text-sm font-light"
             >
-              <thead
-                formArrayName="tableHeaders"
-                class="border-b font-medium dark:border-neutral-500"
-              >
+              <thead formArrayName="tableHeaders" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
                   class="bg-lightPurple"

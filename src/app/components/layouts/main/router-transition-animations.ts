@@ -261,37 +261,6 @@ export const fader = trigger('triggerName', [
   ),
 ]);
 
-// export const vendorAnimations = trigger('vendorAnimate', [
-//   transition('isLeft => isRight', slideTo('right')),
-//   transition('isRight => isLeft', slideTo('left')),
-//   transition('dashboard => *', slideTo('right')),
-//   transition('* => dashboard', slideTo('left')),
-//   transition(
-//     routesStates(vendorInvoiceModules, vendorReportsModules).join(','),
-//     stepper()
-//   ),
-//   transition(
-//     routesStates(vendorCompanyModules, vendorInvoiceModules).join(','),
-//     stepper()
-//   ),
-//   transition(
-//     routesStates(vendorCompanyModules, vendorReportsModules).join(','),
-//     stepper()
-//   ),
-//   transition(vendorInvoiceRoutes.join(','), fadeEase()),
-//   transition(vendorReportRoutes.join(','), fadeEase()),
-//   transition(
-//     nestedRouteStates('isLeft', vendorInvoiceModules).join(','),
-//     stepper()
-//   ),
-//   transition(
-//     nestedRouteStates('isLeft', vendorReportsModules).join(','),
-//     fadeEase()
-//   ),
-//   transition('isLeft <=> company-module-1', stepper()),
-//   transition('isLeft <=> isLeft', stepper()),
-// ]);
-
 export const vendorAnimations = trigger('vendorAnimate', [
   transition('dashboard => *', slideTo('right')),
   transition('* => dashboard', slideTo('left')),

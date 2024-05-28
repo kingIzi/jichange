@@ -52,7 +52,8 @@
           {{ t("itemTotalAmount") }}
         </p>
         <p class="font-semibold">
-          {{ Item_Total_Amount.value + " " + Currency.value }}
+          {{ PerformanceUtils.moneyFormat(Item_Total_Amount.value.toString()) }}
+          {{ Currency.value }}
         </p>
       </div>
       <div class="flex flex-col">
@@ -62,7 +63,10 @@
         >
           {{ t("balance") }}
         </p>
-        <p class="font-semibold">{{ Balance.value + " " + Currency.value }}</p>
+        <p class="font-semibold">
+          {{ PerformanceUtils.moneyFormat(Balance.value.toString()) }}
+          {{ Currency.value }}
+        </p>
       </div>
     </form>
     <div class="modal-action">
