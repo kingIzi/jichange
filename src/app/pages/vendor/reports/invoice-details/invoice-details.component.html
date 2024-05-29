@@ -119,6 +119,40 @@
     <div [formGroup]="tableFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-end">
         <div class="flex flex-row items-center space-x-2">
+          <div class="dropdown">
+            <button
+              tabindex="0"
+              role="button"
+              class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+            >
+              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+                {{ t("columns") }}
+              </p>
+              <span class="material-symbols-outlined lg:block hidden">
+                arrow_drop_down
+              </span>
+            </button>
+            <ul
+              tabindex="0"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li *ngFor="let control of headers.controls">
+                <label class="label cursor-pointer">
+                  <span class="label-text text-xs font-normal">{{
+                    control.get("label")?.value
+                  }}</span>
+                  <input
+                    type="checkbox"
+                    [formControl]="
+                      PerformanceUtils.getFormControl(control, 'included')
+                    "
+                    class="checkbox checkbox-xs"
+                  />
+                </label>
+              </li>
+            </ul>
+          </div>
           <div class="relative">
             <input
               *transloco="let t; read: 'defaults'"
@@ -140,41 +174,6 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <table class="min-w-full text-left text-sm font-light">
-              <!-- <thead class="border-b font-medium">
-                <tr
-                  class="bg-lightPurple"
-                  *transloco="let t; read: 'reports.invoiceDetails'"
-                >
-                  <th
-                    *ngFor="
-                      let header of t('invoiceDetailsTable') | slice : 1;
-                      index as ind
-                    "
-                    scope="col"
-                    class="px-6 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
-                  >
-                    <div class="flex flex-row items-center">
-                      <p class="text-sm font-extrabold text-black">
-                        {{ header }}
-                      </p>
-                      <button>
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
-                        </span>
-                      </button>
-                    </div>
-                  </th>
-                  <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 font-inter text-sm font-extrabold text-black"
-                  >
-                    {{ t("action") }}
-                  </th>
-                </tr>
-              </thead> -->
               <thead formArrayName="headers" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
@@ -217,12 +216,6 @@
                       </div>
                     </th>
                   </ng-container>
-                  <!-- <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 font-inter text-sm text-right"
-                  >
-                    {{ t("action") }}
-                  </th> -->
                 </tr>
               </thead>
               <tbody>

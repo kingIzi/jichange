@@ -67,29 +67,23 @@
         }
       }
     },
-    "invoiceDetailsTable": [
-      "Invoice No",
-      "Date",
-      "Customer",
-      "Total",
-      "With VAT",
-      "Without VAT"
-    ]
+    "invoiceDetailsTable": ["Invoice No", "Date", "Customer", "Total"]
   },
   "paymentDetails": {
     "payment": "Payment(s)",
     "paymentsTable": [
       "Date",
+      "Payer",
+      "Customer",
       "Invoice N°",
-      "Transaction N°",
       "Control N°",
       "Channel",
+      "Transaction N°",
       "Receipt No",
       "Amount",
       "Balance",
-      "From",
-      "To",
-      "For"
+      "Total amount",
+      "Payment type"
     ]
   },
   "customerDetailReport": {

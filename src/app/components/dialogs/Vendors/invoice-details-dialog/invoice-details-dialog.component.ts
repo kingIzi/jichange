@@ -333,9 +333,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
           let m = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(message)
           );
-          m.then((res) => {
-            this.addedInvoice.emit();
-          });
+          this.addedInvoice.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

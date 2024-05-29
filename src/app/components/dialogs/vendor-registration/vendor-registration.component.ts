@@ -60,6 +60,7 @@ export class VendorRegistrationComponent implements OnInit {
   public startLoading: boolean = false;
   public branchDetails: BranchDetail[] = [];
   public vendorFormGroup!: FormGroup;
+  public addedVendor = new EventEmitter<void>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -169,9 +170,7 @@ export class VendorRegistrationComponent implements OnInit {
               `auth.vendorRegistration.form.success.vendorAddedSuccessfully`
             )
           );
-          sal.then((res) => {
-            this.closeDialog();
-          });
+          this.addedVendor.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

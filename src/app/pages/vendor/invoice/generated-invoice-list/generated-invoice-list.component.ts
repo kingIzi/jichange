@@ -326,9 +326,7 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       let m = AppUtilities.sweetAlertSuccessMessage(
         this.tr.translate('generated.addedInvoiceSuccessfully')
       );
-      m.then((res) => {
-        this.requestGeneratedInvoice();
-      });
+      this.requestGeneratedInvoice();
     });
   }
   openAmmendInvoiceDialog(invoice: GeneratedInvoice) {

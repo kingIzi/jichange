@@ -129,9 +129,7 @@ export class SmtpDialogComponent implements OnInit {
       .then((result) => {
         if (result.response && typeof result.response !== 'boolean') {
           let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          sal.then((res) => {
-            this.addedSmtp.emit();
-          });
+          this.addedSmtp.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

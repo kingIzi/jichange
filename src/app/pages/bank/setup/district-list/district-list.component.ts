@@ -145,9 +145,10 @@ export class DistrictListComponent implements OnInit {
               'setup.districtDialog.deletedDistrictSuccessfully'
             )
           );
-          msg.then((res) => {
-            this.requestDistrictList();
-          });
+          this.requestDistrictList();
+          // msg.then((res) => {
+          //   this.requestDistrictList();
+          // });
         }
         this.startLoading = false;
         this.cdr.detectChanges();

@@ -117,9 +117,7 @@ export class DesignationDialogComponent implements OnInit {
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
           );
-          sal.then((res) => {
-            this.addedDesignation.emit();
-          });
+          this.addedDesignation.emit();
         } else if (typeof res.response === 'boolean' && res.response) {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

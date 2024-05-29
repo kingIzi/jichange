@@ -123,9 +123,7 @@ export class QuestionNameDialogComponent implements OnInit {
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.questionName.addedQuestionSuccessfully`)
           );
-          sal.then((res) => {
-            this.added.emit();
-          });
+          this.added.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

@@ -192,9 +192,7 @@ export class RegionDialogComponent implements OnInit {
           result.response > 0
         ) {
           let sal = AppUtilities.sweetAlertSuccessMessage(message);
-          sal.then((res) => {
-            this.addedRegion.emit();
-          });
+          this.addedRegion.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

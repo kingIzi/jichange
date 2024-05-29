@@ -247,9 +247,10 @@ export class EmailTextListComponent implements OnInit {
           let m = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.emailText.deletedEmailText`)
           );
-          m.then((res) => {
-            this.requestEmailTextList();
-          });
+          this.requestEmailTextList();
+          // m.then((res) => {
+          //   this.requestEmailTextList();
+          // });
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

@@ -153,12 +153,6 @@
                       </div>
                     </th>
                   </ng-container>
-                  <!-- <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 font-inter text-sm text-right"
-                  >
-                    {{ t("action") }}
-                  </th> -->
                 </tr>
               </thead>
               <tbody>
@@ -247,7 +241,7 @@
                       userReportLog.Login_Time
                         ? PerformanceUtils.convertDateStringToDate(
                             userReportLog.Login_Time
-                          ).toLocaleDateString()
+                          ).toDateString()
                         : "-"
                     }}
                   </td>
@@ -270,7 +264,7 @@
                       userReportLog.Logout_Time
                         ? PerformanceUtils.convertDateStringToDate(
                             userReportLog.Logout_Time
-                          )
+                          ).toDateString()
                         : "-"
                     }}
                   </td>

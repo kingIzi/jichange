@@ -264,20 +264,34 @@ export class UserLogReportComponent implements OnInit {
     return keys;
   }
   submitTableFilterForm() {
+    // if (!this.tableFilterFormGroup.valid) {
+    //   this.formErrors();
+    //   return;
+    // }
+    // let value = { ...this.tableFilterFormGroup.value };
+    // value.stdate = AppUtilities.reformatDate(
+    //   this.tableFilterFormGroup.value.stdate.split('-')
+    // );
+    // value.enddate = AppUtilities.reformatDate(
+    //   this.tableFilterFormGroup.value.enddate.split('-')
+    // );
+    // this.userReportLogsData = [];
+    // this.userReportLogs = this.userReportLogsData;
+    // this.requestUserLog(value);
     if (!this.tableFilterFormGroup.valid) {
-      this.formErrors();
-      return;
+      this.tableFilterFormGroup.markAllAsTouched();
+    } else {
+      let value = { ...this.tableFilterFormGroup.value };
+      value.stdate = AppUtilities.reformatDate(
+        this.tableFilterFormGroup.value.stdate.split('-')
+      );
+      value.enddate = AppUtilities.reformatDate(
+        this.tableFilterFormGroup.value.enddate.split('-')
+      );
+      this.userReportLogsData = [];
+      this.userReportLogs = this.userReportLogsData;
+      this.requestUserLog(value);
     }
-    let value = { ...this.tableFilterFormGroup.value };
-    value.stdate = AppUtilities.reformatDate(
-      this.tableFilterFormGroup.value.stdate.split('-')
-    );
-    value.enddate = AppUtilities.reformatDate(
-      this.tableFilterFormGroup.value.enddate.split('-')
-    );
-    this.userReportLogsData = [];
-    this.userReportLogs = this.userReportLogsData;
-    this.requestUserLog(value);
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');

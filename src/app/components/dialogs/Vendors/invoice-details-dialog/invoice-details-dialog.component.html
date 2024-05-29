@@ -103,7 +103,7 @@
           [placeholder]="t('dueDate')"
           class="input input-sm input-bordered font-inter"
           [formControl]="edate"
-          #invoiceDateInput
+          [min]="date.value"
         />
         <span *ngIf="edate && edate.invalid && edate.touched">
           <p
@@ -124,7 +124,7 @@
           [placeholder]="t('invoiceExpire')"
           class="input input-sm input-bordered font-inter"
           [formControl]="iedate"
-          #invoiceDateInput
+          [min]="date.value"
         />
         <span *ngIf="iedate && iedate.invalid && iedate.touched">
           <p

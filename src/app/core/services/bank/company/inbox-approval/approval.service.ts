@@ -15,7 +15,7 @@ export class ApprovalService {
     const data = await lastValueFrom(
       this.client.performPost<
         CompanyInboxListForm,
-        HttpDataResponse<Company[]>
+        HttpDataResponse<Company[] | number | string>
       >(`/api/CompanyInbox/Getcompanys`, body)
     );
     return data;

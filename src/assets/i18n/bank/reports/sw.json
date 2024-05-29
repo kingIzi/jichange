@@ -117,14 +117,7 @@
         }
       }
     },
-    "invoiceDetailsTable": [
-      "Nambari ya Bili",
-      "Tarehe",
-      "Mteja",
-      "Jumla",
-      "Kwa VAT",
-      "Bila VAT"
-    ]
+    "invoiceDetailsTable": ["Nambari ya Bili", "Tarehe", "Mteja", "Jumla"]
   },
   "customerDetailReport": {
     "customerDetailReport": "Ripoti ya Maelezo ya Muuzaji",
@@ -150,8 +143,8 @@
     },
     "customerDetailReportTable": [
       "Jina la Mteja",
-      "Mtu wa Mawasiliano",
       "Simu",
+      "Barua pepe",
       "Anwani",
       "Tarehe ya Kutuma"
     ]

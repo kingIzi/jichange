@@ -5,6 +5,7 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/vendor-details-report-form';
+import { BankInvoiceData } from 'src/app/core/models/bank/reports/bank-invoice-data';
 
 @Injectable({
   providedIn: 'root',
@@ -52,6 +53,15 @@ export class ReportsService {
   }) {
     let data = await lastValueFrom(
       this.client.performPost(`/api/InvoiceRep/getInvReport`, body)
+    );
+    return data;
+  }
+  public async getBankerInvoiceStats(body: { sessB: string }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { sessB: string },
+        HttpDataResponse<BankInvoiceData | number | string>
+      >(`/api/Setup/Invoices`, body)
     );
     return data;
   }

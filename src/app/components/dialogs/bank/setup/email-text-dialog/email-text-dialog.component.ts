@@ -156,9 +156,7 @@ export class EmailTextDialogComponent implements OnInit {
       .then((result) => {
         if (result.response && typeof result.response !== 'boolean') {
           let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          sal.then((res) => {
-            this.addedEmailText.emit();
-          });
+          this.addedEmailText.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

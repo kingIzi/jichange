@@ -132,9 +132,7 @@ export class SuspenseAccountDialogComponent implements OnInit {
               `setup.suspenseAccount.addedSuspenseAccountSuccessfully`
             )
           );
-          sal.then((res) => {
-            this.addedSuspenseAccount.emit();
-          });
+          this.addedSuspenseAccount.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

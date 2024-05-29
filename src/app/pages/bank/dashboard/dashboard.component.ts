@@ -56,6 +56,7 @@ import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approv
 import { CompanyInboxListForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-inbox-list-form';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/vendor-details-report-form';
+import { BankInvoiceData } from 'src/app/core/models/bank/reports/bank-invoice-data';
 
 @Component({
   selector: 'app-dashboard',
@@ -123,6 +124,8 @@ export class DashboardComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public inboxApprovalLoading: boolean = false;
+  public overviewLoading: boolean = false;
+  public bankInvoiceData!: BankInvoiceData;
   public inboxApprovals: Company[] = [];
   public companies: Company[] = [];
   public regions: Region[] = [];
@@ -151,6 +154,12 @@ export class DashboardComponent implements OnInit {
     private fb: FormBuilder,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createVendorReportForm() {
     this.vendorReportForm = this.fb.group({
       Comp: this.fb.control('0', [Validators.required]),
@@ -189,7 +198,7 @@ export class DashboardComponent implements OnInit {
       case VendorDetailsReportTable.CUSTOMER_NAME:
         this.customers.sort((a, b) => (a.Cust_Name > b.Cust_Name ? 1 : -1));
         break;
-      case VendorDetailsReportTable.CONTACT_PERSON:
+      case VendorDetailsReportTable.PHONE:
         this.customers.sort((a, b) => (a.ConPerson > b.ConPerson ? 1 : -1));
         break;
       case VendorDetailsReportTable.EMAIL:
@@ -207,7 +216,7 @@ export class DashboardComponent implements OnInit {
       case VendorDetailsReportTable.CUSTOMER_NAME:
         this.customers.sort((a, b) => (a.Cust_Name < b.Cust_Name ? 1 : -1));
         break;
-      case VendorDetailsReportTable.CONTACT_PERSON:
+      case VendorDetailsReportTable.PHONE:
         this.customers.sort((a, b) => (a.ConPerson < b.ConPerson ? 1 : -1));
         break;
       case VendorDetailsReportTable.EMAIL:
@@ -305,12 +314,6 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private requestInboxApprovals() {
     this.inboxApprovalLoading = true;
     this.approvalService
@@ -318,9 +321,16 @@ export class DashboardComponent implements OnInit {
         design: this.userProfile.desig,
         braid: Number(this.userProfile.braid),
       } as CompanyInboxListForm)
-      .then((results: any) => {
+      .then((results) => {
+        if (
+          typeof results.response !== 'string' &&
+          typeof results.response !== 'number'
+        ) {
+          this.inboxApprovals = results.response;
+        } else {
+          this.inboxApprovals = [];
+        }
         this.inboxApprovalLoading = false;
-        this.inboxApprovals = results.response === 0 ? [] : results.response;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -368,6 +378,33 @@ export class DashboardComponent implements OnInit {
         throw err;
       });
   }
+  private requestBankerInvoiceStats() {
+    this.overviewLoading = true;
+    this.reportsService
+      .getBankerInvoiceStats({ sessB: this.userProfile.sessb })
+      .then((result) => {
+        if (typeof result === 'string' && typeof result === 'number') {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`dashboard.dashboard.invoiceData.message`)
+          );
+        } else {
+          this.bankInvoiceData = result as BankInvoiceData;
+        }
+        this.overviewLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.overviewLoading = false;
+        this.cdr.detectChanges();
+      });
+  }
   private customerKeys(indexes: number[]) {
     let keys: string[] = [];
     if (indexes.includes(VendorDetailsReportTable.CUSTOMER_NAME)) {
@@ -379,7 +416,7 @@ export class DashboardComponent implements OnInit {
     if (indexes.includes(VendorDetailsReportTable.EMAIL)) {
       keys.push('Email');
     }
-    if (indexes.includes(VendorDetailsReportTable.CONTACT_PERSON)) {
+    if (indexes.includes(VendorDetailsReportTable.PHONE)) {
       keys.push('ConPerson');
     }
     return keys;
@@ -409,6 +446,7 @@ export class DashboardComponent implements OnInit {
     this.breadcrumbService.set('@dashboard', 'Child One');
     this.requestInboxApprovals();
     this.requestCustomerDetails(this.vendorReportForm.value);
+    this.requestBankerInvoiceStats();
   }
   transactionsLatest(): any[] {
     let groupedByDate = this.transactions.reduce((acc, obj) => {

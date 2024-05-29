@@ -131,9 +131,7 @@ export class CurrencyDialogComponent implements OnInit {
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
           );
-          sal.then((res) => {
-            this.added.emit();
-          });
+          this.added.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

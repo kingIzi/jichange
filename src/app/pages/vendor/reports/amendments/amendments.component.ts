@@ -112,6 +112,7 @@ export class AmendmentsComponent implements OnInit {
       enddate: this.fb.control('', [Validators.required]),
       invno: this.fb.control('', []),
     });
+    this.compid.disable();
   }
   private async createHeaderGroup() {
     this.tableFormGroup = this.fb.group({
@@ -268,14 +269,15 @@ export class AmendmentsComponent implements OnInit {
   }
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
-      let value = { ...this.filterFormGroup.value };
-      value.stdate = this.reformatDate(
+      let form = { ...this.filterFormGroup.value };
+      form.compid = this.userProfile.InstID;
+      form.stdate = this.reformatDate(
         this.filterFormGroup.value.stdate.split('-')
       );
-      value.enddate = this.reformatDate(
+      form.enddate = this.reformatDate(
         this.filterFormGroup.value.enddate.split('-')
       );
-      this.requestAmendmentsReport(value);
+      this.requestAmendmentsReport(form);
     } else {
       this.filterFormGroup.markAllAsTouched();
     }

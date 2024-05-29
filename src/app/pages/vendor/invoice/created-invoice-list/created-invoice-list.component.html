@@ -206,8 +206,75 @@
                   {{
                     PerformanceUtils.convertDateStringToDate(
                       invoice.Invoice_Date.toString()
-                    ).toLocaleDateString()
+                    ).toDateString()
                   }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(InvoiceListTable.APPROVE)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(InvoiceListTable.APPROVE)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  <ng-container
+                    *ngIf="
+                      userProfile.Usno.toString().toLocaleLowerCase() !==
+                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
+                    "
+                  >
+                    <app-submit-message-box
+                      #submitMessageBox
+                    ></app-submit-message-box>
+                    <button
+                      (click)="approveInvoice(invoice, submitMessageBox)"
+                      class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
+                    >
+                      {{ determineApprovalStatus(invoice.approval_status) }}
+                    </button>
+                  </ng-container>
+                  <ng-container
+                    *ngIf="
+                      userProfile.Usno.toString().toLocaleLowerCase() ===
+                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
+                    "
+                  >
+                    <mark class="p-1">No Access</mark>
+                  </ng-container>
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
+                      .at(InvoiceListTable.CANCEL_INVOICE)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(InvoiceListTable.CANCEL_INVOICE)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  <app-cancel-generated-invoice
+                    [invoiceId]="invoice.Inv_Mas_Sno"
+                    [userId]="userProfile.Usno"
+                    #cancelGeneratedInvoice
+                  ></app-cancel-generated-invoice>
+                  <button
+                    (click)="cancelInvoice(invoice, cancelGeneratedInvoice)"
+                    class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
+                  >
+                    Cancel
+                  </button>
                 </td>
                 <td
                   *ngIf="
@@ -288,80 +355,8 @@
                     {{ invoice.goods_status ? invoice.goods_status : "-" }}
                   </button>
                 </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.APPROVE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.APPROVE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  <ng-container
-                    *ngIf="
-                      userProfile.Usno.toString().toLocaleLowerCase() !==
-                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
-                    "
-                  >
-                    <app-submit-message-box
-                      #submitMessageBox
-                    ></app-submit-message-box>
-                    <button
-                      (click)="approveInvoice(invoice, submitMessageBox)"
-                      class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
-                    >
-                      <!-- {{
-                      invoice.approval_status
-                        ? invoice?.approval_status?.trim()
-                        : "Approve"
-                    }} -->
-                      {{ determineApprovalStatus(invoice.approval_status) }}
-                    </button>
-                  </ng-container>
-                  <ng-container
-                    *ngIf="
-                      userProfile.Usno.toString().toLocaleLowerCase() ===
-                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
-                    "
-                  >
-                    <mark class="p-1">No Access</mark>
-                  </ng-container>
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.CANCEL_INVOICE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.CANCEL_INVOICE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  <app-cancel-generated-invoice
-                    [invoiceId]="invoice.Inv_Mas_Sno"
-                    [userId]="userProfile.Usno"
-                    #cancelGeneratedInvoice
-                  ></app-cancel-generated-invoice>
-                  <button
-                    (click)="cancelInvoice(invoice, cancelGeneratedInvoice)"
-                    class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
-                  >
-                    Cancel
-                  </button>
-                </td>
                 <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
-                  <div class="flex flex-row items-center justify-between">
+                  <div class="flex flex-row items-center justify-end">
                     <button
                       *transloco="let t; read: 'actions'"
                       [attr.data-tip]="t('view')"

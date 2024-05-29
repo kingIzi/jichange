@@ -16,7 +16,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -31,16 +35,20 @@ import {
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { PaymentDetailsTable } from 'src/app/core/enums/vendor/reports/payment-details-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-payment-details',
@@ -72,8 +80,12 @@ export class PaymentDetailsComponent implements OnInit {
   public companies: Company[] = [];
   public customers: CustomerName[] = [];
   public invoices: GeneratedInvoice[] = [];
-  public payments: any[] = [];
+  public payments: PaymentDetail[] = [];
+  public paymentsData: PaymentDetail[] = [];
   public userProfile!: LoginResponse;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public PaymentDetailsTable: typeof PaymentDetailsTable = PaymentDetailsTable;
+  @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
@@ -99,23 +111,23 @@ export class PaymentDetailsComponent implements OnInit {
       enddate: this.fb.control('', [Validators.required]),
       invno: this.fb.control('', [Validators.required]),
     });
+    this.compid.disable();
   }
   private async createHeaderGroup() {
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    let labels = (await firstValueFrom(
-      this.tr.selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
-    )) as string[];
-    labels.forEach((label, index) => {
-      let header = this.fb.group({
-        label: this.fb.control(label, []),
-        sortAsc: this.fb.control(false, []),
-        included: this.fb.control(index <= 5, []),
-        values: this.fb.array([], []),
-      });
-      this.sortTableHeaderEventHandler(header, index);
-      this.tableHeaders.push(header);
+    TableUtilities.createHeaders(
+      this.tr,
+      `paymentDetails.paymentsTable`,
+      this.scope,
+      this.tableHeaders,
+      this.fb,
+      this
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
     });
   }
   private sortTableAsc(ind: number) {
@@ -164,7 +176,7 @@ export class PaymentDetailsComponent implements OnInit {
     }
   }
   private buildPage() {
-    this.tableLoading = true;
+    this.startLoading = true;
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
@@ -212,7 +224,7 @@ export class PaymentDetailsComponent implements OnInit {
         ) {
           this.invoices = invoices.response;
         }
-        this.tableLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -221,18 +233,32 @@ export class PaymentDetailsComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.tableLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
   private requestPaymentReport(value: any) {
-    this.startLoading = true;
+    this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
-      .then((results: any) => {
-        this.payments = results.response === 0 ? [] : results.response;
-        this.startLoading = false;
+      .then((results) => {
+        if (
+          typeof results.response !== 'number' &&
+          typeof results.response !== 'string'
+        ) {
+          this.paymentsData = results.response;
+          this.payments = this.paymentsData;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.paymentsData = [];
+          this.payments = this.paymentsData;
+        }
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -241,14 +267,28 @@ export class PaymentDetailsComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.startLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
   private reformatDate(values: string[]) {
     let [year, month, date] = values;
-    return `${month}/${date}/${year}`;
+    return `${date}/${month}/${year}`;
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.toLocaleLowerCase();
+      this.payments = this.paymentsData.filter((p) => {
+        return (
+          p?.Payer_Name?.toLocaleLowerCase().includes(text) ||
+          p?.Customer_Name?.toLocaleLowerCase().includes(text)
+        );
+      });
+    } else {
+      this.payments = this.paymentsData;
+    }
   }
   ngOnInit(): void {
     this.parseUserProfile();
@@ -256,7 +296,6 @@ export class PaymentDetailsComponent implements OnInit {
     this.createHeaderGroup();
     this.buildPage();
   }
-  searchTable(searchText: string) {}
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
@@ -266,17 +305,17 @@ export class PaymentDetailsComponent implements OnInit {
   }
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
-      let value = { ...this.filterFormGroup.value };
-      value.stdate = this.reformatDate(
+      let form = { ...this.filterFormGroup.value };
+      form.compid = this.userProfile.InstID;
+      form.stdate = this.reformatDate(
         this.filterFormGroup.value.stdate.split('-')
       );
-      value.enddate = this.reformatDate(
+      form.enddate = this.reformatDate(
         this.filterFormGroup.value.enddate.split('-')
       );
-      this.requestPaymentReport(value);
+      this.requestPaymentReport(form);
     } else {
       this.filterFormGroup.markAllAsTouched();
-      //this.formErrors();
     }
   }
   get compid() {
@@ -296,5 +335,8 @@ export class PaymentDetailsComponent implements OnInit {
   }
   get tableHeaders() {
     return this.tableFormGroup.get('tableHeaders') as FormArray;
+  }
+  get tableSearch() {
+    return this.tableFormGroup.get('tableSearch') as FormControl;
   }
 }

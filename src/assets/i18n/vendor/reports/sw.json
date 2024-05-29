@@ -74,29 +74,23 @@
         }
       }
     },
-    "invoiceDetailsTable": [
-      "Nambari ya Bili",
-      "Tarehe",
-      "Mteja",
-      "Jumla",
-      "Kwa VAT",
-      "Bila VAT"
-    ]
+    "invoiceDetailsTable": ["Nambari ya Bili", "Tarehe", "Mteja", "Jumla"]
   },
   "paymentDetails": {
     "payment": "Malipo",
     "paymentsTable": [
       "Tarehe",
-      "Nambari ya Invoice",
+      "Mlipa",
+      "Mteja",
+      "Nambari ya Ankara",
+      "Nambari ya Udhibiti",
+      "Njia",
       "Nambari ya Muamala",
-      "Nambari ya Kudhibiti",
-      "Mfereji",
       "Nambari ya Risiti",
       "Kiasi",
       "Salio",
-      "Kutoka",
-      "Kwenda",
-      "Kwa"
+      "Jumla ya Kiasi",
+      "Aina ya Malipo"
     ]
   },
   "customerDetailReport": {

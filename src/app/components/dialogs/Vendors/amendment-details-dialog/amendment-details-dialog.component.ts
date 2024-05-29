@@ -301,9 +301,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`generated.invoiceAmendedSuccessfully`)
           );
-          sal.then((res) => {
-            this.amended.emit();
-          });
+          this.amended.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

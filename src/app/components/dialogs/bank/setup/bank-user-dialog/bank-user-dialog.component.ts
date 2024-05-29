@@ -268,9 +268,7 @@ export class BankUserDialogComponent implements OnInit {
           let message = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.bankUser.addedBankUserSuccessfully`)
           );
-          message.then(() => {
-            this.added.emit();
-          });
+          this.added.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

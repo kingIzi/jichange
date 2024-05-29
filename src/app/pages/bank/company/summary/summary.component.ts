@@ -349,6 +349,7 @@ export class SummaryComponent implements OnInit {
     dialogRef.componentInstance.companyAddedSuccessfully
       .asObservable()
       .subscribe(() => {
+        dialogRef.close();
         this.requestList();
       });
   }
@@ -364,6 +365,7 @@ export class SummaryComponent implements OnInit {
     dialogRef.componentInstance.companyAddedSuccessfully
       .asObservable()
       .subscribe(() => {
+        dialogRef.close();
         this.requestList();
       });
   }

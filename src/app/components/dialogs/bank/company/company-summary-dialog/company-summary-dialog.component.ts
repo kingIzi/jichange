@@ -501,10 +501,7 @@ export class CompanySummaryDialogComponent implements OnInit {
           );
         } else if (result.message.toLocaleLowerCase() === 'success') {
           let msg = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          msg.then(() => {
-            this.companyAddedSuccessfully.emit();
-            this.closeDialog();
-          });
+          this.companyAddedSuccessfully.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

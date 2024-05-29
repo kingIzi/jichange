@@ -92,9 +92,7 @@ export class DistrictDialogComponent implements OnInit {
       .then((result) => {
         if (result.response && typeof result.response !== 'boolean') {
           let sal = AppUtilities.sweetAlertSuccessMessage(message);
-          sal.then((res) => {
-            this.addedDistrict.emit();
-          });
+          this.addedDistrict.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

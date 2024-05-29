@@ -189,9 +189,10 @@ export class DesignationListComponent implements OnInit {
               `setup.designation.form.dialog.removedSuccessfully`
             )
           );
-          sal.then((res) => {
-            this.requestDesignationList();
-          });
+          this.requestDesignationList();
+          // sal.then((res) => {
+          //   this.requestDesignationList();
+          // });
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

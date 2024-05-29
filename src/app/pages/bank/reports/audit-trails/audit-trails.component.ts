@@ -41,6 +41,7 @@ import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AuditTrailsTable } from 'src/app/core/enums/bank/reports/audit-trails-table';
+import { AuditTrailsReportForm } from 'src/app/core/models/bank/forms/reports/audit-trails-report-form';
 
 @Component({
   selector: 'app-audit-trails',
@@ -256,17 +257,24 @@ export class AuditTrailsComponent implements OnInit {
     let [year, month, date] = values;
     return `${date}/${month}/${year}`;
   }
-  private filterAuditTrailsRequest(value: any) {
+  private filterAuditTrailsRequest(value: AuditTrailsReportForm) {
     this.startLoading = true;
     this.auditTrailsService
       .getDetails(value)
-      .then((results: any) => {
-        if (results.response instanceof Array) {
-          this.auditTrailsData = results.response;
-          this.auditTrails = this.auditTrailsData;
-        } else {
-          this.auditTrails = [];
+      .then((results) => {
+        if (
+          typeof results.response === 'string' ||
+          typeof results.response === 'number'
+        ) {
           this.auditTrailsData = [];
+          this.auditTrails = this.auditTrailsData;
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        } else {
+          this.auditTrailsData = results.response;
           this.auditTrails = this.auditTrailsData;
         }
         this.startLoading = false;

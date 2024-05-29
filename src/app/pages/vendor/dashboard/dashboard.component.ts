@@ -74,6 +74,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 export class DashboardComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
+  public overviewLoading: boolean = false;
   private userProfile!: LoginResponse;
   public inboxApprovals: any[] = [];
   public transactions: any[] = [];
@@ -232,11 +233,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
-        // this.generatedInvoicesData =
-        //   results.response === 0 ? [] : results.response;
-        // this.generatedInvoices = this.generatedInvoicesData;
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
@@ -402,6 +398,35 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       },
     });
   }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.toLocaleLowerCase();
+      this.generatedInvoices = this.generatedInvoicesData.filter(
+        (elem: GeneratedInvoice) => {
+          return (
+            elem?.Chus_Name?.toLocaleLowerCase().includes(text) ||
+            elem.Invoice_No.toLocaleLowerCase().includes(text)
+          );
+        }
+      );
+    } else {
+      this.generatedInvoices = this.generatedInvoicesData;
+    }
+  }
+  private requestInvoiceStatistics() {
+    this.overviewLoading = true;
+    this.invoiceService
+      .getCompanysInvoiceStats({ compid: this.userProfile.InstID })
+      .then((result) => {})
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+      });
+  }
   ngAfterViewInit(): void {
     this.createTransactionChart();
     this.createOperationsChart();
@@ -433,22 +458,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
         : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow'
       : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.generatedInvoices = this.generatedInvoicesData.filter(
-        (elem: GeneratedInvoice) => {
-          return (
-            elem?.Chus_Name?.toLocaleLowerCase().includes(text) ||
-            elem.Invoice_No.toLocaleLowerCase().includes(text)
-          );
-        }
-      );
-    } else {
-      this.generatedInvoices = this.generatedInvoicesData;
-    }
   }
   moneyFormat(value: string) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');

@@ -239,9 +239,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`company.companyUsersForm.successMessage`)
           );
-          sal.then((res) => {
-            this.addedUser.emit();
-          });
+          this.addedUser.emit();
         } else if (typeof results.response === 'string') {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
@@ -273,11 +271,6 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     if (this.data.companyUserId) {
       this.buildPage();
     }
-    // if (this.data.companyUserId) {
-    //   this.createEditForm();
-    // } else {
-    //   this.createForm();
-    // }
   }
   ngAfterViewInit(): void {
     this.successMessageBox.closeSuccessMessageBox

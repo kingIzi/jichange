@@ -196,9 +196,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
           let m = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`company.inboxApproval.approvedSuccessfully`)
           );
-          m.then((res) => {
-            this.approved.emit();
-          });
+          this.approved.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

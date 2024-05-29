@@ -28,6 +28,9 @@
         "noDataFound": "No data found"
       }
     },
+    "invoiceData": {
+      "message": "Failed to retrieve invoice data."
+    },
     "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"],
     "customerDetailReport": {
       "customerDetailReport": "Vendor detail report",
@@ -53,8 +56,8 @@
       },
       "customerDetailReportTable": [
         "Customer name",
-        "Contact person",
         "Phone",
+        "Email",
         "Address",
         "Date posted"
       ]

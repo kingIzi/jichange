@@ -187,9 +187,7 @@ export class CountryListComponent implements OnInit {
               `setup.countryDialog.form.dialog.removedSuccessfully`
             )
           );
-          d.then((res) => {
-            this.getCountryList();
-          });
+          this.getCountryList();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

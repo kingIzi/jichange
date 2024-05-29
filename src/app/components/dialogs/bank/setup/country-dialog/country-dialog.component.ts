@@ -124,9 +124,7 @@ export class CountryDialogComponent implements OnInit {
           result.response > 0
         ) {
           let m = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          m.then((res) => {
-            this.addedCountry.emit();
-          });
+          this.addedCountry.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

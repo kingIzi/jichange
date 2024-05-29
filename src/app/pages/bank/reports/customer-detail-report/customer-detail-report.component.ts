@@ -234,7 +234,7 @@ export class CustomerDetailReportComponent implements OnInit {
             : -1
         );
         break;
-      case VendorDetailsReportTable.CONTACT_PERSON:
+      case VendorDetailsReportTable.PHONE:
         this.customers.sort((a: Customer, b: Customer) =>
           a?.ConPerson?.toLocaleLowerCase() > b?.ConPerson?.toLocaleLowerCase()
             ? 1
@@ -269,7 +269,7 @@ export class CustomerDetailReportComponent implements OnInit {
             : -1
         );
         break;
-      case VendorDetailsReportTable.CONTACT_PERSON:
+      case VendorDetailsReportTable.PHONE:
         this.customers.sort((a: Customer, b: Customer) =>
           a?.ConPerson?.toLocaleLowerCase() < b?.ConPerson?.toLocaleLowerCase()
             ? 1
@@ -327,7 +327,7 @@ export class CustomerDetailReportComponent implements OnInit {
     if (indexes.includes(VendorDetailsReportTable.EMAIL)) {
       keys.push('Email');
     }
-    if (indexes.includes(VendorDetailsReportTable.CONTACT_PERSON)) {
+    if (indexes.includes(VendorDetailsReportTable.PHONE)) {
       keys.push('ConPerson');
     }
     return keys;

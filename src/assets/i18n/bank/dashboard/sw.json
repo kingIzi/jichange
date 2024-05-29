@@ -28,6 +28,9 @@
         "noDataFound": "Hakuna data iliyopatikana"
       }
     },
+    "invoiceData": {
+      "message": "Imeshindwa kupata data ya ankara."
+    },
     "vendorsTable": [
       "Sno",
       "Jina",
@@ -60,8 +63,8 @@
       },
       "customerDetailReportTable": [
         "Jina la Mteja",
-        "Mtu wa Mawasiliano",
         "Simu",
+        "Barua pepe",
         "Anwani",
         "Tarehe ya Kutuma"
       ]

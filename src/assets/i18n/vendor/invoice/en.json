@@ -130,11 +130,11 @@
       "Customer name",
       "Invoice No",
       "Invoice Date",
+      "Approve",
+      "Cancel Invoice",
       "Payment type",
       "Total Amount",
-      "Approval Status",
-      "Approve",
-      "Cancel Invoice"
+      "Approval Status"
     ],
     "failedToDownloadInvoice": "Failed to download invoice.",
     "sureCancelInvoice": "Are you sure you want to cancel invoice {}",

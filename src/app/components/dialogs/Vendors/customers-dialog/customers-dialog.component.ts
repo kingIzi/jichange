@@ -182,14 +182,11 @@ export class CustomersDialogComponent implements OnInit {
           let success = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`customer.addedCustomerSuccessfully`)
           );
-          success.then((res) => {
-            if (attachInvoice) {
-              this.attachInvoice.emit(result.response as number);
-            } else {
-              this.addedCustomer.emit();
-            }
-            this.closeDialog();
-          });
+          if (attachInvoice) {
+            this.attachInvoice.emit(result.response as number);
+          } else {
+            this.addedCustomer.emit();
+          }
         }
         this.startLoading = false;
         this.cdr.detectChanges();

@@ -146,9 +146,7 @@ export class WardListComponent implements OnInit {
           let msg = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate('setup.wardDialog.deletedWardSuccessfully')
           );
-          msg.then((res) => {
-            this.requestWardList();
-          });
+          this.requestWardList();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

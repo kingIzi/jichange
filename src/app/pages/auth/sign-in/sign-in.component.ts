@@ -164,6 +164,9 @@ export class SignInComponent implements OnInit {
       width: '600px',
       disableClose: true,
     });
+    dialogRef.componentInstance.addedVendor.asObservable().subscribe(() => {
+      dialogRef.close();
+    });
   }
   submitSignInForm() {
     if (this.formGroup.invalid) {

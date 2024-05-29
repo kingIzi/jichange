@@ -81,8 +81,7 @@ export class CustomersListComponent implements OnInit {
   public customers: Customer[] = [];
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  //public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   private headersMap = {
     customerName: 0,
     emailId: 1,
@@ -154,9 +153,7 @@ export class CustomersListComponent implements OnInit {
           let msg = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate('customer.removedCustomerSuccessfully')
           );
-          msg.then((res) => {
-            this.requestCustomerNames();
-          });
+          this.requestCustomerNames();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

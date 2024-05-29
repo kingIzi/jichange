@@ -347,9 +347,7 @@ export class CreatedInvoiceListComponent implements OnInit {
           let m = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate('invoice.form.dialog.invoiceApprovedSuccessfully')
           );
-          m.then((res) => {
-            this.requestCreatedInvoiceList();
-          });
+          this.requestCreatedInvoiceList();
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -479,6 +477,7 @@ export class CreatedInvoiceListComponent implements OnInit {
   downloadInvoice(invoice: GeneratedInvoice) {
     let dialogRef = this.dialog.open(InvoiceDetailsViewComponent, {
       width: '800px',
+      height: '700px',
       data: {
         Inv_Mas_Sno: invoice.Inv_Mas_Sno,
         userProfile: this.userProfile,
@@ -512,6 +511,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     dialog.userId = this.userProfile.Usno;
     dialog.invoiceId = invoice.Inv_Mas_Sno;
     dialog.cancelledInvoice.asObservable().subscribe(() => {
+      dialog.closeDialog();
       this.requestCreatedInvoiceList();
     });
     dialog.openDialog();

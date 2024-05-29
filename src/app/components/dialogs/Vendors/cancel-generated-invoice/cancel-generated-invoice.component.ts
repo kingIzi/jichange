@@ -113,10 +113,7 @@ export class CancelGeneratedInvoiceComponent implements OnInit {
               `invoice.createdInvoice.cancelInvoice.cancelledSuccessfully`
             )
           );
-          msg.then((result) => {
-            this.cancelledInvoice.emit();
-            this.closeDialog();
-          });
+          this.cancelledInvoice.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

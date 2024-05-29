@@ -188,9 +188,7 @@ export class WardDialogComponent implements OnInit {
       .then((result) => {
         if (result.response && typeof result.response !== 'boolean') {
           let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          sal.then((res) => {
-            this.addedWard.emit();
-          });
+          this.addedWard.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

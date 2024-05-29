@@ -132,9 +132,7 @@ export class BranchDialogComponent implements OnInit {
           Number(result.response) == 0
         ) {
           let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          sal.then((res) => {
-            this.addedBranch.emit();
-          });
+          this.addedBranch.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

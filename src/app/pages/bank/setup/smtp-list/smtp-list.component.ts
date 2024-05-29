@@ -125,9 +125,7 @@ export class SmtpListComponent implements OnInit {
           let m = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.smtp.deletedSmtp`)
           );
-          m.then((res) => {
-            this.requestSmtpList();
-          });
+          this.requestSmtpList();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

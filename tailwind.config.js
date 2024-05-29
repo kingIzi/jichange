@@ -28,6 +28,6 @@ module.exports = {
   daisyui: {
     themes: ["light"],
     darkTheme: false,
-    //themes: ["light"],
+    styled: true,
   },
 };

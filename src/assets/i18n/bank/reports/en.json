@@ -125,14 +125,7 @@
         }
       }
     },
-    "invoiceDetailsTable": [
-      "Invoice No",
-      "Date",
-      "Customer",
-      "Total",
-      "With VAT",
-      "Without VAT"
-    ]
+    "invoiceDetailsTable": ["Invoice No", "Date", "Customer", "Total"]
   },
   "customerDetailReport": {
     "customerDetailReport": "Vendor detail report",
@@ -158,8 +151,8 @@
     },
     "customerDetailReportTable": [
       "Customer name",
-      "Contact person",
       "Phone",
+      "Email",
       "Address",
       "Date posted"
     ]
