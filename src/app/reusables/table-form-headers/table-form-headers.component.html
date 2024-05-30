@@ -1,0 +1,103 @@
+<!-- <div [formGroup]="formGroup" class="w-full bg-red-600">
+  <thead [formArrayName]="controlName" class="border-b font-medium w-full">
+    <tr class="bg-lightPurple rounded-tl-lg w-full">
+      <ng-container *ngFor="let header of headers.controls; index as ind">
+        <th
+          *ngIf="header.get('included')?.value"
+          scope="col"
+          class="px-6 font-inter text-sm"
+          [id]="'generated-invoice-id-' + ind"
+          formGroupName="{{ ind }}"
+        >
+          <div class="flex items-center">
+            <p>
+              {{ header?.get("label")?.value }}
+            </p>
+            <button (click)="PerformanceUtils.sortColumnClicked(ind, headers)">
+              <span>
+                <i class="bi bi-arrow-up"></i>
+              </span>
+              <span>
+                <i class="bi bi-arrow-down"></i>
+              </span>
+            </button>
+          </div>
+        </th>
+      </ng-container>
+      <ng-container *ngIf="allowAction">
+        <th
+          *transloco="let t; read: 'defaults'"
+          class="px-6 font-inter text-sm text-right"
+        >
+          {{ t("action") }}
+        </th>
+      </ng-container>
+    </tr>
+  </thead>
+</div> -->
+
+<!-- <thead [formGroup]="formGroup" class="border-b font-medium w-full">
+  <tr [formArrayName]="controlName" class="bg-lightPurple rounded-tl-lg w-full">
+    <ng-container *ngFor="let header of headers.controls; index as ind">
+      <th
+        *ngIf="header.get('included')?.value"
+        scope="col"
+        class="px-6 font-inter text-sm"
+        [id]="'generated-invoice-id-' + ind"
+        formGroupName="{{ ind }}"
+      >
+        <div class="flex items-center">
+          <p>
+            {{ header?.get("label")?.value }}
+          </p>
+          <button (click)="PerformanceUtils.sortColumnClicked(ind, headers)">
+            <span>
+              <i class="bi bi-arrow-up"></i>
+            </span>
+            <span>
+              <i class="bi bi-arrow-down"></i>
+            </span>
+          </button>
+        </div>
+      </th>
+    </ng-container>
+    <ng-container *ngIf="allowAction">
+      <th
+        *transloco="let t; read: 'defaults'"
+        class="px-6 font-inter text-sm text-right"
+      >
+        {{ t("action") }}
+      </th>
+    </ng-container>
+  </tr>
+</thead> -->
+
+<thead formArrayName="headers" class="border-b font-medium">
+  <tr
+    *transloco="let t; read: 'tableData.vendor'"
+    class="bg-lightPurple rounded-tl-lg w-full"
+  >
+    <ng-container *ngFor="let header of headers.controls; index as ind">
+      <th
+        *ngIf="header.get('included')?.value"
+        scope="col"
+        class="px-6 font-inter text-sm"
+        [id]="'generated-invoice-id-' + ind"
+        formGroupName="{{ ind }}"
+      >
+        <div class="flex items-center">
+          <p>
+            {{ header?.get("label")?.value }}
+          </p>
+          <button (click)="PerformanceUtils.sortColumnClicked(ind, headers)">
+            <span
+              class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+            >
+              unfold_more
+            </span>
+          </button>
+        </div>
+      </th>
+    </ng-container>
+  </tr>
+</thead>

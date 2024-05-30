@@ -95,7 +95,6 @@ export class InvoiceDetailsComponent implements OnInit {
   constructor(
     private tr: TranslocoService,
     private dialog: MatDialog,
-    private client: RequestClientService,
     private reportsService: ReportsService,
     private invoiceReportService: InvoiceReportServiceService,
     private fb: FormBuilder,
@@ -145,11 +144,22 @@ export class InvoiceDetailsComponent implements OnInit {
         Sno: value,
       });
       companyList
-        .then((list) => {
-          let data = list as HttpDataResponse<Customer[]>;
-          if (typeof data.response !== 'number') {
-            this.customers = data.response;
+        .then((result) => {
+          if (
+            typeof result.response !== 'number' &&
+            typeof result.response !== 'string'
+          ) {
+            this.customers = result.response;
           } else {
+            if (this.Comp.value !== 'all') {
+              AppUtilities.openDisplayMessageBox(
+                this.displayMessageBox,
+                this.tr.translate(`defaults.failed`),
+                this.tr.translate(
+                  `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+                )
+              );
+            }
             this.customers = [];
             this.cusid.setValue('all');
           }
@@ -428,9 +438,6 @@ export class InvoiceDetailsComponent implements OnInit {
         headers: [],
         generatedInvoices: [],
       },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
     });
   }
   get Comp() {

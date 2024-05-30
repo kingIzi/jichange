@@ -43,6 +43,9 @@ import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approv
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { SubmitMessageBoxComponent } from '../../../submit-message-box/submit-message-box.component';
 import { SuspenseAccountDialogComponent } from '../../setup/suspense-account-dialog/suspense-account-dialog.component';
+import { DepositAccount } from 'src/app/core/models/bank/setup/deposit-account';
+import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-account/deposit-account.service';
+import { DepositAccountDialogComponent } from '../../setup/deposit-account-dialog/deposit-account-dialog.component';
 
 @Component({
   selector: 'app-approve-company-inbox',
@@ -75,6 +78,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
   private userProfile!: LoginResponse;
   public accountPool: FormControl = this.fb.control('', []);
   public selectAccountList: SuspenseAccount[] = [];
+  public selectDepositAccountList: DepositAccount[] = [];
   public approved = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -83,29 +87,44 @@ export class ApproveCompanyInboxComponent implements OnInit {
   @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
   @ViewChild('noSuspenseAccountFoundDilog', { static: true })
   noSuspenseAccountFoundDilog!: ElementRef<HTMLDialogElement>;
+  @ViewChild('noDepositAccountFound', { static: true })
+  noDepositAccountFound!: ElementRef<HTMLDialogElement>;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
     private suspenseAccountService: SuspenseAccountService,
+    private depositAccountService: DepositAccountService,
     private approvalService: ApprovalService,
     private dialogRef: MatDialogRef<ApproveCompanyInboxComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { company: Company },
-    @Inject(TRANSLOCO_SCOPE) private scope: any
+    @Inject(MAT_DIALOG_DATA) public data: { company: Company }
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private accountPoolChangeEventListener() {
     this.accountPool.valueChanges.subscribe((value) => {
       if (
         value.toLocaleLowerCase() === 'Suspense Account'.toLocaleLowerCase()
       ) {
         this.requestAccountPool();
+        this.selectDepositAccountList =
+          this.selectDepositAccountList.length > 0
+            ? []
+            : this.selectDepositAccountList;
+        this.depositAccNo.setValue('');
       } else if (
         value.toLocaleLowerCase() === 'Deposit Account'.toLocaleLowerCase()
       ) {
+        this.requestDepositAccountPool();
         this.selectAccountList =
           this.selectAccountList.length > 0 ? [] : this.selectAccountList;
         this.depositAccNo.setValue('');
+      } else {
       }
     });
   }
@@ -117,11 +136,20 @@ export class ApproveCompanyInboxComponent implements OnInit {
         this.selectAccountList.length > 0
       ) {
         let foundIndex = this.selectAccountList.findIndex(
-          (account) => account.Sus_Acc_No === value
+          (account: SuspenseAccount) => account.Sus_Acc_No === value
         );
         if (foundIndex > -1) {
           this.suspenseAccSno.setValue(
             this.selectAccountList.at(foundIndex)?.Sus_Acc_Sno
+          );
+        }
+      } else {
+        let foundIndex = this.selectDepositAccountList.findIndex(
+          (account) => account.Deposit_Acc_No == value
+        );
+        if (foundIndex > -1) {
+          this.suspenseAccSno.setValue(
+            this.selectDepositAccountList.at(foundIndex)?.Comp_Dep_Acc_Sno
           );
         }
       }
@@ -157,11 +185,32 @@ export class ApproveCompanyInboxComponent implements OnInit {
         throw err;
       });
   }
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
+  private requestDepositAccountPool() {
+    this.startLoading = true;
+    this.depositAccountService
+      .getDepositAccountList({})
+      .then((result) => {
+        if (
+          result.message.toLocaleLowerCase() == 'failed'.toLocaleLowerCase() ||
+          typeof result.response === 'number'
+        ) {
+          this.noDepositAccountFound.nativeElement.showModal();
+        } else {
+          this.selectDepositAccountList = result.response;
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private createFormGroup(company: Company) {
     this.formGroup = this.fb.group({
@@ -250,6 +299,19 @@ export class ApproveCompanyInboxComponent implements OnInit {
         dialogRef.close();
         this.requestAccountPool();
       });
+  }
+  addDepositAccount() {
+    let dialogRef = this.dialog.open(DepositAccountDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        depositAccount: null,
+      },
+    });
+    dialogRef.componentInstance.added.asObservable().subscribe(() => {
+      dialogRef.close();
+      this.requestDepositAccountPool();
+    });
   }
   closeDialog() {
     this.dialogRef.close();

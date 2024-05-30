@@ -8,7 +8,7 @@ import { AddCancelForm } from '../../models/vendors/forms/add-cancel-form';
 import { CustomerName } from '../../models/vendors/customer-name';
 import { AmendInvoiceForm } from '../../models/vendors/forms/amend-invoice-form';
 import { Currency } from '../../models/vendors/currency';
-import { BankInvoiceData } from '../../models/bank/reports/bank-invoice-data';
+import { DashboardOverviewStatistic } from '../../models/bank/reports/dashboard-overview-statistic';
 
 @Injectable({
   providedIn: 'root',
@@ -114,8 +114,8 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: string | number },
-        HttpDataResponse<BankInvoiceData | number | string>
-      >(`/api/Setup/Invoices`, body)
+        HttpDataResponse<DashboardOverviewStatistic | number | string>
+      >(`/api/Setup/Overview`, body)
     );
     return data;
   }

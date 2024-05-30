@@ -150,7 +150,7 @@ export class SuspenseAccountDialogComponent implements OnInit {
   }
   ngOnInit(): void {
     this.parseUserProfile();
-    if (this.data.suspenseAccount) {
+    if (this.data?.suspenseAccount) {
       this.createEditForm(this.data.suspenseAccount);
     } else {
       this.createForm();

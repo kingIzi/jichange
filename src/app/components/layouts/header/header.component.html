@@ -98,7 +98,9 @@
           <p class="font-extrabold capitalize">
             {{ header.get("label")?.value }}
           </p>
-          <span class="material-symbols-outlined"> expand_more </span>
+          <span>
+            <i class="bi bi-chevron-down"></i>
+          </span>
         </button>
         <ul
           tabindex="0"
@@ -160,7 +162,9 @@
               (click)="routerClicked(profileAhref)"
               class="flex flex-row items-center"
             >
-              <span class="material-symbols-outlined"> account_circle </span>
+              <span>
+                <i class="bi bi-person-circle text-lg"></i>
+              </span>
               <p>
                 {{ t("profile") }}
               </p>
@@ -171,7 +175,9 @@
               (click)="logout()"
               class="flex flex-row items-center text-red-600"
             >
-              <span class="material-symbols-outlined"> logout </span>
+              <span>
+                <i class="bi bi-box-arrow-right text-lg"></i>
+              </span>
               <p>{{ t("logout") }}</p>
             </button>
           </li>

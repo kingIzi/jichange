@@ -1,4 +1,8 @@
 <app-success-message-box #successMessageBox></app-success-message-box>
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-8 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -13,21 +17,23 @@
         (click)="downloadSheet()"
         class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
       >
-        <span class="material-symbols-outlined text-success"> download </span>
+        <span>
+          <i class="bi bi-download text-success text-lg"></i>
+        </span>
       </a>
-      <a
+      <!-- <a
         (click)="openTransactionCharts()"
         class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
       >
         <span class="material-symbols-outlined text-warning"> bar_chart </span>
-      </a>
+      </a> -->
     </div>
   </div>
   <div
     [formGroup]="headersFormGroup"
     class="flex flex-col bg-white shadow px-2 py-4 space-y-2"
   >
-    <form class="w-full grid grid-cols-2 gap-x-2 gap-y-3 mb-6">
+    <!-- <form class="w-full grid grid-cols-2 gap-x-2 gap-y-3 mb-6">
       <div class="flex flex-col space-y-1">
         <p
           *transloco="let t; read: 'reports.userLogReport.form'"
@@ -55,323 +61,696 @@
           {{ t("submit") }}
         </button>
       </div>
+    </form> -->
+    <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("company") }}
+        </p>
+        <select
+          [formControl]="compid"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="'all'"
+          >
+            {{ t("all") }}
+          </option>
+          <ng-container *ngIf="companies.length > 0">
+            <option
+              *ngFor="
+                let company of companies;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="company.CompSno"
+            >
+              {{ company.CompName }}
+            </option>
+          </ng-container>
+        </select>
+        <span *ngIf="compid && compid.invalid && compid.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("company") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("customer") }}
+        </p>
+        <select
+          [formControl]="cusid"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="'all'"
+          >
+            {{ t("all") }}
+          </option>
+          <ng-container *ngIf="customers.length > 0">
+            <option
+              *ngFor="
+                let customer of customers;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="customer.Cust_Sno"
+            >
+              {{ customer.Cust_Name }}
+            </option>
+          </ng-container>
+        </select>
+        <span *ngIf="cusid && cusid.invalid && cusid.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("customer") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("startDate") }}
+        </p>
+        <input
+          type="date"
+          [formControl]="stdate"
+          class="input input-sm input-bordered"
+        />
+        <span *ngIf="stdate && stdate.invalid && stdate.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("startDate") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("endDate") }}
+        </p>
+        <input
+          type="date"
+          [formControl]="enddate"
+          class="input input-sm input-bordered"
+        />
+        <span *ngIf="enddate && enddate.invalid && enddate.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("endDate") }}
+          </p>
+        </span>
+      </div>
+      <div class="col-span-full flex flex-row items-center justify-end">
+        <button
+          (click)="submitForm()"
+          *transloco="let t; read: 'actions'"
+          class="btn btn-sm text-darkPurple bg-lightPurple"
+        >
+          {{ t("submit") }}
+        </button>
+      </div>
     </form>
-    <div class="flex flex-row items-center justify-end">
-      <div class="flex flex-row items-center space-x-2">
-        <div class="dropdown">
-          <button
-            tabindex="0"
-            role="button"
-            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
-          >
-            <span class="material-symbols-outlined text-sm"> view_week </span>
-            <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
-              {{ t("columns") }}
-            </p>
-            <span class="material-symbols-outlined lg:block hidden">
-              arrow_drop_down
+    <div [formGroup]="headersFormGroup" class="flex flex-col px-2 py-4">
+      <div class="flex flex-row items-center justify-end">
+        <div class="flex flex-row items-center space-x-2">
+          <div class="dropdown">
+            <button
+              tabindex="0"
+              role="button"
+              class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+            >
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
+              <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+                {{ t("columns") }}
+              </p>
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
+              </span>
+            </button>
+            <ul
+              tabindex="0"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li *ngFor="let control of headers.controls">
+                <label class="label cursor-pointer">
+                  <span class="label-text text-xs font-normal">{{
+                    control.get("label")?.value
+                  }}</span>
+                  <input
+                    type="checkbox"
+                    [formControl]="getFormControl(control, 'included')"
+                    class="checkbox checkbox-xs"
+                  />
+                </label>
+              </li>
+            </ul>
+          </div>
+          <div class="relative">
+            <input
+              *transloco="let t; read: 'defaults'"
+              type="search"
+              class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+              id="exampleSearch"
+              [placeholder]="t('search')"
+              [formControl]="tableSearch"
+            />
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
             </span>
-          </button>
-          <ul
-            tabindex="0"
-            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-          >
-            <li *ngFor="let control of headers.controls">
-              <label class="label cursor-pointer">
-                <span class="label-text text-xs font-normal">{{
-                  control.get("label")?.value
-                }}</span>
-                <input
-                  type="checkbox"
-                  [formControl]="getFormControl(control, 'included')"
-                  class="checkbox checkbox-xs"
-                />
-              </label>
-            </li>
-          </ul>
-        </div>
-        <div class="relative">
-          <input
-            *transloco="let t; read: 'defaults'"
-            type="search"
-            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
-            id="exampleSearch"
-            [placeholder]="t('search')"
-            #searchInput
-            (keyup)="searchTable(searchInput.value)"
-          />
-          <span
-            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-          >
-            search
-          </span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
-      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-        <div class="overflow-y-auto shadow">
-          <table
-            #transactioinDetailsTable
-            class="min-w-full text-left text-sm font-light"
-          >
-            <thead formArrayName="headers" class="border-b font-medium">
-              <tr
-                *transloco="let t; read: 'tableData.vendor'"
-                class="bg-lightPurple"
-              >
-                <th
-                  *ngFor="let header of includedHeaders; index as ind"
-                  scope="col"
-                  class="px-6 font-inter text-sm"
-                  [id]="'generated-invoice-id-' + ind"
-                  formGroupName="{{ ind }}"
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="overflow-y-auto shadow">
+            <table class="min-w-full text-left text-sm font-light">
+              <thead formArrayName="headers" class="border-b font-medium">
+                <tr
+                  *transloco="let t; read: 'tableData.vendor'"
+                  class="bg-lightPurple rounded-tl-lg w-full"
                 >
-                  <div
-                    class="flex items-center"
-                    [class]="indexIncludedHeader(header) ? 'float-right' : ''"
+                  <ng-container
+                    *ngFor="let header of headers.controls; index as ind"
                   >
-                    <p>
-                      {{ header?.get("label")?.value }}
-                    </p>
-                    <button>
-                      <span
-                        class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                      >
-                        unfold_more
-                      </span>
-                    </button>
-                  </div>
-                </th>
-                <th
-                  *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm text-right"
-                >
-                  {{ t("action") }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                *ngFor="
-                  let transaction of transactions
-                    | slice
-                      : 1 + paginator.pageSize * paginator.pageIndex - 1
-                      : 1 +
-                          paginator.pageSize * paginator.pageIndex +
-                          paginator.pageSize -
-                          1;
-                  index as i;
-                  trackBy: PerformanceUtils.trackByIndex
-                "
-                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-              >
-                <td
-                  *ngIf="
-                    headers.controls.at(this.headersMap.DATE)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(this.headersMap.DATE)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
-                >
-                  {{
-                    convertDotNetJSONDate(
-                      transaction.date.toString()
-                    ).toLocaleDateString()
-                  }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(this.headersMap.INVOICE_NUMBER)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(this.headersMap.INVOICE_NUMBER)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black hover:underline font-semibold cursor-pointer"
-                >
-                  {{ transaction.invoiceNo }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(this.headersMap.COMPANY)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(this.headersMap.COMPANY)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
-                >
-                  {{ transaction.company }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(this.headersMap.TRANSACTION_NUMBER)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(this.headersMap.TRANSACTION_NUMBER)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
-                >
-                  {{ transaction.transactionNumber }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls.at(this.headersMap.AMOUNT)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(this.headersMap.AMOUNT)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 text-black font-normal w-fit"
-                >
-                  {{
-                    moneyFormat(transaction.amount.toString()) +
-                      " " +
-                      transaction.currency
-                  }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls.at(this.headersMap.STATUS)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(this.headersMap.STATUS)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
-                >
-                  <button
-                    class="bg-base-200 rounded-full flex flex-row items-center py-1 px-2 space-x-1 btn btn-xs"
+                    <th
+                      *ngIf="header.get('included')?.value"
+                      scope="col"
+                      class="px-6 py-2 font-inter text-sm"
+                      [id]="'generated-invoice-id-' + ind"
+                      formGroupName="{{ ind }}"
+                    >
+                      <div class="flex items-center">
+                        <p>
+                          {{ header?.get("label")?.value }}
+                        </p>
+                        <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(ind, headers)
+                          "
+                          class="flex flex-row items-center m-1"
+                        >
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </ng-container>
+                  <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 font-inter text-sm text-right"
                   >
-                    <div
-                      *ngIf="
-                        transaction.status.toLocaleLowerCase() ===
-                        'pending'.toLocaleLowerCase()
-                      "
-                      class="w-2 h-2 rounded-full bg-warning"
-                    ></div>
-                    <div
-                      *ngIf="
-                        transaction.status.toLocaleLowerCase() ===
-                        'finalized'.toLocaleLowerCase()
-                      "
-                      class="w-2 h-2 rounded-full bg-success"
-                    ></div>
-                    <div
-                      *ngIf="
-                        transaction.status.toLocaleLowerCase() ===
-                        'in-progress'.toLocaleLowerCase()
-                      "
-                      class="w-2 h-2 rounded-full bg-info"
-                    ></div>
-                    <p class="capitalize">{{ transaction.status }}</p>
-                  </button>
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(this.headersMap.DESCRIPTION)
-                      ?.get('included')?.value
+                    {{ t("action") }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let transaction of transactions
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    index as i;
+                    trackBy: PerformanceUtils.trackByIndex
                   "
-                  [class]="
-                    headers.controls
-                      .at(this.headersMap.DESCRIPTION)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
                 >
-                  {{ transaction.description }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
-                  <app-remove-item-dialog
-                    #removeItemDialog
-                  ></app-remove-item-dialog>
-                  <div class="flex flex-row items-center justify-end space-x-2">
-                    <button [routerLink]="'/main/reports/transactions/' + i">
-                      <span class="material-symbols-outlined text-warning">
-                        visibility
-                      </span>
-                    </button>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{
+                      PerformanceUtils.getIndexOfItem(transactions, transaction)
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAYMENT_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAYMENT_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        transaction.Payment_Date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.Invoice_Sno }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.TOTAL_AMOUNT)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.TOTAL_AMOUNT)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.Requested_Amount }}
+                    {{ transaction.Currency_Code }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAID_AMOUNT)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAID_AMOUNT)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.PaidAmount }}
+                    {{ transaction.Currency_Code }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.BALANCE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.BALANCE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.Balance }}
+                    {{ transaction.Currency_Code }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
                     <button
-                      (click)="
-                        downloadPdf(i, '/main/reports/transactions/' + i)
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          transaction.Payment_Type,
+                          'Fixed'
+                        )
                       "
                     >
-                      <span class="material-symbols-outlined text-linkBlue">
-                        download
-                      </span>
+                      {{ transaction.Payment_Type }}
                     </button>
-                    <button (click)="removeItem(i, removeItemDialog)">
-                      <span class="material-symbols-outlined text-danger-600">
-                        delete
-                      </span>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAYMENT_METHOD)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.PAYMENT_METHOD)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.Trans_Channel }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(
+                          TransactionDetailsTableHeadersMap.TRANSACTION_NUMBER
+                        )
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(
+                          TransactionDetailsTableHeadersMap.TRANSACTION_NUMBER
+                        )
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.Payment_Trans_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.RECEIPT_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.RECEIPT_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                  >
+                    {{ transaction.Receipt_No }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                    <app-remove-item-dialog
+                      #removeItemDialog
+                    ></app-remove-item-dialog>
+                    <div
+                      class="flex flex-row items-center justify-end space-x-4"
+                    >
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        [routerLink]="'/main/reports/transactions/' + i"
+                        htclass="btn btn-sm btn-ghost tooltip"
+                        [attr.data-tip]="t('view')"
+                      >
+                        <span class="material-symbols-outlined text-warning">
+                          visibility
+                        </span>
+                      </button>
+                    </div>
+                  </td>
+
+                  <!-- <td
+                    *ngIf="
+                      headers.controls.at(this.headersMap.DATE)?.get('included')
+                        ?.value
+                    "
+                    [class]="
+                      headers.controls.at(this.headersMap.DATE)?.get('included')
+                        ?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{
+                      convertDotNetJSONDate(
+                        transaction.date.toString()
+                      ).toLocaleDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black hover:underline font-semibold cursor-pointer"
+                  >
+                    {{ transaction.invoiceNo }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.COMPANY)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.COMPANY)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ transaction.company }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.TRANSACTION_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.TRANSACTION_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                  >
+                    {{ transaction.transactionNumber }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.AMOUNT)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.AMOUNT)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 text-black font-normal w-fit"
+                  >
+                    {{
+                      moneyFormat(transaction.amount.toString()) +
+                        " " +
+                        transaction.currency
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.STATUS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.STATUS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    <button
+                      class="bg-base-200 rounded-full flex flex-row items-center py-1 px-2 space-x-1 btn btn-xs"
+                    >
+                      <div
+                        *ngIf="
+                          transaction.status.toLocaleLowerCase() ===
+                          'pending'.toLocaleLowerCase()
+                        "
+                        class="w-2 h-2 rounded-full bg-warning"
+                      ></div>
+                      <div
+                        *ngIf="
+                          transaction.status.toLocaleLowerCase() ===
+                          'finalized'.toLocaleLowerCase()
+                        "
+                        class="w-2 h-2 rounded-full bg-success"
+                      ></div>
+                      <div
+                        *ngIf="
+                          transaction.status.toLocaleLowerCase() ===
+                          'in-progress'.toLocaleLowerCase()
+                        "
+                        class="w-2 h-2 rounded-full bg-info"
+                      ></div>
+                      <p class="capitalize">{{ transaction.status }}</p>
                     </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <ng-container *ngIf="!tableLoading">
-            <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="transactions.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="tableLoading">
-            <div class="w-full grid place-items-center mt-6">
-              <span
-                class="loading loading-spinner loading-sm bg-darkPurple"
-              ></span>
-            </div>
-          </ng-container>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(this.headersMap.DESCRIPTION)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(this.headersMap.DESCRIPTION)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ transaction.description }}
+                  </td>
+                  <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                    <app-remove-item-dialog
+                      #removeItemDialog
+                    ></app-remove-item-dialog>
+                    <div
+                      class="flex flex-row items-center justify-end space-x-2"
+                    >
+                      <button [routerLink]="'/main/reports/transactions/' + i">
+                        <span class="material-symbols-outlined text-warning">
+                          visibility
+                        </span>
+                      </button>
+                      <button
+                        (click)="
+                          downloadPdf(i, '/main/reports/transactions/' + i)
+                        "
+                      >
+                        <span class="material-symbols-outlined text-linkBlue">
+                          download
+                        </span>
+                      </button>
+                      <button (click)="removeItem(i, removeItemDialog)">
+                        <span class="material-symbols-outlined text-danger-600">
+                          delete
+                        </span>
+                      </button>
+                    </div>
+                  </td> -->
+                </tr>
+              </tbody>
+            </table>
+            <ng-container *ngIf="!tableLoading">
+              <div *transloco="let t; read: 'errors'">
+                <p
+                  *ngIf="transactions.length <= 0"
+                  class="text-center text-sm tracking-wide pt-3 pb-1"
+                >
+                  {{ t("noDataFound") }}
+                </p>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="tableLoading">
+              <div class="w-full grid place-items-center mt-6">
+                <span
+                  class="loading loading-spinner loading-sm bg-darkPurple"
+                ></span>
+              </div>
+            </ng-container>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="flex flex-row-reverse items-center justify-between">
-      <mat-paginator
-        #paginator
-        [length]="transactions.length"
-        [pageSize]="5"
-        [pageSizeOptions]="[5, 10, 20]"
-        aria-label="Select page"
-        [showFirstLastButtons]="transactions.length > 20"
-      >
-      </mat-paginator>
+      <div class="flex flex-row-reverse items-center justify-between">
+        <mat-paginator
+          #paginator
+          [length]="transactions.length"
+          [pageSize]="5"
+          [pageSizeOptions]="[5, 10, 20]"
+          aria-label="Select page"
+          [showFirstLastButtons]="transactions.length > 20"
+        >
+        </mat-paginator>
+      </div>
     </div>
   </div>
 </div>

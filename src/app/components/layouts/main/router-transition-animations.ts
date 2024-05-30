@@ -244,7 +244,7 @@ export const fader = trigger('triggerName', [
   transition(reportsRoutes.join(','), fadeEase()),
   transition('isLeft => isRight', slideTo('right')),
   transition('isRight => isLeft', slideTo('left')),
-  transition('dashboard => *', transformTo({ x: 100, y: 0, rotate: 0 })),
+  transition('dashboard => *', slideTo('right')),
   transition('* => dashboard', slideTo('left')),
   transition('profile <=> *', stepper()),
   transition(routesStates(companyModules, setupModules).join(','), stepper()),

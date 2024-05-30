@@ -7,15 +7,19 @@
       "modifiedCompanySuccessfully": "Modified company successfully!",
       "approvedCompanySuccessfully": "Company approved successfully!",
       "noSuspenseAccountsAvailable": "No suspense accounts available. Would you like to create one?",
-      "createSuspenseAccount": "Add Suspense Account"
+      "noDepositAccountAvailable": "No deposit accounts available. Would you like to create one?",
+      "createSuspenseAccount": "Add Suspense account",
+      "createDepositAccount": "Add deposit account"
     },
     "companySummary": [
+      "#",
       "Name",
-      "Address",
       "Email",
       "TIN N°",
       "Mobile N°",
       "Status",
+      "Account N°",
+      "Address",
       "Director name",
       "PostBox",
       "Telephone N°",
@@ -131,6 +135,13 @@
         "failedToApprove": "Failed to approve company."
       }
     },
-    "inboxApprovalTable": ["Name", "Address", "Email", "Mobile No", "Status"]
+    "inboxApprovalTable": [
+      "#",
+      "Name",
+      "Address",
+      "Email",
+      "Mobile No",
+      "Status"
+    ]
   }
 }

@@ -7,15 +7,19 @@
       "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!",
       "approvedCompanySuccessfully": "Kampuni imefanikiwa kwa mafanikio!",
       "noSuspenseAccountsAvailable": "Hakuna akaunti za mashaka zinazopatikana. Je, ungependa kuunda moja?",
-      "createSuspenseAccount": "Ongeza Akaunti ya Suspense"
+      "noDepositAccountAvailable": "Hakuna akaunti za amana zinazopatikana. Je! Ungependa kuunda moja?",
+      "createSuspenseAccount": "Ongeza Akaunti ya Suspense",
+      "createDepositAccount": "Ongeza akaunti ya amana"
     },
     "companySummary": [
+      "#",
       "Jina",
-      "Anwani",
       "Barua pepe",
       "Nambari ya TIN",
       "Simu ya nyumbani",
       "Hali",
+      "Namba ya Akaunti",
+      "Anwani",
       "Jina la Mkurugenzi",
       "Sanduku la posta",
       "Namba ya simu",
@@ -131,6 +135,6 @@
         "failedToApprove": "Kushindwa kuidhinisha kampuni."
       }
     },
-    "inboxApprovalTable": ["Jina", "Anuani", "Barua pepe", "Simu", "Hali"]
+    "inboxApprovalTable": ["#", "Jina", "Anuani", "Barua pepe", "Simu", "Hali"]
   }
 }

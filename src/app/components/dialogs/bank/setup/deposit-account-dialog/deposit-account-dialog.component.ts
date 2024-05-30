@@ -94,13 +94,10 @@ export class DepositAccountDialogComponent implements OnInit {
       .addDepositAccount(body)
       .then((result) => {
         if (typeof result.response === 'number' && result.response > 0) {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.depositAccount.addedDepositSuccessfully`)
           );
-          dialog.addEventListener('close', () => {
-            this.added.emit();
-          });
+          this.added.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
@@ -195,7 +192,7 @@ export class DepositAccountDialogComponent implements OnInit {
   ngOnInit(): void {
     this.parseUserProfile();
     this.buildPage();
-    if (this.data.depositAccount) {
+    if (this.data?.depositAccount) {
     } else {
       this.createForm();
     }

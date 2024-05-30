@@ -78,13 +78,13 @@ export class HeaderComponent implements OnInit {
     currency: 4,
     designation: 5,
     branch: 6,
-    questionName: 7,
-    smtp: 8,
-    emailText: 9,
-    bankUser: 10,
-    language: 11,
-    suspenseAccount: 12,
-    depositAccount: 13,
+    //questionName: 7,
+    smtp: 7,
+    emailText: 8,
+    bankUser: 9,
+    //language: 11,
+    suspenseAccount: 10,
+    depositAccount: 11,
   };
   private reportsMap = {
     overview: 0,
@@ -241,8 +241,8 @@ export class HeaderComponent implements OnInit {
         return '/main/setup/designation';
       case this.setupMap.branch:
         return '/main/setup/branch';
-      case this.setupMap.questionName:
-        return '/main/setup/question';
+      // case this.setupMap.questionName:
+      //   return '/main/setup/question';
       case this.setupMap.smtp:
         return '/main/setup/smtp';
       case this.setupMap.emailText:
@@ -253,8 +253,8 @@ export class HeaderComponent implements OnInit {
         return '/main/setup/suspense';
       case this.setupMap.depositAccount:
         return '/main/setup/deposit';
-      case this.setupMap.language:
-        return '/main/setup/language';
+      // case this.setupMap.language:
+      //   return '/main/setup/language';
       default:
         return '';
     }

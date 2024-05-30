@@ -108,16 +108,16 @@
   },
   "forgotPassword": {
     "welcomeMessage": "Forgot Password",
-    "forgotPasswordMessage": "Enter your Email and instructions will be sent to you!",
+    "forgotPasswordMessage": "Enter your mobile number and instructions will be sent to you.",
     "resetPasswordSuccessfull": "Resest password has been Successfuly sent!",
     "resetPasswordFailed": "Failed to send reset password",
     "form": {
-      "email": "Email Address",
+      "email": "Mobile number",
       "placeholders": {
-        "email": "Enter email address"
+        "email": "Enter mobile number"
       },
       "errors": {
-        "email": "Please provide valid email",
+        "email": "Please provide mobile number",
         "dialogs": {
           "invalidFormError": "Invalid form",
           "missingEmail": "Please provide a valid email address"
@@ -125,6 +125,21 @@
       },
       "links": {
         "backToLogin": "Go to login"
+      }
+    }
+  },
+  "otp": {
+    "verifyAccount": "Verify account",
+    "verifyAccountMessage": "A code was sent to your mobile number, please enter the code below to proceed",
+    "resendCodeIn": "Resend code in {} seconds",
+    "resendCode": "Resend code",
+    "form": {
+      "code": "Code",
+      "placeholders": {
+        "code": "Enter code"
+      },
+      "errors": {
+        "code": "Please fill"
       }
     }
   },

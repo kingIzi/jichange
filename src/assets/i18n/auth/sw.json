@@ -105,16 +105,16 @@
   },
   "forgotPassword": {
     "welcomeMessage": "Imesahau Nywila",
-    "forgotPasswordMessage": "Ingiza barua pepe yako na maagizo yatatumwa kwako!",
+    "forgotPasswordMessage": "Ingiza nambari yako ya simu na maagizo yatatumwa kwako.",
     "resetPasswordSuccessfull": "Barua pepe ya kuweka upya nenosiri imetumwa kwa mafanikio!",
     "resetPasswordFailed": "Imeshindwa kutuma barua pepe ya kuweka upya nenosiri",
     "form": {
-      "email": "Anwani ya barua pepe",
+      "email": "Namba ya simu",
       "placeholders": {
-        "email": "Ingiza anwani ya barua pepe"
+        "email": "Ingiza namba ya simu"
       },
       "errors": {
-        "email": "Tafadhali toa barua pepe halali",
+        "email": "Tafadhali ingiza namba ya simu",
         "dialogs": {
           "invalidFormError": "Fomu batili",
           "missingEmail": "Tafadhali toa anwani halali ya barua pepe"
@@ -122,6 +122,21 @@
       },
       "links": {
         "backToLogin": "Nenda kwenye kuingia"
+      }
+    }
+  },
+  "otp": {
+    "verifyAccount": "Thibitisha akaunti",
+    "verifyAccountMessage": "Msimbo umetumwa kwa nambari ya simu yako, tafadhali ingiza msimbo hapa chini ili kuendelea",
+    "resendCodeIn": "Tuma tena msimbo baada ya sekunde {}",
+    "resendCode": "Tuma tena msimbo",
+    "form": {
+      "code": "Msimbo",
+      "placeholders": {
+        "code": "Ingiza msimbo"
+      },
+      "errors": {
+        "code": "Tafadhali jaza"
       }
     }
   },

@@ -25,6 +25,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { LoginService } from 'src/app/core/services/login.service';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
+import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 
 @Component({
@@ -41,6 +42,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     RouterModule,
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
+    PhoneNumberInputComponent,
   ],
   providers: [{ provide: TRANSLOCO_SCOPE, useValue: 'auth' }],
 })
@@ -64,7 +66,10 @@ export class ForgotPasswordComponent implements OnInit {
 
   private createForm() {
     this.formGroup = this.fb.group({
-      name: this.fb.control('', [Validators.required, Validators.email]),
+      name: this.fb.control('', [
+        Validators.required,
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+      ]),
     });
   }
 
@@ -77,10 +82,10 @@ export class ForgotPasswordComponent implements OnInit {
           typeof result.response === 'string' &&
           result.response.toLocaleLowerCase() === form.name.toLocaleLowerCase()
         ) {
-          let dialog = this.sendPasswordSuccessfull();
-          dialog.addEventListener('close', () => {
-            this.router.navigate(['/auth']);
-          });
+          AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(`auth.forgotPassword.resetPasswordSuccessfull`)
+          );
+          this.router.navigate(['/auth/otp']);
         } else {
           this.sendPasswordFailed();
         }
@@ -125,10 +130,11 @@ export class ForgotPasswordComponent implements OnInit {
 
   submitForm() {
     if (this.formGroup.valid) {
-      this.sendPasswordReset(this.formGroup.value);
+      this.router.navigate(['/auth/otp']);
+      //this.sendPasswordReset(this.formGroup.value);
     } else {
       this.formGroup.markAllAsTouched();
-      this.formErrors();
+      //this.formErrors();
     }
   }
 

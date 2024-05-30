@@ -52,6 +52,7 @@ import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approv
 import { CompanyInboxListForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-inbox-list-form';
 import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -100,6 +101,7 @@ export class InboxApprovalComponent implements OnInit {
     private approvalService: ApprovalService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
+    private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -119,7 +121,8 @@ export class InboxApprovalComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -214,6 +217,14 @@ export class InboxApprovalComponent implements OnInit {
     }
     return keys;
   }
+  private getTableActiveKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.companyKeys(indexes);
+  }
   private requestCompanyInbox() {
     this.tableLoading = true;
     let inbox = this.approvalService.postCompanyInboxList({
@@ -241,12 +252,7 @@ export class InboxApprovalComponent implements OnInit {
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let keys = this.companyKeys(indexes);
+      let keys = this.getTableActiveKeys();
       let text = searchText.trim().toLowerCase();
       this.companies = this.companiesData.filter((company: any) => {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
@@ -260,12 +266,16 @@ export class InboxApprovalComponent implements OnInit {
     this.createTableHeadersFormGroup();
     this.requestCompanyInbox();
   }
-  sortColumnClicked(ind: number) {
-    let sortAsc = this.headers.at(ind).get('sortAsc');
-    sortAsc?.setValue(!sortAsc?.value);
-  }
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
+  }
+  downloadSheet() {
+    this.fileHandler.downloadExcelTable(
+      this.companiesData,
+      this.getTableActiveKeys(),
+      'pending_approval_companies',
+      []
+    );
   }
   approveCompany(company: Company) {
     let dialogRef = this.dialog.open(ApproveCompanyInboxComponent, {

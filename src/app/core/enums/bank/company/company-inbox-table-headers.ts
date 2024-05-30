@@ -1,4 +1,5 @@
 export enum CompanyInboxTable {
+  ID,
   NAME,
   ADDRESS,
   EMAIL,

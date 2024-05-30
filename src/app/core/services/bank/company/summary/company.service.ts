@@ -52,7 +52,7 @@ export class CompanyService {
     const data = await lastValueFrom(
       this.client.performPost(`/api/Company/getcompanys_S`, body)
     );
-    return data as HttpDataResponse<Company[]>;
+    return data as HttpDataResponse<Company[] | number | string>;
   }
   public async postCompanyUsersList(body: { compid: number }) {
     const data = await lastValueFrom(

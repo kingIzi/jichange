@@ -30,6 +30,16 @@ const routes: Routes = [
           animationState: 'isRight',
         },
       },
+      {
+        path: 'otp',
+        loadComponent: () =>
+          import('./otp-page/otp-page.component').then(
+            (o) => o.OtpPageComponent
+          ),
+        data: {
+          animationState: 'isLeft',
+        },
+      },
     ],
   },
 ];

@@ -12,14 +12,16 @@
         (click)="downloadSheet()"
         class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
       >
-        <span class="material-symbols-outlined text-success"> download </span>
+        <span>
+          <i class="bi bi-download text-success text-lg"></i>
+        </span>
       </a>
       <button
         (click)="openCompanySummaryDialog()"
         class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
       >
-        <span class="material-symbols-outlined text-darkPurple">
-          add_circle
+        <span>
+          <i class="bi bi-plus-circle text-darkPurple text-lg"></i>
         </span>
         <p
           *transloco="let t; read: 'company.summary.actions'"
@@ -42,12 +44,14 @@
             role="button"
             class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
           >
-            <span class="material-symbols-outlined text-sm"> view_week </span>
+            <span>
+              <i class="bi bi-layout-three-columns text-sm"></i>
+            </span>
             <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
               {{ t("columns") }}
             </p>
-            <span class="material-symbols-outlined lg:block hidden">
-              arrow_drop_down
+            <span>
+              <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
             </span>
           </button>
           <ul
@@ -77,10 +81,8 @@
             [placeholder]="t('search')"
             [formControl]="tableSearch"
           />
-          <span
-            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-          >
-            search
+          <span class="absolute top-1/2 left-2 -translate-y-1/2">
+            <i class="bi bi-search text-lg text-neutral-500"></i>
           </span>
         </div>
       </div>
@@ -103,7 +105,7 @@
                   <th
                     *ngIf="header.get('included')?.value"
                     scope="col"
-                    class="px-6 font-inter text-sm"
+                    class="px-6 py-2 font-inter text-sm"
                     [id]="'generated-invoice-id-' + ind"
                     formGroupName="{{ ind }}"
                   >
@@ -112,14 +114,33 @@
                         {{ header?.get("label")?.value }}
                       </p>
                       <button
+                        [class]="
+                          header.get('label')?.value === '#' ? 'hidden' : ''
+                        "
                         (click)="
                           PerformanceUtils.sortColumnClicked(ind, headers)
                         "
+                        class="flex flex-row items-center m-1"
                       >
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
+                        <span>
+                          <i
+                            [class]="
+                              header.get('sortAsc')?.value
+                                ? 'text-darkPurple'
+                                : ''
+                            "
+                            class="bi bi-arrow-up"
+                          ></i>
+                        </span>
+                        <span>
+                          <i
+                            [class]="
+                              header.get('sortAsc')?.value
+                                ? ''
+                                : 'text-darkPurple'
+                            "
+                            class="bi bi-arrow-down"
+                          ></i>
                         </span>
                       </button>
                     </div>
@@ -153,6 +174,23 @@
                   <td
                     *ngIf="
                       headers.controls
+                        .at(CompanySummaryTable.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(CompanySummaryTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ PerformanceUtils.getIndexOfItem(companies, company) }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
                         .at(CompanySummaryTable.NAME)
                         ?.get('included')?.value
                     "
@@ -170,23 +208,6 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(CompanySummaryTable.ADDRESS)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(CompanySummaryTable.ADDRESS)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{ company.Address }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
                         .at(CompanySummaryTable.EMAIL)
                         ?.get('included')?.value
                     "
@@ -199,7 +220,7 @@
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ company.Email }}
+                    {{ company.Email ? company.Email : "-" }}
                   </td>
                   <td
                     *ngIf="
@@ -260,6 +281,47 @@
                     >
                       {{ company.Status }}
                     </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(CompanySummaryTable.ACCOUNT_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(CompanySummaryTable.ACCOUNT_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{
+                      company.AccountNo
+                        ? company.AccountNo.slice(-4).padStart(
+                            company.AccountNo.length,
+                            "x"
+                          )
+                        : "-"
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(CompanySummaryTable.ADDRESS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(CompanySummaryTable.ADDRESS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.Address }}
                   </td>
                   <td
                     *ngIf="
@@ -330,7 +392,7 @@
                     {{
                       PerformanceUtils.convertDateStringToDate(
                         company.Posteddate
-                      ).toLocaleDateString()
+                      ).toDateString()
                     }}
                   </td>
                   <td class="text-sm font-inter whitespace-nowrap px-6 py-4">
@@ -343,19 +405,10 @@
                         class="btn btn-sm bg-transparent tooltip"
                         [attr.data-tip]="t('edit')"
                       >
-                        <span class="material-symbols-outlined text-info">
-                          edit
+                        <span>
+                          <i class="bi bi-pen text-lg text-info"></i>
                         </span>
                       </button>
-                      <!-- <button
-                        *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('delete')"
-                        class="btn btn-sm bg-transparent tooltip"
-                      >
-                        <span class="material-symbols-outlined text-danger-600">
-                          cancel
-                        </span>
-                      </button> -->
                     </div>
                   </td>
                 </tr>

@@ -170,8 +170,9 @@ export class BankUserDialogComponent implements OnInit {
       user: this.fb.control('', [Validators.required]),
       desg: this.fb.control('', [Validators.required]),
       branch: this.fb.control('', []),
-      email: this.fb.control('', [Validators.required, Validators.email]),
+      email: this.fb.control('', [Validators.email]),
       mobile: this.fb.control('', [
+        Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       gender: this.fb.control('', [Validators.required]),
@@ -337,7 +338,6 @@ export class BankUserDialogComponent implements OnInit {
       this.requestModifyBankUser(this.bankUserForm.value);
     } else {
       this.bankUserForm.markAllAsTouched();
-      this.formErrors();
     }
   }
   get empid() {

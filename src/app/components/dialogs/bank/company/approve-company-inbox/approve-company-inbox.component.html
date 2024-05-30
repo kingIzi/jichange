@@ -33,6 +33,38 @@
   </form>
 </dialog>
 
+<dialog #noDepositAccountFound id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("warning") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'company.summary.actions'">
+      {{ t("noDepositAccountAvailable") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="noDepositAccountFound.close(); closeDialog()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'company.summary.actions'"
+          (click)="noDepositAccountFound.close(); addDepositAccount()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("createSuspenseAccount") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -108,12 +140,22 @@
         >
           {{ t("account") }}
         </option>
-        <option
-          *ngFor="let selectAccount of selectAccountList"
-          [value]="selectAccount.Sus_Acc_No"
-        >
-          {{ selectAccount.Sus_Acc_No }}
-        </option>
+        <ng-container *ngIf="selectAccountList.length > 0">
+          <option
+            *ngFor="let selectAccount of selectAccountList"
+            [value]="selectAccount.Sus_Acc_No"
+          >
+            {{ selectAccount.Sus_Acc_No }}
+          </option>
+        </ng-container>
+        <ng-container *ngIf="selectDepositAccountList.length > 0">
+          <option
+            *ngFor="let depositAccount of selectDepositAccountList"
+            [value]="depositAccount.Deposit_Acc_No"
+          >
+            {{ depositAccount.Deposit_Acc_No }}
+          </option>
+        </ng-container>
       </select>
       <span
         *ngIf="depositAccNo && depositAccNo.invalid && depositAccNo.touched"

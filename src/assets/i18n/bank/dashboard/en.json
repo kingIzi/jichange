@@ -6,7 +6,14 @@
       "pendingApproval": "Pending",
       "customers": "Customer(s)",
       "users": "User(s)",
-      "viewMore": "View more"
+      "viewMore": "View more",
+      "statisticsData": {
+        "transaction": "Transaction",
+        "vendor": "Vendor",
+        "users": "Users",
+        "pendings": "Pendings",
+        "customers": "Customers"
+      }
     },
     "inboxApproval": {
       "name": "Inbox Approval",
@@ -23,10 +30,11 @@
       }
     },
     "onboardCustomers": {
-      "name": "Vendor details report",
+      "name": "Latest added vendors",
       "errors": {
         "noDataFound": "No data found"
-      }
+      },
+      "companySummary": ["Name", "Email", "TIN N°", "Mobile N°", "Status"]
     },
     "invoiceData": {
       "message": "Failed to retrieve invoice data."
@@ -54,12 +62,13 @@
           }
         }
       },
-      "customerDetailReportTable": [
-        "Customer name",
-        "Phone",
-        "Email",
+      "companySummary": [
+        "Name",
         "Address",
-        "Date posted"
+        "Email",
+        "TIN N°",
+        "Mobile N°",
+        "Status"
       ]
     }
   }

@@ -26,13 +26,16 @@
     "note": "Note(s)",
     "transactionReportForm": "Transaction Report form",
     "transactionDetailsTable": [
-      "Date",
+      "#",
+      "Payment Date",
       "Invoice N°",
-      "Company",
+      "Total Amount",
+      "Paid Amount",
+      "Balance",
+      "Payment type",
+      "Payment Method",
       "Transaction N°",
-      "Amount",
-      "Status",
-      "Description"
+      "Receipt N°"
     ],
     "statusOptions": {
       "pending": "pending",
@@ -104,8 +107,8 @@
   "invoiceDetails": {
     "invoiceDetails": "Invoice details",
     "form": {
-      "company": "Company",
-      "customer": "Vendor",
+      "company": "Vendor",
+      "customer": "Customer",
       "startDate": "Start date",
       "endDate": "End date",
       "placeholders": {
@@ -121,7 +124,8 @@
           "company": "You must select a company",
           "customer": "You must select a customer",
           "startDate": "You must select a start date",
-          "endDate": "You must select an end date"
+          "endDate": "You must select an end date",
+          "noCustomersFound": "No customers found."
         }
       }
     },

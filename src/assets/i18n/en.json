@@ -56,11 +56,9 @@
         "currency",
         "designation",
         "branch",
-        "questionName",
         "smtp",
         "emailText",
         "bankUser",
-        "language",
         "Suspense account",
         "Deposit account"
       ]

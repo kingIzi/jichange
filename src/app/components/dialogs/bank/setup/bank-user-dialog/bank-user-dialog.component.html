@@ -220,7 +220,7 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
-          {{ t("mobileNo") }}
+          {{ t("mobileNo") }}<span class="text-red-600">*</span>
         </p>
         <app-phone-number-input
           [mobileNumber]="mobile"

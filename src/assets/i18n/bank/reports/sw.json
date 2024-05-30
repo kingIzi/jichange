@@ -32,13 +32,16 @@
     "attachment": "Viambatanisho",
     "note": "Maelezo",
     "transactionDetailsTable": [
-      "Tarehe",
-      "Ankara N°",
-      "Kampuni",
+      "#",
+      "Tarehe ya Malipo",
+      "Nambari ya Ankara",
+      "Jumla ya Kiasi",
+      "Kiasi Kilicholipwa",
+      "Kiasi kilichobaki",
+      "Aina ya Malipo",
+      "Njia ya Malipo",
       "Nambari ya Muamala",
-      "Maelezo",
-      "Kiasi",
-      "Hali"
+      "Nambari ya Risiti"
     ],
     "statusOptions": {
       "pending": "Inasubiri",
@@ -96,8 +99,8 @@
   "invoiceDetails": {
     "invoiceDetails": "Maelezo ya Bili",
     "form": {
-      "company": "Kampuni",
-      "customer": "Muuzaji",
+      "company": "Muuzaji",
+      "customer": "Muteja",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
       "placeholders": {
@@ -113,7 +116,8 @@
           "company": "Lazima uchague kampuni",
           "customer": "Lazima uchague mteja",
           "startDate": "Lazima uchague tarehe ya kuanza",
-          "endDate": "Lazima uchague tarehe ya mwisho"
+          "endDate": "Lazima uchague tarehe ya mwisho",
+          "noCustomersFound": "Hakuna wateja waliopatikana."
         }
       }
     },

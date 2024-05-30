@@ -8,7 +8,7 @@
   class="py-2 w-full h-fit pl-6 pr-4 grid grid-cols-12 gap-x-4 gap-y-4 overflow-y-auto"
 >
   <div
-    class="w-full grid grid-cols-2 gap-1 col-span-full lg:col-span-8 relative"
+    class="w-full grid grid-cols-3 gap-1 col-span-full lg:col-span-8 relative"
   >
     <h4
       *transloco="let t; read: 'dashboard.dashboard.overview'"
@@ -16,49 +16,32 @@
     >
       {{ t("name") }}
     </h4>
-    <ng-container *ngIf="bankInvoiceData">
+    <ng-container *ngIf="invoiceStatistics.length > 0">
       <div
+        *ngFor="
+          let statistic of invoiceStatistics;
+          trackBy: PerformanceUtils.trackByIndex;
+          index as i
+        "
         class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
       >
         <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
-          {{ bankInvoiceData.approved }}
+          {{ statistic.Statistic }}
         </h2>
-        <h4 class="text-sm lg:text-lg font-bold">Approved</h4>
-        <a class="text-xs text-darkPurple font-inter hover:underline">
-          View more
-        </a>
-      </div>
-      <div
-        class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
-      >
-        <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
-          {{ bankInvoiceData.canceled }}
-        </h2>
-        <h4 class="text-sm lg:text-lg font-bold">Cancelled</h4>
-        <a class="text-xs text-darkPurple font-inter hover:underline">
-          View more
-        </a>
-      </div>
-      <div
-        class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
-      >
-        <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
-          {{ bankInvoiceData.pending }}
-        </h2>
-        <h4 class="text-sm lg:text-lg font-bold">Pending</h4>
-        <a class="text-xs text-darkPurple font-inter hover:underline">
-          View more
-        </a>
-      </div>
-      <div
-        class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
-      >
-        <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
-          {{ bankInvoiceData.paid }}
-        </h2>
-        <h4 class="text-sm lg:text-lg font-bold">Paid</h4>
-        <a class="text-xs text-darkPurple font-inter hover:underline">
-          View more
+        <h4
+          *transloco="
+            let t;
+            read: 'dashboard.dashboard.overview.statisticsData'
+          "
+          class="text-sm lg:text-lg font-bold"
+        >
+          {{ t(statistic.Name.toLocaleLowerCase()) }}
+        </h4>
+        <a
+          *transloco="let t; read: 'dashboard.dashboard.overview'"
+          class="text-xs text-darkPurple font-inter hover:underline"
+        >
+          {{ t("viewMore") }}
         </a>
       </div>
     </ng-container>
@@ -67,12 +50,9 @@
         <span class="loading loading-spinner loading-sm bg-darkPurple"></span>
       </div>
     </ng-container>
-    <ng-container *ngIf="!overviewLoading && !bankInvoiceData">
+    <ng-container *ngIf="!overviewLoading && !invoiceStatistics">
       <div *transloco="let t; read: 'errors'">
-        <p
-          *ngIf="customers.length <= 0"
-          class="text-center text-sm tracking-wide pt-3 pb-1"
-        >
+        <p class="text-center text-sm tracking-wide pt-3 pb-1">
           {{ t("noDataFound") }}
         </p>
       </div>
@@ -118,7 +98,7 @@
     <ul
       *ngIf="inboxApprovals.length > 0"
       id="inbox-approval"
-      class="bg-white p-2 shadow rounded flex flex-col space-y-4 divide-y overflow-y-auto h-full w-full lg:max-h-none"
+      class="bg-white p-2 shadow rounded flex flex-col space-y-4 divide-y overflow-y-auto h-full w-full lg:max-h-72"
     >
       <li class="py-2" *ngFor="let info of inboxApprovals; index as i">
         <a class="flex flex-row items-center justify-between">
@@ -142,7 +122,7 @@
     </ul>
   </div>
   <div
-    class="flex flex-col space-y-1 relative w-full h-full col-span-full lg:col-span-4 lg:col-start-9 max-h-96"
+    class="flex flex-col space-y-1 relative w-full h-full col-span-full lg:col-span-4 lg:col-start-9"
   >
     <div class="flex flex-row justify-between w-full">
       <div class="relative flex flex-row items-center space-x-1">
@@ -174,7 +154,7 @@
     </div>
     <div
       *ngIf="transactions.length > 0"
-      class="w-full h-full overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
+      class="w-full max-h-96 overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
     >
       <ul
         *ngFor="let arr of transactionsLatest(); index as i"
@@ -237,159 +217,15 @@
       >
         {{ t("name") }}
       </p>
+      <a
+        [routerLink]="'/main/company/summary'"
+        *transloco="let t; read: 'defaults'"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+      >
+        {{ t("viewAll") }}
+      </a>
     </div>
     <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
-      <form class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3">
-        <div class="flex flex-col space-y-1">
-          <p
-            *transloco="
-              let t;
-              read: 'dashboard.dashboard.customerDetailReport.form'
-            "
-            class="text-xs capitalize"
-          >
-            {{ t("company") }}
-          </p>
-          <select
-            [formControl]="Comp"
-            class="select select-sm select-bordered w-full"
-          >
-            <option
-              *transloco="
-                let t;
-                read: 'dashboard.dashboard.customerDetailReport.form.placeholders'
-              "
-              selected
-              [value]="'0'"
-            >
-              {{ t("all") }}
-            </option>
-            <option
-              [value]="company.CompSno"
-              *ngFor="
-                let company of companies;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-            >
-              {{ company.CompName }}
-            </option>
-          </select>
-          <span *ngIf="Comp && Comp.invalid && Comp.touched">
-            <p
-              *transloco="
-                let t;
-                read: 'dashboard.dashboard.customerDetailReport.form.errors'
-              "
-              class="text-xs text-red-600"
-            >
-              {{ t("company") }}
-            </p>
-          </span>
-        </div>
-        <div class="flex flex-col space-y-1">
-          <p
-            *transloco="
-              let t;
-              read: 'dashboard.dashboard.customerDetailReport.form'
-            "
-            class="text-xs capitalize"
-          >
-            {{ t("region") }}
-          </p>
-          <select
-            [formControl]="reg"
-            class="select select-sm select-bordered w-full"
-          >
-            <option
-              *transloco="
-                let t;
-                read: 'dashboard.dashboard.customerDetailReport.form.placeholders'
-              "
-              selected
-              [value]="'0'"
-            >
-              {{ t("all") }}
-            </option>
-            <option
-              [value]="region.Region_SNO"
-              *ngFor="
-                let region of regions;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-            >
-              {{ region.Region_Name }}
-            </option>
-          </select>
-          <span *ngIf="reg && reg.invalid && reg.touched">
-            <p
-              *transloco="
-                let t;
-                read: 'dashboard.dashboard.customerDetailReport.form.errors'
-              "
-              class="text-xs text-red-600"
-            >
-              {{ t("region") }}
-            </p>
-          </span>
-        </div>
-        <div class="flex flex-col space-y-1">
-          <p
-            *transloco="
-              let t;
-              read: 'dashboard.dashboard.customerDetailReport.form'
-            "
-            class="text-xs capitalize"
-          >
-            {{ t("district") }}
-          </p>
-          <select
-            [formControl]="dist"
-            class="select select-sm select-bordered w-full"
-          >
-            <option
-              *transloco="
-                let t;
-                read: 'dashboard.dashboard.customerDetailReport.form.placeholders'
-              "
-              selected
-              [value]="'0'"
-            >
-              {{ t("all") }}
-            </option>
-            <option
-              [value]="district.SNO"
-              *ngFor="
-                let district of districts;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-            >
-              {{ district.District_Name }}
-            </option>
-          </select>
-          <span *ngIf="dist && dist.invalid && dist.touched">
-            <p
-              *transloco="
-                let t;
-                read: 'dashboard.dashboard.customerDetailReport.form.errors'
-              "
-              class="text-xs text-red-600"
-            >
-              {{ t("district") }}
-            </p>
-          </span>
-        </div>
-
-        <div class="col-span-full flex flex-row items-center justify-end">
-          <button
-            (click)="submitTableFilterForm()"
-            *transloco="let t; read: 'actions'"
-            type="button"
-            class="btn btn-sm text-darkPurple bg-lightPurple"
-          >
-            {{ t("submit") }}
-          </button>
-        </div>
-      </form>
       <div class="flex flex-row items-center justify-end space-x-2 pt-1">
         <div class="relative">
           <input
@@ -400,10 +236,8 @@
             [placeholder]="t('search')"
             [formControl]="tableSearch"
           />
-          <span
-            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-          >
-            search
+          <span class="absolute left-2 top-1/2 -translate-y-1/2">
+            <i class="bi bi-search text-neutral-content text-lg"></i>
           </span>
         </div>
       </div>
@@ -412,17 +246,14 @@
           <div class="overflow-y-auto shadow">
             <table class="min-w-full text-left text-sm font-light">
               <thead formArrayName="headers" class="border-b font-medium">
-                <tr
-                  *transloco="let t; read: 'tableData.vendor'"
-                  class="bg-lightPurple"
-                >
+                <tr class="bg-lightPurple rounded-tl-lg w-full">
                   <ng-container
                     *ngFor="let header of headers.controls; index as ind"
                   >
                     <th
                       *ngIf="header.get('included')?.value"
                       scope="col"
-                      class="px-6 font-inter text-sm"
+                      class="px-6 py-1.5 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
@@ -431,12 +262,30 @@
                           {{ header?.get("label")?.value }}
                         </p>
                         <button
-                          *ngIf="ind !== VendorDetailsReportTable.DATE_POSTED"
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(ind, headers)
+                          "
+                          class="flex flex-row items-center m-1"
                         >
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
                           </span>
                         </button>
                       </div>
@@ -447,7 +296,7 @@
               <tbody>
                 <tr
                   *ngFor="
-                    let customer of customers
+                    let vendor of tableCompanies
                       | slice
                         : 1 + paginator.pageSize * paginator.pageIndex - 1
                         : 1 +
@@ -463,91 +312,96 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(VendorDetailsReportTable.CUSTOMER_NAME)
+                        .at(DashboardCompanySummaryTable.NAME)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(VendorDetailsReportTable.CUSTOMER_NAME)
+                        .at(DashboardCompanySummaryTable.NAME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ customer.Cust_Name }}
+                    {{ vendor.CompName }}
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(VendorDetailsReportTable.PHONE)
+                        .at(DashboardCompanySummaryTable.EMAIL)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(VendorDetailsReportTable.PHONE)
+                        .at(DashboardCompanySummaryTable.EMAIL)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ customer.Phone }}
+                    {{ vendor.Email }}
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(VendorDetailsReportTable.EMAIL)
+                        .at(DashboardCompanySummaryTable.TIN_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(VendorDetailsReportTable.EMAIL)
+                        .at(DashboardCompanySummaryTable.TIN_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ customer.Email }}
+                    {{ vendor.TinNo }}
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(VendorDetailsReportTable.ADDRESS)
+                        .at(DashboardCompanySummaryTable.MOBILE_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(VendorDetailsReportTable.ADDRESS)
+                        .at(DashboardCompanySummaryTable.MOBILE_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{ customer.Address }}
+                    {{ vendor.MobNo }}
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(VendorDetailsReportTable.DATE_POSTED)
+                        .at(DashboardCompanySummaryTable.STATUS)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(VendorDetailsReportTable.DATE_POSTED)
+                        .at(DashboardCompanySummaryTable.STATUS)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4"
                   >
-                    {{
-                      PerformanceUtils.convertDateStringToDate(
-                        customer.Posted_Date
-                      ).toDateString()
-                    }}
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          vendor.Status,
+                          'Approved'
+                        )
+                      "
+                    >
+                      {{ vendor.Status ? vendor.Status : "-" }}
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -555,7 +409,7 @@
             <ng-container *ngIf="!tableLoading">
               <div *transloco="let t; read: 'errors'">
                 <p
-                  *ngIf="customers.length <= 0"
+                  *ngIf="tableCompanies.length <= 0"
                   class="text-center text-sm tracking-wide pt-3 pb-1"
                 >
                   {{ t("noDataFound") }}
@@ -575,11 +429,11 @@
       <div class="flex flex-row-reverse items-center justify-between">
         <mat-paginator
           #paginator
-          [length]="customers.length"
-          [pageSize]="5"
-          [pageSizeOptions]="[5]"
+          [length]="tableCompanies.length"
+          [pageSize]="3"
+          [pageSizeOptions]="[3]"
           aria-label="Select page"
-          [showFirstLastButtons]="customers.length > 20"
+          [showFirstLastButtons]="tableCompanies.length > 20"
         >
         </mat-paginator>
       </div>

@@ -4,6 +4,7 @@ import { RouterModule, RouterOutlet } from '@angular/router';
 import { LanguageSelectorComponent } from 'src/app/components/language-selector/language-selector.component';
 import { FooterComponent } from 'src/app/components/layouts/footer/footer.component';
 import { fader } from 'src/app/components/layouts/main/router-transition-animations';
+import { inOutAnimation } from './auth-animations';
 
 @Component({
   selector: 'app-auth',
@@ -16,7 +17,7 @@ import { fader } from 'src/app/components/layouts/main/router-transition-animati
     LanguageSelectorComponent,
     FooterComponent,
   ],
-  animations: [fader],
+  animations: [inOutAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {

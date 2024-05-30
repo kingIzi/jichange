@@ -11,6 +11,10 @@ export class PerformanceUtils {
   static getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
+  static getIndexOfItem(items: any[], item: any) {
+    let index = items.indexOf(item);
+    return index + 1;
+  }
   static getActiveStatusStyles(
     status: string,
     target: string,

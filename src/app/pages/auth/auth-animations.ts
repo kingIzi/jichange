@@ -11,35 +11,9 @@ export const toggle = trigger('toggle', [
   ]),
 ]);
 
-export const inOutAnimation = trigger('inOutAnimation', [
-  transition(':enter', [
-    style({
-      opacity: 0,
-      position: 'absolute',
-      //left: '-50%',
-    }),
-    animate(
-      '1s ease-out',
-      style({
-        opacity: 1,
-        position: 'absolute',
-        //left: '0%',
-      })
-    ),
-  ]),
-  transition(':leave', [
-    style({
-      opacity: 1,
-      position: 'absolute',
-      //left: '0',
-    }),
-    animate(
-      '1s ease-in',
-      style({
-        opacity: 0,
-        position: 'absolute',
-        //left: '-50%',
-      })
-    ),
+export const inOutAnimation = trigger('triggerName', [
+  transition('isLeft <=> isRight', [
+    style({ opacity: 0, position: 'relative' }),
+    animate('0.5s ease-out', style({ opacity: 1 })),
   ]),
 ]);

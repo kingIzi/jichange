@@ -113,7 +113,8 @@ export class SummaryComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      7
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -283,6 +284,9 @@ export class SummaryComponent implements OnInit {
     if (indexes.includes(CompanySummaryTable.TELEPHONE_NUMBER)) {
       keys.push('TelNo');
     }
+    if (indexes.includes(CompanySummaryTable.DATE_POSTED)) {
+      keys.push('Posteddate');
+    }
     return keys;
   }
   private requestList() {
@@ -291,10 +295,20 @@ export class SummaryComponent implements OnInit {
     this.tableLoading = true;
     this.companyService
       .getCustomersList({})
-      .then((data) => {
-        this.companiesData =
-          typeof data.response === 'number' ? [] : data.response;
-        this.companies = this.companiesData;
+      .then((result) => {
+        if (
+          typeof result.response === 'number' ||
+          typeof result.response === 'string'
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        } else {
+          this.companiesData = result.response;
+          this.companies = this.companiesData;
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -310,16 +324,19 @@ export class SummaryComponent implements OnInit {
       });
     this.cdr.detectChanges();
   }
+  private getTableActiveKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.companyKeys(indexes);
+  }
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
-      let keys = this.companyKeys(indexes);
+      let text = searchText.trim().toLowerCase();
+      let keys = this.getTableActiveKeys();
       this.companies = this.companiesData.filter((company: any) => {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
@@ -370,14 +387,12 @@ export class SummaryComponent implements OnInit {
       });
   }
   downloadSheet() {
-    let data = this.companiesData.map((d) => {
-      let t = { ...d };
-      t.Posteddate = AppUtilities.convertDotNetJsonDateToDate(
-        d.Posteddate
-      ).toLocaleDateString();
-      return t;
-    });
-    this.fileHandler.exportAsExcelFile(data, 'company_summary');
+    this.fileHandler.downloadExcelTable(
+      this.companiesData,
+      this.getTableActiveKeys(),
+      'vendors_summary',
+      ['Posteddate']
+    );
   }
   get headers(): FormArray {
     return this.headersFormGroup.get('headers') as FormArray;

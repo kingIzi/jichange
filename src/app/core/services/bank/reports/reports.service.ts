@@ -5,7 +5,9 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/vendor-details-report-form';
-import { BankInvoiceData } from 'src/app/core/models/bank/reports/bank-invoice-data';
+import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
+import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
+import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 
 @Injectable({
   providedIn: 'root',
@@ -60,8 +62,17 @@ export class ReportsService {
     let data = await lastValueFrom(
       this.client.performPost<
         { sessB: string },
-        HttpDataResponse<BankInvoiceData | number | string>
-      >(`/api/Setup/Invoices`, body)
+        HttpDataResponse<DashboardOverviewStatistic[] | number | string>
+      >(`/api/Setup/Overview`, body)
+    );
+    return data;
+  }
+  public async getTransactionsReport(body: TransactionDetailsReportForm) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        TransactionDetailsReportForm,
+        HttpDataResponse<TransactionDetail[] | number | string>
+      >(`/api/Invoice/GetchTransact_B`, body)
     );
     return data;
   }

@@ -1,43 +1,50 @@
-<app-display-message-box #displayMessageBox></app-display-message-box>
-<app-success-message-box #successMessageBox></app-success-message-box>
-
-<ngx-loading
-  [show]="startLoading"
-  [config]="{ backdropBorderRadius: '1px' }"
-></ngx-loading>
-
 <form
   id="forgot-password-form"
-  *transloco="let t; read: 'auth.forgotPassword'"
+  *transloco="let t; read: 'auth.otp'"
   class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-0 md:w-[30rem]"
   [formGroup]="formGroup"
 >
   <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
   <div class="w-full flex flex-col">
     <h6 class="text-center text-xl">
-      {{ t("welcomeMessage") }}
+      {{ t("verifyAccount") }}
     </h6>
     <h6 class="text-center text-sm">
-      {{ t("forgotPasswordMessage") }}
+      {{ t("verifyAccountMessage") }}
     </h6>
   </div>
   <div class="flex flex-col space-y-1 w-full py-8">
     <h6 class="text-left text-sm">
-      {{ t("form.email") }} <span class="text-red-600">*</span>
+      {{ t("form.code") }} <span class="text-red-600">*</span>
     </h6>
-    <app-phone-number-input [mobileNumber]="name"></app-phone-number-input>
-    <span *ngIf="name && name.invalid && name.touched">
+    <input
+      #controlNumber
+      [formControl]="otp"
+      type="email"
+      [placeholder]="t('form.placeholders.code')"
+      class="input input-bordered w-full max-w-lg bg-transparent text-black"
+    />
+    <span *ngIf="otp && otp.invalid && otp.touched">
       <p class="text-xs text-red-600">
-        {{ t("form.errors.email") }}
+        {{ t("form.errors.code") }}
       </p>
     </span>
   </div>
   <div class="w-full pb-4">
     <a
-      [routerLink]="'/auth'"
-      class="text-linkBlue cursor-pointer text-sm hover:underline"
+      (click)="resendCode()"
+      [class]="
+        resendCodeCounter > 0
+          ? 'text-gray-400 '
+          : 'text-linkBlue hover:underline cursor-pointer'
+      "
+      class="text-sm"
     >
-      {{ t("form.links.backToLogin") }}
+      {{
+        resendCodeCounter > 0
+          ? t("resendCodeIn").replace("{}", resendCodeCounter)
+          : t("resendCode")
+      }}
     </a>
   </div>
   <button
@@ -47,6 +54,6 @@
     *transloco="let y; read: 'actions'"
     class="btn w-full btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
   >
-    {{ y("reset") }}
+    {{ y("submit") }}
   </button>
 </form>

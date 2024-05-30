@@ -12,7 +12,7 @@ export class DepositAccountService {
   constructor(private client: RequestClientService) {}
   public async getDepositAccountList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<any, HttpDataResponse<DepositAccount[]>>(
+      this.client.performPost<any, HttpDataResponse<DepositAccount[] | number>>(
         `/api/DepositA/Getdeposits`,
         body
       )

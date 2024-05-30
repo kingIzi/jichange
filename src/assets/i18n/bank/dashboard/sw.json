@@ -6,7 +6,14 @@
       "pendingApproval": "Inasubiri",
       "customers": "Wateja",
       "users": "Watumiaji",
-      "viewMore": "Tazama zaidi"
+      "viewMore": "Tazama zaidi",
+      "statisticsData": {
+        "transaction": "Mkataba",
+        "vendor": "Muuzaji",
+        "users": "Watumiaji",
+        "pendings": "Inasubiri",
+        "customers": "Wateja"
+      }
     },
     "inboxApproval": {
       "name": "Kuidhinishwa kwa kikasha pokezi",
@@ -26,7 +33,14 @@
       "name": "Mchuuzi wa hivi karibuni aliyeongezwa",
       "errors": {
         "noDataFound": "Hakuna data iliyopatikana"
-      }
+      },
+      "companySummary": [
+        "Jina",
+        "Barua pepe",
+        "Nambari ya TIN",
+        "Nambari ya Simu",
+        "Hali"
+      ]
     },
     "invoiceData": {
       "message": "Imeshindwa kupata data ya ankara."
@@ -38,36 +52,6 @@
       "Barua pepe",
       "Nambari ya Simu",
       "Hali"
-    ],
-    "customerDetailReport": {
-      "customerDetailReport": "Ripoti ya Maelezo ya Muuzaji",
-      "form": {
-        "company": "Kampuni",
-        "region": "Mkoa",
-        "district": "Wilaya",
-        "placeholders": {
-          "all": "Yote"
-        },
-        "errors": {
-          "company": "Tafadhali chagua kampuni",
-          "region": "Tafadhali chagua mkoa",
-          "district": "Tafadhali chagua wilaya",
-          "dialog": {
-            "invalidForm": "Fomu batili",
-            "company": "Lazima uchague kampuni",
-            "region": "Lazima uchague eneo",
-            "district": "Lazima uchague wilaya",
-            "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu."
-          }
-        }
-      },
-      "customerDetailReportTable": [
-        "Jina la Mteja",
-        "Simu",
-        "Barua pepe",
-        "Anwani",
-        "Tarehe ya Kutuma"
-      ]
-    }
+    ]
   }
 }
