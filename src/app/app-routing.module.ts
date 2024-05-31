@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouteReuseStrategy, RouterModule, Routes } from '@angular/router';
 import { loggedInGuard } from './core/guards/logged-in.guard';
+import { DefaultRouteReuseStrategy } from './utilities/default-route-reuse-strategy';
 
 const routes: Routes = [
   {
@@ -33,5 +34,11 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
+  providers: [
+    {
+      provide: RouteReuseStrategy,
+      useClass: DefaultRouteReuseStrategy,
+    },
+  ],
 })
 export class AppRoutingModule {}

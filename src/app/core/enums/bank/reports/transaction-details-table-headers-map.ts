@@ -5,6 +5,7 @@ export enum TransactionDetailsTableHeadersMap {
   TOTAL_AMOUNT,
   PAID_AMOUNT,
   BALANCE,
+  CONTROL_NUMBER,
   PAYMENT_TYPE,
   PAYMENT_METHOD,
   TRANSACTION_NUMBER,

@@ -9,7 +9,8 @@ export class TableUtilities {
     headers: FormArray,
     fb: FormBuilder,
     tableComponent: any,
-    nItems: number = 5
+    nItems: number = 5,
+    hideFirstColumn: boolean = false
   ) {
     tr.selectTranslate(translatePath, {}, scope).subscribe(
       (labels: string[]) => {
@@ -17,7 +18,10 @@ export class TableUtilities {
           let header = fb.group({
             label: fb.control(label, []),
             sortAsc: fb.control(false, []),
-            included: fb.control(index < nItems, []),
+            included: fb.control(
+              hideFirstColumn && index == 0 ? false : index < nItems,
+              []
+            ),
             values: fb.array([], []),
           });
           header.get('sortAsc')?.valueChanges.subscribe((value: any) => {

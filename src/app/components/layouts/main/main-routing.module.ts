@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouteReuseStrategy, RouterModule, Routes } from '@angular/router';
 import { MainComponent } from './main.component';
+import { DefaultRouteReuseStrategy } from 'src/app/utilities/default-route-reuse-strategy';
 
 const routes: Routes = [
   {
@@ -269,6 +270,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'transactions', skip: false },
                   animationState: 'isLeft',
+                  reuseRoute: true,
                 },
               },
               {

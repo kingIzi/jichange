@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   Component,
   Inject,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -214,7 +215,8 @@ export class TransactionDetailsComponent implements OnInit {
       this.headers,
       this.fb,
       this,
-      6
+      7,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);

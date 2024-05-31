@@ -46,6 +46,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'customers', skip: false },
                   animationState: 'isLeft-1',
+                  reuseRoute: true,
                 },
               },
               {
@@ -57,6 +58,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'view-customer', skip: false },
                   animationState: 'isRight-1',
+                  reuseRoute: true,
                 },
               },
             ],

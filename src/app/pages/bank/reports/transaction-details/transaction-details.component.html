@@ -216,7 +216,7 @@
             </button>
             <ul
               tabindex="0"
-              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 grid grid-cols-2"
             >
               <li *ngFor="let control of headers.controls">
                 <label class="label cursor-pointer">
@@ -397,9 +397,13 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
-                    {{ transaction.Requested_Amount }}
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        transaction.Requested_Amount.toString()
+                      )
+                    }}
                     {{ transaction.Currency_Code }}
                   </td>
                   <td
@@ -415,9 +419,13 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
-                    {{ transaction.PaidAmount }}
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        transaction.PaidAmount.toString()
+                      )
+                    }}
                     {{ transaction.Currency_Code }}
                   </td>
                   <td
@@ -433,10 +441,31 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
-                    {{ transaction.Balance }}
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        transaction.Balance.toString()
+                      )
+                    }}
                     {{ transaction.Currency_Code }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(TransactionDetailsTableHeadersMap.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                  >
+                    {{ transaction.Control_No }}
                   </td>
                   <td
                     *ngIf="
@@ -451,13 +480,17 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
                     <button
                       [class]="
                         PerformanceUtils.getActiveStatusStyles(
                           transaction.Payment_Type,
-                          'Fixed'
+                          'Fixed',
+                          'bg-purple-100',
+                          'text-black',
+                          'bg-teal-100',
+                          'text-black'
                         )
                       "
                     >
@@ -477,7 +510,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
                     {{ transaction.Trans_Channel }}
                   </td>
@@ -498,7 +531,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
                     {{ transaction.Payment_Trans_No }}
                   </td>
@@ -515,7 +548,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-bold"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                   >
                     {{ transaction.Receipt_No }}
                   </td>
@@ -526,7 +559,7 @@
                     <div
                       class="flex flex-row items-center justify-end space-x-4"
                     >
-                      <button
+                      <!-- <button
                         *transloco="let t; read: 'actions'"
                         [routerLink]="'/main/reports/transactions/' + i"
                         htclass="btn btn-sm btn-ghost tooltip"
@@ -534,6 +567,16 @@
                       >
                         <span class="material-symbols-outlined text-warning">
                           visibility
+                        </span>
+                      </button> -->
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        [routerLink]="'/main/reports/transactions/' + i"
+                        class="btn btn-sm bg-transparent tooltip"
+                        [attr.data-tip]="t('view')"
+                      >
+                        <span>
+                          <i class="bi bi-eye text-lg text-warning"></i>
                         </span>
                       </button>
                     </div>
