@@ -1,10 +1,15 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
 <div #rootElement class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
     <h2
       *transloco="let t; read: 'reports.transactionDetails'"
       class="text-lg font-bold"
     >
-      {{ t("transaction") + " #" + detail.transactionNumber }}
+      {{ t("transaction") }}
     </h2>
     <button
       #downloadBtn
@@ -33,21 +38,28 @@
   </div>
   <div class="bg-white w-full shadow flex flex-col p-4">
     <div id="accordionExample">
-      <div class="rounded-t-lg border border-neutral-200 bg-white">
-        <h2 class="mb-0" id="headingOne">
+      <div
+        *ngFor="
+          let payment of payments;
+          index as i;
+          trackBy: PerformanceUtils.trackByIndex
+        "
+        class="rounded-t-lg border border-neutral-200 bg-white"
+      >
+        <h2 class="mb-0" [id]="'heading-' + i.toString()">
           <button
             class="group relative flex w-full items-center rounded-t-[15px] border-0 bg-white px-5 py-4 text-left text-base text-neutral-800 transition [overflow-anchor:none] hover:z-[2] focus:z-[3] focus:outline-none [&:not([data-te-collapse-collapsed])]:bg-white [&:not([data-te-collapse-collapsed])]:text-black [&:not([data-te-collapse-collapsed])]:font-extrabold [&:not([data-te-collapse-collapsed])]:[box-shadow:inset_0_-1px_0_rgba(229,231,235)]"
             type="button"
             data-te-collapse-init
-            data-te-target="#collapseOne"
-            [attr.aria-expanded]="true"
-            aria-controls="collapseOne"
+            [attr.data-te-target]="'#' + 'collapse-' + i.toString()"
+            [attr.aria-expanded]="false"
+            [attr.aria-controls]="'collapse-' + i.toString()"
           >
             <h1
               *transloco="let t; read: 'reports.transactionDetails'"
-              class="text-2xl"
+              class="text-xl"
             >
-              {{ t("transactionDetails") }}
+              {{ payment.Payment_Trans_No }}
             </h1>
             <span
               class="material-symbols-outlined -mr-1 ml-auto h-5 w-5 shrink-0 rotate-[-180deg] fill-[#336dec] transition-transform duration-200 ease-in-out group-[[data-te-collapse-collapsed]]:mr-0 group-[[data-te-collapse-collapsed]]:rotate-0 group-[[data-te-collapse-collapsed]]:fill-[#212529] motion-reduce:transition-none"
@@ -65,12 +77,13 @@
             </span>
           </button>
         </h2>
+        <!-- [class]="i > 0 ? '!visible' : '!visible hidden'" -->
         <div
-          id="collapseOne"
+          [id]="'collapse-' + i.toString()"
           class="!visible"
           data-te-collapse-item
           data-te-collapse-show
-          aria-labelledby="headingOne"
+          [attr.aria-labelledby]="'heading-' + i.toString()"
           data-te-parent="#accordionExample"
         >
           <div
@@ -81,10 +94,21 @@
                 *transloco="let t; read: 'reports.transactionDetails'"
                 class="text-neutral-500 text-xs uppercase"
               >
-                {{ t("transactionNumber") }}
+                {{ t("company") }}
               </p>
               <p class="text-black text-sm capitalize font-semibold">
-                {{ detail.transactionNumber }}
+                {{ payment.Company_Name }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("customer") }}
+              </p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ payment.Customer_Name }}
               </p>
             </div>
             <div class="flex flex-col">
@@ -95,8 +119,31 @@
                 {{ t("description") }}
               </p>
               <p class="text-black text-sm capitalize font-semibold">
-                {{ detail.description }}
+                {{ payment.Payment_Desc }}
               </p>
+            </div>
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("transactionType") }}
+              </p>
+              <button
+                class="lg:w-1/2"
+                [class]="
+                  PerformanceUtils.getActiveStatusStyles(
+                    payment.Payment_Type,
+                    'Fixed',
+                    'bg-purple-100',
+                    'text-black',
+                    'bg-teal-100',
+                    'text-black'
+                  )
+                "
+              >
+                {{ payment.Payment_Type }}
+              </button>
             </div>
             <div class="flex flex-col">
               <p
@@ -106,7 +153,7 @@
                 {{ t("amount") }}
               </p>
               <p class="text-black text-sm capitalize font-semibold">
-                {{ moneyFormat(detail.amount.toString()) }}
+                {{ moneyFormat(payment.PaidAmount.toString()) }}
               </p>
             </div>
             <div class="flex flex-col">
@@ -117,7 +164,7 @@
                 {{ t("currency") }}
               </p>
               <p class="text-black text-sm capitalize font-semibold">
-                {{ detail.currency }}
+                {{ payment.Currency_Code }}
               </p>
             </div>
             <div class="flex flex-col">
@@ -125,23 +172,10 @@
                 *transloco="let t; read: 'reports.transactionDetails'"
                 class="text-neutral-500 text-xs uppercase"
               >
-                {{ t("company") }}
+                {{ t("payer") }}
               </p>
               <p class="text-black text-sm capitalize font-semibold">
-                {{ detail.company }}
-              </p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="let t; read: 'reports.transactionDetails'"
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("date") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">
-                {{
-                  convertDotNetJSONDate(detail.date.toString()).toDateString()
-                }}
+                {{ payment.Payer_Name }}
               </p>
             </div>
             <div class="flex flex-col">
@@ -151,51 +185,9 @@
               >
                 {{ t("method") }}
               </p>
-              <p class="text-black text-sm capitalize font-semibold">FIXED</p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="let t; read: 'reports.transactionDetails'"
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("status") }}
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ payment.Trans_Channel }}
               </p>
-              <p
-                *ngIf="
-                  detail.status.toLocaleLowerCase() ===
-                  'pending'.toLocaleLowerCase()
-                "
-                class="capitalize text-xs font-semibold text-warning"
-              >
-                {{ detail.status }}
-              </p>
-              <p
-                *ngIf="
-                  detail.status.toLocaleLowerCase() ===
-                  'finalized'.toLocaleLowerCase()
-                "
-                class="capitalize text-xs font-semibold text-success"
-              >
-                {{ detail.status }}
-              </p>
-              <p
-                *ngIf="
-                  detail.status.toLocaleLowerCase() ===
-                  'in-progress'.toLocaleLowerCase()
-                "
-                class="capitalize text-xs font-semibold text-info"
-              >
-                {{ detail.status }}
-              </p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="let t; read: 'reports.transactionDetails'"
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("transactionType") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">Refund</p>
             </div>
             <div class="flex flex-col">
               <p
@@ -204,11 +196,31 @@
               >
                 {{ t("balance") }}
               </p>
-              <p class="text-black text-sm capitalize font-semibold">400.0</p>
+              <p class="text-black text-sm capitalize font-semibold">
+                {{ PerformanceUtils.moneyFormat(payment.Balance.toString()) }}
+              </p>
             </div>
-            <div
-              class="grid grid-cols-2 lg:grid-cols-3 col-start-1 col-span-3 gap-y-3 gap-x-2"
-            >
+            <div class="flex flex-col">
+              <p
+                *transloco="let t; read: 'reports.transactionDetails'"
+                class="text-neutral-500 text-xs uppercase"
+              >
+                {{ t("status") }}
+              </p>
+              <ng-template #inProgress>
+                <button class="flex flex-row items-center space-x-0.5">
+                  <div class="w-2 h-2 rounded-full bg-blue-600"></div>
+                  <p class="text-blue-600 text-sm">In progress</p>
+                </button>
+              </ng-template>
+              <div *ngIf="payment.Balance == 0; else inProgress">
+                <button class="flex flex-row items-center space-x-0.5">
+                  <div class="w-2 h-2 rounded-full bg-warning"></div>
+                  <p class="text-warning text-sm">{{ payment.Status }}</p>
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col col-span-full space-y-2">
               <p
                 *transloco="let t; read: 'reports.transactionDetails'"
                 class="text-neutral-500 text-xs uppercase col-span-full"
@@ -216,97 +228,49 @@
                 {{ t("attachment") }}
               </p>
               <div
-                *ngFor="let receipt of detail.receipts; index as i"
-                class="flex flex-row items-center border justify-between py-2"
+                class="flex flex-row items-center space-x-4 border border-neutral-500 max-w-fit p-2"
               >
-                <div class="flex flex-row items-center">
-                  <span>
-                    <img
-                      src="assets/img/icons/description_FILL0_wght400_GRAD0_opsz24.png"
-                      alt=""
-                    />
-                  </span>
-                  <div class="flex flex-col">
-                    <p class="text-black text-xs capitalize font-semibold">
-                      {{ i === 0 ? "receipt.pdf" : "receipt_" + i + ".pdf" }}
-                    </p>
-                    <div class="flex flex-col lg:hidden">
-                      <p
-                        class="text-xs capitalize font-semibold text-neutral-500"
-                      >
-                        {{
-                          convertDotNetJSONDate(
-                            detail.date.toString()
-                          ).toLocaleDateString()
-                        }}
-                      </p>
-                      <p
-                        class="text-xs capitalize font-semibold text-neutral-500"
-                      >
-                        9:52AM
-                      </p>
-                    </div>
-                    <div
-                      class="hidden lg:flex flex-col lg:flex-row items-center lg:space-x-4"
-                    >
-                      <p
-                        class="text-xs capitalize font-semibold text-neutral-500"
-                      >
-                        {{
-                          convertDotNetJSONDate(
-                            detail.date.toString()
-                          ).toLocaleDateString()
-                        }}
-                      </p>
-                      <p
-                        class="text-xs capitalize font-semibold text-neutral-500"
-                      >
-                        9:52AM
-                      </p>
-                    </div>
-                  </div>
+                <div class="flex flex-col">
+                  <p class="text-sm">{{ payment.Receipt_No }}</p>
+                  <p class="text-sm">
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        payment.Payment_Date
+                      ).toLocaleDateString()
+                    }}
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        payment.Payment_Time
+                      ).toLocaleTimeString()
+                    }}
+                  </p>
                 </div>
-                <div class="dropdown">
-                  <div tabindex="0" role="button" class="btn m-1">
-                    <img
-                      src="assets/img/icons/more_vert_FILL0_wght400_GRAD0_opsz24.png"
-                      alt=""
-                      srcset=""
-                    />
-                  </div>
-                  <ul
-                    tabindex="0"
-                    class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                <div class="flex flex-row items-center space-x-1">
+                  <button
+                    *transloco="let t; read: 'actions'"
+                    class="btn btn-sm bg-transparent tooltip"
+                    [attr.data-tip]="t('view')"
                   >
-                    <li>
-                      <a
-                        (click)="downloadCustomerReceipt()"
-                        class="flex flex-row items-center"
-                      >
-                        <img
-                          src="assets/img/icons/download_FILL0_wght400_GRAD0_opsz24.png"
-                          alt=""
-                        />
-                        <p>Download</p>
-                      </a>
-                    </li>
-                  </ul>
+                    <span>
+                      <i class="bi bi-eye text-lg text-warning"></i>
+                    </span>
+                  </button>
+                  <button
+                    *transloco="let t; read: 'actions'"
+                    class="btn btn-sm bg-transparent tooltip"
+                    [attr.data-tip]="t('download')"
+                  >
+                    <span>
+                      <i class="bi bi-download text-lg text-purple-600"></i>
+                    </span>
+                  </button>
                 </div>
               </div>
-            </div>
-            <div class="flex flex-col col-span-2">
-              <p
-                *transloco="let t; read: 'reports.transactionDetails'"
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("note") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">-</p>
             </div>
           </div>
         </div>
       </div>
-      <div class="border border-t-0 border-neutral-200 bg-white">
+      <div class="border border-t-0 border-neutral-200 bg-white hidden">
         <h2 class="mb-0" id="headingTwo">
           <button
             class="group relative flex w-full items-center rounded-none border-0 bg-white px-5 py-4 text-left text-base text-neutral-800 transition [overflow-anchor:none] hover:z-[2] focus:z-[3] focus:outline-none [&:not([data-te-collapse-collapsed])]:bg-white [&:not([data-te-collapse-collapsed])]:text-black [&:not([data-te-collapse-collapsed])]:font-extrabold [&:not([data-te-collapse-collapsed])]:[box-shadow:inset_0_-1px_0_rgba(229,231,235)]"
@@ -342,268 +306,7 @@
             </span>
           </button>
         </h2>
-        <div
-          id="collapseTwo"
-          class="!visible hidden"
-          data-te-collapse-item
-          aria-labelledby="headingTwo"
-          data-te-parent="#accordionExample"
-        >
-          <div
-            class="px-5 py-4 grid grid-cols-3 lg:grid-cols-5 w-full gap-y-4 gap-x-3"
-          >
-            <div class="flex flex-col">
-              <p
-                *transloco="
-                  let t;
-                  read: 'reports.transactionDetails.approvalDetails'
-                "
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("approvedBy") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">
-                CRDB Bank PLC
-              </p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="
-                  let t;
-                  read: 'reports.transactionDetails.approvalDetails'
-                "
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("method") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">
-                MasterCard
-              </p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="
-                  let t;
-                  read: 'reports.transactionDetails.approvalDetails'
-                "
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("comment") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">-</p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="
-                  let t;
-                  read: 'reports.transactionDetails.approvalDetails'
-                "
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("location") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">
-                Dar es Salaam, tanzania
-              </p>
-            </div>
-            <div class="flex flex-col">
-              <p
-                *transloco="
-                  let t;
-                  read: 'reports.transactionDetails.approvalDetails'
-                "
-                class="text-neutral-500 text-xs uppercase"
-              >
-                {{ t("contact") }}
-              </p>
-              <p class="text-black text-sm capitalize font-semibold">
-                +255 742536676
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
-      <!-- <div class="rounded-b-lg border border-t-0 border-neutral-200 bg-white">
-        <h2 class="accordion-header mb-0" id="headingThree">
-          <button
-            class="group relative flex w-full items-center rounded-none border-0 bg-white px-5 py-4 text-left text-base text-neutral-800 transition [overflow-anchor:none] hover:z-[2] focus:z-[3] focus:outline-none [&:not([data-te-collapse-collapsed])]:bg-white [&:not([data-te-collapse-collapsed])]:text-black [&:not([data-te-collapse-collapsed])]:font-extrabold [&:not([data-te-collapse-collapsed])]:[box-shadow:inset_0_-1px_0_rgba(229,231,235)]"
-            type="button"
-            data-te-collapse-init
-            data-te-collapse-collapsed
-            data-te-target="#collapseThree"
-            [attr.aria-expanded]="false"
-            aria-controls="collapseThree"
-          >
-            <h1
-              *transloco="let t; read: 'reports.transactionDetails.history'"
-              class="text-2xl"
-            >
-              {{ t("history") }}
-            </h1>
-            <span
-              class="material-symbols-outlined -mr-1 ml-auto h-5 w-5 shrink-0 rotate-[-180deg] fill-[#336dec] transition-transform duration-200 ease-in-out group-[[data-te-collapse-collapsed]]:mr-0 group-[[data-te-collapse-collapsed]]:rotate-0 group-[[data-te-collapse-collapsed]]:fill-[#212529] motion-reduce:transition-none"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24"
-                viewBox="0 -960 960 960"
-                width="24"
-              >
-                <path
-                  d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"
-                />
-              </svg>
-            </span>
-          </button>
-        </h2>
-        <div
-          id="collapseThree"
-          class="!visible hidden"
-          data-te-collapse-item
-          aria-labelledby="headingThree"
-          data-te-parent="#accordionExample"
-        >
-          <div class="px-5 py-4 flex flex-col">
-            <ol
-              class="border-l border-neutral-300 grid grid-cols-1 md:grid-cols-4 md:gap-6 md:border-l-0 md:border-t"
-            >
-              <li>
-                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
-                  <div
-                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
-                  ></div>
-                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
-                </div>
-                <div class="ml-4 mt-2 pb-5 md:ml-0">
-                  <h4 class="mb-1.5 text-xl font-semibold">
-                    Transaction created
-                  </h4>
-                  <div class="flex flex-row items-center">
-                    <p
-                      class="capitalize text-sm font-semibold text-neutral-500"
-                    >
-                      New
-                    </p>
-                    <span>
-                      <img
-                        src="assets/img/icons/arrow_right_alt_FILL0_wght400_GRAD0_opsz24.png"
-                        alt=""
-                        srcset=""
-                      />
-                    </span>
-
-                    <p class="capitalize text-sm font-semibold text-info">
-                      In Progress
-                    </p>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
-                  <div
-                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
-                  ></div>
-                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
-                </div>
-                <div class="ml-4 mt-2 pb-5 md:ml-0">
-                  <h4 class="mb-1.5 text-xl font-semibold">Status Changed</h4>
-                  <div class="flex flex-row items-center">
-                    <p
-                      class="capitalize text-sm font-semibold text-neutral-500"
-                    >
-                      In Progress
-                    </p>
-                    <span>
-                      <img
-                        src="assets/img/icons/arrow_right_alt_FILL0_wght400_GRAD0_opsz24.png"
-                        alt=""
-                        srcset=""
-                      />
-                    </span>
-                    <p class="capitalize text-sm font-semibold text-warning">
-                      Pending
-                    </p>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
-                  <div
-                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
-                  ></div>
-                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
-                </div>
-                <div class="ml-4 mt-2 pb-5 md:ml-0">
-                  <h4 class="mb-1.5 text-xl font-semibold">
-                    Payment completed
-                  </h4>
-                  <div class="flex flex-row items-center">
-                    <p
-                      class="capitalize text-sm font-semibold text-black hover:underline cursor-pointer"
-                    >
-                      Payment made to CRDB Bank
-                    </p>
-                  </div>
-                </div>
-              </li>
-              <li>
-                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
-                  <div
-                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
-                  ></div>
-                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
-                </div>
-                <div class="ml-4 mt-2 pb-5 md:ml-0">
-                  <h4 class="mb-1.5 text-xl font-semibold">
-                    Payment completed
-                  </h4>
-                  <div class="flex flex-row items-center">
-                    <p
-                      class="capitalize text-sm font-semibold text-black hover:underline cursor-pointer"
-                    >
-                      Payment made to CRDB Bank
-                    </p>
-                  </div>
-                </div>
-              </li>
-            </ol>
-            <ol
-              class="border-l border-neutral-300 grid grid-cols-1 md:grid-cols-4 md:gap-6 md:border-l-0 md:border-t"
-            >
-              <li>
-                <div class="flex-start flex items-center pt-2 md:block md:pt-0">
-                  <div
-                    class="-ml-[5px] mr-3 h-[9px] w-[9px] rounded-full bg-warning md:-mt-[5px] md:ml-0 md:mr-0"
-                  ></div>
-                  <p class="mt-2 text-sm text-neutral-500">01.07.2021</p>
-                </div>
-                <div class="ml-4 mt-2 pb-5 md:ml-0">
-                  <h4 class="mb-1.5 text-xl font-semibold">
-                    Transaction Finalized
-                  </h4>
-                  <div class="flex flex-row items-center">
-                    <p
-                      class="capitalize text-sm font-semibold text-neutral-500"
-                    >
-                      Pending
-                    </p>
-                    <span>
-                      <img
-                        src="assets/img/icons/arrow_right_alt_FILL0_wght400_GRAD0_opsz24.png"
-                        alt=""
-                        srcset=""
-                      />
-                    </span>
-                    <p class="capitalize text-sm font-semibold text-success">
-                      Finalized
-                    </p>
-                  </div>
-                </div>
-              </li>
-            </ol>
-          </div>
-        </div>
-      </div> -->
     </div>
   </div>
 </div>

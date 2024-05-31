@@ -76,4 +76,13 @@ export class ReportsService {
     );
     return data;
   }
+  public async getInvoicePaymentDetails(body: { invoice_sno: string }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { invoice_sno: string },
+        HttpDataResponse<TransactionDetail[] | number | string>
+      >(`/api/invoice/GetchTransact_Inv`, body)
+    );
+    return data;
+  }
 }

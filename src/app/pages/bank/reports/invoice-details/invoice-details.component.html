@@ -177,7 +177,7 @@
             </button>
             <ul
               tabindex="0"
-              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 grid grid-cols-2"
             >
               <li *ngFor="let control of headers.controls">
                 <label class="label cursor-pointer">
@@ -225,7 +225,7 @@
                     <th
                       *ngIf="header.get('included')?.value"
                       scope="col"
-                      class="px-6 font-inter text-sm"
+                      class="px-6 py-2 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
@@ -236,11 +236,34 @@
                         <p>
                           {{ header?.get("label")?.value }}
                         </p>
-                        <button (click)="sortColumnClicked(ind)">
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
+                        <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(ind, headers)
+                          "
+                          class="flex flex-row items-center m-1"
+                        >
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
                           </span>
                         </button>
                       </div>
@@ -264,7 +287,8 @@
                             paginator.pageSize * paginator.pageIndex +
                             paginator.pageSize -
                             1;
-                    index as ind
+                    index as ind;
+                    trackBy: PerformanceUtils.trackByIndex
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="ind % 2 !== 0 ? 'bg-neutral-50' : ''"
@@ -272,12 +296,55 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.INVOICE_NUMBER)
+                        .at(InvoiceDetailsTable.ID)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.INVOICE_NUMBER)
+                        .at(InvoiceDetailsTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.getIndexOfItem(
+                        invoiceReports,
+                        invoiceReport
+                      )
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.POSTED_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.POSTED_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.p_date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.INVOICE_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -289,33 +356,128 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.INVOICE_DATE)
+                        .at(InvoiceDetailsTable.CONTROL_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.INVOICE_DATE)
+                        .at(InvoiceDetailsTable.CONTROL_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
                     class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
-                    {{
-                      PerformanceUtils.convertDateStringToDate(
-                        invoiceReport.Invoice_Date
-                      ).toLocaleDateString()
-                    }}
+                    {{ invoiceReport.Control_No }}
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.CUSTOMER)
+                        .at(InvoiceDetailsTable.PAYMENT_TYPE)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.CUSTOMER)
+                        .at(InvoiceDetailsTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          invoiceReport.Payment_Type,
+                          'Fixed',
+                          'bg-purple-100',
+                          'text-black',
+                          'bg-teal-100',
+                          'text-black'
+                        )
+                      "
+                    >
+                      {{ invoiceReport.Payment_Type }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.TOTAL)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.TOTAL)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal text-right"
+                  >
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        invoiceReport.Total.toString()
+                      )
+                    }}
+                    {{ invoiceReport.Currency_Code }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.STATUS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.STATUS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          invoiceReport.goods_status,
+                          'Approved'
+                        )
+                      "
+                    >
+                      {{
+                        invoiceReport.goods_status
+                          ? invoiceReport.goods_status
+                          : "-"
+                      }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.COMPANY_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.COMPANY_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{ invoiceReport.Company_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.CUSTOMER_NAME)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -327,68 +489,65 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.TOTAL)
+                        .at(InvoiceDetailsTable.INVOICE_DATE)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.TOTAL)
+                        .at(InvoiceDetailsTable.INVOICE_DATE)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 font-normal"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
                     {{
-                      PerformanceUtils.moneyFormat(
-                        invoiceReport.Total.toString()
-                      )
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.Invoice_Date
+                      ).toDateString()
                     }}
-                    TZS
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.WITH_VAT)
+                        .at(InvoiceDetailsTable.DUE_DATE)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.WITH_VAT)
+                        .at(InvoiceDetailsTable.DUE_DATE)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 font-normal"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
                     {{
-                      PerformanceUtils.moneyFormat(
-                        invoiceReport.Total_Vt.toString()
-                      )
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.Due_Date
+                      ).toDateString()
                     }}
-                    TZS
                   </td>
                   <td
                     *ngIf="
                       headers.controls
-                        .at(this.headersMap.WITHOUT_VAT)
+                        .at(InvoiceDetailsTable.EXPIRY_DATE)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(this.headersMap.WITHOUT_VAT)
+                        .at(InvoiceDetailsTable.EXPIRY_DATE)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm text-right font-inter whitespace-nowrap px-6 py-4 font-normal"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                   >
                     {{
-                      PerformanceUtils.moneyFormat(
-                        invoiceReport.Total_Without_Vt.toString()
-                      )
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.Invoice_Expired_Date
+                      ).toDateString()
                     }}
-                    TZS
                   </td>
                 </tr>
               </tbody>

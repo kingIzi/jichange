@@ -46,6 +46,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-details-table';
 
 @Component({
   selector: 'app-invoice-details',
@@ -81,14 +82,15 @@ export class InvoiceDetailsComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public headersMap = {
-    INVOICE_NUMBER: 0,
-    INVOICE_DATE: 1,
-    CUSTOMER: 2,
-    TOTAL: 3,
-    WITH_VAT: 4,
-    WITHOUT_VAT: 5,
-  };
+  public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
+  // public headersMap = {
+  //   INVOICE_NUMBER: 0,
+  //   INVOICE_DATE: 1,
+  //   CUSTOMER: 2,
+  //   TOTAL: 3,
+  //   WITH_VAT: 4,
+  //   WITHOUT_VAT: 5,
+  // };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -191,22 +193,27 @@ export class InvoiceDetailsComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
+  private getTableActiveKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.invoiceReportKeys(indexes);
+  }
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
-      let keys = this.invoiceReportKeys(indexes);
+      let text = searchText.trim().toLowerCase();
+      let keys = this.getTableActiveKeys();
       this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
@@ -216,7 +223,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
-      case this.headersMap.INVOICE_NUMBER:
+      case InvoiceDetailsTable.INVOICE_NUMBER:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
           a.Invoice_No.trim().toLocaleLowerCase() >
           b.Invoice_No.trim().toLocaleLowerCase()
@@ -224,14 +231,15 @@ export class InvoiceDetailsComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.INVOICE_DATE:
+      case InvoiceDetailsTable.INVOICE_DATE:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
-          new Date(a.Invoice_Date.trim()) > new Date(b.Invoice_Date.trim())
+          new Date(a.Invoice_Date.trim()).toLocaleDateString() >
+          new Date(b.Invoice_Date.trim()).toLocaleDateString()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.CUSTOMER:
+      case InvoiceDetailsTable.CUSTOMER_NAME:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
           a.Chus_Name.trim().toLocaleLowerCase() >
           b.Chus_Name.trim().toLocaleLowerCase()
@@ -239,28 +247,27 @@ export class InvoiceDetailsComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.TOTAL:
+      case InvoiceDetailsTable.TOTAL:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
           a.Total > b.Total ? 1 : -1
         );
         break;
-      case this.headersMap.WITH_VAT:
-        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
-          a.Total_Vt > b.Total_Vt ? 1 : -1
+      case InvoiceDetailsTable.COMPANY_NAME:
+        this.invoiceReports.sort((a, b) =>
+          a.Company_Name.toLocaleLowerCase() >
+          b.Company_Name.toLocaleLowerCase()
+            ? 1
+            : -1
         );
         break;
-      case this.headersMap.WITHOUT_VAT:
-        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
-          a.Total_Without_Vt > b.Total_Without_Vt ? 1 : -1
-        );
-        break;
+
       default:
         break;
     }
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
-      case this.headersMap.INVOICE_NUMBER:
+      case InvoiceDetailsTable.INVOICE_NUMBER:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
           a.Invoice_No.trim().toLocaleLowerCase() <
           b.Invoice_No.trim().toLocaleLowerCase()
@@ -268,14 +275,15 @@ export class InvoiceDetailsComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.INVOICE_DATE:
+      case InvoiceDetailsTable.INVOICE_DATE:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
-          new Date(a.Invoice_Date.trim()) < new Date(b.Invoice_Date.trim())
+          new Date(a.Invoice_Date.trim()).toLocaleDateString() <
+          new Date(b.Invoice_Date.trim()).toLocaleDateString()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.CUSTOMER:
+      case InvoiceDetailsTable.CUSTOMER_NAME:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
           a.Chus_Name.trim().toLocaleLowerCase() <
           b.Chus_Name.trim().toLocaleLowerCase()
@@ -283,19 +291,17 @@ export class InvoiceDetailsComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.TOTAL:
+      case InvoiceDetailsTable.TOTAL:
         this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
           a.Total < b.Total ? 1 : -1
         );
         break;
-      case this.headersMap.WITH_VAT:
-        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
-          a.Total_Vt < b.Total_Vt ? 1 : -1
-        );
-        break;
-      case this.headersMap.WITHOUT_VAT:
-        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
-          a.Total_Without_Vt < b.Total_Without_Vt ? 1 : -1
+      case InvoiceDetailsTable.COMPANY_NAME:
+        this.invoiceReports.sort((a, b) =>
+          a.Company_Name.toLocaleLowerCase() <
+          b.Company_Name.toLocaleLowerCase()
+            ? 1
+            : -1
         );
         break;
       default:
@@ -334,11 +340,38 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private invoiceReportKeys(indexes: number[]) {
     let keys: string[] = [];
-    if (indexes.includes(this.headersMap.INVOICE_NUMBER)) {
+    if (indexes.includes(InvoiceDetailsTable.POSTED_DATE)) {
+      keys.push('p_date');
+    }
+    if (indexes.includes(InvoiceDetailsTable.INVOICE_NUMBER)) {
       keys.push('Invoice_No');
     }
-    if (indexes.includes(this.headersMap.CUSTOMER)) {
+    if (indexes.includes(InvoiceDetailsTable.CONTROL_NUMBER)) {
+      keys.push('Control_No');
+    }
+    if (indexes.includes(InvoiceDetailsTable.PAYMENT_TYPE)) {
+      keys.push('Payment_Type');
+    }
+    if (indexes.includes(InvoiceDetailsTable.TOTAL)) {
+      keys.push('Total');
+    }
+    if (indexes.includes(InvoiceDetailsTable.STATUS)) {
+      keys.push('goods_status');
+    }
+    if (indexes.includes(InvoiceDetailsTable.COMPANY_NAME)) {
+      keys.push('Company_Name');
+    }
+    if (indexes.includes(InvoiceDetailsTable.CUSTOMER_NAME)) {
       keys.push('Chus_Name');
+    }
+    if (indexes.includes(InvoiceDetailsTable.INVOICE_DATE)) {
+      keys.push('Invoice_Date');
+    }
+    if (indexes.includes(InvoiceDetailsTable.DUE_DATE)) {
+      keys.push('Due_Date');
+    }
+    if (indexes.includes(InvoiceDetailsTable.EXPIRY_DATE)) {
+      keys.push('Invoice_Expired_Date');
     }
     return keys;
   }
@@ -391,26 +424,12 @@ export class InvoiceDetailsComponent implements OnInit {
     }
   }
   downloadSheet() {
-    let data = this.invoiceReportsData.map((d) => {
-      let t = { ...d };
-      t.Invoice_Date = AppUtilities.convertDotNetJsonDateToDate(
-        d.Invoice_Date
-      ).toLocaleDateString();
-      t.Audit_Date = AppUtilities.convertDotNetJsonDateToDate(
-        d.Audit_Date
-      ).toLocaleDateString();
-      t.approval_date = AppUtilities.convertDotNetJsonDateToDate(
-        d.approval_date
-      ).toLocaleDateString();
-      t.p_date = AppUtilities.convertDotNetJsonDateToDate(
-        d.p_date
-      ).toLocaleDateString();
-      t.Zreport_Date = AppUtilities.convertDotNetJsonDateToDate(
-        d.Zreport_Date
-      ).toLocaleDateString();
-      return t;
-    });
-    this.fileHandler.exportAsExcelFile(data, 'invoice_report');
+    this.fileHandler.downloadExcelTable(
+      this.invoiceReportsData,
+      this.getTableActiveKeys(),
+      'invoice_reports',
+      ['Due_Date', 'Invoice_Expired_Date', 'Invoice_Date', 'p_date']
+    );
   }
   moneyFormat(amount: number) {
     return AppUtilities.moneyFormat(amount.toString());
@@ -423,11 +442,7 @@ export class InvoiceDetailsComponent implements OnInit {
     sortAsc?.setValue(!sortAsc?.value);
   }
   isCashAmountColumn(index: number) {
-    return (
-      index === this.headersMap.TOTAL ||
-      index === this.headersMap.WITH_VAT ||
-      index === this.headersMap.WITHOUT_VAT
-    );
+    return index === InvoiceDetailsTable.TOTAL;
   }
   openInvoiceDetailsGraph() {
     let dialogRef = this.dialog.open(GeneratedInvoiceDialogComponent, {

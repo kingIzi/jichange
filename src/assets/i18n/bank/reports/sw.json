@@ -23,11 +23,14 @@
     "description": "Maelezo",
     "amount": "Kiasi",
     "currency": "Sarafu",
-    "company": "Kampuni",
+    "company": "Muuzaji",
+    "customer": "Muteja",
     "date": "Tarehe",
+    "payer": "Mlipaji",
     "method": "Mbinu",
     "status": "Hali",
     "transactionType": "Aina ya Uhamisho",
+    "controlNumber": "Numbari wa Udhibiti",
     "balance": "Usawa",
     "attachment": "Viambatanisho",
     "note": "Maelezo",
@@ -122,7 +125,20 @@
         }
       }
     },
-    "invoiceDetailsTable": ["Nambari ya Bili", "Tarehe", "Mteja", "Jumla"]
+    "invoiceDetailsTable": [
+      "#",
+      "Imeundwa",
+      "Ankara N°",
+      "Nambari ya Udhibiti",
+      "Aina ya Malipo",
+      "JUMLA",
+      "Hali",
+      "Muuzaji",
+      "Mteja",
+      "Tarehe ya Ankara",
+      "Tarehe ya Mwisho",
+      "Tarehe ya Kumalizika"
+    ]
   },
   "customerDetailReport": {
     "customerDetailReport": "Ripoti ya Maelezo ya Muuzaji",

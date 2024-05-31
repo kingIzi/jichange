@@ -369,6 +369,9 @@ export class TransactionDetailsComponent implements OnInit {
       this.filterTableFormGroup.markAllAsTouched();
     }
   }
+  invoiceNumberToBase64(invoice_number: string) {
+    return btoa(invoice_number);
+  }
   searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       this.transactions = this.transactionsData.filter((elem: any) => {

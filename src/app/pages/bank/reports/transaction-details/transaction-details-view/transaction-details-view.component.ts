@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnInit,
@@ -10,9 +12,20 @@ import {
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
+import {
+  TRANSLOCO_SCOPE,
+  TranslocoModule,
+  TranslocoService,
+} from '@ngneat/transloco';
+import { from, zip } from 'rxjs';
 import { CustomerReceiptDialogComponent } from 'src/app/components/dialogs/Vendors/customer-receipt-dialog/customer-receipt-dialog.component';
+import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import * as json from 'src/assets/temp/data.json';
 import { Collapse, initTE } from 'tw-elements';
 import { BreadcrumbService } from 'xng-breadcrumb';
@@ -22,7 +35,14 @@ import { BreadcrumbService } from 'xng-breadcrumb';
   templateUrl: './transaction-details-view.component.html',
   styleUrls: ['./transaction-details-view.component.scss'],
   standalone: true,
-  imports: [TranslocoModule, CommonModule, MatDialogModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TranslocoModule,
+    CommonModule,
+    MatDialogModule,
+    DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
+  ],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -31,32 +51,83 @@ import { BreadcrumbService } from 'xng-breadcrumb';
   ],
 })
 export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
+  public startLoading: boolean = false;
   public detail: any;
   public downloading: boolean = false;
+  public payments: TransactionDetail[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('rootElement') rootElement!: ElementRef;
   @ViewChild('downloadBtn') downloadBtn!: ElementRef;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private activatedRoute: ActivatedRoute,
+    private reportsService: ReportsService,
+    private tr: TranslocoService,
     private fileHandler: FileHandlerService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
+  private buildPage(invoice_number: string) {
+    this.startLoading = true;
+    let paymentsObs = from(
+      this.reportsService.getInvoicePaymentDetails({
+        invoice_sno: invoice_number,
+      })
+    );
+    let res = AppUtilities.pipedObservables(zip(paymentsObs));
+    res
+      .then((results) => {
+        let [payments] = results;
+        if (
+          typeof payments.response !== 'number' &&
+          typeof payments.response !== 'string'
+        ) {
+          this.payments = payments.response;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     initTE({ Collapse });
-    let data = JSON.parse(JSON.stringify(json));
     this.activatedRoute.params.subscribe((params) => {
-      if (Number(params['id']) >= 0) {
-        this.detail = (data.transactionDetails as any[]).find(
-          (detail, index) => {
-            return index === Number(params['id']);
-          }
-        );
+      if (params['id']) {
+        let invno = atob(params['id']);
+        this.buildPage(invno);
       }
     });
-    this.activatedRoute.queryParams.subscribe((q) => {
-      if (q['download']) {
-        this.downloading = q['download'];
-      }
-    });
+    //let data = JSON.parse(JSON.stringify(json));
+    // this.activatedRoute.params.subscribe((params) => {
+    //   if (Number(params['id']) >= 0) {
+    //     this.detail = (data.transactionDetails as any[]).find(
+    //       (detail, index) => {
+    //         return index === Number(params['id']);
+    //       }
+    //     );
+    //   }
+    // });
+    // this.activatedRoute.queryParams.subscribe((q) => {
+    //   if (q['download']) {
+    //     this.downloading = q['download'];
+    //   }
+    // });
   }
   ngAfterViewInit(): void {
     this.activatedRoute.queryParams.subscribe((q) => {
@@ -113,9 +184,6 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
 
       this.fileHandler.downloadPdf(element, `invoice.pdf`);
       dialogRef.close();
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
     });
   }
 }

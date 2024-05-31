@@ -129,9 +129,10 @@ export class HeaderComponent implements OnInit {
         this.tr.translate(`auth.sessionManagement.timedOut.timedOutTitle`),
         this.tr.translate(`auth.sessionManagement.timedOut.timeOutMessage`)
       );
-      timeOut.addEventListener('close', () => {
-        this.requestLogout();
-      });
+      // timeOut.addEventListener('close', () => {
+      //   this.requestLogout();
+      // });
+      this.requestLogout();
       this.cdr.detectChanges();
     });
 

@@ -10,17 +10,20 @@
     "salesSummary": "Sale(s) Summary"
   },
   "transactionDetails": {
-    "transaction": "Transaction",
+    "transaction": "Transaction(s)",
     "transactionDetails": "Transaction Details",
     "transactionNumber": "Transaction Number",
     "description": "Description",
     "amount": "Amount",
     "currency": "Currency",
-    "company": "Company",
+    "company": "Vendor",
+    "customer": "Customer",
     "date": "Date",
+    "payer": "Payer",
     "method": "Method",
     "status": "Status",
     "transactionType": "Transaction type",
+    "controlNumber": "Control N°",
     "balance": "Balance",
     "attachment": "Attachment(s)",
     "note": "Note(s)",
@@ -130,7 +133,20 @@
         }
       }
     },
-    "invoiceDetailsTable": ["Invoice No", "Date", "Customer", "Total"]
+    "invoiceDetailsTable": [
+      "#",
+      "Created",
+      "Invoice N°",
+      "Control N°",
+      "Payment Type",
+      "TOTAL",
+      "Status",
+      "Vendor",
+      "Customer",
+      "Invoice Date",
+      "Due Date",
+      "Expiry Date"
+    ]
   },
   "customerDetailReport": {
     "customerDetailReport": "Vendor detail report",
