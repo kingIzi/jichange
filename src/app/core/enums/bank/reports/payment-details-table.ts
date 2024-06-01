@@ -1,0 +1,14 @@
+export enum PaymentDetailsTable {
+  ID,
+  PAYMENT_DATE,
+  INVOICE_NUMBER,
+  TRANSACTION_NUMBER,
+  CONTROL_NUMBER,
+  CHANNEL,
+  RECEIPT_NUMBER,
+  AMOUNT,
+  BALANCE,
+  FROM,
+  TO,
+  FOR,
+}

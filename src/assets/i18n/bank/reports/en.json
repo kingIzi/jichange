@@ -75,7 +75,8 @@
   "paymentDetails": {
     "payment": "Payment(s)",
     "paymentsTable": [
-      "Date",
+      "#",
+      "Payment Date",
       "Invoice N°",
       "Transaction N°",
       "Control N°",
@@ -99,6 +100,7 @@
       }
     },
     "amendmentTable": [
+      "#",
       "Due date",
       "Invoice N°",
       "Control N°",
@@ -113,6 +115,7 @@
     "form": {
       "company": "Vendor",
       "customer": "Customer",
+      "invoiceNumber": "Invoice N°",
       "startDate": "Start date",
       "endDate": "End date",
       "placeholders": {
@@ -123,6 +126,7 @@
         "customer": "Please select a customer",
         "startDate": "Please select a start date",
         "endDate": "Please select an end date",
+        "invoiceNumber": "Please select invoice",
         "dialog": {
           "invalidForm": "Invalid form",
           "company": "You must select a company",

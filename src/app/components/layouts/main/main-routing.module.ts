@@ -295,6 +295,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'payment', skip: false },
               animationState: 'reports-module-3',
+              reuseRoute: true,
             },
           },
           {
@@ -306,6 +307,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'invoice', skip: false },
               animationState: 'reports-module-4',
+              reuseRoute: true,
             },
           },
           {
@@ -317,6 +319,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'amendment', skip: false },
               animationState: 'reports-module-5',
+              reuseRoute: true,
             },
           },
           {
@@ -328,6 +331,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'customer', skip: false },
               animationState: 'reports-module-6',
+              reuseRoute: true,
             },
           },
           {
@@ -339,6 +343,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'userLog', skip: false },
               animationState: 'reports-module-7',
+              reuseRoute: true,
             },
           },
           {
@@ -350,6 +355,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'audit', skip: false },
               animationState: 'reports-module-8',
+              reuseRoute: true,
             },
           },
         ],

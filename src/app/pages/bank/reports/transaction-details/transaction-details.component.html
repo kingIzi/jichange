@@ -21,47 +21,12 @@
           <i class="bi bi-download text-success text-lg"></i>
         </span>
       </a>
-      <!-- <a
-        (click)="openTransactionCharts()"
-        class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
-      >
-        <span class="material-symbols-outlined text-warning"> bar_chart </span>
-      </a> -->
     </div>
   </div>
   <div
     [formGroup]="headersFormGroup"
     class="flex flex-col bg-white shadow px-2 py-4 space-y-2"
   >
-    <!-- <form class="w-full grid grid-cols-2 gap-x-2 gap-y-3 mb-6">
-      <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.userLogReport.form'"
-          class="text-xs capitalize"
-        >
-          {{ t("startDate") }}
-        </p>
-        <input type="date" class="input input-sm input-bordered" />
-      </div>
-      <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.userLogReport.form'"
-          class="text-xs capitalize"
-        >
-          {{ t("endDate") }}
-        </p>
-        <input type="date" class="input input-sm input-bordered" />
-      </div>
-      <div class="col-span-full flex flex-row items-center justify-end">
-        <button
-          type="button"
-          *transloco="let t; read: 'actions'"
-          class="btn btn-sm text-darkPurple bg-lightPurple"
-        >
-          {{ t("submit") }}
-        </button>
-      </div>
-    </form> -->
     <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
       <div class="flex flex-col space-y-1">
         <p
@@ -175,6 +140,7 @@
           type="date"
           [formControl]="enddate"
           class="input input-sm input-bordered"
+          [min]="stdate.value"
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
@@ -266,7 +232,10 @@
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
-                      <div class="flex items-center">
+                      <div
+                        class="flex items-center"
+                        [class]="isCashAmountColumn(ind) ? 'justify-end' : ''"
+                      >
                         <p>
                           {{ header?.get("label")?.value }}
                         </p>
@@ -397,7 +366,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal text-right"
                   >
                     {{
                       PerformanceUtils.moneyFormat(
@@ -419,7 +388,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal text-right"
                   >
                     {{
                       PerformanceUtils.moneyFormat(
@@ -441,7 +410,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal text-right"
                   >
                     {{
                       PerformanceUtils.moneyFormat(
@@ -559,16 +528,6 @@
                     <div
                       class="flex flex-row items-center justify-end space-x-4"
                     >
-                      <!-- <button
-                        *transloco="let t; read: 'actions'"
-                        [routerLink]="'/main/reports/transactions/' + i"
-                        htclass="btn btn-sm btn-ghost tooltip"
-                        [attr.data-tip]="t('view')"
-                      >
-                        <span class="material-symbols-outlined text-warning">
-                          visibility
-                        </span>
-                      </button> -->
                       <button
                         *transloco="let t; read: 'actions'"
                         [routerLink]="

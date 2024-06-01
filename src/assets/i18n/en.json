@@ -16,6 +16,10 @@
     "confirm": "Confirm",
     "close": "Close"
   },
+  "forms": {
+    "from": "From",
+    "to": "To"
+  },
   "actions": {
     "submit": "Submit",
     "close": "Close",

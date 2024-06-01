@@ -122,7 +122,8 @@ export class InboxApprovalComponent implements OnInit {
       this.headers,
       this.fb,
       this,
-      6
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);

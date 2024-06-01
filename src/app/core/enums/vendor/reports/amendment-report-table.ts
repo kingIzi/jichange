@@ -1,4 +1,5 @@
 export enum AmendmentReportTable {
+  ID,
   DUE_DATE,
   INVOICE_NUMBER,
   CONTROL_NUMBER,

@@ -39,6 +39,7 @@ import { PaymentDetailsTable } from 'src/app/core/enums/vendor/reports/payment-d
 import { Company } from 'src/app/core/models/bank/company/company';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
+import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
@@ -238,7 +239,7 @@ export class PaymentDetailsComponent implements OnInit {
         throw err;
       });
   }
-  private requestPaymentReport(value: any) {
+  private requestPaymentReport(value: PaymentDetailReportForm) {
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)

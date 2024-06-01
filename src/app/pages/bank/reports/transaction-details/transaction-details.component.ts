@@ -159,46 +159,108 @@ export class TransactionDetailsComponent implements OnInit {
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
-      // case this.headersMap.DATE:
-      //   this.transactions.sort((a, b) => (a.date > b.date ? 1 : -1));
-      //   break;
-      // case this.headersMap.COMPANY:
-      //   this.transactions.sort((a, b) => (a.company > b.company ? 1 : -1));
-      //   break;
-      // case this.headersMap.DESCRIPTION:
-      //   this.transactions.sort((a, b) =>
-      //     a.description > b.description ? 1 : -1
-      //   );
-      //   break;
-      // case this.headersMap.AMOUNT:
-      //   this.transactions.sort((a, b) => (a.amount > b.amount ? 1 : -1));
-      //   break;
-      // case this.headersMap.STATUS:
-      //   this.transactions.sort((a, b) => (a.status > b.status ? 1 : -1));
-      //   break;
+      case TransactionDetailsTableHeadersMap.PAYMENT_DATE:
+        this.transactions.sort((a, b) =>
+          new Date(a.Payment_Date) > new Date(b.Payment_Date) ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.INVOICE_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Invoice_Sno > b.Invoice_Sno ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.TOTAL_AMOUNT:
+        this.transactions.sort((a, b) =>
+          a.Requested_Amount > b.Requested_Amount ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.PAID_AMOUNT:
+        this.transactions.sort((a, b) =>
+          a.PaidAmount > b.PaidAmount ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.BALANCE:
+        this.transactions.sort((a, b) => (a.Balance > b.Balance ? 1 : -1));
+        break;
+      case TransactionDetailsTableHeadersMap.CONTROL_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Control_No > b.Control_No ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.PAYMENT_TYPE:
+        this.transactions.sort((a, b) =>
+          a.Payment_Type > b.Payment_Type ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.PAYMENT_METHOD:
+        this.transactions.sort((a, b) =>
+          a.Trans_Channel > b.Trans_Channel ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.TRANSACTION_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Payment_Trans_No > b.Payment_Trans_No ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.RECEIPT_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Receipt_No > b.Receipt_No ? 1 : -1
+        );
+        break;
       default:
         break;
     }
   }
   private sortTableDesc(ind: number): void {
     switch (ind) {
-      // case this.headersMap.DATE:
-      //   this.transactions.sort((a, b) => (a.date < b.date ? 1 : -1));
-      //   break;
-      // case this.headersMap.COMPANY:
-      //   this.transactions.sort((a, b) => (a.company < b.company ? 1 : -1));
-      //   break;
-      // case this.headersMap.DESCRIPTION:
-      //   this.transactions.sort((a, b) =>
-      //     a.description < b.description ? 1 : -1
-      //   );
-      //   break;
-      // case this.headersMap.AMOUNT:
-      //   this.transactions.sort((a, b) => (a.amount < b.amount ? 1 : -1));
-      //   break;
-      // case this.headersMap.STATUS:
-      //   this.transactions.sort((a, b) => (a.status < b.status ? 1 : -1));
-      //   break;
+      case TransactionDetailsTableHeadersMap.PAYMENT_DATE:
+        this.transactions.sort((a, b) =>
+          new Date(a.Payment_Date) < new Date(b.Payment_Date) ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.INVOICE_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Invoice_Sno < b.Invoice_Sno ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.TOTAL_AMOUNT:
+        this.transactions.sort((a, b) =>
+          a.Requested_Amount < b.Requested_Amount ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.PAID_AMOUNT:
+        this.transactions.sort((a, b) =>
+          a.PaidAmount < b.PaidAmount ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.BALANCE:
+        this.transactions.sort((a, b) => (a.Balance < b.Balance ? 1 : -1));
+        break;
+      case TransactionDetailsTableHeadersMap.CONTROL_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Control_No < b.Control_No ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.PAYMENT_TYPE:
+        this.transactions.sort((a, b) =>
+          a.Payment_Type < b.Payment_Type ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.PAYMENT_METHOD:
+        this.transactions.sort((a, b) =>
+          a.Trans_Channel < b.Trans_Channel ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.TRANSACTION_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Payment_Trans_No < b.Payment_Trans_No ? 1 : -1
+        );
+        break;
+      case TransactionDetailsTableHeadersMap.RECEIPT_NUMBER:
+        this.transactions.sort((a, b) =>
+          a.Receipt_No < b.Receipt_No ? 1 : -1
+        );
+        break;
       default:
         break;
     }
@@ -283,6 +345,62 @@ export class TransactionDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private transactionKeys(indexes: number[]) {
+    let keys: string[] = [];
+    if (indexes.includes(TransactionDetailsTableHeadersMap.PAYMENT_DATE)) {
+      keys.push('Payment_Date');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.INVOICE_NUMBER)) {
+      keys.push('Invoice_Sno');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.TOTAL_AMOUNT)) {
+      keys.push('Requested_Amount');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.PAID_AMOUNT)) {
+      keys.push('PaidAmount');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.BALANCE)) {
+      keys.push('Balance');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.CONTROL_NUMBER)) {
+      keys.push('Control_No');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.PAYMENT_TYPE)) {
+      keys.push('Payment_Type');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.PAYMENT_METHOD)) {
+      keys.push('Trans_Channel');
+    }
+    if (
+      indexes.includes(TransactionDetailsTableHeadersMap.TRANSACTION_NUMBER)
+    ) {
+      keys.push('Payment_Trans_No');
+    }
+    if (indexes.includes(TransactionDetailsTableHeadersMap.RECEIPT_NUMBER)) {
+      keys.push('Receipt_No');
+    }
+    return keys;
+  }
+  private getActiveTableKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.transactionKeys(indexes);
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.trim().toLowerCase();
+      let keys = this.getActiveTableKeys();
+      this.transactions = this.transactionsData.filter((company: any) => {
+        return keys.some((key) => company[key]?.toLowerCase().includes(text));
+      });
+    } else {
+      this.transactions = this.transactionsData;
+    }
+  }
   ngOnInit(): void {
     this.createHeadersFormGroup();
     this.createRequestFormGroup();
@@ -310,38 +428,21 @@ export class TransactionDetailsComponent implements OnInit {
         transactions: this.transactions,
       },
     });
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
-    });
-  }
-  moneyFormat(value: string) {
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-  convertDotNetJSONDate(dotNetJSONDate: string) {
-    const timestamp = parseInt(
-      dotNetJSONDate.replace(/\/Date\((\d+)\)\//, '$1'),
-      10
-    );
-    return new Date(timestamp);
   }
   downloadSheet() {
-    // let data = this.transactionsData.map((d) => {
-    //   let t = { ...d };
-    //   t.date = AppUtilities.convertDotNetJsonDateToDate(
-    //     d.date
-    //   ).toLocaleString();
-    //   return t;
-    // });
-    // this.fileHandler.exportAsExcelFile(data, 'transaction_details');
-  }
-  sortColumnClicked(ind: number) {
-    let sortAsc = this.headers.at(ind).get('sortAsc');
-    if (!sortAsc?.value) {
-      this.sortTableDesc(ind);
-      sortAsc?.setValue(true);
+    if (this.transactionsData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.transactionsData,
+        this.getActiveTableKeys(),
+        'transaction_details_report',
+        ['Payment_Date']
+      );
     } else {
-      this.sortTableAsc(ind);
-      sortAsc?.setValue(false);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
     }
   }
   getValueArray(ind: number) {
@@ -364,35 +465,27 @@ export class TransactionDetailsComponent implements OnInit {
   }
   submitForm() {
     if (this.filterTableFormGroup.valid) {
-      this.requestTransactionDetailsList(this.filterTableFormGroup.value);
+      let form = { ...this.filterTableFormGroup.value };
+      if (form.stdate) {
+        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+      }
+      if (form.enddate) {
+        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+      }
+      this.requestTransactionDetailsList(form);
     } else {
       this.filterTableFormGroup.markAllAsTouched();
     }
   }
+  isCashAmountColumn(index: number) {
+    return (
+      index === TransactionDetailsTableHeadersMap.TOTAL_AMOUNT ||
+      index === TransactionDetailsTableHeadersMap.PAID_AMOUNT ||
+      index === TransactionDetailsTableHeadersMap.BALANCE
+    );
+  }
   invoiceNumberToBase64(invoice_number: string) {
     return btoa(invoice_number);
-  }
-  searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      this.transactions = this.transactionsData.filter((elem: any) => {
-        return (
-          elem.company
-            .toLocaleLowerCase()
-            .includes(searchText.toLocaleLowerCase()) ||
-          elem.description
-            .toLocaleLowerCase()
-            .includes(searchText.toLocaleLowerCase()) ||
-          elem.transactionNumber
-            .toLocaleLowerCase()
-            .includes(searchText.toLocaleLowerCase()) ||
-          elem.status
-            .toLocaleLowerCase()
-            .includes(searchText.toLocaleLowerCase())
-        );
-      });
-    } else {
-      this.transactions = this.transactionsData;
-    }
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

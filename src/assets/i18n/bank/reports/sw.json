@@ -67,7 +67,8 @@
   "paymentDetails": {
     "payment": "Malipo",
     "paymentsTable": [
-      "Tarehe",
+      "#",
+      "Tarehe ya malipo",
       "Nambari ya Invoice",
       "Nambari ya Muamala",
       "Nambari ya Kudhibiti",
@@ -91,6 +92,7 @@
       }
     },
     "amendmentTable": [
+      "#",
       "Tarehe ya Muda wa Kulipa",
       "Nambari ya Invoice",
       "Nambari ya Kudhibiti",
@@ -105,6 +107,7 @@
     "form": {
       "company": "Muuzaji",
       "customer": "Muteja",
+      "invoiceNumber": "Ankara N°",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
       "placeholders": {
@@ -115,6 +118,7 @@
         "customer": "Tafadhali chagua mteja",
         "startDate": "Tafadhali chagua tarehe ya kuanza",
         "endDate": "Tafadhali chagua tarehe ya mwisho",
+        "invoiceNumber": "Tafadhali chagua ankara",
         "dialog": {
           "invalidForm": "Fomu batili",
           "company": "Lazima uchague kampuni",

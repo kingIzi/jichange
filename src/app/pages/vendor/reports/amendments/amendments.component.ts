@@ -125,17 +125,91 @@ export class AmendmentsComponent implements OnInit {
       this.scope,
       this.tableHeaders,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
   private sortTableAsc(ind: number) {
-    throw Error('unimplemented method');
+    switch (ind) {
+      case AmendmentReportTable.DUE_DATE:
+        this.amendments.sort((a, b) =>
+          new Date(a.Due_Date) > new Date(b.Due_Date) ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.INVOICE_NUMBER:
+        this.amendments.sort((a, b) => (a.Invoice_No > b.Invoice_No ? 1 : -1));
+        break;
+      case AmendmentReportTable.CONTROL_NUMBER:
+        this.amendments.sort((a, b) =>
+          (a.Control_No || '') > (b.Control_No || '') ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.CUSTOMER_NAME:
+        this.amendments.sort((a, b) => (a.Chus_Name > b.Chus_Name ? 1 : -1));
+        break;
+      case AmendmentReportTable.PAYMENT_TYPE:
+        this.amendments.sort((a, b) =>
+          (a.Payment_Type || '') > (b.Payment_Type || '') ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.REASON:
+        this.amendments.sort((a, b) =>
+          (a.Reason || '') > (b.Reason || '') ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.EXPIRY_DATE:
+        this.amendments.sort((a, b) =>
+          new Date(a.Invoice_Expired_Date) > new Date(b.Invoice_Expired_Date)
+            ? 1
+            : -1
+        );
+        break;
+      default:
+        break;
+    }
   }
   private sortTableDesc(ind: number) {
-    throw Error('unimplemented method');
+    switch (ind) {
+      case AmendmentReportTable.DUE_DATE:
+        this.amendments.sort((a, b) =>
+          new Date(a.Due_Date) < new Date(b.Due_Date) ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.INVOICE_NUMBER:
+        this.amendments.sort((a, b) => (a.Invoice_No < b.Invoice_No ? 1 : -1));
+        break;
+      case AmendmentReportTable.CONTROL_NUMBER:
+        this.amendments.sort((a, b) =>
+          (a.Control_No || '') < (b.Control_No || '') ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.CUSTOMER_NAME:
+        this.amendments.sort((a, b) => (a.Chus_Name < b.Chus_Name ? 1 : -1));
+        break;
+      case AmendmentReportTable.PAYMENT_TYPE:
+        this.amendments.sort((a, b) =>
+          (a.Payment_Type || '') < (b.Payment_Type || '') ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.REASON:
+        this.amendments.sort((a, b) =>
+          (a.Reason || '') < (b.Reason || '') ? 1 : -1
+        );
+        break;
+      case AmendmentReportTable.EXPIRY_DATE:
+        this.amendments.sort((a, b) =>
+          new Date(a.Invoice_Expired_Date) < new Date(b.Invoice_Expired_Date)
+            ? 1
+            : -1
+        );
+        break;
+      default:
+        break;
+    }
   }
   private buildPage() {
     this.startLoading = true;

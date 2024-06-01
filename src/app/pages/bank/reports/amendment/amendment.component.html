@@ -11,11 +11,21 @@
     >
       {{ t("amendment") }}
     </h2>
+    <div class="flex flex-row items-center space-x-2">
+      <a
+        (click)="downloadSheet()"
+        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+      >
+        <span>
+          <i class="bi bi-download text-success text-lg"></i>
+        </span>
+      </a>
+    </div>
   </div>
   <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
     <form
-      [formGroup]="filterFormGroup"
-      class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
+      [formGroup]="filterForm"
+      class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3"
     >
       <div class="flex flex-col space-y-1">
         <p
@@ -25,7 +35,7 @@
           {{ t("company") }}
         </p>
         <select
-          [formControl]="Comp"
+          [formControl]="compid"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -37,14 +47,18 @@
           </option>
           <ng-container *ngIf="companies.length > 0">
             <option
-              *ngFor="let company of companies; index as i"
+              *ngFor="
+                let company of companies;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
               [value]="company.CompSno"
             >
               {{ company.CompName }}
             </option>
           </ng-container>
         </select>
-        <span *ngIf="Comp && Comp.invalid && Comp.touched">
+        <span *ngIf="compid && compid.invalid && compid.touched">
           <p
             *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"
@@ -73,7 +87,11 @@
           </option>
           <ng-container *ngIf="customers.length > 0">
             <option
-              *ngFor="let customer of customers; index as i"
+              *ngFor="
+                let customer of customers;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
               [value]="customer.Cust_Sno"
             >
               {{ customer.Cust_Name }}
@@ -91,74 +109,47 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p
-          *transloco="let t; read: 'reports.amendmentDetails.form'"
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
           class="text-xs"
         >
-          {{ t("status") }}
+          {{ t("invoiceNumber") }}
         </p>
         <select
-          [formControl]="cusid"
+          [formControl]="invno"
           class="select select-sm select-bordered w-full"
         >
-          <option *transloco="let t; read: 'defaults'" selected [value]="'any'">
-            {{ t("any") }}
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="''"
+          >
+            {{ t("all") }}
           </option>
-          <ng-container *ngIf="statuses.length > 0">
+          <ng-container *ngIf="invoiceReports.length > 0">
             <option
-              *ngFor="let status of statuses; index as i"
-              [value]="status"
+              *ngFor="
+                let invoiceReport of invoiceReports;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="invoiceReport.Invoice_No"
             >
-              {{ status }}
+              {{ invoiceReport.Invoice_No }}
             </option>
           </ng-container>
         </select>
-        <span *ngIf="status && status.invalid && status.touched">
+        <span *ngIf="invno && invno.invalid && invno.touched">
           <p
-            *transloco="let t; read: 'reports.amendmentDetails.form.errors'"
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"
           >
-            {{ t("status") }}
+            {{ t("invoiceNumber") }}
           </p>
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.amendmentDetails.form'"
-          class="text-xs"
-        >
-          {{ t("paymentType") }}
-        </p>
-        <select
-          [formControl]="cusid"
-          class="select select-sm select-bordered w-full"
-        >
-          <option *transloco="let t; read: 'defaults'" selected [value]="'any'">
-            {{ t("any") }}
-          </option>
-          <ng-container *ngIf="paymentTypes.length > 0">
-            <option
-              *ngFor="let paymentType of paymentTypes; index as i"
-              [value]="paymentType"
-            >
-              {{ paymentType }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="paymentType && paymentType.invalid && paymentType.touched">
-          <p
-            *transloco="let t; read: 'reports.amendmentDetails.form.errors'"
-            class="text-danger-700 text-xs"
-          >
-            {{ t("paymentType") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1 col-span-1 lg:col-span-2">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("startDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("from") }}
         </p>
         <input
           type="date"
@@ -174,17 +165,15 @@
           </p>
         </span>
       </div>
-      <div class="flex flex-col space-y-1 col-span-1 lg:col-span-2">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("endDate") }}
+      <div class="flex flex-col space-y-1">
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("to") }}
         </p>
         <input
           type="date"
           [formControl]="enddate"
           class="input input-sm input-bordered"
+          [min]="stdate.value"
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
@@ -261,7 +250,7 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <table class="min-w-full text-left text-sm font-light">
-              <thead formArrayName="tableHeaders" class="border-b font-medium">
+              <!-- <thead formArrayName="tableHeaders" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
                   class="bg-lightPurple"
@@ -297,9 +286,69 @@
                     {{ t("action") }}
                   </th>
                 </tr>
+              </thead> -->
+              <thead formArrayName="tableHeaders" class="border-b font-medium">
+                <tr
+                  *transloco="let t; read: 'tableData.vendor'"
+                  class="bg-lightPurple rounded-tl-lg w-full"
+                >
+                  <ng-container
+                    *ngFor="let header of tableHeaders.controls; index as ind"
+                  >
+                    <th
+                      *ngIf="header.get('included')?.value"
+                      scope="col"
+                      class="px-6 py-2 font-inter text-sm"
+                      [id]="'generated-invoice-id-' + ind"
+                      formGroupName="{{ ind }}"
+                    >
+                      <div
+                        class="flex items-center"
+                        [class]="isCashAmountColumn(ind) ? 'justify-end' : ''"
+                      >
+                        <p>
+                          {{ header?.get("label")?.value }}
+                        </p>
+                        <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(
+                              ind,
+                              tableHeaders
+                            )
+                          "
+                          class="flex flex-row items-center m-1"
+                        >
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </ng-container>
+                </tr>
               </thead>
               <tbody>
-                <tr
+                <!-- <tr
                   *ngFor="
                     let amendment of amendments
                       | slice
@@ -312,7 +361,184 @@
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-                ></tr>
+                ></tr> -->
+                <tr
+                  *ngFor="
+                    let amendment of amendments
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    index as i;
+                    trackBy: PerformanceUtils.trackByIndex
+                  "
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
+                >
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ PerformanceUtils.getIndexOfItem(amendments, amendment) }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.DUE_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.DUE_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        amendment.Due_Date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ amendment.Invoice_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ amendment.Control_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ amendment.Chus_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          amendment.Payment_Type,
+                          'Flexible',
+                          'bg-teal-100',
+                          'text-black',
+                          'bg-indigo-100',
+                          'text-black'
+                        )
+                      "
+                    >
+                      {{
+                        amendment.Payment_Type
+                          ? amendment.Payment_Type.trim()
+                          : "-"
+                      }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.REASON)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.REASON)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ amendment.Reason }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.EXPIRY_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(AmendmentReportTable.EXPIRY_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        amendment.Invoice_Expired_Date
+                      ).toDateString()
+                    }}
+                  </td>
+                </tr>
               </tbody>
             </table>
             <ng-container *ngIf="!tableLoading">

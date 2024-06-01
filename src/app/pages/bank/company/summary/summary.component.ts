@@ -114,7 +114,8 @@ export class SummaryComponent implements OnInit {
       this.headers,
       this.fb,
       this,
-      7
+      7,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);

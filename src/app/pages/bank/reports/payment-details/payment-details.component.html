@@ -12,11 +12,21 @@
     >
       {{ t("payment") }}
     </h2>
+    <div class="flex flex-row items-center space-x-2">
+      <a
+        (click)="downloadSheet()"
+        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+      >
+        <span>
+          <i class="bi bi-download text-success text-lg"></i>
+        </span>
+      </a>
+    </div>
   </div>
   <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
     <form
       [formGroup]="filterForm"
-      class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
+      class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3"
     >
       <div class="flex flex-col space-y-1">
         <p
@@ -26,7 +36,7 @@
           {{ t("company") }}
         </p>
         <select
-          [formControl]="Comp"
+          [formControl]="compid"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -38,14 +48,18 @@
           </option>
           <ng-container *ngIf="companies.length > 0">
             <option
-              *ngFor="let company of companies; index as i"
+              *ngFor="
+                let company of companies;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
               [value]="company.CompSno"
             >
               {{ company.CompName }}
             </option>
           </ng-container>
         </select>
-        <span *ngIf="Comp && Comp.invalid && Comp.touched">
+        <span *ngIf="compid && compid.invalid && compid.touched">
           <p
             *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"
@@ -74,7 +88,11 @@
           </option>
           <ng-container *ngIf="customers.length > 0">
             <option
-              *ngFor="let customer of customers; index as i"
+              *ngFor="
+                let customer of customers;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
               [value]="customer.Cust_Sno"
             >
               {{ customer.Cust_Name }}
@@ -87,6 +105,46 @@
             class="text-danger-700 text-xs"
           >
             {{ t("customer") }}
+          </p>
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("invoiceNumber") }}
+        </p>
+        <select
+          [formControl]="invno"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="''"
+          >
+            {{ t("all") }}
+          </option>
+          <ng-container *ngIf="invoiceReports.length > 0">
+            <option
+              *ngFor="
+                let invoiceReport of invoiceReports;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="invoiceReport.Invoice_No"
+            >
+              {{ invoiceReport.Invoice_No }}
+            </option>
+          </ng-container>
+        </select>
+        <span *ngIf="invno && invno.invalid && invno.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("invoiceNumber") }}
           </p>
         </span>
       </div>
@@ -122,6 +180,7 @@
           type="date"
           [formControl]="enddate"
           class="input input-sm input-bordered"
+          [min]="stdate.value"
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
@@ -151,17 +210,19 @@
               role="button"
               class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
             >
-              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
               <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
                 {{ t("columns") }}
               </p>
-              <span class="material-symbols-outlined lg:block hidden">
-                arrow_drop_down
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
               </span>
             </button>
             <ul
               tabindex="0"
-              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 grid grid-cols-2"
             >
               <li *ngFor="let control of tableHeaders.controls">
                 <label class="label cursor-pointer">
@@ -170,7 +231,9 @@
                   }}</span>
                   <input
                     type="checkbox"
-                    [formControl]="getFormControl(control, 'included')"
+                    [formControl]="
+                      PerformanceUtils.getFormControl(control, 'included')
+                    "
                     class="checkbox checkbox-xs"
                   />
                 </label>
@@ -209,37 +272,53 @@
                     <th
                       *ngIf="header.get('included')?.value"
                       scope="col"
-                      class="px-6 font-inter text-sm"
+                      class="px-6 py-2 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
-                      <div class="flex items-center">
+                      <div
+                        class="flex items-center"
+                        [class]="isCashAmountColumn(ind) ? 'justify-end' : ''"
+                      >
                         <p>
                           {{ header?.get("label")?.value }}
                         </p>
                         <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
                           (click)="
                             PerformanceUtils.sortColumnClicked(
                               ind,
                               tableHeaders
                             )
                           "
+                          class="flex flex-row items-center m-1"
                         >
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
                           </span>
                         </button>
                       </div>
                     </th>
                   </ng-container>
-                  <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 font-inter text-sm text-right"
-                  >
-                    {{ t("action") }}
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -256,13 +335,222 @@
                   "
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-                ></tr>
+                >
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ PerformanceUtils.getIndexOfItem(payments, payment) }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.PAYMENT_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.PAYMENT_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        payment.Payment_Date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                  >
+                    {{ payment.Invoice_Sno }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.TRANSACTION_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.TRANSACTION_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Payment_Trans_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Control_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.CHANNEL)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.CHANNEL)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Trans_Channel }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.RECEIPT_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.RECEIPT_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Receipt_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.AMOUNT)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.AMOUNT)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal text-right"
+                  >
+                    {{ payment.PaidAmount }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.BALANCE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.BALANCE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal text-right"
+                  >
+                    {{ payment.Balance }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.FROM)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.FROM)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Payer_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.TO)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.TO)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Customer_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.FOR)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.FOR)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ payment.Payment_Desc }}
+                  </td>
+                </tr>
               </tbody>
             </table>
             <ng-container *ngIf="!tableLoading">
               <div *transloco="let t; read: 'errors'">
                 <p
-                  *ngIf="customers.length <= 0"
+                  *ngIf="payments.length <= 0"
                   class="text-center text-sm tracking-wide pt-3 pb-1"
                 >
                   {{ t("noDataFound") }}

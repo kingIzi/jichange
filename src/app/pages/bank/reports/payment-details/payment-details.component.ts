@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Inject,
   NO_ERRORS_SCHEMA,
@@ -21,7 +23,7 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, from, zip } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { Company } from 'src/app/core/models/bank/company/company';
@@ -36,6 +38,16 @@ import {
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { PaymentDetailsTable } from 'src/app/core/enums/bank/reports/payment-details-table';
+import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
+import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
+import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 
 @Component({
   selector: 'app-payment-details',
@@ -49,6 +61,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     MatPaginatorModule,
     LoaderInfiniteSpinnerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
   schemas: [NO_ERRORS_SCHEMA],
@@ -62,25 +75,15 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 export class PaymentDetailsComponent implements OnInit {
   public companies: Company[] = [];
   public customers: Customer[] = [];
-  public payments: any[] = [];
+  public invoiceReports: InvoiceReport[] = [];
+  public payments: PaymentDetail[] = [];
+  public paymentsData: PaymentDetail[] = [];
   public filterForm!: FormGroup;
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public headersMap = {
-    DATE: 0,
-    INVOICE_NUMBER: 1,
-    TRANSACTION_NUMBER: 2,
-    CONTROL_NUMBER: 3,
-    CHANNEL: 4,
-    RECEIPT_NUMBER: 5,
-    AMOUNT: 6,
-    BALANCE: 7,
-    FROM: 8,
-    TO: 9,
-    FOR: 10,
-  };
+  public PaymentDetailsTable: typeof PaymentDetailsTable = PaymentDetailsTable;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -89,10 +92,15 @@ export class PaymentDetailsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
+    private reportsService: ReportsService,
+    private invoiceReportService: InvoiceReportServiceService,
+    private paymentService: PaymentsService,
+    private fileHandler: FileHandlerService,
+    private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
-    if (this.Comp.invalid) {
+    if (this.compid.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidForm`),
@@ -122,25 +130,96 @@ export class PaymentDetailsComponent implements OnInit {
     }
   }
   private createFilterForm() {
-    const currentDate = new Date();
     this.filterForm = this.fb.group({
-      Comp: this.fb.control('', [Validators.required]),
+      compid: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
-      stdate: this.fb.control(
-        AppUtilities.dateToFormat(
-          new Date(
-            currentDate.getFullYear() - 4,
-            currentDate.getMonth(),
-            currentDate.getDate()
-          ),
-          'yyyy-MM-dd'
-        ),
-        [Validators.required]
-      ),
-      enddate: this.fb.control(
-        AppUtilities.dateToFormat(currentDate, 'yyyy-MM-dd'),
-        [Validators.required]
-      ),
+      invno: this.fb.control('', []),
+      stdate: this.fb.control('', [Validators.required]),
+      enddate: this.fb.control('', [Validators.required]),
+    });
+    this.companyChangedEventHandler();
+    this.filterFormChanged();
+  }
+  private companyChangedEventHandler() {
+    this.startLoading = true;
+    this.compid.valueChanges.subscribe((value) => {
+      this.startLoading = true;
+      let companyList = this.reportsService.getCustomerDetailsList({
+        Sno: value,
+      });
+      companyList
+        .then((result) => {
+          if (
+            typeof result.response !== 'number' &&
+            typeof result.response !== 'string'
+          ) {
+            this.customers = result.response;
+          } else {
+            if (this.compid.value !== 'all') {
+              AppUtilities.openDisplayMessageBox(
+                this.displayMessageBox,
+                this.tr.translate(`defaults.failed`),
+                this.tr.translate(
+                  `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+                )
+              );
+            }
+            this.customers = [];
+            this.cusid.setValue('all');
+          }
+          this.startLoading = false;
+          this.cdr.detectChanges();
+        })
+        .catch((err) => {
+          AppUtilities.requestFailedCatchError(
+            err,
+            this.displayMessageBox,
+            this.tr
+          );
+          this.customers = [];
+          this.cusid.setValue('all');
+          this.startLoading = false;
+          this.cdr.detectChanges();
+          throw err;
+        });
+    });
+  }
+  private filterFormChanged() {
+    this.startLoading = true;
+    this.filterForm.valueChanges.subscribe((value) => {
+      if (value.compid && value.cusid) {
+        let form = {
+          Comp: value.compid,
+          cusid: value.cusid,
+          stdate: '',
+          enddate: '',
+        } as InvoiceReportForm;
+        this.invoiceReportService
+          .getInvoiceReport(form)
+          .then((result) => {
+            if (
+              result.response &&
+              typeof result.response !== 'number' &&
+              result.response !== 'string'
+            ) {
+              this.invoiceReports = result.response as InvoiceReport[];
+            } else {
+              this.invoiceReports = [];
+            }
+            this.tableLoading = false;
+            this.cdr.detectChanges();
+          })
+          .catch((err) => {
+            AppUtilities.requestFailedCatchError(
+              err,
+              this.displayMessageBox,
+              this.tr
+            );
+            this.startLoading = false;
+            this.cdr.detectChanges();
+            throw err;
+          });
+      }
     });
   }
   private async createHeaderGroup() {
@@ -148,75 +227,296 @@ export class PaymentDetailsComponent implements OnInit {
       tableHeaders: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-
-    // let labels = (await firstValueFrom(
-    //   this.tr.selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
-    // )) as string[];
-    // labels.forEach((label, index) => {
-    //   let header = this.fb.group({
-    //     label: this.fb.control(label, []),
-    //     sortAsc: this.fb.control(false, []),
-    //     included: this.fb.control(index <= 5, []),
-    //     values: this.fb.array([], []),
-    //   });
-    //   this.sortTableHeaderEventHandler(header, index);
-    //   this.tableHeaders.push(header);
-    // });
     TableUtilities.createHeaders(
       this.tr,
       `paymentDetails.paymentsTable`,
       this.scope,
       this.tableHeaders,
       this.fb,
-      this
+      this,
+      7,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
   private sortTableAsc(ind: number) {
-    throw Error('unimplemented method');
+    switch (ind) {
+      case PaymentDetailsTable.PAYMENT_DATE:
+        this.payments.sort((a, b) =>
+          new Date(a.Payment_Date) > new Date(b.Payment_Date) ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.INVOICE_NUMBER:
+        this.payments.sort((a, b) => (a.Invoice_Sno > b.Invoice_Sno ? 1 : -1));
+        break;
+      case PaymentDetailsTable.TRANSACTION_NUMBER:
+        this.payments.sort((a, b) =>
+          a.Payment_Trans_No > b.Payment_Trans_No ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.CONTROL_NUMBER:
+        this.payments.sort((a, b) => (a.Control_No > b.Control_No ? 1 : -1));
+        break;
+      case PaymentDetailsTable.CHANNEL:
+        this.payments.sort((a, b) =>
+          a.Trans_Channel > b.Trans_Channel ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.CHANNEL:
+        this.payments.sort((a, b) =>
+          a.Trans_Channel > b.Trans_Channel ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.RECEIPT_NUMBER:
+        this.payments.sort((a, b) => (a.Receipt_No > b.Receipt_No ? 1 : -1));
+        break;
+      case PaymentDetailsTable.AMOUNT:
+        this.payments.sort((a, b) => (a.PaidAmount > b.PaidAmount ? 1 : -1));
+        break;
+      case PaymentDetailsTable.BALANCE:
+        this.payments.sort((a, b) => (a.Balance > b.Balance ? 1 : -1));
+        break;
+      case PaymentDetailsTable.FROM:
+        this.payments.sort((a, b) => (a.Payer_Name > b.Payer_Name ? 1 : -1));
+        break;
+      case PaymentDetailsTable.TO:
+        this.payments.sort((a, b) =>
+          a.Customer_Name > b.Customer_Name ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.FOR:
+        this.payments.sort((a, b) =>
+          (a.Payment_Desc || '') > (b.Payment_Desc || '') ? 1 : -1
+        );
+        break;
+      default:
+        break;
+    }
   }
   private sortTableDesc(ind: number) {
-    throw Error('unimplemented method');
+    switch (ind) {
+      case PaymentDetailsTable.PAYMENT_DATE:
+        this.payments.sort((a, b) =>
+          new Date(a.Payment_Date) < new Date(b.Payment_Date) ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.INVOICE_NUMBER:
+        this.payments.sort((a, b) => (a.Invoice_Sno < b.Invoice_Sno ? 1 : -1));
+        break;
+      case PaymentDetailsTable.TRANSACTION_NUMBER:
+        this.payments.sort((a, b) =>
+          a.Payment_Trans_No < b.Payment_Trans_No ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.CONTROL_NUMBER:
+        this.payments.sort((a, b) => (a.Control_No < b.Control_No ? 1 : -1));
+        break;
+      case PaymentDetailsTable.CHANNEL:
+        this.payments.sort((a, b) =>
+          a.Trans_Channel < b.Trans_Channel ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.CHANNEL:
+        this.payments.sort((a, b) =>
+          a.Trans_Channel < b.Trans_Channel ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.RECEIPT_NUMBER:
+        this.payments.sort((a, b) => (a.Receipt_No < b.Receipt_No ? 1 : -1));
+        break;
+      case PaymentDetailsTable.AMOUNT:
+        this.payments.sort((a, b) => (a.PaidAmount < b.PaidAmount ? 1 : -1));
+        break;
+      case PaymentDetailsTable.BALANCE:
+        this.payments.sort((a, b) => (a.Balance < b.Balance ? 1 : -1));
+        break;
+      case PaymentDetailsTable.FROM:
+        this.payments.sort((a, b) => (a.Payer_Name < b.Payer_Name ? 1 : -1));
+        break;
+      case PaymentDetailsTable.TO:
+        this.payments.sort((a, b) =>
+          a.Customer_Name < b.Customer_Name ? 1 : -1
+        );
+        break;
+      case PaymentDetailsTable.FOR:
+        this.payments.sort((a, b) =>
+          (a.Payment_Desc || '') < (b.Payment_Desc || '') ? 1 : -1
+        );
+        break;
+      default:
+        break;
+    }
   }
-  private sortTableHeaderEventHandler(header: FormGroup, index: number) {
-    header.get('sortAsc')?.valueChanges.subscribe((value: any) => {
-      if (value === true) {
-        this.sortTableAsc(index);
-      } else {
-        this.sortTableDesc(index);
-      }
-    });
+  private paymentKeys(indexes: number[]) {
+    let keys: string[] = [];
+    if (indexes.includes(PaymentDetailsTable.PAYMENT_DATE)) {
+      keys.push('Payment_Date');
+    }
+    if (indexes.includes(PaymentDetailsTable.INVOICE_NUMBER)) {
+      keys.push('Invoice_Sno');
+    }
+    if (indexes.includes(PaymentDetailsTable.TRANSACTION_NUMBER)) {
+      keys.push('Payment_Trans_No');
+    }
+    if (indexes.includes(PaymentDetailsTable.CONTROL_NUMBER)) {
+      keys.push('Control_No');
+    }
+    if (indexes.includes(PaymentDetailsTable.CHANNEL)) {
+      keys.push('Trans_Channel');
+    }
+    if (indexes.includes(PaymentDetailsTable.RECEIPT_NUMBER)) {
+      keys.push('Receipt_No');
+    }
+    if (indexes.includes(PaymentDetailsTable.AMOUNT)) {
+      keys.push('PaidAmount');
+    }
+    if (indexes.includes(PaymentDetailsTable.BALANCE)) {
+      keys.push('Balance');
+    }
+    if (indexes.includes(PaymentDetailsTable.FROM)) {
+      keys.push('Payer_Name');
+    }
+    if (indexes.includes(PaymentDetailsTable.TO)) {
+      keys.push('Customer_Name');
+    }
+    if (indexes.includes(PaymentDetailsTable.FOR)) {
+      keys.push('Payment_Desc');
+    }
+    return keys;
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {}
+  private getActiveTableKeys() {
+    let indexes = this.tableHeaders.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.paymentKeys(indexes);
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.trim().toLowerCase();
+      let keys = this.getActiveTableKeys();
+      this.payments = this.payments.filter((payment: any) => {
+        return keys.some((key) => payment[key]?.toLowerCase().includes(text));
+      });
+    } else {
+      this.payments = this.paymentsData;
+    }
+  }
+  private buildPage() {
+    this.startLoading = true;
+    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let res = AppUtilities.pipedObservables(zip(companiesObs));
+    res
+      .then((results) => {
+        let [companies] = results;
+        if (typeof companies.response !== 'number') {
+          this.companies = companies.response as Company[];
+          this.startLoading = false;
+        } else {
+          this.companies = [];
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private requestPaymentReport(value: PaymentDetailReportForm) {
+    this.tableLoading = true;
+    this.paymentService
+      .getPaymentReport(value)
+      .then((results) => {
+        console.log(results);
+        if (
+          typeof results.response !== 'number' &&
+          typeof results.response !== 'string'
+        ) {
+          this.paymentsData = results.response;
+          this.payments = this.paymentsData;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.paymentsData = [];
+          this.payments = this.paymentsData;
+        }
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
+    this.buildPage();
   }
   submitFilterForm() {
     if (this.filterForm.valid) {
+      let form = { ...this.filterForm.value };
+      if (form.stdate) {
+        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+      }
+      if (form.enddate) {
+        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+      }
+      this.requestPaymentReport(form);
     } else {
-      this.formErrors();
+      this.filterForm.markAllAsTouched();
     }
-  }
-  getFormControl(control: AbstractControl, name: string) {
-    return control.get(name) as FormControl;
-  }
-  sortColumnClicked(ind: number) {
-    let sortAsc = this.tableHeaders.at(ind).get('sortAsc');
-    sortAsc?.setValue(!sortAsc?.value);
   }
   isCashAmountColumn(index: number) {
     return (
-      index === this.headersMap.AMOUNT || index === this.headersMap.BALANCE
+      index == PaymentDetailsTable.AMOUNT ||
+      index == PaymentDetailsTable.BALANCE
     );
   }
-  get Comp() {
-    return this.filterForm.get('Comp') as FormControl;
+  downloadSheet() {
+    if (this.paymentsData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.paymentsData,
+        this.getActiveTableKeys(),
+        'payment_details_report',
+        ['Payment_Date']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  get compid() {
+    return this.filterForm.get('compid') as FormControl;
   }
   get cusid() {
     return this.filterForm.get('cusid') as FormControl;
+  }
+  get invno() {
+    return this.filterForm.get('invno') as FormControl;
   }
   get stdate() {
     return this.filterForm.get('stdate') as FormControl;
