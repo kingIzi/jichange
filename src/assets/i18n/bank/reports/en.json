@@ -118,6 +118,7 @@
       "invoiceNumber": "Invoice N°",
       "startDate": "Start date",
       "endDate": "End date",
+      "branch": "Branch",
       "placeholders": {
         "all": "all"
       },
@@ -127,6 +128,7 @@
         "startDate": "Please select a start date",
         "endDate": "Please select an end date",
         "invoiceNumber": "Please select invoice",
+        "branch": "Please select branch",
         "dialog": {
           "invalidForm": "Invalid form",
           "company": "You must select a company",

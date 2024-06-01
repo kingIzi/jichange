@@ -110,6 +110,7 @@
       "invoiceNumber": "Ankara N°",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
+      "branch": "Tawi",
       "placeholders": {
         "all": "yote"
       },
@@ -119,6 +120,7 @@
         "startDate": "Tafadhali chagua tarehe ya kuanza",
         "endDate": "Tafadhali chagua tarehe ya mwisho",
         "invoiceNumber": "Tafadhali chagua ankara",
+        "branch": "Tafadhali chagua tawi",
         "dialog": {
           "invalidForm": "Fomu batili",
           "company": "Lazima uchague kampuni",

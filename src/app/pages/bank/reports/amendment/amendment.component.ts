@@ -32,10 +32,13 @@ import { AmendmentReportTable } from 'src/app/core/enums/vendor/reports/amendmen
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { LoginResponse } from 'src/app/core/models/login-response';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { AmendmentsService } from 'src/app/core/services/vendor/reports/amendments.service';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
@@ -72,11 +75,23 @@ export class AmendmentComponent implements OnInit {
   public tableFormGroup!: FormGroup;
   public amendments: GeneratedInvoice[] = [];
   public amendmentsData: GeneratedInvoice[] = [];
-  public companies: Company[] = [];
-  public customers: Customer[] = [];
-  public invoiceReports: InvoiceReport[] = [];
+  //public companies: Company[] = [];
+  //public customers: Customer[] = [];
+  //public invoiceReports: InvoiceReport[] = [];
+  public filterFormData: {
+    companies: Company[];
+    customers: Customer[];
+    invoiceReports: InvoiceReport[];
+    branches: Branch[];
+  } = {
+    companies: [],
+    customers: [],
+    invoiceReports: [],
+    branches: [],
+  };
   public statuses: string[] = ['Paid', 'Pending', 'Cancelled'];
   public paymentTypes: string[] = ['Fixed', 'Flexible'];
+  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public AmendmentReportTable: typeof AmendmentReportTable =
     AmendmentReportTable;
@@ -89,14 +104,22 @@ export class AmendmentComponent implements OnInit {
     private reportsService: ReportsService,
     private invoiceReportService: InvoiceReportServiceService,
     private amendmentService: AmendmentsService,
+    private branchService: BranchService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createFilterForm() {
     this.filterForm = this.fb.group({
       compid: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
+      branch: this.fb.control(this.userProfile.braid, [Validators.required]),
       invno: this.fb.control('', []),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
@@ -117,7 +140,7 @@ export class AmendmentComponent implements OnInit {
             typeof result.response !== 'number' &&
             typeof result.response !== 'string'
           ) {
-            this.customers = result.response;
+            this.filterFormData.customers = result.response;
           } else {
             if (this.compid.value !== 'all') {
               AppUtilities.openDisplayMessageBox(
@@ -128,7 +151,7 @@ export class AmendmentComponent implements OnInit {
                 )
               );
             }
-            this.customers = [];
+            this.filterFormData.customers = [];
             this.cusid.setValue('all');
           }
           this.startLoading = false;
@@ -140,7 +163,7 @@ export class AmendmentComponent implements OnInit {
             this.displayMessageBox,
             this.tr
           );
-          this.customers = [];
+          this.filterFormData.customers = [];
           this.cusid.setValue('all');
           this.startLoading = false;
           this.cdr.detectChanges();
@@ -166,14 +189,16 @@ export class AmendmentComponent implements OnInit {
               typeof result.response !== 'number' &&
               result.response !== 'string'
             ) {
-              this.invoiceReports = result.response as InvoiceReport[];
+              this.filterFormData.invoiceReports =
+                result.response as InvoiceReport[];
             } else {
-              this.invoiceReports = [];
+              this.filterFormData.invoiceReports = [];
             }
             this.tableLoading = false;
             this.cdr.detectChanges();
           })
           .catch((err) => {
+            this.filterFormData.invoiceReports = [];
             AppUtilities.requestFailedCatchError(
               err,
               this.displayMessageBox,
@@ -349,20 +374,30 @@ export class AmendmentComponent implements OnInit {
   private buildPage() {
     this.startLoading = true;
     let companiesObs = from(this.reportsService.getCompaniesList({}));
-    let res = AppUtilities.pipedObservables(zip(companiesObs));
+    let branchObs = from(this.branchService.postBranchList({}));
+    let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
     res
       .then((results) => {
-        let [companies] = results;
+        let [companies, branchList] = results;
         if (typeof companies.response !== 'number') {
-          this.companies = companies.response as Company[];
+          this.filterFormData.companies = companies.response as Company[];
           this.startLoading = false;
-        } else {
-          this.companies = [];
         }
+        if (
+          typeof branchList.response !== 'number' &&
+          typeof branchList.response !== 'string'
+        ) {
+          this.filterFormData.branches = branchList.response as Branch[];
+          this.startLoading = false;
+        }
+        // else {
+        //   this.filterFormData.companies = [];
+        // }
         this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        this.filterFormData.companies = [];
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
@@ -419,6 +454,7 @@ export class AmendmentComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
@@ -467,6 +503,9 @@ export class AmendmentComponent implements OnInit {
   }
   get invno() {
     return this.filterForm.get('invno') as FormControl;
+  }
+  get branch() {
+    return this.filterForm.get('branch') as FormControl;
   }
   get stdate() {
     return this.filterForm.get('stdate') as FormControl;

@@ -50,6 +50,9 @@ import { from, zip } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-transaction-details',
@@ -85,12 +88,19 @@ export class TransactionDetailsComponent implements OnInit {
   public includedHeaders: any[] = [];
   public transactions: TransactionDetail[] = [];
   public transactionsData: TransactionDetail[] = [];
-  public companies: Company[] = [];
-  public customers: Customer[] = [];
+  public userProfile!: LoginResponse;
+  public filterFormData: {
+    companies: Company[];
+    customers: Customer[];
+    branches: Branch[];
+  } = {
+    companies: [],
+    customers: [],
+    branches: [],
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public TransactionDetailsTableHeadersMap: typeof TransactionDetailsTableHeadersMap =
     TransactionDetailsTableHeadersMap;
-
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -99,15 +109,23 @@ export class TransactionDetailsComponent implements OnInit {
     private dialog: MatDialog,
     private tr: TranslocoService,
     private router: Router,
+    public branchService: BranchService,
     private reportsService: ReportsService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createRequestFormGroup() {
     this.filterTableFormGroup = this.fb.group({
       compid: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
+      branch: this.fb.control(this.userProfile.braid, [Validators.required]),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
@@ -126,7 +144,8 @@ export class TransactionDetailsComponent implements OnInit {
             typeof result.response !== 'number' &&
             typeof result.response !== 'string'
           ) {
-            this.customers = result.response;
+            this.filterFormData.customers = result.response;
+            //this.customers = result.response;
           } else {
             if (this.compid.value !== 'all') {
               AppUtilities.openDisplayMessageBox(
@@ -137,7 +156,8 @@ export class TransactionDetailsComponent implements OnInit {
                 )
               );
             }
-            this.customers = [];
+            //this.customers = [];
+            this.filterFormData.customers = [];
             this.cusid.setValue('all');
           }
           this.startLoading = false;
@@ -149,7 +169,8 @@ export class TransactionDetailsComponent implements OnInit {
             this.displayMessageBox,
             this.tr
           );
-          this.customers = [];
+          //this.customers = [];
+          this.filterFormData.customers = [];
           this.cusid.setValue('all');
           this.startLoading = false;
           this.cdr.detectChanges();
@@ -287,15 +308,22 @@ export class TransactionDetailsComponent implements OnInit {
   private buildPage() {
     this.startLoading = true;
     let companiesObs = from(this.reportsService.getCompaniesList({}));
-    let res = AppUtilities.pipedObservables(zip(companiesObs));
+    let branchObs = from(this.branchService.postBranchList({}));
+    let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
     res
       .then((results) => {
-        let [companiesList] = results;
-        if (typeof companiesList.response !== 'number') {
-          this.companies = companiesList.response as Company[];
-          this.startLoading = false;
-        } else {
-          this.companies = [];
+        let [companiesList, branchList] = results;
+        if (
+          typeof companiesList.response !== 'number' &&
+          typeof companiesList.response !== 'string'
+        ) {
+          this.filterFormData.companies = companiesList.response as Company[];
+        }
+        if (
+          typeof branchList.response !== 'number' &&
+          typeof branchList.response !== 'string'
+        ) {
+          this.filterFormData.branches = branchList.response;
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -306,6 +334,7 @@ export class TransactionDetailsComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
+        this.filterFormData.companies = [];
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -402,6 +431,7 @@ export class TransactionDetailsComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createHeadersFormGroup();
     this.createRequestFormGroup();
     this.buildPage();
@@ -501,6 +531,9 @@ export class TransactionDetailsComponent implements OnInit {
   }
   get stdate() {
     return this.filterTableFormGroup.get(`stdate`) as FormControl;
+  }
+  get branch() {
+    return this.filterTableFormGroup.get(`branch`) as FormControl;
   }
   get enddate() {
     return this.filterTableFormGroup.get(`enddate`) as FormControl;

@@ -23,7 +23,7 @@ import {
   MatPaginator,
 } from '@angular/material/paginator';
 import { Company } from 'src/app/core/models/bank/company/company';
-import { TimeoutError, firstValueFrom } from 'rxjs';
+import { TimeoutError, firstValueFrom, from, zip } from 'rxjs';
 import { Customer } from 'src/app/core/models/bank/customer';
 import {
   AbstractControl,
@@ -47,6 +47,9 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-details-table';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 
 @Component({
   selector: 'app-invoice-details',
@@ -75,22 +78,24 @@ import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-det
 export class InvoiceDetailsComponent implements OnInit {
   public invoiceReports: InvoiceReport[] = [];
   public invoiceReportsData: InvoiceReport[] = [];
-  public companies: Company[] = [];
-  public customers: Customer[] = [];
+  //public companies: Company[] = [];
+  //public customers: Customer[] = [];
+  public filterFormData: {
+    companies: Company[];
+    customers: Customer[];
+    branches: Branch[];
+  } = {
+    companies: [],
+    customers: [],
+    branches: [],
+  };
   public formGroup!: FormGroup;
   public headerFormGroup!: FormGroup;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
-  // public headersMap = {
-  //   INVOICE_NUMBER: 0,
-  //   INVOICE_DATE: 1,
-  //   CUSTOMER: 2,
-  //   TOTAL: 3,
-  //   WITH_VAT: 4,
-  //   WITHOUT_VAT: 5,
-  // };
+  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -100,20 +105,36 @@ export class InvoiceDetailsComponent implements OnInit {
     private reportsService: ReportsService,
     private invoiceReportService: InvoiceReportServiceService,
     private fb: FormBuilder,
+    private branchService: BranchService,
     private cdr: ChangeDetectorRef,
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private async preparePage() {
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
+  private async buildPage() {
     this.startLoading = true;
-    this.reportsService
-      .getCompaniesList({})
-      .then((results: any) => {
-        if (typeof results.response !== 'number') {
-          this.companies = results.response;
-          this.startLoading = false;
-        } else {
-          this.companies = [];
+    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let branchObs = from(this.branchService.postBranchList({}));
+    let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
+    res
+      .then((results) => {
+        let [companiesList, branchList] = results;
+        if (
+          typeof companiesList.response !== 'number' &&
+          typeof companiesList.response !== 'string'
+        ) {
+          this.filterFormData.companies = companiesList.response as Company[];
+        }
+        if (
+          typeof branchList.response !== 'number' &&
+          typeof branchList.response !== 'string'
+        ) {
+          this.filterFormData.branches = branchList.response;
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -124,6 +145,7 @@ export class InvoiceDetailsComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
+        this.filterFormData.companies = [];
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -133,6 +155,7 @@ export class InvoiceDetailsComponent implements OnInit {
     this.formGroup = this.fb.group({
       Comp: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
+      branch: this.fb.control(this.userProfile.braid, []),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
@@ -151,7 +174,7 @@ export class InvoiceDetailsComponent implements OnInit {
             typeof result.response !== 'number' &&
             typeof result.response !== 'string'
           ) {
-            this.customers = result.response;
+            this.filterFormData.customers = result.response;
           } else {
             if (this.Comp.value !== 'all') {
               AppUtilities.openDisplayMessageBox(
@@ -162,7 +185,7 @@ export class InvoiceDetailsComponent implements OnInit {
                 )
               );
             }
-            this.customers = [];
+            this.filterFormData.customers = [];
             this.cusid.setValue('all');
           }
           this.startLoading = false;
@@ -174,7 +197,7 @@ export class InvoiceDetailsComponent implements OnInit {
             this.displayMessageBox,
             this.tr
           );
-          this.customers = [];
+          this.filterFormData.customers = [];
           this.cusid.setValue('all');
           this.startLoading = false;
           this.cdr.detectChanges();
@@ -404,9 +427,10 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   ngOnInit(): void {
     initTE({ Datepicker, Input });
+    this.parseUserProfile();
     this.createRequestFormGroup();
     this.createHeaderGroup();
-    this.preparePage();
+    this.buildPage();
   }
   submitForm() {
     if (this.formGroup.valid) {
@@ -468,6 +492,9 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   get cusid() {
     return this.formGroup.get('cusid') as FormControl;
+  }
+  get branch() {
+    return this.formGroup.get('branch') as FormControl;
   }
   get stdate() {
     return this.formGroup.get('stdate') as FormControl;
