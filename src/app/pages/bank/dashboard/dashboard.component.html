@@ -38,6 +38,7 @@
           {{ t(statistic.Name.toLocaleLowerCase()) }}
         </h4>
         <a
+          [routerLink]="dashboardStatisticRouterLink(statistic.Name)"
           *transloco="let t; read: 'dashboard.dashboard.overview'"
           class="text-xs text-darkPurple font-inter hover:underline"
         >

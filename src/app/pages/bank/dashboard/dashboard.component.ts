@@ -435,6 +435,22 @@ export class DashboardComponent implements OnInit {
       days.at(date.getDay())?.abbreviation + ', ' + this.getDate(months, date)
     );
   }
+  dashboardStatisticRouterLink(name: string) {
+    switch (name.toLocaleLowerCase()) {
+      case 'Transaction'.toLocaleLowerCase():
+        return '/main/reports/transactions';
+      case 'Vendor'.toLocaleLowerCase():
+        return '/main/reports/customers';
+      case 'Users'.toLocaleLowerCase():
+        return '/main/reports/userlog';
+      case 'Pendings'.toLocaleLowerCase():
+        return '/main/company/inbox';
+      case 'Customers'.toLocaleLowerCase():
+        return '/main/company/summary';
+      default:
+        return '/main';
+    }
+  }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;
   }
