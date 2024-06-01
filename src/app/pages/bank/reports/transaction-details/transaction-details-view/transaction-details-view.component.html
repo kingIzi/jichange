@@ -11,7 +11,7 @@
     >
       {{ t("transaction") }}
     </h2>
-    <button
+    <!-- <button
       #downloadBtn
       (click)="downloadPdf()"
       class="inline-flex group w-40 h-14 relative transform active:scale-x-75 transition-transform"
@@ -34,7 +34,17 @@
           {{ t("download") }}
         </p>
       </div>
-    </button>
+    </button> -->
+    <div class="flex flex-row items-center space-x-2">
+      <a
+        (click)="downloadPdf(payments)"
+        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+      >
+        <span>
+          <i class="bi bi-download text-success text-lg"></i>
+        </span>
+      </a>
+    </div>
   </div>
   <div class="bg-white w-full shadow flex flex-col p-4">
     <div id="accordionExample">
@@ -207,18 +217,10 @@
               >
                 {{ t("status") }}
               </p>
-              <ng-template #inProgress>
-                <button class="flex flex-row items-center space-x-0.5">
-                  <div class="w-2 h-2 rounded-full bg-blue-600"></div>
-                  <p class="text-blue-600 text-sm">In progress</p>
-                </button>
-              </ng-template>
-              <div *ngIf="payment.Balance == 0; else inProgress">
-                <button class="flex flex-row items-center space-x-0.5">
-                  <div class="w-2 h-2 rounded-full bg-warning"></div>
-                  <p class="text-warning text-sm">{{ payment.Status }}</p>
-                </button>
-              </div>
+              <button class="flex flex-row items-center space-x-0.5">
+                <div class="w-2 h-2 rounded-full bg-success"></div>
+                <p class="text-success text-sm">{{ payment.Status }}</p>
+              </button>
             </div>
             <div class="flex flex-col col-span-full space-y-2">
               <p
@@ -228,10 +230,10 @@
                 {{ t("attachment") }}
               </p>
               <div
-                class="flex flex-row items-center space-x-4 border border-neutral-500 max-w-fit p-2"
+                class="flex flex-row items-center justify-between space-x-4 border border-neutral-500 max-w-full lg:max-w-fit p-2"
               >
                 <div class="flex flex-col">
-                  <p class="text-sm">{{ payment.Receipt_No }}</p>
+                  <p class="text-sm font-semibold">{{ payment.Receipt_No }}</p>
                   <p class="text-sm">
                     {{
                       PerformanceUtils.convertDateStringToDate(
@@ -247,8 +249,9 @@
                 </div>
                 <div class="flex flex-row items-center space-x-1">
                   <button
+                    (click)="openReceipt(payment)"
                     *transloco="let t; read: 'actions'"
-                    class="btn btn-sm bg-transparent tooltip"
+                    class="btn btn-sm bg-transparent tooltip lg:block hidden"
                     [attr.data-tip]="t('view')"
                   >
                     <span>
@@ -256,6 +259,7 @@
                     </span>
                   </button>
                   <button
+                    (click)="downloadReceipt(payment)"
                     *transloco="let t; read: 'actions'"
                     class="btn btn-sm bg-transparent tooltip"
                     [attr.data-tip]="t('download')"

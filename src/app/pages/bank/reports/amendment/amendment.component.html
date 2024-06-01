@@ -203,12 +203,14 @@
               role="button"
               class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
             >
-              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
               <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
                 {{ t("columns") }}
               </p>
-              <span class="material-symbols-outlined lg:block hidden">
-                arrow_drop_down
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
               </span>
             </button>
             <ul
@@ -238,10 +240,8 @@
               [placeholder]="t('search')"
               [formControl]="tableSearch"
             />
-            <span
-              class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-            >
-              search
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
             </span>
           </div>
         </div>
@@ -250,43 +250,6 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <table class="min-w-full text-left text-sm font-light">
-              <!-- <thead formArrayName="tableHeaders" class="border-b font-medium">
-                <tr
-                  *transloco="let t; read: 'tableData.vendor'"
-                  class="bg-lightPurple"
-                >
-                  <ng-container
-                    *ngFor="let header of tableHeaders.controls; index as ind"
-                  >
-                    <th
-                      *ngIf="header.get('included')?.value"
-                      scope="col"
-                      class="px-6 font-inter text-sm"
-                      [id]="'generated-invoice-id-' + ind"
-                      formGroupName="{{ ind }}"
-                    >
-                      <div class="flex items-center">
-                        <p>
-                          {{ header?.get("label")?.value }}
-                        </p>
-                        <button (click)="sortColumnClicked(ind)">
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
-                          </span>
-                        </button>
-                      </div>
-                    </th>
-                  </ng-container>
-                  <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 font-inter text-sm text-right"
-                  >
-                    {{ t("action") }}
-                  </th>
-                </tr>
-              </thead> -->
               <thead formArrayName="tableHeaders" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
@@ -348,20 +311,6 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- <tr
-                  *ngFor="
-                    let amendment of amendments
-                      | slice
-                        : 1 + paginator.pageSize * paginator.pageIndex - 1
-                        : 1 +
-                            paginator.pageSize * paginator.pageIndex +
-                            paginator.pageSize -
-                            1;
-                    index as i
-                  "
-                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-                ></tr> -->
                 <tr
                   *ngFor="
                     let amendment of amendments

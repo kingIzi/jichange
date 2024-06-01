@@ -52,6 +52,7 @@ import { VendorDetailsReportTable } from 'src/app/core/enums/bank/reports/vendor
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -96,6 +97,7 @@ export class CustomerDetailReportComponent implements OnInit {
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private companyService: CompanyService,
+    private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     private tr: TranslocoService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -332,15 +334,18 @@ export class CustomerDetailReportComponent implements OnInit {
     }
     return keys;
   }
+  private getActiveTableKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.customerKeys(indexes);
+  }
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let keys = this.customerKeys(indexes);
+      let keys = this.getActiveTableKeys();
       let text = searchText.trim().toLowerCase();
       this.customers = this.customersData.filter((customer: any) => {
         return keys.some((key) => customer[key]?.toLowerCase().includes(text));
@@ -372,6 +377,22 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
+  }
+  downloadSheet() {
+    if (this.customersData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.customersData,
+        this.getActiveTableKeys(),
+        'vendors_report',
+        ['Posted_Date']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   get Comp() {
     return this.tableFilterFormGroup.get('Comp') as FormControl;

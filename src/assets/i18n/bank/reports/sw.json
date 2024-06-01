@@ -147,7 +147,7 @@
   "customerDetailReport": {
     "customerDetailReport": "Ripoti ya Maelezo ya Muuzaji",
     "form": {
-      "company": "Kampuni",
+      "company": "Muuzaji",
       "region": "Mkoa",
       "district": "Wilaya",
       "placeholders": {
@@ -190,9 +190,9 @@
       }
     },
     "userLogReportTable": [
-      "Jina la Mtumiaji",
+      "Jina Kamili",
       "Anwani ya IP",
-      "Kikundi cha Mtumiaji",
+      "Maelezo",
       "Wakati wa Kuingia",
       "Wakati wa Kutoka"
     ]

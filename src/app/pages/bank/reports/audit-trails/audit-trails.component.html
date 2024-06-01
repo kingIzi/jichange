@@ -77,11 +77,8 @@
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.auditTrails.form'"
-          class="text-xs capitalize"
-        >
-          {{ t("startDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
+          {{ t("from") }}
         </p>
         <input
           [formControl]="Startdate"
@@ -95,8 +92,8 @@
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'reports.auditTrails.form'" class="text-xs">
-          {{ t("endDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("to") }}
         </p>
         <input
           [formControl]="Enddate"

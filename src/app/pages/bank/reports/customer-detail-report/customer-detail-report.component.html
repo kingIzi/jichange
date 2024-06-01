@@ -5,12 +5,30 @@
 ></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
-  <h2
+  <!-- <h2
     *transloco="let t; read: 'reports.customerDetailReport'"
     class="text-lg font-bold"
   >
     {{ t("customerDetailReport") }}
-  </h2>
+  </h2> -->
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.customerDetailReport'"
+      class="text-lg font-bold"
+    >
+      {{ t("customerDetailReport") }}
+    </h2>
+    <div class="flex flex-row items-center space-x-2">
+      <a
+        (click)="downloadSheet()"
+        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+      >
+        <span>
+          <i class="bi bi-download text-success text-lg"></i>
+        </span>
+      </a>
+    </div>
+  </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
     <form class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3">
       <div class="flex flex-col space-y-1">
@@ -153,12 +171,14 @@
               role="button"
               class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
             >
-              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
               <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
                 {{ t("columns") }}
               </p>
-              <span class="material-symbols-outlined lg:block hidden">
-                arrow_drop_down
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
               </span>
             </button>
             <ul
@@ -188,10 +208,8 @@
               [placeholder]="t('search')"
               [formControl]="tableSearch"
             />
-            <span
-              class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-            >
-              search
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
             </span>
           </div>
         </div>

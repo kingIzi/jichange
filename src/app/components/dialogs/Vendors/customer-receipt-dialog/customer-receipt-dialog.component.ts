@@ -20,6 +20,9 @@ import { DisplayMessageBoxComponent } from '../../display-message-box/display-me
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-customer-receipt-dialog',
@@ -35,48 +38,38 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 })
 export class CustomerReceiptDialogComponent implements OnInit {
   public formGroups: FormGroup[] = [];
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('receiptView') receiptView!: ElementRef;
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<CustomerReceiptDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      payments: TransactionDetail[];
+    }
   ) {}
-  private createReceiptForm(receipts: any[]) {
-    receipts.forEach((receipt) => {
+  private createReceiptForm(payments: TransactionDetail[]) {
+    payments.forEach((payment) => {
       let group = this.fb.group({
-        receiptNo: this.fb.control(receipt.receiptNo, [Validators.required]),
-        controlNumber: this.fb.control(receipt.controlNo, [
-          Validators.required,
-        ]),
+        receiptNo: this.fb.control(payment.Receipt_No, []),
+        controlNumber: this.fb.control(payment.Control_No, []),
         date: this.fb.control(
-          AppUtilities.dateToFormat(
-            AppUtilities.convertDotNetJsonDateToDate(receipt.date.toString()),
-            'yyyy-MM-dd'
-          ),
-          [Validators.required]
+          new Date(payment.Payment_Date).toISOString().split('T')[0],
+          []
         ),
-        to: this.fb.control(receipt.to, [Validators.required]),
-        amount: this.fb.control(
-          AppUtilities.moneyFormat(receipt.amount.toFixed(2).toString()) +
-            ' /TZS',
-          [Validators.required]
-        ),
-        from: this.fb.control(receipt.from, [Validators.required]),
-        for: this.fb.control(receipt.for, [Validators.required]),
-        method: this.fb.control(receipt.method, [Validators.required]),
-        balance: this.fb.control(receipt.balance.toFixed(2) + ' /TZS', [
-          Validators.required,
-        ]),
-        currencyCode: this.fb.control(receipt.currencyCode, [
-          Validators.required,
-        ]),
+        to: this.fb.control(payment.Customer_Name, []),
+        amount: this.fb.control(payment.PaidAmount, []),
+        from: this.fb.control(payment.Payer_Name, []),
+        for: this.fb.control(payment.Payment_Desc, []),
+        method: this.fb.control(payment.Trans_Channel, []),
+        balance: this.fb.control(payment.Balance, []),
+        currencyCode: this.fb.control(payment.Currency_Code, []),
       });
       this.formGroups.push(group);
     });
   }
   ngOnInit(): void {
-    if (this.data.receipts) {
-      this.createReceiptForm(this.data.receipts);
+    if (this.data.payments) {
+      this.createReceiptForm(this.data.payments);
     }
   }
 }

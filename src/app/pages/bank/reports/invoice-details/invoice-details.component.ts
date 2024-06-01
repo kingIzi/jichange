@@ -424,12 +424,20 @@ export class InvoiceDetailsComponent implements OnInit {
     }
   }
   downloadSheet() {
-    this.fileHandler.downloadExcelTable(
-      this.invoiceReportsData,
-      this.getTableActiveKeys(),
-      'invoice_reports',
-      ['Due_Date', 'Invoice_Expired_Date', 'Invoice_Date', 'p_date']
-    );
+    if (this.invoiceReportsData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.invoiceReportsData,
+        this.getTableActiveKeys(),
+        'invoice_reports',
+        ['Due_Date', 'Invoice_Expired_Date', 'Invoice_Date', 'p_date']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   moneyFormat(amount: number) {
     return AppUtilities.moneyFormat(amount.toString());

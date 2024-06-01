@@ -1,0 +1,14 @@
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+/* Firefox */
+input[type="date"] {
+  -moz-appearance: textfield;
+}
+
+/* Internet Explorer 11 */
+input[type="date"]::-ms-clear {
+  display: none;
+}

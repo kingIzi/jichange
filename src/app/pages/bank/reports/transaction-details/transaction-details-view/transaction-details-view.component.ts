@@ -113,50 +113,50 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
         this.buildPage(invno);
       }
     });
-    //let data = JSON.parse(JSON.stringify(json));
-    // this.activatedRoute.params.subscribe((params) => {
-    //   if (Number(params['id']) >= 0) {
-    //     this.detail = (data.transactionDetails as any[]).find(
-    //       (detail, index) => {
-    //         return index === Number(params['id']);
-    //       }
-    //     );
-    //   }
-    // });
+  }
+  ngAfterViewInit(): void {
     // this.activatedRoute.queryParams.subscribe((q) => {
     //   if (q['download']) {
     //     this.downloading = q['download'];
+    //     let divs = this.rootElement.nativeElement as HTMLDivElement;
+    //     let items = divs.querySelectorAll('[data-te-collapse-item]');
+    //     items.forEach((item) => {
+    //       item.classList.remove('hidden');
+    //     });
+    //     this.downloadPdf();
     //   }
     // });
   }
-  ngAfterViewInit(): void {
-    this.activatedRoute.queryParams.subscribe((q) => {
-      if (q['download']) {
-        this.downloading = q['download'];
-        let divs = this.rootElement.nativeElement as HTMLDivElement;
-        let items = divs.querySelectorAll('[data-te-collapse-item]');
-        items.forEach((item) => {
-          item.classList.remove('hidden');
-        });
-        this.downloadPdf();
-      }
+  downloadPdf(payments: TransactionDetail[]) {
+    // let btn = this.downloadBtn.nativeElement as HTMLButtonElement;
+    // btn.classList.add('hidden');
+    // let divs = this.rootElement.nativeElement as HTMLDivElement;
+    // this.fileHandler
+    //   .downloadPdf(
+    //     this.rootElement.nativeElement as HTMLDivElement,
+    //     'transaction.pdf'
+    //   )
+    //   .then(() => {
+    //     btn.classList.remove('hidden');
+    //   })
+    //   .catch((err) => {
+    //     btn.classList.remove('hidden');
+    //   });
+    let dialogRef = this.dialog.open(CustomerReceiptDialogComponent, {
+      width: '800px',
+      data: {
+        payments: payments,
+      },
     });
-  }
-  downloadPdf() {
-    let btn = this.downloadBtn.nativeElement as HTMLButtonElement;
-    btn.classList.add('hidden');
-    let divs = this.rootElement.nativeElement as HTMLDivElement;
-    this.fileHandler
-      .downloadPdf(
-        this.rootElement.nativeElement as HTMLDivElement,
-        'transaction.pdf'
-      )
-      .then(() => {
-        btn.classList.remove('hidden');
-      })
-      .catch((err) => {
-        btn.classList.remove('hidden');
-      });
+    dialogRef.afterOpened().subscribe(() => {
+      let element = dialogRef.componentInstance.receiptView
+        .nativeElement as HTMLDivElement;
+      this.fileHandler.downloadPdfRemoveLastPage(
+        element,
+        `receipts-invoice-${payments.at(0)?.Invoice_Sno}.pdf`
+      );
+      dialogRef.close();
+    });
   }
   moneyFormat(value: string) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -168,21 +168,28 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
     );
     return new Date(timestamp);
   }
-  downloadCustomerReceipt(
-    receipt: any = JSON.parse(JSON.stringify(json)).customerInvoices[0]
-      .receipts[0]
-  ) {
+  openReceipt(payment: TransactionDetail) {
     let dialogRef = this.dialog.open(CustomerReceiptDialogComponent, {
       width: '800px',
       data: {
-        receipts: [receipt],
+        payments: [payment],
+      },
+    });
+  }
+  downloadReceipt(payment: TransactionDetail) {
+    let dialogRef = this.dialog.open(CustomerReceiptDialogComponent, {
+      width: '800px',
+      data: {
+        payments: [payment],
       },
     });
     dialogRef.afterOpened().subscribe(() => {
       let element = dialogRef.componentInstance.receiptView
         .nativeElement as HTMLDivElement;
-
-      this.fileHandler.downloadPdf(element, `invoice.pdf`);
+      this.fileHandler.downloadPdfRemoveLastPage(
+        element,
+        `receipt-${payment.Receipt_No}.pdf`
+      );
       dialogRef.close();
     });
   }

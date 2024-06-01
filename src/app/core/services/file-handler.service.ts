@@ -13,15 +13,46 @@ export class FileHandlerService {
   private EXCEL_EXTENSION: string = '.xlsx';
   private PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor() {}
-  public downloadPdf(element: HTMLElement, filename: string) {
-    let doc = new jsPDF(
-      element.clientWidth > element.clientHeight ? 'l' : 'p',
-      'mm',
-      [element.clientWidth, element.clientHeight]
-    );
+  public downloadPdf(
+    element: HTMLElement,
+    filename: string,
+    width: number = 0,
+    height: number = 0
+  ) {
+    let dim =
+      width == 0 && height == 0
+        ? element.clientWidth > element.clientHeight
+        : width > height;
+    let dimArr =
+      width == 0 && height == 0
+        ? [element.clientWidth, element.clientHeight]
+        : [width, height];
+    let doc = new jsPDF(dim ? 'l' : 'p', 'mm', dimArr);
     return doc.html(element, {
       callback: function (pdf: jsPDF) {
         //pdf.deletePage(pdf.getNumberOfPages());
+        pdf.save(filename);
+      },
+    });
+  }
+  public downloadPdfRemoveLastPage(
+    element: HTMLElement,
+    filename: string,
+    width: number = 0,
+    height: number = 0
+  ) {
+    let dim =
+      width == 0 && height == 0
+        ? element.clientWidth > element.clientHeight
+        : width > height;
+    let dimArr =
+      width == 0 && height == 0
+        ? [element.clientWidth, element.clientHeight]
+        : [width, height];
+    let doc = new jsPDF(dim ? 'l' : 'p', 'mm', dimArr);
+    return doc.html(element, {
+      callback: function (pdf: jsPDF) {
+        pdf.deletePage(pdf.getNumberOfPages());
         pdf.save(filename);
       },
     });

@@ -155,7 +155,7 @@
   "customerDetailReport": {
     "customerDetailReport": "Vendor detail report",
     "form": {
-      "company": "Company",
+      "company": "Vendor",
       "region": "region",
       "district": "district",
       "placeholders": {
@@ -198,9 +198,9 @@
       }
     },
     "userLogReportTable": [
-      "User Name",
+      "Full name",
       "Ip Address",
-      "User Group",
+      "Description",
       "Login Time",
       "Logout Time"
     ]
