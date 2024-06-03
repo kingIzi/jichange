@@ -144,6 +144,7 @@ const routes: Routes = [
                     data: {
                       breadcrumb: { alias: 'transactions', skip: false },
                       animationState: 'isLeft-2',
+                      reuseRoute: true,
                     },
                   },
                   {
@@ -164,6 +165,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'invoice', skip: false },
                   animationState: 'reports-module-3',
+                  reuseRoute: true,
                 },
                 loadComponent: () =>
                   import(
@@ -175,6 +177,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'payments', skip: false },
                   animationState: 'reports-module-4',
+                  reuseRoute: true,
                 },
                 loadComponent: () =>
                   import(
@@ -186,6 +189,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'amendment', skip: false },
                   animationState: 'reports-module-5',
+                  reuseRoute: true,
                 },
                 loadComponent: () =>
                   import(
@@ -201,6 +205,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'invoice-cancelled', skip: false },
                   animationState: 'reports-module-6',
+                  reuseRoute: true,
                 },
               },
               {
@@ -208,6 +213,7 @@ const routes: Routes = [
                 data: {
                   breadcrumb: { alias: 'customer', skip: false },
                   animationState: 'reports-module-7',
+                  reuseRoute: true,
                 },
                 loadComponent: () =>
                   import(

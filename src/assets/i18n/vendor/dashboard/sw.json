@@ -7,7 +7,15 @@
       "invoiceExpire": "Bili Zilizopita Muda",
       "customers": "Wateja",
       "viewMore": "Ona zaidi",
-      "createInvoice": "Unda bili"
+      "createInvoice": "Unda bili",
+      "statisticsData": {
+        "transaction": "Muamala/Miamala",
+        "customer": "Mteja/Wateja",
+        "users": "Mtumiaji/Watumiaji",
+        "pendings": "Inayosubiri/Inazosubiri",
+        "due": "Inayostahili",
+        "expired": "Imeisha Muda"
+      }
     },
     "transaction": {
       "transaction": "Miamala"

@@ -183,6 +183,25 @@
                 </td>
                 <td
                   *ngIf="
+                    headers.controls.at(EmployeeTable.BRANCH)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(EmployeeTable.BRANCH)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{
+                    employeeDetail.Branch_Name
+                      ? employeeDetail.Branch_Name
+                      : "-"
+                  }}
+                </td>
+                <td
+                  *ngIf="
                     headers.controls
                       .at(EmployeeTable.FULL_NAME)
                       ?.get('included')?.value

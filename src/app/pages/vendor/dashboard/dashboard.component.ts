@@ -45,6 +45,7 @@ import { TimeoutError } from 'rxjs';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/generated-invoice-list-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 
 @Component({
   selector: 'app-dashboard',
@@ -92,47 +93,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     TOTAL_AMOUNT: 4,
     DELIVERY_STATUS: 5,
   };
-  public overviewCards: {
-    imgUrl: string;
-    viewMoreLink: string;
-    increase: boolean;
-    statistic: number;
-    lang: string;
-    label: string;
-  }[] = [
-    {
-      statistic: 12,
-      label: 'Paid Invoice',
-      imgUrl: 'assets/img/transaction.png',
-      viewMoreLink: '/vendor/invoice/generated',
-      increase: true,
-      lang: 'paidInvoice',
-    },
-    {
-      statistic: 0,
-      label: 'Due Invoice',
-      imgUrl: 'assets/img/check-mark.png',
-      viewMoreLink: '/vendor/invoice/amendments',
-      increase: false,
-      lang: 'dueInvoice',
-    },
-    {
-      statistic: 18,
-      label: 'Invoice expired',
-      imgUrl: 'assets/img/customer-review.png',
-      viewMoreLink: '/vendor/invoice/cancelled',
-      increase: false,
-      lang: 'invoiceExpire',
-    },
-    {
-      statistic: 23,
-      label: 'Customers',
-      imgUrl: 'assets/img/man.png',
-      viewMoreLink: '/vendor/customers',
-      increase: true,
-      lang: 'customers',
-    },
-  ];
+  public invoiceStatistics: DashboardOverviewStatistic[] = [];
   @ViewChild('transactionChart') transactionChart!: ElementRef;
   @ViewChild('operationsChart') operationsChart!: ElementRef;
   @ViewChild('displayMessageBox')
@@ -220,6 +181,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         break;
     }
   }
+
   //request generted invoice
   private requestGeneratedInvoice() {
     this.tableLoading = true;
@@ -327,18 +289,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: ['Paid', 'Pending', 'In-Progress', 'Cancelled'],
+        labels: ['Pending', 'Due', 'Expired'],
         datasets: [
           {
-            label: 'Total Status',
+            label: 'Invoice report',
             data: [300, 209, 438, 653],
-            backgroundColor: [
-              'rgba(63, 81, 181, 0.5)',
-              'rgba(77, 182, 172, 0.5)',
-              'rgba(66, 133, 244, 0.5)',
-              'rgba(156, 39, 176, 0.5)',
-              'rgba(233, 30, 99, 0.5)',
-            ],
+            // backgroundColor: [
+            //   'rgba(63, 81, 181, 0.5)',
+            //   'rgba(77, 182, 172, 0.5)',
+            //   'rgba(156, 39, 176, 0.5)',
+            //   'rgba(233, 30, 99, 0.5)',
+            // ],
           },
         ],
       },
@@ -418,13 +379,28 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.overviewLoading = true;
     this.invoiceService
       .getCompanysInvoiceStats({ compid: this.userProfile.InstID })
-      .then((result) => {})
+      .then((result) => {
+        if (typeof result === 'string' && typeof result === 'number') {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`dashboard.dashboard.invoiceData.message`)
+          );
+        } else {
+          this.invoiceStatistics =
+            result.response as DashboardOverviewStatistic[];
+        }
+        this.overviewLoading = false;
+        this.cdr.detectChanges();
+      })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
+        this.overviewLoading = false;
+        this.cdr.detectChanges();
       });
   }
   ngAfterViewInit(): void {
@@ -435,6 +411,25 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.parseUserProfile();
     this.createHeadersForm();
     this.requestGeneratedInvoice();
+    this.requestInvoiceStatistics();
+  }
+  dashboardStatisticRouterLink(name: string) {
+    switch (name.toLocaleLowerCase()) {
+      case 'Transaction'.toLocaleLowerCase():
+        return '/vendor/reports/transactions';
+      case 'Customers'.toLocaleLowerCase():
+        return '/vendor/customers';
+      case 'Users'.toLocaleLowerCase():
+        return '/vendor/company';
+      case 'Pendings'.toLocaleLowerCase():
+        return '/vendor/invoice/list';
+      case 'Due'.toLocaleLowerCase():
+        return '/vendor/reports/invoice';
+      case 'Expired'.toLocaleLowerCase():
+        return '/vendor/reports/cancelled';
+      default:
+        return '/vendor';
+    }
   }
   openInvoiceDetailsDialog() {
     let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {

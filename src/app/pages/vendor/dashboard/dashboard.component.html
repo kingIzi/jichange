@@ -4,6 +4,381 @@
 ></app-loader-infinite-spinner>
 
 <div
+  class="py-2 w-full h-fit pl-6 pr-4 grid grid-cols-12 gap-x-4 gap-y-4 overflow-y-auto"
+>
+  <div
+    class="w-full grid grid-cols-3 gap-1 col-span-full lg:col-span-8 relative"
+  >
+    <h4
+      *transloco="let t; read: 'panel.dashboard.overview'"
+      class="col-span-full row-span-1 text-black font-bold tracking-wide text-lg"
+    >
+      {{ t("overview") }}
+    </h4>
+    <ng-container *ngIf="invoiceStatistics.length > 0">
+      <div
+        *ngFor="
+          let statistic of invoiceStatistics;
+          trackBy: PerformanceUtils.trackByIndex;
+          index as i
+        "
+        class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
+      >
+        <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
+          {{ statistic.Statistic }}
+        </h2>
+        <h4
+          *transloco="let t; read: 'panel.dashboard.overview.statisticsData'"
+          class="text-sm lg:text-lg font-bold"
+        >
+          {{ t(statistic.Name.toLocaleLowerCase()) }}
+        </h4>
+        <a
+          [routerLink]="dashboardStatisticRouterLink(statistic.Name)"
+          *transloco="let t; read: 'panel.dashboard.overview'"
+          class="text-xs text-darkPurple font-inter hover:underline"
+        >
+          {{ t("viewMore") }}
+        </a>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="overviewLoading">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <span class="loading loading-spinner loading-sm bg-darkPurple"></span>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="!overviewLoading && !invoiceStatistics">
+      <div *transloco="let t; read: 'errors'">
+        <p class="text-center text-sm tracking-wide pt-3 pb-1">
+          {{ t("noDataFound") }}
+        </p>
+      </div>
+    </ng-container>
+  </div>
+  <div
+    class="flex flex-col space-y-2 relative w-full max-h-min col-span-full lg:col-span-4 lg:col-start-9"
+  >
+    <div class="flex flex-row justify-between w-full">
+      <div class="flex flex-row justify-between w-full">
+        <div class="relative flex flex-row items-center space-x-1">
+          <p
+            *transloco="let t; read: 'panel.dashboard.transaction'"
+            class="text-black font-bold tracking-wide text-lg"
+          >
+            {{ t("transaction") }}
+          </p>
+        </div>
+        <a
+          [routerLink]="'/vendor/reports/overview'"
+          *transloco="let t; read: 'defaults'"
+          class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+        >
+          {{ t("viewAll") }}
+        </a>
+      </div>
+    </div>
+    <div class="w-full h-full relative bg-white shadow">
+      <canvas #transactionChart id="chart-double-y-axis-example"></canvas>
+    </div>
+  </div>
+  <div
+    class="flex flex-col space-y-1 relative w-full h-full col-span-full lg:col-span-4 lg:col-start-9"
+  >
+    <div class="flex flex-row justify-between w-full">
+      <div class="flex flex-row justify-between w-full">
+        <p
+          *transloco="let t; read: 'panel.dashboard'"
+          class="text-black font-bold tracking-wide text-lg"
+        >
+          {{ t("latestTransactionsTitle") }}
+        </p>
+        <a
+          [routerLink]="'/vendor/invoice/generated'"
+          *transloco="let t; read: 'defaults'"
+          class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+        >
+          {{ t("viewAll") }}
+        </a>
+      </div>
+    </div>
+    <div class="w-full h-full max-h-96 relative bg-white shadow">
+      <canvas #operationsChart></canvas>
+    </div>
+  </div>
+  <div
+    [formGroup]="tableHeadersFormGroup"
+    class="flex flex-col w-full space-y-1 relative col-span-full col-end-13 lg:col-end-9 lg:row-start-2"
+  >
+    <div class="flex flex-row items-center justify-between">
+      <p
+        *transloco="let t; read: 'panel.dashboard'"
+        class="text-black font-bold tracking-wide text-lg"
+      >
+        {{ t("latestTransactionsTitle") }}
+      </p>
+      <a
+        [routerLink]="'/vendor/invoice/generated'"
+        *transloco="let t; read: 'defaults'"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+      >
+        {{ t("viewAll") }}
+      </a>
+    </div>
+    <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
+      <div class="flex flex-row items-center justify-end space-x-2 pt-1">
+        <div class="relative">
+          <input
+            *transloco="let t; read: 'defaults'"
+            type="search"
+            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+            id="exampleSearch"
+            [placeholder]="t('search')"
+            [formControl]="tableSearch"
+          />
+          <span class="absolute left-2 top-1/2 -translate-y-1/2">
+            <i class="bi bi-search text-neutral-content text-lg"></i>
+          </span>
+        </div>
+      </div>
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="overflow-y-auto shadow">
+            <table class="min-w-full text-left text-sm font-light">
+              <thead formArrayName="headers" class="border-b font-medium">
+                <tr class="bg-lightPurple rounded-tl-lg w-full">
+                  <ng-container
+                    *ngFor="let header of headers.controls; index as ind"
+                  >
+                    <th
+                      *ngIf="header.get('included')?.value"
+                      scope="col"
+                      class="px-6 py-2 font-inter text-sm"
+                      [id]="'generated-invoice-id-' + ind"
+                      formGroupName="{{ ind }}"
+                    >
+                      <div class="flex items-center">
+                        <p>
+                          {{ header?.get("label")?.value }}
+                        </p>
+                        <button
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(ind, headers)
+                          "
+                          class="flex flex-row items-center m-1"
+                        >
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let generatedInvoice of generatedInvoices
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    trackBy: PerformanceUtils.trackByIndex;
+                    index as i
+                  "
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
+                >
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ generatedInvoice.Chus_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-semibold"
+                  >
+                    {{ generatedInvoice.Invoice_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.INVOICE_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.INVOICE_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        generatedInvoice.Invoice_Date
+                      ).toLocaleDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          generatedInvoice.Payment_Type,
+                          'Flexible',
+                          'bg-teal-100',
+                          'text-black',
+                          'bg-indigo-100',
+                          'text-black'
+                        )
+                      "
+                    >
+                      {{
+                        generatedInvoice.Payment_Type
+                          ? generatedInvoice.Payment_Type.trim()
+                          : "-"
+                      }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.TOTAL_AMOUNT)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.TOTAL_AMOUNT)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-right"
+                  >
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        generatedInvoice.Total.toString()
+                      ) +
+                        " " +
+                        generatedInvoice.Currency_Code
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.DELIVERY_STATUS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(GeneratedInvoiceListTable.DELIVERY_STATUS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-right"
+                  >
+                    {{
+                      generatedInvoice.delivery_status
+                        ? generatedInvoice?.delivery_status?.trim()
+                        : "-"
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-container *ngIf="!tableLoading">
+              <div *transloco="let t; read: 'errors'">
+                <p
+                  *ngIf="generatedInvoices.length <= 0"
+                  class="text-center text-sm tracking-wide pt-3 pb-1"
+                >
+                  {{ t("noDataFound") }}
+                </p>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="tableLoading">
+              <div class="w-full grid place-items-center mt-6">
+                <span
+                  class="loading loading-spinner loading-sm bg-darkPurple"
+                ></span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-row-reverse items-center justify-between">
+        <mat-paginator
+          #paginator
+          [length]="generatedInvoices.length"
+          [pageSize]="5"
+          [pageSizeOptions]="[5]"
+          aria-label="Select page"
+          [showFirstLastButtons]="generatedInvoices.length > 20"
+        >
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div
   class="absolute py-2 top-0 left-0 right-0 bottom-0 w-full h-full pl-6 pr-4 grid grid-cols-12 grid-rows-12 gap-x-4 gap-y-4 overflow-y-auto"
 >
   <div
@@ -326,4 +701,5 @@
       </div>
     </div>
   </div>
+</div> -->
 </div>

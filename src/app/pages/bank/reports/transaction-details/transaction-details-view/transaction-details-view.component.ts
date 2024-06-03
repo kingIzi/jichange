@@ -50,7 +50,7 @@ import { BreadcrumbService } from 'xng-breadcrumb';
     },
   ],
 })
-export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
+export class TransactionDetailsViewComponent implements OnInit {
   public startLoading: boolean = false;
   public detail: any;
   public downloading: boolean = false;
@@ -114,34 +114,7 @@ export class TransactionDetailsViewComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  ngAfterViewInit(): void {
-    // this.activatedRoute.queryParams.subscribe((q) => {
-    //   if (q['download']) {
-    //     this.downloading = q['download'];
-    //     let divs = this.rootElement.nativeElement as HTMLDivElement;
-    //     let items = divs.querySelectorAll('[data-te-collapse-item]');
-    //     items.forEach((item) => {
-    //       item.classList.remove('hidden');
-    //     });
-    //     this.downloadPdf();
-    //   }
-    // });
-  }
   downloadPdf(payments: TransactionDetail[]) {
-    // let btn = this.downloadBtn.nativeElement as HTMLButtonElement;
-    // btn.classList.add('hidden');
-    // let divs = this.rootElement.nativeElement as HTMLDivElement;
-    // this.fileHandler
-    //   .downloadPdf(
-    //     this.rootElement.nativeElement as HTMLDivElement,
-    //     'transaction.pdf'
-    //   )
-    //   .then(() => {
-    //     btn.classList.remove('hidden');
-    //   })
-    //   .catch((err) => {
-    //     btn.classList.remove('hidden');
-    //   });
     let dialogRef = this.dialog.open(CustomerReceiptDialogComponent, {
       width: '800px',
       data: {

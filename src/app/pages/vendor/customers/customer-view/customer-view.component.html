@@ -23,11 +23,11 @@
               {{ t("customerDetails") }}
             </h2>
             <div class="flex flex-row items-center justify-between">
-              <div class="avatar placeholder">
+              <!-- <div class="avatar placeholder">
                 <div class="bg-neutral text-neutral-content rounded-full w-16">
                   <span class="text-xl">AI</span>
                 </div>
-              </div>
+              </div> -->
               <div
                 *transloco="
                   let t;
@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-    <div class="col-span-full lg:col-span-3">
+    <div [formGroup]="headerFormGroup" class="col-span-full lg:col-span-3">
       <div class="flex flex-col">
         <h2
           *transloco="let t; read: 'customer.customerView'"
@@ -62,6 +62,45 @@
         <div class="flex flex-col bg-white shadow px-2 py-4">
           <div class="flex flex-row items-center justify-end">
             <div class="flex flex-row items-center space-x-2">
+              <div class="dropdown">
+                <button
+                  tabindex="0"
+                  role="button"
+                  class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+                >
+                  <span>
+                    <i class="bi bi-layout-three-columns text-sm"></i>
+                  </span>
+                  <p
+                    *transloco="let t; read: 'defaults'"
+                    class="lg:block hidden"
+                  >
+                    {{ t("columns") }}
+                  </p>
+                  <span>
+                    <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
+                  </span>
+                </button>
+                <ul
+                  tabindex="0"
+                  class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 grid grid-cols-2"
+                >
+                  <li *ngFor="let control of headers.controls">
+                    <label class="label cursor-pointer">
+                      <span class="label-text text-xs font-normal">{{
+                        control.get("label")?.value
+                      }}</span>
+                      <input
+                        type="checkbox"
+                        [formControl]="
+                          PerformanceUtils.getFormControl(control, 'included')
+                        "
+                        class="checkbox checkbox-xs"
+                      />
+                    </label>
+                  </li>
+                </ul>
+              </div>
               <div class="relative">
                 <input
                   *transloco="let t; read: 'defaults'"
@@ -71,10 +110,8 @@
                   [placeholder]="t('search')"
                   #searchInput
                 />
-                <span
-                  class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-                >
-                  search
+                <span class="absolute left-2 top-1/2 -translate-y-1/2">
+                  <i class="bi bi-search text-neutral-content text-lg"></i>
                 </span>
               </div>
             </div>
@@ -86,42 +123,69 @@
                   #customersTable
                   class="min-w-full text-left text-sm font-light"
                 >
-                  <thead
-                    [formGroup]="headerFormGroup"
-                    class="border-b font-medium"
-                  >
+                  <thead formArrayName="headers" class="border-b font-medium">
                     <tr
                       *transloco="let t; read: 'tableData.vendor'"
-                      class="bg-lightPurple"
+                      class="bg-lightPurple rounded-tl-lg w-full"
                     >
-                      <th
+                      <ng-container
                         *ngFor="let header of headers.controls; index as ind"
-                        scope="col"
-                        class="px-6 font-inter text-sm"
-                        [id]="'generated-invoice-id-' + ind"
                       >
-                        <div class="flex flex-row items-center">
-                          <p class="text-sm font-extrabold text-black">
-                            {{ header.get("label")?.value }}
-                          </p>
-                          <button>
-                            <span
-                              class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
+                        <th
+                          *ngIf="header.get('included')?.value"
+                          scope="col"
+                          class="px-6 py-2 font-inter text-sm"
+                          [id]="'generated-invoice-id-' + ind"
+                          formGroupName="{{ ind }}"
+                        >
+                          <div class="flex items-center">
+                            <p>
+                              {{ header?.get("label")?.value }}
+                            </p>
+                            <button
+                              [class]="
+                                header.get('label')?.value === '#'
+                                  ? 'hidden'
+                                  : ''
+                              "
+                              (click)="
+                                PerformanceUtils.sortColumnClicked(ind, headers)
+                              "
+                              class="flex flex-row items-center m-1"
                             >
-                              unfold_more
-                            </span>
-                          </button>
-                        </div>
-                      </th>
+                              <span>
+                                <i
+                                  [class]="
+                                    header.get('sortAsc')?.value
+                                      ? 'text-darkPurple'
+                                      : ''
+                                  "
+                                  class="bi bi-arrow-up"
+                                ></i>
+                              </span>
+                              <span>
+                                <i
+                                  [class]="
+                                    header.get('sortAsc')?.value
+                                      ? ''
+                                      : 'text-darkPurple'
+                                  "
+                                  class="bi bi-arrow-down"
+                                ></i>
+                              </span>
+                            </button>
+                          </div>
+                        </th>
+                      </ng-container>
                       <th
                         *transloco="let t; read: 'defaults'"
-                        class="px-6 py-4 font-inter text-sm font-extrabold text-black"
+                        class="px-6 font-inter text-sm text-right"
                       >
                         {{ t("action") }}
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <!-- <tbody>
                     <tr
                       *ngFor="
                         let customer of customerInvoices
@@ -231,7 +295,7 @@
                         </div>
                       </td>
                     </tr>
-                  </tbody>
+                  </tbody> -->
                 </table>
                 <div *transloco="let t; read: 'errors'">
                   <p

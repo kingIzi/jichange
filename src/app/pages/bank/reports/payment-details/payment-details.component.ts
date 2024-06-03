@@ -160,6 +160,9 @@ export class PaymentDetailsComponent implements OnInit {
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
     this.companyChangedEventHandler();
     this.filterFormChanged();
   }
@@ -522,6 +525,7 @@ export class PaymentDetailsComponent implements OnInit {
       if (form.enddate) {
         form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
       }
+      form.branch = this.branch.value;
       this.requestPaymentReport(form);
     } else {
       this.filterForm.markAllAsTouched();

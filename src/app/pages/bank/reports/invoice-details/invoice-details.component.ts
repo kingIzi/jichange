@@ -159,6 +159,9 @@ export class InvoiceDetailsComponent implements OnInit {
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
     this.companyChangedEventHandler();
   }
   private companyChangedEventHandler() {
@@ -441,6 +444,7 @@ export class InvoiceDetailsComponent implements OnInit {
       if (form.enddate) {
         form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
       }
+      form.branch = this.branch.value;
       this.requestInvoiceDetails(form);
     } else {
       this.formGroup.markAllAsTouched();

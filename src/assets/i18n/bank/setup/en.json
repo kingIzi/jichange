@@ -368,6 +368,7 @@
     },
     "bankUserTable": [
       "#",
+      "Branch",
       "Full name",
       "Designation",
       "Email",

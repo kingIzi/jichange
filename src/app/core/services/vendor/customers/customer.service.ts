@@ -38,4 +38,16 @@ export class CustomerService {
     );
     return data;
   }
+  public async getCustomerById(body: {
+    compid: number | string;
+    Sno: number | string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { compid: number | string; Sno: number | string },
+        HttpDataResponse<number | string | Customer>
+      >(`/api/Customer/GetCustbyID`, body)
+    );
+    return data;
+  }
 }

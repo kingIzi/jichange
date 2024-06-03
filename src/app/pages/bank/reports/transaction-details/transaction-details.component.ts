@@ -129,6 +129,9 @@ export class TransactionDetailsComponent implements OnInit {
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
     this.companyChangedEventHandler();
   }
   private companyChangedEventHandler() {
@@ -502,6 +505,7 @@ export class TransactionDetailsComponent implements OnInit {
       if (form.enddate) {
         form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
       }
+      form.branch = this.branch.value;
       this.requestTransactionDetailsList(form);
     } else {
       this.filterTableFormGroup.markAllAsTouched();

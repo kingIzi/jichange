@@ -1,7 +1,7 @@
 {
   "customer": "Mteja(s)",
   "addCustomer": "Ongeza Mteja",
-  "customersTable": ["Jina la Mteja", "Barua pepe", "Nambari ya Simu"],
+  "customersTable": ["#", "Jina la Mteja", "Barua pepe", "Nambari ya Simu"],
   "addedCustomerSuccessfully": "Aliongeza wateja kwa mafanikio!",
   "removedCustomerSuccessfully": "Kuondolewa kwa wateja kwa mafanikio!",
   "form": {
@@ -46,6 +46,7 @@
     },
     "customerViewTableTitle": "Miamala",
     "customerInvoicesTable": [
+      "#",
       "Nambari ya Bili",
       "Tarehe",
       "Jina la Bidhaa",

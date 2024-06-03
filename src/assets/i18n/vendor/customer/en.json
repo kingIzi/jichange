@@ -1,7 +1,7 @@
 {
   "customer": "Customer(s)",
   "addCustomer": "Add Customer",
-  "customersTable": ["Customer name", "Email Id", "Mobile No"],
+  "customersTable": ["#", "Customer name", "Email Id", "Mobile No"],
   "addedCustomerSuccessfully": "Added customer successfully!",
   "removedCustomerSuccessfully": "Removed customer successfully!",
   "form": {
@@ -46,6 +46,7 @@
     },
     "customerViewTableTitle": "Transactions",
     "customerInvoicesTable": [
+      "#",
       "Invoice N°",
       "Date",
       "Item Name",

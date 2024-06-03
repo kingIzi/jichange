@@ -114,7 +114,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: string | number },
-        HttpDataResponse<DashboardOverviewStatistic | number | string>
+        HttpDataResponse<DashboardOverviewStatistic[] | number | string>
       >(`/api/Setup/Overview`, body)
     );
     return data;

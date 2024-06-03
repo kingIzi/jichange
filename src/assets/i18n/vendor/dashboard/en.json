@@ -7,7 +7,15 @@
       "invoiceExpire": "Expired",
       "customers": "Customer(s)",
       "viewMore": "View more",
-      "createInvoice": "Create invoice"
+      "createInvoice": "Create invoice",
+      "statisticsData": {
+        "transaction": "Transaction(s)",
+        "customer": "Customer(s)",
+        "users": "User(s)",
+        "pendings": "Pending(s)",
+        "due": "Due",
+        "expired": "Expired"
+      }
     },
     "transaction": {
       "transaction": "Transaction"

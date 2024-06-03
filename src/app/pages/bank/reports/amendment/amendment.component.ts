@@ -124,6 +124,9 @@ export class AmendmentComponent implements OnInit {
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
     this.companyChangedEventHandler();
     this.filterFormChanged();
   }
@@ -471,6 +474,7 @@ export class AmendmentComponent implements OnInit {
       if (form.enddate) {
         form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
       }
+      form.branch = this.branch.value;
       this.requestAmendmentsReport(form);
     } else {
       this.filterForm.markAllAsTouched();

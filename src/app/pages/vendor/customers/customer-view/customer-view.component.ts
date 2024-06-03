@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -8,7 +8,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -23,8 +23,17 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 //import * as json from 'src/assets/temp/data.json';
-import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import {
+  PageEvent,
+  MatPaginatorModule,
+  MatPaginator,
+} from '@angular/material/paginator';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
+import { Customer } from 'src/app/core/models/vendors/customer';
 
 @Component({
   selector: 'app-customer-view',
@@ -51,41 +60,58 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 })
 export class CustomerViewComponent implements OnInit {
   public startLoading: boolean = false;
+  public customer!: Customer;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public customerInvoices: CustomerInvoice[] = [];
   public customerInvoicesData: CustomerInvoice[] = [];
   public headerFormGroup!: FormGroup;
-  public itemsPerPage: number[] = [5, 10, 20];
-  public itemPerPage: number = this.itemsPerPage[0];
+  public userProfile!: LoginResponse;
+  @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
+    private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
-    private translocoService: TranslocoService,
+    private tr: TranslocoService,
+    private customerService: CustomerService,
     private dialog: MatDialog,
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private buildFormHeaders() {
     this.headerFormGroup = this.fb.group({
       headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
     });
-    this.translocoService
-      .selectTranslate('customerView.customerInvoicesTable', {}, this.scope)
-      .subscribe((headers: string[]) => {
-        if (headers && headers.length > 0) {
-          headers.forEach((element) => {
-            let header = this.fb.group({
-              label: this.fb.control(element, []),
-              sortAsc: this.fb.control('', []),
-            });
-            this.headers.push(header);
-          });
-        }
-      });
+    TableUtilities.createHeaders(
+      this.tr,
+      `customerView.customerInvoicesTable`,
+      this.scope,
+      this.headers,
+      this.fb,
+      this,
+      6,
+      true
+    );
+    this.tableSearch.valueChanges.subscribe((value) => {
+      this.searchTable(value, this.paginator);
+    });
   }
+  private buildPage(customerId: string) {}
+  private searchTable(searchText: string, paginator: MatPaginator) {}
   ngOnInit(): void {
-    // let data = JSON.parse(JSON.stringify(json));
-    // this.customerInvoicesData = data.customerInvoices;
-    // this.customerInvoices = this.customerInvoicesData;
+    this.parseUserProfile();
     this.buildFormHeaders();
+    this.activatedRoute.params.subscribe((params) => {
+      if (params['id']) {
+        let customerId = atob(params['id']);
+        this.buildPage(customerId);
+      }
+    });
   }
   convertDate(date: string) {
     return AppUtilities.convertDotNetJsonDateToDate(date);
@@ -129,12 +155,10 @@ export class CustomerViewComponent implements OnInit {
       console.log(`Dialog result: ${result}`);
     });
   }
-  itemsPerPageChanged(value: string) {
-    if (this.itemsPerPage.indexOf(+value) !== -1) {
-      this.itemPerPage = +value;
-    }
-  }
   get headers() {
     return this.headerFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headerFormGroup.get('tableSearch') as FormArray;
   }
 }

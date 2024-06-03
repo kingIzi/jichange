@@ -131,6 +131,9 @@ export class CustomerDetailReportComponent implements OnInit {
       reg: this.fb.control('', [Validators.required]),
       dist: this.fb.control('', [Validators.required]),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
     this.regionChangeEventHandler();
   }
   private async createTableHeadersFormGroup() {
@@ -402,9 +405,11 @@ export class CustomerDetailReportComponent implements OnInit {
       this.formErrors();
       return;
     }
+    let form = { ...this.tableFilterFormGroup.value };
+    form.branch = this.branch.value;
     this.customersData = [];
     this.customers = this.customersData;
-    this.requestCustomerDetails(this.tableFilterFormGroup.value);
+    this.requestCustomerDetails(form);
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');

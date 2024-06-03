@@ -45,6 +45,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
+import { CustomerDetailsTable } from 'src/app/core/enums/vendor/customers/customers-details-table';
 
 @Component({
   selector: 'app-customers-list',
@@ -82,11 +83,13 @@ export class CustomersListComponent implements OnInit {
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  private headersMap = {
-    customerName: 0,
-    emailId: 1,
-    mobileNo: 2,
-  };
+  public CustomerDetailsTable: typeof CustomerDetailsTable =
+    CustomerDetailsTable;
+  // private headersMap = {
+  //   customerName: 0,
+  //   emailId: 1,
+  //   mobileNo: 2,
+  // };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -171,7 +174,7 @@ export class CustomersListComponent implements OnInit {
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
-      case this.headersMap.customerName:
+      case CustomerDetailsTable.NAME:
         this.customers.sort((a, b) =>
           a.Cust_Name.trim().toLocaleLowerCase() >
           b.Cust_Name.trim().toLocaleLowerCase()
@@ -179,7 +182,7 @@ export class CustomersListComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.emailId:
+      case CustomerDetailsTable.EMAIL:
         this.customers.sort((a, b) =>
           a.Email.trim().toLocaleLowerCase() >
           b.Email.trim().toLocaleLowerCase()
@@ -187,7 +190,7 @@ export class CustomersListComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.mobileNo:
+      case CustomerDetailsTable.MOBILE_NUMBER:
         this.customers.sort((a, b) =>
           a.Phone.trim().toLocaleLowerCase() >
           b.Phone.trim().toLocaleLowerCase()
@@ -201,7 +204,7 @@ export class CustomersListComponent implements OnInit {
   }
   private sortTableDesc(ind: number): void {
     switch (ind) {
-      case this.headersMap.customerName:
+      case CustomerDetailsTable.NAME:
         this.customers.sort((a, b) =>
           a.Cust_Name.trim().toLocaleLowerCase() <
           b.Cust_Name.trim().toLocaleLowerCase()
@@ -209,7 +212,7 @@ export class CustomersListComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.emailId:
+      case CustomerDetailsTable.EMAIL:
         this.customers.sort((a, b) =>
           a.Email.trim().toLocaleLowerCase() <
           b.Email.trim().toLocaleLowerCase()
@@ -217,7 +220,7 @@ export class CustomersListComponent implements OnInit {
             : -1
         );
         break;
-      case this.headersMap.mobileNo:
+      case CustomerDetailsTable.MOBILE_NUMBER:
         this.customers.sort((a, b) =>
           a.Phone.trim().toLocaleLowerCase() <
           b.Phone.trim().toLocaleLowerCase()
@@ -342,6 +345,9 @@ export class CustomersListComponent implements OnInit {
     removeClient.remove.asObservable().subscribe((event) => {
       this.deleteCustomer({ sno: id });
     });
+  }
+  encodeCustomerId(customerId: number) {
+    return btoa(customerId.toString());
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;
