@@ -37,6 +37,7 @@ import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 
 @Component({
   selector: 'app-user-log-report',
@@ -77,6 +78,7 @@ export class UserLogReportComponent implements OnInit {
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private tr: TranslocoService,
+    private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -97,7 +99,9 @@ export class UserLogReportComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -197,15 +201,18 @@ export class UserLogReportComponent implements OnInit {
       );
     }
   }
+  private getActiveTableKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.userLogKeys(indexes);
+  }
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let keys = this.userLogKeys(indexes);
+      let keys = this.getActiveTableKeys();
       let text = searchText.trim().toLowerCase();
       this.userReportLogs = this.userReportLogsData.filter(
         (userReportLog: any) => {
@@ -288,6 +295,22 @@ export class UserLogReportComponent implements OnInit {
   }
   dateToFormat(date: string) {
     return new Date(date);
+  }
+  downloadSheet() {
+    if (this.userReportLogsData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.userReportLogsData,
+        this.getActiveTableKeys(),
+        'user_log_report',
+        ['Login_Time', 'Logout_Time']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   get stdate() {
     return this.tableFilterFormGroup.get('stdate') as FormControl;

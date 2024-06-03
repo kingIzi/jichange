@@ -5,12 +5,6 @@
 ></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
-  <!-- <h2
-    *transloco="let t; read: 'reports.customerDetailReport'"
-    class="text-lg font-bold"
-  >
-    {{ t("customerDetailReport") }}
-  </h2> -->
   <div class="flex flex-row items-center justify-between">
     <h2
       *transloco="let t; read: 'reports.customerDetailReport'"
@@ -30,7 +24,47 @@
     </div>
   </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
-    <form class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3">
+    <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("branch") }}
+        </p>
+        <select
+          [formControl]="branch"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="'0'"
+          >
+            {{ t("all") }}
+          </option>
+          <ng-container *ngIf="filterFormData.branches.length > 0">
+            <option
+              *ngFor="
+                let branch of filterFormData.branches;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="branch.Branch_Sno.toString()"
+            >
+              {{ branch.Name }}
+            </option>
+          </ng-container>
+        </select>
+        <span *ngIf="branch && branch.invalid && branch.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("branch") }}
+          </p>
+        </span>
+      </div>
       <div class="flex flex-col space-y-1">
         <p
           *transloco="let t; read: 'reports.customerDetailReport.form'"
@@ -55,7 +89,7 @@
           <option
             [value]="company.CompSno"
             *ngFor="
-              let company of companies;
+              let company of filterFormData.companies;
               trackBy: PerformanceUtils.trackByIndex
             "
           >
@@ -95,7 +129,7 @@
           <option
             [value]="region.Region_SNO"
             *ngFor="
-              let region of regions;
+              let region of filterFormData.regions;
               trackBy: PerformanceUtils.trackByIndex
             "
           >
@@ -135,7 +169,7 @@
           <option
             [value]="district.SNO"
             *ngFor="
-              let district of districts;
+              let district of filterFormData.districts;
               trackBy: PerformanceUtils.trackByIndex
             "
           >
@@ -224,7 +258,7 @@
               <thead formArrayName="headers" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
-                  class="bg-lightPurple"
+                  class="bg-lightPurple rounded w-full"
                 >
                   <ng-container
                     *ngFor="let header of headers.controls; index as ind"
@@ -232,7 +266,7 @@
                     <th
                       *ngIf="header.get('included')?.value"
                       scope="col"
-                      class="px-6 font-inter text-sm"
+                      class="px-6 py-2 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
@@ -240,16 +274,45 @@
                         <p>
                           {{ header?.get("label")?.value }}
                         </p>
-                        <button (click)="sortColumnClicked(ind)">
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
+                        <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(ind, headers)
+                          "
+                          class="flex flex-row items-center m-1"
+                        >
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
                           </span>
                         </button>
                       </div>
                     </th>
                   </ng-container>
+                  <!-- <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 font-inter text-sm text-right"
+                  >
+                    {{ t("action") }}
+                  </th> -->
                 </tr>
               </thead>
               <tbody>
@@ -267,6 +330,23 @@
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
                 >
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorDetailsReportTable.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorDetailsReportTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ PerformanceUtils.getIndexOfItem(customers, customer) }}
+                  </td>
                   <td
                     *ngIf="
                       headers.controls

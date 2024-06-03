@@ -177,6 +177,7 @@
       }
     },
     "customerDetailReportTable": [
+      "#",
       "Customer name",
       "Phone",
       "Email",
@@ -200,6 +201,7 @@
       }
     },
     "userLogReportTable": [
+      "#",
       "Full name",
       "Ip Address",
       "Description",
@@ -231,11 +233,12 @@
       }
     },
     "auditTrailsTable": [
+      "#",
       "Actions",
       "Column Name",
       "Old value",
       "New value",
-      "Posted",
+      "Posted by",
       "Audit Date"
     ]
   }

@@ -19,7 +19,7 @@
         "modifiedSuccessfully": "Nchi iliyobadilishwa kwa mafanikio!"
       }
     },
-    "countriesTable": ["Nchi"]
+    "countriesTable": ["#", "Nchi"]
   },
   "regionDialog": {
     "addRegion": "Ongeza mkoa",
@@ -45,7 +45,7 @@
         "missingStatus": "Tafadhali chagua hali"
       }
     },
-    "regionsTable": ["Nchi", "Mkoa", "Hali"]
+    "regionsTable": ["#", "Nchi", "Mkoa", "Hali"]
   },
   "districtDialog": {
     "addDistrict": "Ongeza Wilaya",
@@ -73,7 +73,7 @@
         "missingStatus": "Tafadhali chagua hali"
       }
     },
-    "districtsTable": ["Mkoa", "Wilaya", "Hali"]
+    "districtsTable": ["#", "Mkoa", "Wilaya", "Hali"]
   },
   "wardDialog": {
     "addWard": "Ongeza Kata",
@@ -101,7 +101,7 @@
         "missingStatus": "Tafadhali chagua hali"
       }
     },
-    "wardsTable": ["Wilaya", "Kata", "Hali"]
+    "wardsTable": ["#", "Wilaya", "Kata", "Hali"]
   },
   "currency": {
     "addCurrency": "Ongeza Fedha",
@@ -130,7 +130,7 @@
         "failedToModifyCurrency": "Imeshindwa kubadilisha sarafu."
       }
     },
-    "currenciesTable": ["Msimbo", "Jina"]
+    "currenciesTable": ["#", "Msimbo", "Jina"]
   },
   "designation": {
     "addDesignation": "Ongeza Uteuzi",
@@ -153,7 +153,7 @@
         "modifiedSuccessfully": "Nchi imebadilishwa kwa mafanikio!"
       }
     },
-    "designationsTable": ["Uteuzi"]
+    "designationsTable": ["#", "Uteuzi"]
   },
   "branch": {
     "addBranch": "Ongeza tawi",
@@ -183,7 +183,7 @@
         "removedSuccessfully": "Tawi lilifutwa kwa mafanikio!"
       }
     },
-    "branchesTable": ["Tawi", "Mahali", "Hali"]
+    "branchesTable": ["#", "Tawi", "Mahali", "Hali"]
   },
   "questionName": {
     "addQuestionName": "Ongeza swali",
@@ -253,6 +253,7 @@
       }
     },
     "smtpTable": [
+      "#",
       "Kutoka kwa Anwani",
       "TAREHE YA KUUNDWA",
       "Anwani",
@@ -301,6 +302,7 @@
       }
     },
     "emailTextsTable": [
+      "#",
       "Ilifanyika",
       "Kiingereza cha somo",
       "Mada ya Kiswahili",
@@ -362,6 +364,7 @@
       }
     },
     "bankUserTable": [
+      "#",
       "Jina Kamili",
       "Cheo",
       "Barua pepe",
@@ -396,7 +399,7 @@
         "failedToAddSuspenseAccount": "Imeshindwa kuongeza akaunti ya mashaka."
       }
     },
-    "suspenseAccountsTable": ["Nambari ya Akaunti ya Suspense", "Hali"]
+    "suspenseAccountsTable": ["#", "Nambari ya Akaunti ya Suspense", "Hali"]
   },
   "depositAccount": {
     "addDepositAccount": "Ongeza",
@@ -427,6 +430,6 @@
         "sureRemoveAccount": "Je, una uhakika unataka kufuta akaunti hii?"
       }
     },
-    "depositAccountTable": ["Muuzaji", "Akaunti", "Sababu"]
+    "depositAccountTable": ["#", "Muuzaji", "Akaunti", "Sababu"]
   }
 }

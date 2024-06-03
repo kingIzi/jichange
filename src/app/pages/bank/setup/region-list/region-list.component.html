@@ -131,6 +131,19 @@
               >
                 <td
                   *ngIf="
+                    headers.controls.at(RegionTable.ID)?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls.at(RegionTable.ID)?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ PerformanceUtils.getIndexOfItem(regions, region) }}
+                </td>
+                <td
+                  *ngIf="
                     headers.controls.at(RegionTable.COUNTRY)?.get('included')
                       ?.value
                   "

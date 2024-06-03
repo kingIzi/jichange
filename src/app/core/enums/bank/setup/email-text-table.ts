@@ -1,4 +1,5 @@
 export enum EmailTextTable {
+  ID,
   CREATED,
   SUBJECT_ENGLISH,
   SUBJECT_KISWAHILI,

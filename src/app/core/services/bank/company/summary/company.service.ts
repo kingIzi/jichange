@@ -6,6 +6,7 @@ import { AddCompany } from 'src/app/core/models/bank/forms/company/summary/add-c
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+import { Region } from 'src/app/core/models/bank/setup/region';
 
 @Injectable({
   providedIn: 'root',
@@ -38,7 +39,9 @@ export class CompanyService {
   }
   public async getRegionList() {
     let data = await lastValueFrom(
-      this.client.performGet(`/api/Company/GetRegionDetails`)
+      this.client.performGet<HttpDataResponse<number | string | Region[]>>(
+        `/api/Company/GetRegionDetails`
+      )
     );
     return data;
   }

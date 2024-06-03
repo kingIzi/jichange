@@ -148,9 +148,6 @@ export class RegionListComponent implements OnInit {
             this.tr.translate(`setup.regionDialog.removeRegionSuccessfully`)
           );
           this.requestRegionList();
-          // sal.then((res) => {
-          //   this.requestRegionList();
-          // });
         }
         this.startLoaing = false;
         this.cdr.detectChanges();

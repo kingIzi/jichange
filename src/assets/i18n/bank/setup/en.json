@@ -19,7 +19,7 @@
         "modifiedSuccessfully": "Country modified successfully!"
       }
     },
-    "countriesTable": ["Country"]
+    "countriesTable": ["#", "Country"]
   },
   "regionDialog": {
     "region": "Region",
@@ -46,7 +46,7 @@
         "missingStatus": "Please select a status"
       }
     },
-    "regionsTable": ["Country", "Region", "Status"]
+    "regionsTable": ["#", "Country", "Region", "Status"]
   },
   "districtDialog": {
     "addDistrict": "Add District",
@@ -74,7 +74,7 @@
         "missingStatus": "Please select a status"
       }
     },
-    "districtsTable": ["Region", "District", "Status"]
+    "districtsTable": ["#", "Region", "District", "Status"]
   },
   "wardDialog": {
     "addWard": "Add Ward",
@@ -102,7 +102,7 @@
         "missingStatus": "Please select a status"
       }
     },
-    "wardsTable": ["District", "Ward", "Status"]
+    "wardsTable": ["#", "District", "Ward", "Status"]
   },
   "currency": {
     "addCurrency": "Add Currency",
@@ -131,7 +131,7 @@
         "failedToModifyCurrency": "Failed to modify currency."
       }
     },
-    "currenciesTable": ["Code", "Name"]
+    "currenciesTable": ["#", "Code", "Name"]
   },
   "designation": {
     "addDesignation": "Add Designation",
@@ -156,7 +156,7 @@
         "failedToAddDesignation": "Failed to add designation."
       }
     },
-    "designationsTable": ["Designation"]
+    "designationsTable": ["#", "Designation"]
   },
   "branch": {
     "addBranch": "Add branch",
@@ -186,7 +186,7 @@
         "removedSuccessfully": "Branch deleted successfully!"
       }
     },
-    "branchesTable": ["Branch", "Location", "Status"]
+    "branchesTable": ["#", "Branch", "Location", "Status"]
   },
   "questionName": {
     "addQuestionName": "Add question",
@@ -256,6 +256,7 @@
       }
     },
     "smtpTable": [
+      "#",
       "From Address",
       "DATE CREATED",
       "Address",
@@ -304,6 +305,7 @@
       }
     },
     "emailTextsTable": [
+      "#",
       "Created",
       "Subject English",
       "Subject Swahili",
@@ -365,6 +367,7 @@
       }
     },
     "bankUserTable": [
+      "#",
       "Full name",
       "Designation",
       "Email",
@@ -400,7 +403,7 @@
         "failedToAddSuspenseAccount": "Failed to add suspense account."
       }
     },
-    "suspenseAccountsTable": ["Suspense Account No", "Status"]
+    "suspenseAccountsTable": ["#", "Suspense Account No", "Status"]
   },
   "depositAccount": {
     "addDepositAccount": "Add",
@@ -431,6 +434,6 @@
         "sureRemoveAccount": "Are you sure you want to remove this account?"
       }
     },
-    "depositAccountTable": ["Vendor", "Account", "Reason"]
+    "depositAccountTable": ["#", "Vendor", "Account", "Reason"]
   }
 }

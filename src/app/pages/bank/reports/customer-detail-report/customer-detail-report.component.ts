@@ -53,6 +53,9 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -82,9 +85,21 @@ export class CustomerDetailReportComponent implements OnInit {
   public tableLoading: boolean = false;
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
-  public companies: Company[] = [];
-  public regions: Region[] = [];
-  public districts: District[] = [];
+  //public companies: Company[] = [];
+  //public regions: Region[] = [];
+  //public districts: District[] = [];
+  public userProfile!: LoginResponse;
+  public filterFormData: {
+    companies: Company[];
+    regions: Region[];
+    districts: District[];
+    branches: Branch[];
+  } = {
+    companies: [],
+    regions: [],
+    districts: [],
+    branches: [],
+  };
   public customers: Customer[] = [];
   public customersData: Customer[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -97,14 +112,22 @@ export class CustomerDetailReportComponent implements OnInit {
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private companyService: CompanyService,
+    private branchService: BranchService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     private tr: TranslocoService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createTableFilterForm() {
     this.tableFilterFormGroup = this.fb.group({
       Comp: this.fb.control('', [Validators.required]),
+      branch: this.fb.control(this.userProfile.braid, []),
       reg: this.fb.control('', [Validators.required]),
       dist: this.fb.control('', [Validators.required]),
     });
@@ -121,7 +144,9 @@ export class CustomerDetailReportComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -142,7 +167,7 @@ export class CustomerDetailReportComponent implements OnInit {
             )
           );
         }
-        this.districts =
+        this.filterFormData.districts =
           typeof results.response === 'number' ? [] : results.response;
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -160,34 +185,46 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   private regionChangeEventHandler() {
     this.reg.valueChanges.subscribe((value) => {
-      let index = this.regions.find((r) => r.Region_SNO === Number(value));
+      let index = this.filterFormData.regions.find(
+        (r) => r.Region_SNO === Number(value)
+      );
       if (index) {
         this.fetchDistricts({ Sno: value });
       } else {
-        this.districts = [];
+        this.filterFormData.districts = [];
       }
     });
   }
   private async buildPage() {
-    let companiesObservable = from(this.reportsService.getCompaniesList({}));
-    let regionsObservable = from(this.companyService.getRegionList());
-    let mergedObservable = zip(companiesObservable, regionsObservable);
     this.startLoading = true;
-    let res = lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    );
+    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let regionsObs = from(this.companyService.getRegionList());
+    let branchesObs = from(this.branchService.postBranchList({}));
+    let mergedObservable = zip(companiesObs, regionsObs, branchesObs);
+    let res = AppUtilities.pipedObservables(mergedObservable);
     res
-      .then((results: Array<any>) => {
-        let [companies, regions] = results;
-        this.companies = companies.response === 0 ? [] : companies.response;
-        this.regions = regions.response === 0 ? [] : regions.response;
+      .then((results) => {
+        let [companies, regions, branches] = results;
+        // this.filterFormData.companies = companies.response === 0 ? [] : companies.response;
+        // this.filterFormData.regions = regions.response === 0 ? [] : regions.response;
+        if (
+          typeof companies.response !== 'number' &&
+          typeof companies.response !== 'string'
+        ) {
+          this.filterFormData.companies = companies.response;
+        }
+        if (
+          typeof regions.response !== 'number' &&
+          typeof regions.response !== 'string'
+        ) {
+          this.filterFormData.regions = regions.response;
+        }
+        if (
+          typeof branches.response !== 'number' &&
+          typeof branches.response !== 'string'
+        ) {
+          this.filterFormData.branches = branches.response;
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -355,6 +392,7 @@ export class CustomerDetailReportComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.buildPage();
     this.createTableFilterForm();
@@ -402,6 +440,9 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   get dist() {
     return this.tableFilterFormGroup.get('dist') as FormControl;
+  }
+  get branch() {
+    return this.tableFilterFormGroup.get('branch') as FormControl;
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

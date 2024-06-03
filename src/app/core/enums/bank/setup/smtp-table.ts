@@ -1,4 +1,5 @@
 export enum SmtpTable {
+  ID,
   FROM_ADDRESS,
   CREATED,
   ADDRESS,

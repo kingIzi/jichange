@@ -158,7 +158,9 @@ export class SmtpListComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      7,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);

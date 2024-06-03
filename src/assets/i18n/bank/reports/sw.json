@@ -169,6 +169,7 @@
       }
     },
     "customerDetailReportTable": [
+      "#",
       "Jina la Mteja",
       "Simu",
       "Barua pepe",
@@ -192,6 +193,7 @@
       }
     },
     "userLogReportTable": [
+      "#",
       "Jina Kamili",
       "Anwani ya IP",
       "Maelezo",
@@ -223,11 +225,12 @@
       }
     },
     "auditTrailsTable": [
+      "#",
       "Hatua",
       "Jina la Safu",
       "Thamani ya Zamani",
       "Thamani Mpya",
-      "Imetumwa",
+      "Imetumwa na",
       "Tarehe ya Ukaguzi"
     ]
   }

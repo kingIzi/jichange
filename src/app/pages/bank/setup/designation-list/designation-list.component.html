@@ -125,7 +125,36 @@
                 class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                 [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
               >
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
+                <td
+                  *ngIf="
+                    headers.controls.at(DesignationTable.ID)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(DesignationTable.ID)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{
+                    PerformanceUtils.getIndexOfItem(designations, designation)
+                  }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls.at(DesignationTable.NAME)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(DesignationTable.NAME)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                >
                   {{ designation.Desg_Name }}
                 </td>
                 <td class="text-sm font-inter whitespace-nowrap px-6 py-3">

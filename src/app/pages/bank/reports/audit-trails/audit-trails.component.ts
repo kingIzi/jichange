@@ -42,6 +42,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AuditTrailsTable } from 'src/app/core/enums/bank/reports/audit-trails-table';
 import { AuditTrailsReportForm } from 'src/app/core/models/bank/forms/reports/audit-trails-report-form';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 
 @Component({
   selector: 'app-audit-trails',
@@ -91,22 +92,14 @@ export class AuditTrailsComponent implements OnInit {
   public headersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public AuditTrailsTable: typeof AuditTrailsTable = AuditTrailsTable;
-  public headersMap = {
-    ACTIONS: 0,
-    COLUMN_NAME: 1,
-    OLD_VALUE: 2,
-    NEW_VALUE: 3,
-    POSTED: 4,
-    AUDIT_DATE: 5,
-  };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
-    //private client: RequestClientService,
     private auditTrailsService: AuditTrailsService,
+    private fileHandler: FileHandlerService,
     private cdf: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -121,7 +114,9 @@ export class AuditTrailsComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      7,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -129,32 +124,32 @@ export class AuditTrailsComponent implements OnInit {
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
-      case this.headersMap.ACTIONS:
+      case AuditTrailsTable.ACTIONS:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.atype.toLocaleLowerCase() > b.atype.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.COLUMN_NAME:
+      case AuditTrailsTable.COLUMN_NAME:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.colname.toLocaleLowerCase() > b.colname.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.OLD_VALUE:
+      case AuditTrailsTable.OLD_VALUE:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.ovalue?.toLocaleLowerCase() > b.ovalue?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.NEW_VALUE:
+      case AuditTrailsTable.NEW_VALUE:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.nvalue?.toLocaleLowerCase() > b.nvalue?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.POSTED:
+      case AuditTrailsTable.POSTED:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.aby?.toLocaleLowerCase() > b.aby?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.AUDIT_DATE:
+      case AuditTrailsTable.AUDIT_DATE:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           new Date(a.adate) > new Date(b.adate) ? 1 : -1
         );
@@ -165,32 +160,32 @@ export class AuditTrailsComponent implements OnInit {
   }
   private sortTableDesc(ind: number): void {
     switch (ind) {
-      case this.headersMap.ACTIONS:
+      case AuditTrailsTable.ACTIONS:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.atype.toLocaleLowerCase() < b.atype.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.COLUMN_NAME:
+      case AuditTrailsTable.COLUMN_NAME:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.colname.toLocaleLowerCase() < b.colname.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.OLD_VALUE:
+      case AuditTrailsTable.OLD_VALUE:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.ovalue?.toLocaleLowerCase() < b.ovalue?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.NEW_VALUE:
+      case AuditTrailsTable.NEW_VALUE:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.nvalue?.toLocaleLowerCase() < b.nvalue?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.POSTED:
+      case AuditTrailsTable.POSTED:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           a.aby?.toLocaleLowerCase() < b.aby?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.AUDIT_DATE:
+      case AuditTrailsTable.AUDIT_DATE:
         this.auditTrails.sort((a: AuditTrail, b: AuditTrail) =>
           new Date(a.adate) < new Date(b.adate) ? 1 : -1
         );
@@ -291,17 +286,47 @@ export class AuditTrailsComponent implements OnInit {
         throw err;
       });
   }
+  private audiTrailKeys(indexes: number[]) {
+    let keys: string[] = [];
+    if (indexes.includes(AuditTrailsTable.ACTIONS)) {
+      keys.push('atype');
+    }
+    if (indexes.includes(AuditTrailsTable.COLUMN_NAME)) {
+      keys.push('colname');
+    }
+    if (indexes.includes(AuditTrailsTable.OLD_VALUE)) {
+      keys.push('ovalue');
+    }
+    if (indexes.includes(AuditTrailsTable.NEW_VALUE)) {
+      keys.push('nvalue');
+    }
+    if (indexes.includes(AuditTrailsTable.NEW_VALUE)) {
+      keys.push('nvalue');
+    }
+    if (indexes.includes(AuditTrailsTable.POSTED)) {
+      keys.push('aby');
+    }
+    if (indexes.includes(AuditTrailsTable.AUDIT_DATE)) {
+      keys.push('adate');
+    }
+    return keys;
+  }
+  private getActiveTableKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.audiTrailKeys(indexes);
+  }
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let search = searchText.toLocaleLowerCase();
-      this.auditTrails = this.auditTrails.filter((elem: AuditTrail) => {
-        return (
-          elem.ovalue?.toLocaleLowerCase().includes(search) ||
-          elem.nvalue?.toLocaleLowerCase().includes(search) ||
-          elem.atype?.toLocaleLowerCase().includes(search) ||
-          elem.colname?.toLocaleLowerCase().includes(search) ||
-          elem.aby?.toLocaleLowerCase().includes(search)
+      let keys = this.getActiveTableKeys();
+      let text = searchText.trim().toLowerCase();
+      this.auditTrails = this.auditTrailsData.filter((userReportLog: any) => {
+        return keys.some((key) =>
+          userReportLog[key]?.toLowerCase().includes(text)
         );
       });
     } else {
@@ -328,6 +353,22 @@ export class AuditTrailsComponent implements OnInit {
       this.filterAuditTrailsRequest(value);
     } else {
       this.formGroup.markAllAsTouched();
+    }
+  }
+  downloadSheet() {
+    if (this.auditTrailsData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.auditTrailsData,
+        this.getActiveTableKeys(),
+        'audit_trails_report',
+        ['adate']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
     }
   }
   get tbname() {

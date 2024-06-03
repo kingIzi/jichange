@@ -17,9 +17,6 @@
       (click)="openAddCountryDialog()"
       class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
     >
-      <!-- <span class="material-symbols-outlined text-darkPurple">
-        add_circle
-      </span> -->
       <span>
         <i class="bi bi-plus-circle text-darkPurple text-lg"></i>
       </span>
@@ -136,7 +133,30 @@
                 [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
               >
                 <td
-                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  *ngIf="
+                    headers.controls.at(CountryTable.ID)?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls.at(CountryTable.ID)?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ PerformanceUtils.getIndexOfItem(countries, country) }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls.at(CountryTable.NAME)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(CountryTable.NAME)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
                 >
                   {{ country.Country_Name }}
                 </td>

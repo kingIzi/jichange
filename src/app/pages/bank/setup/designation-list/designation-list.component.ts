@@ -46,6 +46,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/district/remove-district-form';
 import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { DesignationTable } from 'src/app/core/enums/bank/setup/designation-table';
 
 @Component({
   selector: 'app-designation-list',
@@ -80,6 +81,7 @@ export class DesignationListComponent implements OnInit {
   public designationsData: Designation[] = [];
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public DesignationTable: typeof DesignationTable = DesignationTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -116,7 +118,7 @@ export class DesignationListComponent implements OnInit {
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
-      case 0:
+      case DesignationTable.NAME:
         this.designations.sort((a, b) =>
           a.Desg_Name.toLocaleLowerCase() > b.Desg_Name.toLocaleLowerCase()
             ? 1
@@ -129,7 +131,7 @@ export class DesignationListComponent implements OnInit {
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
-      case 0:
+      case DesignationTable.NAME:
         this.designations.sort((a, b) =>
           a.Desg_Name.toLocaleLowerCase() < b.Desg_Name.toLocaleLowerCase()
             ? 1

@@ -1,4 +1,5 @@
 export enum AuditTrailsTable {
+  ID,
   ACTIONS,
   COLUMN_NAME,
   OLD_VALUE,

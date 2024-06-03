@@ -130,17 +130,60 @@
                 [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
               >
                 <td
-                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-semibold"
+                  *ngIf="
+                    headers.controls.at(BranchTable.ID)?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls.at(BranchTable.ID)?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ PerformanceUtils.getIndexOfItem(branches, branch) }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls.at(BranchTable.NAME)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(BranchTable.NAME)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                 >
                   {{ branch.Name }}
                 </td>
                 <td
-                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                  *ngIf="
+                    headers.controls.at(BranchTable.LOCATION)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(BranchTable.LOCATION)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                 >
                   {{ branch.Location }}
                 </td>
                 <td
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                  *ngIf="
+                    headers.controls.at(BranchTable.STATUS)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(BranchTable.STATUS)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                 >
                   <button
                     [class]="

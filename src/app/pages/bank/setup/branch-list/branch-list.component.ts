@@ -42,6 +42,7 @@ import {
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { BranchTable } from 'src/app/core/enums/bank/setup/branch-table';
 
 @Component({
   selector: 'app-branch-list',
@@ -76,12 +77,13 @@ export class BranchListComponent implements OnInit {
   public branchesData: Branch[] = [];
   public branchHeadersForm!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public headersMap = {
-    SNO: 0,
-    BRANCH: 1,
-    LOCATION: 2,
-    STATUS: 3,
-  };
+  public BranchTable: typeof BranchTable = BranchTable;
+  // public headersMap = {
+  //   SNO: 0,
+  //   BRANCH: 1,
+  //   LOCATION: 2,
+  //   STATUS: 3,
+  // };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -187,19 +189,19 @@ export class BranchListComponent implements OnInit {
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
-      case this.headersMap.BRANCH:
+      case BranchTable.NAME:
         this.branches.sort((a, b) =>
           a.Name.toLocaleLowerCase() > b.Name.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.LOCATION:
+      case BranchTable.LOCATION:
         this.branches.sort((a, b) =>
           a.Location.toLocaleLowerCase() > b.Location.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.STATUS:
+      case BranchTable.STATUS:
         this.branches.sort((a, b) =>
           a.Status.toLocaleLowerCase() > b.Status.toLocaleLowerCase() ? 1 : -1
         );
@@ -210,19 +212,19 @@ export class BranchListComponent implements OnInit {
   }
   private sortTableDesc(ind: number): void {
     switch (ind) {
-      case this.headersMap.BRANCH:
+      case BranchTable.NAME:
         this.branches.sort((a, b) =>
           a.Name.toLocaleLowerCase() < b.Name.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.LOCATION:
+      case BranchTable.LOCATION:
         this.branches.sort((a, b) =>
           a.Location.toLocaleLowerCase() < b.Location.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.STATUS:
+      case BranchTable.STATUS:
         this.branches.sort((a, b) =>
           a.Status.toLocaleLowerCase() < b.Status.toLocaleLowerCase() ? 1 : -1
         );

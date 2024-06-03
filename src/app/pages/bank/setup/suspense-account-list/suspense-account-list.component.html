@@ -134,6 +134,28 @@
                 <td
                   *ngIf="
                     headers.controls
+                      .at(SuspenseAccountTable.ID)
+                      ?.get('included')?.value
+                  "
+                  [class]="
+                    headers.controls
+                      .at(SuspenseAccountTable.ID)
+                      ?.get('included')?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{
+                    PerformanceUtils.getIndexOfItem(
+                      suspenseAccounts,
+                      suspenseAccount
+                    )
+                  }}
+                </td>
+                <td
+                  *ngIf="
+                    headers.controls
                       .at(SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER)
                       ?.get('included')?.value
                   "

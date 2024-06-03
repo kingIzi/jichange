@@ -1,4 +1,5 @@
 export enum UserLogReportTable {
+  ID,
   USERNAME,
   IP_ADDRESS,
   USER_GROUP,
