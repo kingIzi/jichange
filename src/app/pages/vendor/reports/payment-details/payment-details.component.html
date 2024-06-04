@@ -11,6 +11,14 @@
     >
       {{ t("payment") }}
     </h2>
+    <a
+      (click)="downloadSheet()"
+      class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+    >
+      <span>
+        <i class="bi bi-download text-success text-lg"></i>
+      </span>
+    </a>
   </div>
   <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
     <form
@@ -126,11 +134,8 @@
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("startDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("from") }}
         </p>
         <input
           type="date"
@@ -147,15 +152,13 @@
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("endDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("to") }}
         </p>
         <input
           type="date"
           [formControl]="enddate"
+          [min]="stdate.value"
           class="input input-sm input-bordered"
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
@@ -186,17 +189,19 @@
               role="button"
               class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
             >
-              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
               <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
                 {{ t("columns") }}
               </p>
-              <span class="material-symbols-outlined lg:block hidden">
-                arrow_drop_down
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
               </span>
             </button>
             <ul
               tabindex="0"
-              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 grid grid-cols-3"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 grid grid-cols-2"
             >
               <li *ngFor="let control of tableHeaders.controls">
                 <label class="label cursor-pointer">
@@ -223,10 +228,8 @@
               [placeholder]="t('search')"
               [formControl]="tableSearch"
             />
-            <span
-              class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-            >
-              search
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
             </span>
           </div>
         </div>
@@ -238,7 +241,7 @@
               <thead formArrayName="tableHeaders" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"
-                  class="bg-lightPurple"
+                  class="bg-lightPurple rounded-tl-lg w-full"
                 >
                   <ng-container
                     *ngFor="let header of tableHeaders.controls; index as ind"
@@ -246,7 +249,7 @@
                     <th
                       *ngIf="header.get('included')?.value"
                       scope="col"
-                      class="px-6 font-inter text-sm"
+                      class="px-6 py-2 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
@@ -255,22 +258,47 @@
                           {{ header?.get("label")?.value }}
                         </p>
                         <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
                           (click)="
                             PerformanceUtils.sortColumnClicked(
                               ind,
                               tableHeaders
                             )
                           "
+                          class="flex flex-row items-center m-1"
                         >
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
                           </span>
                         </button>
                       </div>
                     </th>
                   </ng-container>
+                  <!-- <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 font-inter text-sm text-right"
+                  >
+                    {{ t("action") }}
+                  </th> -->
                 </tr>
               </thead>
               <tbody>
@@ -289,6 +317,23 @@
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
                 >
+                  <td
+                    *ngIf="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      tableHeaders.controls
+                        .at(PaymentDetailsTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ PerformanceUtils.getIndexOfItem(payments, payment) }}
+                  </td>
                   <td
                     *ngIf="
                       tableHeaders.controls
@@ -357,7 +402,7 @@
                         ? ''
                         : 'hidden'
                     "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-semibold"
                   >
                     {{ payment.Invoice_Sno }}
                   </td>

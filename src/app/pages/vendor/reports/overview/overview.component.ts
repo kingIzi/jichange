@@ -102,19 +102,12 @@ export class OverviewComponent {
     this.invoiceSummaryData = new Chart(canvas, {
       type: 'doughnut',
       data: {
-        labels: ['Paid', 'Pending', 'In-Progress', 'Cancelled'],
+        labels: ['Paid', 'Pending', 'Cancelled'],
         datasets: [
           {
-            label: 'My First Dataset',
-            data: [300, 50, 438, 653],
+            label: 'Invoices',
+            data: [300, 50, 653],
             hoverOffset: 4,
-            backgroundColor: [
-              'rgba(63, 81, 181, 0.5)',
-              'rgba(77, 182, 172, 0.5)',
-              'rgba(66, 133, 244, 0.5)',
-              'rgba(156, 39, 176, 0.5)',
-              'rgba(233, 30, 99, 0.5)',
-            ],
           },
         ],
       },

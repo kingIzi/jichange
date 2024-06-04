@@ -41,11 +41,12 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
-import { TimeoutError } from 'rxjs';
+import { TimeoutError, from, zip } from 'rxjs';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/generated-invoice-list-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-dashboard',
@@ -85,14 +86,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public GeneratedInvoiceListTable: typeof GeneratedInvoiceListTable =
     GeneratedInvoiceListTable;
-  public headersMap = {
-    CUSTOMER_NAME: 0,
-    INVOICE_NUMBER: 1,
-    INVOICE_DATE: 2,
-    PAYMENT_TYPE: 3,
-    TOTAL_AMOUNT: 4,
-    DELIVERY_STATUS: 5,
-  };
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   @ViewChild('transactionChart') transactionChart!: ElementRef;
   @ViewChild('operationsChart') operationsChart!: ElementRef;
@@ -115,33 +108,28 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   private sortTableAsc(ind: number): void {
     switch (ind) {
-      case this.headersMap.INVOICE_NUMBER:
+      case GeneratedInvoiceListTable.INVOICE_NUMBER:
         this.generatedInvoices.sort((a, b) =>
           a.Invoice_No > b.Invoice_No ? 1 : -1
         );
         break;
-      case this.headersMap.INVOICE_DATE:
+      case GeneratedInvoiceListTable.INVOICE_DATE:
         this.generatedInvoices.sort((a, b) =>
           new Date(a.Invoice_Date) > new Date(b.Invoice_Date) ? 1 : -1
         );
         break;
-      case this.headersMap.CUSTOMER_NAME:
+      case GeneratedInvoiceListTable.CUSTOMER_NAME:
         this.generatedInvoices.sort((a, b) =>
-          a?.Chus_Name?.trim() > b?.Chus_Name?.trim() ? 1 : -1
+          a.Chus_Name > b.Chus_Name ? 1 : -1
         );
         break;
-      case this.headersMap.PAYMENT_TYPE:
+      case GeneratedInvoiceListTable.PAYMENT_TYPE:
         this.generatedInvoices.sort((a, b) =>
           a?.Payment_Type?.trim() > b?.Payment_Type?.trim() ? 1 : -1
         );
         break;
-      case this.headersMap.TOTAL_AMOUNT:
+      case GeneratedInvoiceListTable.TOTAL_AMOUNT:
         this.generatedInvoices.sort((a, b) => (a.Total > b.Total ? 1 : -1));
-        break;
-      case this.headersMap.DELIVERY_STATUS:
-        this.generatedInvoices.sort((a, b) =>
-          a?.delivery_status?.trim() > b?.delivery_status.trim() ? 1 : -1
-        );
         break;
       default:
         break;
@@ -149,63 +137,34 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   private sortTableDesc(ind: number): void {
     switch (ind) {
-      case this.headersMap.INVOICE_NUMBER:
+      case GeneratedInvoiceListTable.INVOICE_NUMBER:
         this.generatedInvoices.sort((a, b) =>
           a.Invoice_No < b.Invoice_No ? 1 : -1
         );
         break;
-      case this.headersMap.INVOICE_DATE:
+      case GeneratedInvoiceListTable.INVOICE_DATE:
         this.generatedInvoices.sort((a, b) =>
           new Date(a.Invoice_Date) < new Date(b.Invoice_Date) ? 1 : -1
         );
         break;
-      case this.headersMap.CUSTOMER_NAME:
+      case GeneratedInvoiceListTable.CUSTOMER_NAME:
         this.generatedInvoices.sort((a, b) =>
           a?.Chus_Name?.trim() < b?.Chus_Name?.trim() ? 1 : -1
         );
         break;
-      case this.headersMap.PAYMENT_TYPE:
+      case GeneratedInvoiceListTable.PAYMENT_TYPE:
         this.generatedInvoices.sort((a, b) =>
           a?.Payment_Type?.trim() < b?.Payment_Type?.trim() ? 1 : -1
         );
         break;
-      case this.headersMap.TOTAL_AMOUNT:
+      case GeneratedInvoiceListTable.TOTAL_AMOUNT:
         this.generatedInvoices.sort((a, b) => (a.Total < b.Total ? 1 : -1));
-        break;
-      case this.headersMap.DELIVERY_STATUS:
-        this.generatedInvoices.sort((a, b) =>
-          a?.delivery_status?.trim() < b?.delivery_status?.trim() ? 1 : -1
-        );
         break;
       default:
         break;
     }
   }
 
-  //request generted invoice
-  private requestGeneratedInvoice() {
-    this.tableLoading = true;
-    this.invoiceService
-      .postSignedDetails({ compid: this.userProfile.InstID })
-      .then((results) => {
-        if (typeof results.response === 'string') {
-        } else {
-          this.generatedInvoicesData = results.response;
-          this.generatedInvoices = this.generatedInvoicesData;
-        }
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      });
-  }
   //create formGroup for each header item in table
   private createHeadersForm() {
     this.tableHeadersFormGroup = this.fb.group({
@@ -218,71 +177,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
-  }
-  //creates a name and an active state FormControl, filtering data when the active state changes
-  private tableHeaderFilterValues(header: FormGroup, index: number) {
-    let values: string[] = this.getTableColumnDataVariations(index);
-    values.forEach((elem) => {
-      let value = this.fb.group({
-        name: this.fb.control(elem.trim(), []),
-        isActive: this.fb.control(true, []),
-      });
-      value.get('isActive')?.valueChanges.subscribe((value: string | any) => {
-        let filteringIndexes = [
-          this.headersMap.DELIVERY_STATUS,
-          this.headersMap.PAYMENT_TYPE,
-        ];
-        this.generatedInvoices = this.filterTable(filteringIndexes);
-      });
-      (header.get('values') as FormArray).push(value);
-    });
-  }
-  //finds the inActive values within the formArrays and filters their data
-  private filterTable(indexes: number[]) {
-    let [deliveryStatus, paymentType] = indexes;
-    let deliveryStatusArr = this.headers
-      ?.at(deliveryStatus)
-      ?.get('values') as FormArray;
-    let payments = this.headers?.at(paymentType)?.get('values') as FormArray;
-    let deliveryStatusValues = deliveryStatusArr.controls
-      .filter((v) => v.get('isActive')?.value)
-      .map((f) => f.get('name')?.value.toLocaleLowerCase());
-    let paymentValues = payments.controls
-      .filter((p) => p.get('isActive')?.value)
-      .map((f) => f.get('name')?.value.toLocaleLowerCase());
-    if (!deliveryStatusValues || !paymentValues) {
-      return [];
-    }
-    return this.generatedInvoicesData.filter((f) => {
-      return (
-        deliveryStatusValues.indexOf(
-          f.delivery_status.trim().toLocaleLowerCase()
-        ) !== -1 &&
-        paymentValues.indexOf(f.Payment_Type.trim().toLocaleLowerCase()) !== -1
-      );
-    });
-  }
-  //Given a column index, this function returns all unique values of the specified key in the arrays.
-  private getTableColumnDataVariations(ind: number) {
-    switch (ind) {
-      case this.headersMap.DELIVERY_STATUS:
-        let delivery_statusArr = new Set(
-          this.generatedInvoicesData.map((elem) => elem.delivery_status)
-        );
-        return delivery_statusArr.size <= 10 ? [...delivery_statusArr] : [];
-      case this.headersMap.PAYMENT_TYPE:
-        let paymentType = new Set(
-          this.generatedInvoicesData.map((e) => e.Payment_Type)
-        );
-        return paymentType.size <= 10 ? [...paymentType] : [];
-      default:
-        return [];
-    }
   }
   private createTransactionChart() {
     let canvas = this.transactionChart.nativeElement as HTMLCanvasElement;
@@ -294,12 +195,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           {
             label: 'Invoice report',
             data: [300, 209, 438, 653],
-            // backgroundColor: [
-            //   'rgba(63, 81, 181, 0.5)',
-            //   'rgba(77, 182, 172, 0.5)',
-            //   'rgba(156, 39, 176, 0.5)',
-            //   'rgba(233, 30, 99, 0.5)',
-            // ],
           },
         ],
       },
@@ -367,7 +262,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         (elem: GeneratedInvoice) => {
           return (
             elem?.Chus_Name?.toLocaleLowerCase().includes(text) ||
-            elem.Invoice_No.toLocaleLowerCase().includes(text)
+            elem.Invoice_No.toLocaleLowerCase().includes(text) ||
+            elem.Payment_Type.toLocaleLowerCase().includes(text)
           );
         }
       );
@@ -375,22 +271,55 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.generatedInvoices = this.generatedInvoicesData;
     }
   }
-  private requestInvoiceStatistics() {
+  private assignInvoiceStatistics(
+    result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
+  ) {
+    if (typeof result === 'string' && typeof result === 'number') {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`dashboard.dashboard.invoiceData.message`)
+      );
+    } else {
+      this.invoiceStatistics = result.response as DashboardOverviewStatistic[];
+    }
+  }
+  private assignGeneratedInvoice(
+    results: HttpDataResponse<string | GeneratedInvoice[]>
+  ) {
+    if (typeof results.response === 'string') {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    } else {
+      this.generatedInvoicesData = results.response;
+      this.generatedInvoices = this.generatedInvoicesData;
+    }
+    this.tableLoading = false;
+    this.cdr.detectChanges();
+  }
+  private buildPage() {
     this.overviewLoading = true;
-    this.invoiceService
-      .getCompanysInvoiceStats({ compid: this.userProfile.InstID })
-      .then((result) => {
-        if (typeof result === 'string' && typeof result === 'number') {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`dashboard.dashboard.invoiceData.message`)
-          );
-        } else {
-          this.invoiceStatistics =
-            result.response as DashboardOverviewStatistic[];
-        }
+    this.tableLoading = true;
+    let generatedInvoiceObs = from(
+      this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
+    );
+    let invoiceStatisticsObs = from(
+      this.invoiceService.getCompanysInvoiceStats({
+        compid: this.userProfile.InstID,
+      })
+    );
+    let mergedObs = zip(generatedInvoiceObs, invoiceStatisticsObs);
+    let res = AppUtilities.pipedObservables(mergedObs);
+    res
+      .then((results) => {
+        let [generatedInvoices, invoiceStatistics] = results;
+        this.assignGeneratedInvoice(generatedInvoices);
+        this.assignInvoiceStatistics(invoiceStatistics);
         this.overviewLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -400,7 +329,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           this.tr
         );
         this.overviewLoading = false;
+        this.tableLoading = false;
         this.cdr.detectChanges();
+        throw err;
       });
   }
   ngAfterViewInit(): void {
@@ -410,14 +341,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeadersForm();
-    this.requestGeneratedInvoice();
-    this.requestInvoiceStatistics();
+    this.buildPage();
   }
   dashboardStatisticRouterLink(name: string) {
     switch (name.toLocaleLowerCase()) {
       case 'Transaction'.toLocaleLowerCase():
         return '/vendor/reports/transactions';
-      case 'Customers'.toLocaleLowerCase():
+      case 'Customer'.toLocaleLowerCase():
         return '/vendor/customers';
       case 'Users'.toLocaleLowerCase():
         return '/vendor/company';

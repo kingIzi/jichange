@@ -48,6 +48,8 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { CancelledInvoice } from 'src/app/core/models/vendors/cancelled-invoice';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { CancelledInvoiceTable } from 'src/app/core/enums/vendor/reports/cancelled-invoice-table';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -86,7 +88,6 @@ export class InvoiceCancelledComponent implements OnInit {
   public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
   public invoices: GeneratedInvoice[] = [];
   public tableHeadersFormGroup!: FormGroup;
-  //public cancelledInvoices: GeneratedInvoice[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CancelledInvoiceTable: typeof CancelledInvoiceTable =
     CancelledInvoiceTable;
@@ -101,6 +102,7 @@ export class InvoiceCancelledComponent implements OnInit {
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
     private cancelledService: CancelledService,
+    private invoiceReportService: InvoiceReportServiceService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -135,6 +137,57 @@ export class InvoiceCancelledComponent implements OnInit {
       invno: this.fb.control('', []),
     });
     this.compid.disable({ emitEvent: true });
+    this.customerChanged();
+  }
+  private customerChanged() {
+    this.cust.valueChanges.subscribe((value) => {
+      if (value !== 'all') {
+        let form = {
+          Comp: this.userProfile.InstID,
+          cusid: value,
+          stdate: '',
+          enddate: '',
+        } as InvoiceReportForm;
+        this.startLoading = true;
+        this.invoiceReportService
+          .getInvoiceReport(form)
+          .then((result) => {
+            if (
+              typeof result.response !== 'string' &&
+              typeof result.response !== 'number' &&
+              result.response.length == 0
+            ) {
+              AppUtilities.openDisplayMessageBox(
+                this.displayMessageBox,
+                this.tr.translate(`defaults.failed`),
+                this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
+              );
+              this.invoices = [];
+            } else if (
+              typeof result.response !== 'string' &&
+              typeof result.response !== 'number' &&
+              result.response.length > 0
+            ) {
+              this.invoices = result.response as any;
+            }
+            this.startLoading = false;
+            this.cdr.detectChanges();
+          })
+          .catch((err) => {
+            this.invoices = [];
+            AppUtilities.requestFailedCatchError(
+              err,
+              this.displayMessageBox,
+              this.tr
+            );
+            this.startLoading = false;
+            this.cdr.detectChanges();
+            throw err;
+          });
+      } else {
+        this.invoices = [];
+      }
+    });
   }
   private buildPage() {
     this.startLoading = true;
@@ -144,26 +197,11 @@ export class InvoiceCancelledComponent implements OnInit {
         compid: this.userProfile.InstID,
       })
     );
-    let invoicesObservable = from(
-      this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
-    );
-    let mergedObservable = zip(
-      companiesObservable,
-      customersObservable,
-      invoicesObservable
-    );
-    lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    )
+    let mergedObservable = zip(companiesObservable, customersObservable);
+    let res = AppUtilities.pipedObservables(mergedObservable);
+    res
       .then((results) => {
-        let [companies, customers, invoices] = results;
+        let [companies, customers] = results;
         if (
           companies.response &&
           typeof companies.response !== 'string' &&
@@ -177,13 +215,6 @@ export class InvoiceCancelledComponent implements OnInit {
           typeof customers.response !== 'number'
         ) {
           this.customers = customers.response;
-        }
-        if (
-          invoices.response &&
-          typeof invoices.response !== 'string' &&
-          typeof invoices.response !== 'number'
-        ) {
-          this.invoices = invoices.response;
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -257,6 +288,8 @@ export class InvoiceCancelledComponent implements OnInit {
     }
   }
   private requestCancelledInvoice(value: any) {
+    this.invoicesListData = [];
+    this.invoicesList = this.invoicesListData;
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(value)

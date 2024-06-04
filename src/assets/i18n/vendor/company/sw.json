@@ -1,8 +1,9 @@
 {
-  "companyUsers": "Watumiaji wa Kampuni",
-  "addCompanyButton": "Ongeza watumiaji wa kampuni",
-  "failedToRetrieveCompanyUser": "Imeshindwa kupata mtumiaji wa kampuni.",
+  "companyUsers": "Watumiaji wa muuzaji",
+  "addCompanyButton": "Ongeza watumiaji wa muuzaji",
+  "failedToRetrieveCompanyUser": "Imeshindwa kupata mtumiaji wa muuzaji.",
   "companyTable": [
+    "#",
     "Jina la mtumiaji",
     "Aina ya mtumiaji",
     "Jina kamili",
@@ -16,7 +17,7 @@
     "mobileNo": "Namba ya simu",
     "emailId": "Barua pepe",
     "userPosition": "Nafasi ya mtumiaji",
-    "successMessage": "Kampuni imeongezwa kwa mafanikio!",
+    "successMessage": "muuzaji imeongezwa kwa mafanikio!",
     "placeholder": {
       "role": "Chagua jukumu",
       "username": "Ingiza jina la mtumiaji",
@@ -41,7 +42,7 @@
         "userPosition": "Lazima uingize nafasi ya mtumiaji",
         "fullName": "Lazima uingize jina kamili",
         "noRoleActFound": "Hakuna majukumu yaliyopatikana kwenye taasisi yako.",
-        "FailedToAddCompany": "Kushindwa kuongeza kampuni kwa sababu ya {}"
+        "FailedToAddCompany": "Kushindwa kuongeza muuzaji kwa sababu ya {}"
       }
     }
   }

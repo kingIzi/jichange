@@ -82,6 +82,7 @@
     "profile": "Umbo",
     "customer": "Wateja",
     "detail": "Maelezo",
+    "viewCustomerTransactions": "Miamala(s)",
     "users": "Watumiaji",
     "amendment": "Marekebisho",
     "cancelled": "Imekatishwa",
@@ -107,7 +108,7 @@
       "dropdowns": []
     },
     {
-      "name": "Watumiaji wa Kampuni",
+      "name": "Watumiaji wa muuzaji",
       "dropdowns": []
     },
     {
@@ -122,8 +123,7 @@
         "Maelezo ya Makadirio",
         "Maelezo ya Malipo",
         "Maelezo ya Mageuzi",
-        "Ankara iliyokatishwa",
-        "Ripoti ya Mtoa Huduma"
+        "Ankara iliyokatishwa"
       ]
     }
   ],

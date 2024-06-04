@@ -85,7 +85,7 @@
   "invoiceDetailsForm": {
     "invoiceDetails": "Maelezo ya Bili",
     "form": {
-      "company": "Kampuni",
+      "company": "Muuzaji",
       "customer": "Muuzaji",
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
@@ -109,17 +109,19 @@
           "invoiceNo": "Lazima uchague nambari ya ankara"
         }
       }
-    },
-    "cancelledInvoiceTable": [
-      "Nambari ya Bili",
-      "Jina la Mteja",
-      "Kiasi",
-      "Tarehe Iliyoundwa"
-    ]
+    }
   },
+  "cancelledInvoiceTable": [
+    "#",
+    "Nambari ya Bili",
+    "Jina la Mteja",
+    "Kiasi",
+    "Tarehe Iliyoundwa"
+  ],
   "createdInvoice": {
     "createdInvoice": "Ankara zilizoundwa",
     "createdInvoiceTable": [
+      "#",
       "Jina la Mteja",
       "Nambari ya Bili",
       "Tarehe ya Bili",

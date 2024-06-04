@@ -1,8 +1,9 @@
 {
-  "companyUsers": "Company users",
-  "addCompanyButton": "Add company users",
-  "failedToRetrieveCompanyUser": "Failed to retrieve company user.",
+  "companyUsers": "Vendor users",
+  "addCompanyButton": "Add vendor users",
+  "failedToRetrieveCompanyUser": "Failed to retrieve vendor user.",
   "companyTable": [
+    "#",
     "User name",
     "User type",
     "Full name",
@@ -41,7 +42,7 @@
         "userPosition": "You must enter user position",
         "fullName": "You must enter a Full name",
         "noRoleActFound": "No Roles found for this institution.",
-        "FailedToAddCompany": "Failed to add company because {}"
+        "FailedToAddCompany": "Failed to add a vendor because {}"
       }
     }
   }

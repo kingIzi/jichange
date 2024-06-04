@@ -376,7 +376,11 @@ export class AmendmentComponent implements OnInit {
   }
   private buildPage() {
     this.startLoading = true;
-    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let companiesObs = from(
+      this.reportsService.getBranchedCompanyList({
+        branch: this.userProfile.braid,
+      })
+    );
     let branchObs = from(this.branchService.postBranchList({}));
     let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
     res

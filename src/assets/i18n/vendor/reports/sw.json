@@ -19,12 +19,17 @@
   "transactionDetails": {
     "transactionDetails": "Maelezo ya Shughuli",
     "transactionDetailsTable": [
-      "Tarehe",
-      "Kampuni",
+      "#",
+      "Tarehe ya Malipo",
+      "Nambari ya Ankara",
+      "Jumla ya Kiasi",
+      "Kiasi Kilicholipwa",
+      "Kiasi kilichobaki",
+      "Nambari ya udhibiti",
+      "Aina ya Malipo",
+      "Njia ya Malipo",
       "Nambari ya Muamala",
-      "Maelezo",
-      "Kiasi",
-      "Hali"
+      "Nambari ya Risiti"
     ]
   },
   "amendmentDetails": {
@@ -50,6 +55,7 @@
   },
   "invoiceDetails": {
     "invoiceDetails": "Maelezo ya Bili",
+    "noInvoicesFound": "Hakuna ankara.",
     "form": {
       "company": "Kampuni",
       "customer": "Muuzaji",
@@ -75,11 +81,25 @@
         }
       }
     },
-    "invoiceDetailsTable": ["Nambari ya Bili", "Tarehe", "Mteja", "Jumla"]
+    "invoiceDetailsTable": [
+      "#",
+      "Imeundwa",
+      "Ankara N°",
+      "Nambari ya Udhibiti",
+      "Aina ya Malipo",
+      "JUMLA",
+      "Hali",
+      "Muuzaji",
+      "Mteja",
+      "Tarehe ya Ankara",
+      "Tarehe ya Mwisho",
+      "Tarehe ya Kumalizika"
+    ]
   },
   "paymentDetails": {
     "payment": "Malipo",
     "paymentsTable": [
+      "#",
       "Tarehe",
       "Mlipa",
       "Mteja",

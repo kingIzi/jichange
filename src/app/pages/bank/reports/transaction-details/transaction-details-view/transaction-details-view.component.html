@@ -11,30 +11,6 @@
     >
       {{ t("transaction") }}
     </h2>
-    <!-- <button
-      #downloadBtn
-      (click)="downloadPdf()"
-      class="inline-flex group w-40 h-14 relative transform active:scale-x-75 transition-transform"
-    >
-      <div
-        class="h-full w-14 rounded-full grid place-items-center p-2 bg-transparent relative"
-      >
-        <span class="material-symbols-outlined text-white z-50 duration-200">
-          download
-        </span>
-        <div
-          class="absolute w-full group-hover:w-40 duration-200 h-full left-0 top-0 right-0 bottom-0 rounded-full bg-[#282936]"
-        ></div>
-      </div>
-      <div class="h-full w-fit grid place-items-center">
-        <p
-          *transloco="let t; read: 'actions'"
-          class="text-lg group-hover:text-white z-50 duration-200"
-        >
-          {{ t("download") }}
-        </p>
-      </div>
-    </button> -->
     <div class="flex flex-row items-center space-x-2">
       <a
         (click)="downloadPdf(payments)"

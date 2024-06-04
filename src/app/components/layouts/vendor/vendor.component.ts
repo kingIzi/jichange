@@ -61,6 +61,10 @@ export class VendorComponent implements OnInit {
       this.tr.translate(`vendorRoutes.detail`)
     );
     this.breadcrumbService.set(
+      '@view-customer-transactions',
+      this.tr.translate(`vendorRoutes.viewCustomerTransactions`)
+    );
+    this.breadcrumbService.set(
       '@company',
       this.tr.translate(`vendorRoutes.users`)
     );

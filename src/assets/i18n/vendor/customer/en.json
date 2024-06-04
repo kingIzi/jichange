@@ -47,9 +47,9 @@
     "customerViewTableTitle": "Transactions",
     "customerInvoicesTable": [
       "#",
+      "Created",
       "Invoice N°",
-      "Date",
-      "Item Name",
+      "Control N°",
       "Amount",
       "status"
     ]

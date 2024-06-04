@@ -123,7 +123,9 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -291,7 +293,10 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
     });
     dialogRef.componentInstance.viewReady.asObservable().subscribe((view) => {
       this.fileHandler
-        .downloadPdf(view, 'generated-invoice.pdf')
+        .downloadPdf(
+          view,
+          `generated-invoice-${generatedInvoice.Invoice_No}.pdf`
+        )
         .then((results) => {
           this.cdr.detectChanges();
         })

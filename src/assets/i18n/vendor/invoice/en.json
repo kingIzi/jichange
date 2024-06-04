@@ -79,6 +79,7 @@
     }
   },
   "cancelledInvoiceTable": [
+    "#",
     "Invoice No",
     "Customer name",
     "Amount",
@@ -90,7 +91,7 @@
   "invoiceDetailsForm": {
     "invoiceDetails": "Invoice details",
     "form": {
-      "company": "Company",
+      "company": "Vendor",
       "customer": "Customer",
       "startDate": "Start date",
       "endDate": "End date",
@@ -127,6 +128,7 @@
   "createdInvoice": {
     "createdInvoice": "Created Invoice(s)",
     "createdInvoiceTable": [
+      "#",
       "Customer name",
       "Invoice No",
       "Invoice Date",

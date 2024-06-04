@@ -12,12 +12,17 @@
   "transactionDetails": {
     "transactionDetails": "Transaction Details",
     "transactionDetailsTable": [
-      "Date",
-      "Company",
+      "#",
+      "Payment Date",
+      "Invoice N°",
+      "Total Amount",
+      "Paid Amount",
+      "Balance",
+      "Control N°",
+      "Payment type",
+      "Payment Method",
       "Transaction N°",
-      "Description",
-      "Amount",
-      "Status"
+      "Receipt N°"
     ]
   },
   "amendmentDetails": {
@@ -43,6 +48,7 @@
   },
   "invoiceDetails": {
     "invoiceDetails": "Invoice details",
+    "noInvoicesFound": "No Invoices found.",
     "form": {
       "company": "Vendor",
       "customer": "Customer",
@@ -68,11 +74,25 @@
         }
       }
     },
-    "invoiceDetailsTable": ["Invoice No", "Date", "Customer", "Total"]
+    "invoiceDetailsTable": [
+      "#",
+      "Created",
+      "Invoice N°",
+      "Control N°",
+      "Payment Type",
+      "TOTAL",
+      "Status",
+      "Vendor",
+      "Customer",
+      "Invoice Date",
+      "Due Date",
+      "Expiry Date"
+    ]
   },
   "paymentDetails": {
     "payment": "Payment(s)",
     "paymentsTable": [
+      "#",
       "Date",
       "Payer",
       "Customer",

@@ -157,8 +157,6 @@ export class GeneratedInvoiceViewComponent implements OnInit {
         ? this.generatedInvoice.Customer_ID_No
         : ''
     );
-    //customerId: this.fb.control('',[]),
-    //customerNo: this.fb.control('',[])
     this.appendItems();
   }
   private failedToRetrieveInvoice() {

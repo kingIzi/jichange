@@ -41,6 +41,15 @@ export class ReportsService {
     );
     return data;
   }
+  public async getBranchedCompanyList(body: { branch: number | string }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        {},
+        HttpDataResponse<Company[] | string | number>
+      >(`/api/InvoiceRep/CompListB`, body)
+    );
+    return data;
+  }
   public async getUserLogTimes(body: { stdate: string; enddate: string }) {
     let data = await lastValueFrom(
       this.client.performPost(`/api/UserLog/LogtimeRep`, body)

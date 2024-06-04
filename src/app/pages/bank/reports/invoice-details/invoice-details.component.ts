@@ -118,7 +118,11 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private async buildPage() {
     this.startLoading = true;
-    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let companiesObs = from(
+      this.reportsService.getBranchedCompanyList({
+        branch: this.userProfile.braid,
+      })
+    );
     let branchObs = from(this.branchService.postBranchList({}));
     let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
     res
@@ -241,7 +245,11 @@ export class InvoiceDetailsComponent implements OnInit {
       let text = searchText.trim().toLowerCase();
       let keys = this.getTableActiveKeys();
       this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
+        return keys.some((key) => {
+          return typeof company[key] !== 'string'
+            ? false
+            : company[key]?.toLowerCase().includes(text);
+        });
       });
     } else {
       this.invoiceReports = this.invoiceReportsData;

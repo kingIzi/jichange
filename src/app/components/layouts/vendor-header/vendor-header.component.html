@@ -191,7 +191,9 @@
               [routerLink]="'/vendor/profile/' + userProfile.Usno"
               class="flex flex-row items-center"
             >
-              <span class="material-symbols-outlined"> account_circle </span>
+              <span>
+                <i class="bi bi-person-circle text-lg"></i>
+              </span>
               <p *transloco="let t; read: 'vendorRoutes'">
                 <span>{{ t("profile") }}</span>
               </p>

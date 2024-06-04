@@ -178,16 +178,13 @@
   <div class="w-full flex flex-row justify-between relative z-10">
     <div class="flex flex-col">
       <h4 class="font-bold text-sm lg:text-lg text-black">Note</h4>
-      <p class="text-black text-xs font-bold capitalize">
-        Remark:
+      <p
+        *transloco="let t; read: 'generated'"
+        class="text-black text-xs font-bold capitalize"
+      >
+        {{ t("remarks") }}:
         <span class="font-normal">{{ remark.value }}</span>
       </p>
-      <h6 class="text-xs font-bold text-black">
-        Bank name: <span class="font-normal">{{ bankName.value }}</span>
-      </h6>
-      <h6 class="text-xs font-bold text-black">
-        Account N°: <span class="font-normal">{{ accountNo.value }}</span>
-      </h6>
     </div>
   </div>
   <h6

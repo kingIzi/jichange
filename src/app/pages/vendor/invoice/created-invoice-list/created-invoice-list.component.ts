@@ -110,7 +110,9 @@ export class CreatedInvoiceListComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -377,16 +379,7 @@ export class CreatedInvoiceListComponent implements OnInit {
       })
     );
     let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
-    let res = lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    );
+    let res = AppUtilities.pipedObservables(mergedObservable);
     res
       .then((results) => {
         let [invoiceDetail, invoiceItems] = results;

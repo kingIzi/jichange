@@ -16,6 +16,7 @@ const routes: Routes = [
             data: {
               breadcrumb: { alias: 'dashboard', skip: false },
               animationState: 'dashboard',
+              reuseRoute: true,
             },
             loadComponent: () =>
               import(
@@ -51,15 +52,35 @@ const routes: Routes = [
               },
               {
                 path: ':id',
-                loadComponent: () =>
-                  import(
-                    '../../../pages/vendor/customers/customer-view/customer-view.component'
-                  ).then((c) => c.CustomerViewComponent),
-                data: {
-                  breadcrumb: { alias: 'view-customer', skip: false },
-                  animationState: 'isRight-1',
-                  reuseRoute: true,
-                },
+                children: [
+                  {
+                    path: '',
+                    loadComponent: () =>
+                      import(
+                        '../../../pages/vendor/customers/customer-view/customer-view.component'
+                      ).then((c) => c.CustomerViewComponent),
+                    data: {
+                      breadcrumb: { alias: 'view-customer', skip: false },
+                      animationState: 'isRight-1',
+                      reuseRoute: true,
+                    },
+                  },
+                  {
+                    path: ':id',
+                    loadComponent: () =>
+                      import(
+                        '../../../pages/bank/reports/transaction-details/transaction-details-view/transaction-details-view.component'
+                      ).then((c) => c.TransactionDetailsViewComponent),
+                    data: {
+                      breadcrumb: {
+                        alias: 'view-customer-transactions',
+                        skip: false,
+                        reuseRoute: true,
+                      },
+                      animationState: 'isRight-3',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -151,10 +172,14 @@ const routes: Routes = [
                     path: ':id',
                     loadComponent: () =>
                       import(
-                        '../../../pages/vendor/reports/transactions/details/details.component'
-                      ).then((c) => c.DetailsComponent),
+                        '../../../pages/bank/reports/transaction-details/transaction-details-view/transaction-details-view.component'
+                      ).then((c) => c.TransactionDetailsViewComponent),
                     data: {
-                      breadcrumb: { alias: 'transactions-id', skip: false },
+                      breadcrumb: {
+                        alias: 'view-customer-transactions',
+                        skip: false,
+                        reuseRoute: true,
+                      },
                       animationState: 'isRight-2',
                     },
                   },

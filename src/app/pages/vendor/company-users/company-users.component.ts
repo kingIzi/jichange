@@ -28,6 +28,7 @@ import {
 import { TimeoutError } from 'rxjs';
 import { CompanyUsersDialogComponent } from 'src/app/components/dialogs/Vendors/company-users-dialog/company-users-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { CompanyUsersTable } from 'src/app/core/enums/vendor/company/company-users-table';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
@@ -66,14 +67,15 @@ export class CompanyUsersComponent implements OnInit {
   public companUsersData: CompanyUser[] = [];
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
+  public CompanyUsersTable: typeof CompanyUsersTable = CompanyUsersTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public headersMap = {
-    USER_NAME: 0,
-    USER_TYPE: 1,
-    FULL_NAME: 2,
-    EMAIL: 3,
-    MOBILE_NUMBER: 3,
-  };
+  // public headersMap = {
+  //   USER_NAME: 0,
+  //   USER_TYPE: 1,
+  //   FULL_NAME: 2,
+  //   EMAIL: 3,
+  //   MOBILE_NUMBER: 3,
+  // };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -126,7 +128,9 @@ export class CompanyUsersComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -138,33 +142,33 @@ export class CompanyUsersComponent implements OnInit {
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
-      case this.headersMap.USER_NAME:
+      case CompanyUsersTable.USERNAME:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Username?.toLocaleLowerCase() > b?.Username?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.USER_TYPE:
+      case CompanyUsersTable.USERTYPE:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Usertype?.toLocaleLowerCase() > b?.Usertype?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.FULL_NAME:
+      case CompanyUsersTable.FULL_NAME:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Fullname?.toLocaleLowerCase() > b?.Fullname?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case CompanyUsersTable.EMAIL:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Email?.toLocaleLowerCase() > b?.Email?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.MOBILE_NUMBER:
+      case CompanyUsersTable.MOBILE_NUMBER:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Mobile?.toLocaleLowerCase() > b?.Mobile?.toLocaleLowerCase()
             ? 1
@@ -177,33 +181,33 @@ export class CompanyUsersComponent implements OnInit {
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
-      case this.headersMap.USER_NAME:
+      case CompanyUsersTable.USERNAME:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Username?.toLocaleLowerCase() < b?.Username?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.USER_TYPE:
+      case CompanyUsersTable.USERTYPE:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Usertype?.toLocaleLowerCase() < b?.Usertype?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.FULL_NAME:
+      case CompanyUsersTable.FULL_NAME:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Fullname?.toLocaleLowerCase() < b?.Fullname?.toLocaleLowerCase()
             ? 1
             : -1
         );
         break;
-      case this.headersMap.EMAIL:
+      case CompanyUsersTable.EMAIL:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Email?.toLocaleLowerCase() < b?.Email?.toLocaleLowerCase() ? 1 : -1
         );
         break;
-      case this.headersMap.MOBILE_NUMBER:
+      case CompanyUsersTable.MOBILE_NUMBER:
         this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
           a?.Mobile?.toLocaleLowerCase() < b?.Mobile?.toLocaleLowerCase()
             ? 1

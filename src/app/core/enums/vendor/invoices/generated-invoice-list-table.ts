@@ -1,4 +1,5 @@
 export enum GeneratedInvoiceListTable {
+  ID,
   CUSTOMER_NAME,
   INVOICE_NUMBER,
   INVOICE_DATE,

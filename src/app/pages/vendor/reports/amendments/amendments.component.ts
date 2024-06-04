@@ -39,7 +39,9 @@ import { AmendmentReportTable } from 'src/app/core/enums/vendor/reports/amendmen
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { AmendmentsService } from 'src/app/core/services/vendor/reports/amendments.service';
@@ -95,6 +97,7 @@ export class AmendmentsComponent implements OnInit {
     private invoiceService: InvoiceService,
     private reportService: ReportsService,
     private amendmentService: AmendmentsService,
+    private invoiceReportService: InvoiceReportServiceService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -113,6 +116,7 @@ export class AmendmentsComponent implements OnInit {
       invno: this.fb.control('', []),
     });
     this.compid.disable();
+    this.customerChanged();
   }
   private async createHeaderGroup() {
     this.tableFormGroup = this.fb.group({
@@ -211,6 +215,56 @@ export class AmendmentsComponent implements OnInit {
         break;
     }
   }
+  private customerChanged() {
+    this.cust.valueChanges.subscribe((value) => {
+      if (value !== 'all') {
+        let form = {
+          Comp: this.userProfile.InstID,
+          cusid: value,
+          stdate: '',
+          enddate: '',
+        } as InvoiceReportForm;
+        this.startLoading = true;
+        this.invoiceReportService
+          .getInvoiceReport(form)
+          .then((result) => {
+            if (
+              typeof result.response !== 'string' &&
+              typeof result.response !== 'number' &&
+              result.response.length == 0
+            ) {
+              AppUtilities.openDisplayMessageBox(
+                this.displayMessageBox,
+                this.tr.translate(`defaults.failed`),
+                this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
+              );
+              this.invoices = [];
+            } else if (
+              typeof result.response !== 'string' &&
+              typeof result.response !== 'number' &&
+              result.response.length > 0
+            ) {
+              this.invoices = result.response as any;
+            }
+            this.startLoading = false;
+            this.cdr.detectChanges();
+          })
+          .catch((err) => {
+            this.invoices = [];
+            AppUtilities.requestFailedCatchError(
+              err,
+              this.displayMessageBox,
+              this.tr
+            );
+            this.startLoading = false;
+            this.cdr.detectChanges();
+            throw err;
+          });
+      } else {
+        this.invoices = [];
+      }
+    });
+  }
   private buildPage() {
     this.startLoading = true;
     let companiesObservable = from(this.reportService.getCompaniesList({}));
@@ -219,26 +273,18 @@ export class AmendmentsComponent implements OnInit {
         compid: this.userProfile.InstID,
       })
     );
-    let invoicesObservable = from(
-      this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
-    );
+    // let invoicesObservable = from(
+    //   this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
+    // );
     let mergedObservable = zip(
       companiesObservable,
-      customersObservable,
-      invoicesObservable
+      customersObservable
+      //invoicesObservable
     );
-    lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    )
+    let res = AppUtilities.pipedObservables(mergedObservable);
+    res
       .then((results) => {
-        let [companies, customers, invoices] = results;
+        let [companies, customers] = results;
         if (
           companies.response &&
           typeof companies.response !== 'string' &&
@@ -253,14 +299,6 @@ export class AmendmentsComponent implements OnInit {
         ) {
           this.customers = customers.response;
         }
-        if (
-          invoices.response &&
-          typeof invoices.response !== 'string' &&
-          typeof invoices.response !== 'number'
-        ) {
-          this.invoices = invoices.response;
-        }
-        console.log(companies);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

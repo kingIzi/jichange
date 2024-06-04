@@ -148,7 +148,6 @@ export class TransactionDetailsComponent implements OnInit {
             typeof result.response !== 'string'
           ) {
             this.filterFormData.customers = result.response;
-            //this.customers = result.response;
           } else {
             if (this.compid.value !== 'all') {
               AppUtilities.openDisplayMessageBox(
@@ -159,7 +158,6 @@ export class TransactionDetailsComponent implements OnInit {
                 )
               );
             }
-            //this.customers = [];
             this.filterFormData.customers = [];
             this.cusid.setValue('all');
           }
@@ -310,7 +308,11 @@ export class TransactionDetailsComponent implements OnInit {
   }
   private buildPage() {
     this.startLoading = true;
-    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let companiesObs = from(
+      this.reportsService.getBranchedCompanyList({
+        branch: this.userProfile.braid,
+      })
+    );
     let branchObs = from(this.branchService.postBranchList({}));
     let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
     res

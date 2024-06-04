@@ -37,10 +37,12 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-details-table';
 
 @Component({
   selector: 'app-invoice-details',
@@ -75,8 +77,7 @@ export class InvoiceDetailsComponent implements OnInit {
   public invoiceReportsData: InvoiceReport[] = [];
   public customers: Customer[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public InvoiceDetailsReportTable: typeof InvoiceDetailsReportTable =
-    InvoiceDetailsReportTable;
+  public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -85,6 +86,7 @@ export class InvoiceDetailsComponent implements OnInit {
     private fb: FormBuilder,
     private reportService: ReportsService,
     private tr: TranslocoService,
+    private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     private invoiceReportService: InvoiceReportServiceService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -106,7 +108,9 @@ export class InvoiceDetailsComponent implements OnInit {
       this.scope,
       this.headers,
       this.fb,
-      this
+      this,
+      6,
+      true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
@@ -114,29 +118,228 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private invoiceReportKeys(indexes: number[]) {
     let keys: string[] = [];
-    if (indexes.includes(InvoiceDetailsReportTable.INVOICE_NUMBER)) {
+    if (indexes.includes(InvoiceDetailsTable.POSTED_DATE)) {
+      keys.push('p_date');
+    }
+    if (indexes.includes(InvoiceDetailsTable.INVOICE_NUMBER)) {
       keys.push('Invoice_No');
     }
-    if (indexes.includes(InvoiceDetailsReportTable.CUSTOMER)) {
+    if (indexes.includes(InvoiceDetailsTable.CONTROL_NUMBER)) {
+      keys.push('Control_No');
+    }
+    if (indexes.includes(InvoiceDetailsTable.PAYMENT_TYPE)) {
+      keys.push('Payment_Type');
+    }
+    if (indexes.includes(InvoiceDetailsTable.TOTAL)) {
+      keys.push('Total');
+    }
+    if (indexes.includes(InvoiceDetailsTable.STATUS)) {
+      keys.push('goods_status');
+    }
+    if (indexes.includes(InvoiceDetailsTable.COMPANY_NAME)) {
+      keys.push('Company_Name');
+    }
+    if (indexes.includes(InvoiceDetailsTable.CUSTOMER_NAME)) {
       keys.push('Chus_Name');
     }
+    if (indexes.includes(InvoiceDetailsTable.INVOICE_DATE)) {
+      keys.push('Invoice_Date');
+    }
+    if (indexes.includes(InvoiceDetailsTable.DUE_DATE)) {
+      keys.push('Due_Date');
+    }
+    if (indexes.includes(InvoiceDetailsTable.EXPIRY_DATE)) {
+      keys.push('Invoice_Expired_Date');
+    }
     return keys;
+  }
+  private getActiveKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.invoiceReportKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
-      let keys = this.invoiceReportKeys(indexes);
+      let text = searchText.trim().toLowerCase();
+      let keys = this.getActiveKeys();
       this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
+        return keys.some((key) => {
+          return typeof company[key] !== 'string'
+            ? false
+            : company[key]?.toLowerCase().includes(text);
+        });
       });
     } else {
       this.invoiceReports = this.invoiceReportsData;
+    }
+  }
+  private sortTableAsc(ind: number) {
+    switch (ind) {
+      case InvoiceDetailsTable.INVOICE_NUMBER:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Invoice_No.trim().toLocaleLowerCase() >
+          b.Invoice_No.trim().toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.CONTROL_NUMBER:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Control_No.trim().toLocaleLowerCase() >
+          b.Control_No.trim().toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.PAYMENT_TYPE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Payment_Type.trim().toLocaleLowerCase() >
+          b.Payment_Type.trim().toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.DUE_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.Due_Date.trim()).toLocaleDateString() >
+          new Date(b.Due_Date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.EXPIRY_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.Invoice_Expired_Date.trim()).toLocaleDateString() >
+          new Date(b.Invoice_Expired_Date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.POSTED_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.p_date.trim()).toLocaleDateString() >
+          new Date(b.p_date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.INVOICE_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.Invoice_Date.trim()).toLocaleDateString() >
+          new Date(b.Invoice_Date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.CUSTOMER_NAME:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Chus_Name.trim().toLocaleLowerCase() >
+          b.Chus_Name.trim().toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.TOTAL:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Total > b.Total ? 1 : -1
+        );
+        break;
+      case InvoiceDetailsTable.COMPANY_NAME:
+        this.invoiceReports.sort((a, b) =>
+          a.Company_Name.toLocaleLowerCase() >
+          b.Company_Name.toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+
+      default:
+        break;
+    }
+  }
+  private sortTableDesc(ind: number) {
+    switch (ind) {
+      case InvoiceDetailsTable.INVOICE_NUMBER:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Invoice_No.toLocaleLowerCase() < b.Invoice_No.toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.CONTROL_NUMBER:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Control_No.toLocaleLowerCase() < b.Control_No.toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.PAYMENT_TYPE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Payment_Type.toLocaleLowerCase() <
+          b.Payment_Type.toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.DUE_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.Due_Date.trim()).toLocaleDateString() <
+          new Date(b.Due_Date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.EXPIRY_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.Invoice_Expired_Date.trim()).toLocaleDateString() <
+          new Date(b.Invoice_Expired_Date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.POSTED_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.p_date.trim()).toLocaleDateString() <
+          new Date(b.p_date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.INVOICE_DATE:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          new Date(a.Invoice_Date.trim()).toLocaleDateString() <
+          new Date(b.Invoice_Date.trim()).toLocaleDateString()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.CUSTOMER_NAME:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Chus_Name.trim().toLocaleLowerCase() <
+          b.Chus_Name.trim().toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      case InvoiceDetailsTable.TOTAL:
+        this.invoiceReports.sort((a: InvoiceReport, b: InvoiceReport) =>
+          a.Total < b.Total ? 1 : -1
+        );
+        break;
+      case InvoiceDetailsTable.COMPANY_NAME:
+        this.invoiceReports.sort((a, b) =>
+          a.Company_Name.toLocaleLowerCase() <
+          b.Company_Name.toLocaleLowerCase()
+            ? 1
+            : -1
+        );
+        break;
+      default:
+        break;
     }
   }
   private createFilterFormGroup() {
@@ -180,14 +383,40 @@ export class InvoiceDetailsComponent implements OnInit {
       });
   }
   private requestInvoiceDetails(body: InvoiceReportForm) {
+    this.invoiceReportsData = [];
+    this.invoiceReports = this.invoiceReportsData;
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)
       .then((result) => {
+        // if (
+        //   result.response &&
+        //   typeof result.response !== 'number' &&
+        //   result.response !== 'string'
+        // ) {
+        //   this.invoiceReportsData = result.response as InvoiceReport[];
+        //   this.invoiceReports = this.invoiceReportsData;
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        // }
         if (
-          result.response &&
+          typeof result.response !== 'string' &&
           typeof result.response !== 'number' &&
-          result.response !== 'string'
+          result.response.length == 0
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        } else if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number' &&
+          result.response.length > 0
         ) {
           this.invoiceReportsData = result.response as InvoiceReport[];
           this.invoiceReports = this.invoiceReportsData;
@@ -211,6 +440,25 @@ export class InvoiceDetailsComponent implements OnInit {
     this.createHeaderGroup();
     this.createFilterFormGroup();
     this.buildPage();
+  }
+  downloadSheet() {
+    if (this.invoiceReportsData.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.invoiceReportsData,
+        this.getActiveKeys(),
+        'invoice_details_report',
+        ['Payment_Date']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  isCashAmountColumn(index: number) {
+    return index === InvoiceDetailsTable.TOTAL;
   }
   submitFilterForm() {
     if (this.filterFormGroup.valid) {

@@ -87,7 +87,7 @@
       "dropdowns": []
     },
     {
-      "name": "Company users",
+      "name": "Vendor users",
       "dropdowns": []
     },
     {
@@ -102,8 +102,7 @@
         "Invoice Details",
         "Payment Details",
         "Amendments Details",
-        "Cancelled invoice",
-        "Vendor Report"
+        "Cancelled invoice"
       ]
     }
   ],
@@ -147,6 +146,7 @@
     "profile": "Profile",
     "customer": "Customer(s)",
     "detail": "Detail(s)",
+    "viewCustomerTransactions": "Transaction(s)",
     "users": "User(s)",
     "amendment": "Amendment(s)",
     "cancelled": "Cancelled",

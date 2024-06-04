@@ -1,6 +1,3 @@
-<!-- <app-loader-infinite-spinner
-  [show]="startLoading"
-></app-loader-infinite-spinner> -->
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
@@ -15,9 +12,12 @@
       {{ t("invoiceDetails") }}
     </h2>
     <a
-      class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
+      (click)="downloadSheet()"
+      class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
     >
-      <span class="material-symbols-outlined text-warning"> bar_chart </span>
+      <span>
+        <i class="bi bi-download text-success text-lg"></i>
+      </span>
     </a>
   </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
@@ -64,11 +64,8 @@
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("startDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("from") }}
         </p>
         <input
           [formControl]="stdate"
@@ -85,11 +82,8 @@
         </span>
       </div>
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("endDate") }}
+        <p *transloco="let t; read: 'forms'" class="text-xs">
+          {{ t("to") }}
         </p>
         <input
           [formControl]="enddate"
@@ -125,12 +119,14 @@
               role="button"
               class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
             >
-              <span class="material-symbols-outlined text-sm"> view_week </span>
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
               <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
                 {{ t("columns") }}
               </p>
-              <span class="material-symbols-outlined lg:block hidden">
-                arrow_drop_down
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
               </span>
             </button>
             <ul
@@ -162,10 +158,8 @@
               [placeholder]="t('search')"
               [formControl]="tableSearch"
             />
-            <span
-              class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-            >
-              search
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
             </span>
           </div>
         </div>
@@ -185,37 +179,56 @@
                     <th
                       *ngIf="header.get('included')?.value"
                       scope="col"
-                      class="px-6 font-inter text-sm"
+                      class="px-6 py-2 font-inter text-sm"
                       [id]="'generated-invoice-id-' + ind"
                       formGroupName="{{ ind }}"
                     >
                       <div
                         class="flex items-center"
-                        [class]="
-                          ind === InvoiceDetailsReportTable.TOTAL ||
-                          ind === InvoiceDetailsReportTable.WITH_VAT ||
-                          ind === InvoiceDetailsReportTable.WITHOUT_VAT
-                            ? 'justify-end'
-                            : ''
-                        "
+                        [class]="isCashAmountColumn(ind) ? 'justify-end' : ''"
                       >
                         <p>
                           {{ header?.get("label")?.value }}
                         </p>
                         <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
                           (click)="
                             PerformanceUtils.sortColumnClicked(ind, headers)
                           "
+                          class="flex flex-row items-center m-1"
                         >
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
                           </span>
                         </button>
                       </div>
                     </th>
                   </ng-container>
+                  <!-- <th
+                    *transloco="let t; read: 'defaults'"
+                    class="px-6 font-inter text-sm text-right"
+                  >
+                    {{ t("action") }}
+                  </th> -->
                 </tr>
               </thead>
               <tbody>
@@ -233,7 +246,7 @@
                   class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                   [class]="ind % 2 !== 0 ? 'bg-neutral-50' : ''"
                 >
-                  <td
+                  <!-- <td
                     *ngIf="
                       headers.controls
                         .at(InvoiceDetailsReportTable.INVOICE_NUMBER)
@@ -353,6 +366,262 @@
                       )
                     }}
                     TZS
+                  </td> -->
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.ID)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.ID)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.getIndexOfItem(
+                        invoiceReports,
+                        invoiceReport
+                      )
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.POSTED_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.POSTED_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.p_date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.INVOICE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-semibold"
+                  >
+                    {{ invoiceReport.Invoice_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.CONTROL_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{ invoiceReport.Control_No }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.PAYMENT_TYPE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          invoiceReport.Payment_Type,
+                          'Fixed',
+                          'bg-purple-100',
+                          'text-black',
+                          'bg-teal-100',
+                          'text-black'
+                        )
+                      "
+                    >
+                      {{ invoiceReport.Payment_Type }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.TOTAL)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.TOTAL)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal text-right"
+                  >
+                    {{
+                      PerformanceUtils.moneyFormat(
+                        invoiceReport.Total.toString()
+                      )
+                    }}
+                    {{ invoiceReport.Currency_Code }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.STATUS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.STATUS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          invoiceReport.goods_status,
+                          'Approved'
+                        )
+                      "
+                    >
+                      {{
+                        invoiceReport.goods_status
+                          ? invoiceReport.goods_status
+                          : "-"
+                      }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.COMPANY_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.COMPANY_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{ invoiceReport.Company_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.CUSTOMER_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{ invoiceReport.Chus_Name }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.INVOICE_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.INVOICE_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.Invoice_Date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.DUE_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.DUE_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.Due_Date
+                      ).toDateString()
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(InvoiceDetailsTable.EXPIRY_DATE)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(InvoiceDetailsTable.EXPIRY_DATE)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                  >
+                    {{
+                      PerformanceUtils.convertDateStringToDate(
+                        invoiceReport.Invoice_Expired_Date
+                      ).toDateString()
+                    }}
                   </td>
                 </tr>
               </tbody>

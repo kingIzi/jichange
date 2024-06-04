@@ -37,12 +37,15 @@ import { formatDate } from '@angular/common';
 import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
 import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails/audit-trails.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import { TimeoutError } from 'rxjs';
+import { TimeoutError, from, zip } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AuditTrailsTable } from 'src/app/core/enums/bank/reports/audit-trails-table';
 import { AuditTrailsReportForm } from 'src/app/core/models/bank/forms/reports/audit-trails-report-form';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 
 @Component({
   selector: 'app-audit-trails',
@@ -87,9 +90,11 @@ export class AuditTrailsComponent implements OnInit {
   public formGroup!: FormGroup;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
+  public branches: Branch[] = [];
   public auditTrails: AuditTrail[] = [];
   public auditTrailsData: AuditTrail[] = [];
   public headersFormGroup!: FormGroup;
+  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public AuditTrailsTable: typeof AuditTrailsTable = AuditTrailsTable;
   @ViewChild('displayMessageBox')
@@ -100,9 +105,16 @@ export class AuditTrailsComponent implements OnInit {
     private tr: TranslocoService,
     private auditTrailsService: AuditTrailsService,
     private fileHandler: FileHandlerService,
+    private branchService: BranchService,
     private cdf: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createHeadersGroup() {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
@@ -214,7 +226,11 @@ export class AuditTrailsComponent implements OnInit {
         [Validators.required]
       ),
       act: this.fb.control(this.actions[0], [Validators.required]),
+      branch: this.fb.control(this.userProfile.braid, []),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
   }
   private formErrors(
     errorsPath: string = 'reports.auditTrails.form.errors.dialog'
@@ -333,9 +349,38 @@ export class AuditTrailsComponent implements OnInit {
       this.auditTrails = this.auditTrailsData;
     }
   }
+  private buildPage() {
+    this.startLoading = true;
+    let branchesObs = from(this.branchService.postBranchList({}));
+    let res = AppUtilities.pipedObservables(zip(branchesObs));
+    res
+      .then((results) => {
+        let [branches] = results;
+        if (
+          typeof branches.response !== 'string' &&
+          typeof branches.response !== 'number'
+        ) {
+          this.branches = branches.response;
+        }
+        this.startLoading = false;
+        this.cdf.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdf.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createForm();
     this.createHeadersGroup();
+    this.buildPage();
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
@@ -350,6 +395,7 @@ export class AuditTrailsComponent implements OnInit {
       value.Enddate = this.reformatDate(
         this.formGroup.value.Enddate.split('-')
       );
+      value.branch = this.branch.value;
       this.filterAuditTrailsRequest(value);
     } else {
       this.formGroup.markAllAsTouched();
@@ -382,6 +428,9 @@ export class AuditTrailsComponent implements OnInit {
   }
   get act() {
     return this.formGroup.get('act') as FormControl;
+  }
+  get branch() {
+    return this.formGroup.get('branch') as FormControl;
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

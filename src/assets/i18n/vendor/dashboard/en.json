@@ -26,6 +26,7 @@
     "viewAllInvoices": "View All",
     "latestTransactionsTitle": "Generated invoice(s)",
     "latestTransactionsTable": [
+      "#",
       "Customer name",
       "Invoice No",
       "Invoice Date",

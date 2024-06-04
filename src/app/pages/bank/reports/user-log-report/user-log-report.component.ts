@@ -33,11 +33,14 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { UserLog } from 'src/app/core/models/bank/reports/user-log';
 import { UserLogReportTable } from 'src/app/core/enums/bank/reports/user-log-report-table';
-import { TimeoutError } from 'rxjs';
+import { TimeoutError, from, zip } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 
 @Component({
   selector: 'app-user-log-report',
@@ -66,9 +69,11 @@ export class UserLogReportComponent implements OnInit {
   public startLoading: boolean = false;
   public userReportLogs: UserLog[] = [];
   public userReportLogsData: UserLog[] = [];
+  public branches: Branch[] = [];
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
   public tableLoading: boolean = false;
+  public userProfile!: LoginResponse;
   public UserLogReportTable: typeof UserLogReportTable = UserLogReportTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
@@ -78,15 +83,26 @@ export class UserLogReportComponent implements OnInit {
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private tr: TranslocoService,
+    private branchService: BranchService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createTableFilterFormGroup() {
     this.tableFilterFormGroup = this.fb.group({
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
+      branch: this.fb.control(this.userProfile.braid, []),
     });
+    if (Number(this.userProfile.braid) > 0) {
+      this.branch.disable();
+    }
   }
   private createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
@@ -247,7 +263,36 @@ export class UserLogReportComponent implements OnInit {
         throw err;
       });
   }
+  private buildPage() {
+    this.startLoading = true;
+    let branchesObs = from(this.branchService.postBranchList({}));
+    let res = AppUtilities.pipedObservables(zip(branchesObs));
+    res
+      .then((results) => {
+        let [branches] = results;
+        if (
+          typeof branches.response !== 'string' &&
+          typeof branches.response !== 'number'
+        ) {
+          this.branches = branches.response;
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
+    this.parseUserProfile();
+    this.buildPage();
     this.createTableFilterFormGroup();
     this.createTableHeadersFormGroup();
   }
@@ -281,6 +326,7 @@ export class UserLogReportComponent implements OnInit {
       value.enddate = AppUtilities.reformatDate(
         this.tableFilterFormGroup.value.enddate.split('-')
       );
+      value.branch = this.branch.value;
       this.userReportLogsData = [];
       this.userReportLogs = this.userReportLogsData;
       this.requestUserLog(value);
@@ -317,6 +363,9 @@ export class UserLogReportComponent implements OnInit {
   }
   get enddate() {
     return this.tableFilterFormGroup.get('enddate') as FormControl;
+  }
+  get branch() {
+    return this.tableFilterFormGroup.get('branch') as FormControl;
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

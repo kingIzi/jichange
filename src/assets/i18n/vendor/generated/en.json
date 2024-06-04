@@ -2,7 +2,9 @@
   "generatedInvoice": "Generated Invoice",
   "addInvoice": "Add Invoice",
   "contorolNumber": "Control number",
+  "remarks": "Remarks",
   "generatedInvoicesTable": [
+    "#",
     "Customer name",
     "Invoice No",
     "Invoice Date",

@@ -200,7 +200,11 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   private async buildPage() {
     this.startLoading = true;
-    let companiesObs = from(this.reportsService.getCompaniesList({}));
+    let companiesObs = from(
+      this.reportsService.getBranchedCompanyList({
+        branch: this.userProfile.braid,
+      })
+    );
     let regionsObs = from(this.companyService.getRegionList());
     let branchesObs = from(this.branchService.postBranchList({}));
     let mergedObservable = zip(companiesObs, regionsObs, branchesObs);
@@ -208,8 +212,6 @@ export class CustomerDetailReportComponent implements OnInit {
     res
       .then((results) => {
         let [companies, regions, branches] = results;
-        // this.filterFormData.companies = companies.response === 0 ? [] : companies.response;
-        // this.filterFormData.regions = regions.response === 0 ? [] : regions.response;
         if (
           typeof companies.response !== 'number' &&
           typeof companies.response !== 'string'

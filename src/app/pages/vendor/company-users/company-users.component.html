@@ -13,8 +13,8 @@
       (click)="openCompanyUsersDialog()"
       class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
     >
-      <span class="material-symbols-outlined text-darkPurple">
-        add_circle
+      <span>
+        <i class="bi bi-plus-circle text-darkPurple text-lg"></i>
       </span>
       <p *transloco="let t; read: 'company'" class="text-sm text-darkPurple">
         {{ t("addCompanyButton") }}
@@ -33,12 +33,14 @@
             role="button"
             class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
           >
-            <span class="material-symbols-outlined text-sm"> view_week </span>
+            <span>
+              <i class="bi bi-layout-three-columns text-sm"></i>
+            </span>
             <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
               {{ t("columns") }}
             </p>
-            <span class="material-symbols-outlined lg:block hidden">
-              arrow_drop_down
+            <span>
+              <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
             </span>
           </button>
           <ul
@@ -68,10 +70,8 @@
             [placeholder]="t('search')"
             [formControl]="tableSearch"
           />
-          <span
-            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-          >
-            search
+          <span class="absolute left-2 top-1/2 -translate-y-1/2">
+            <i class="bi bi-search text-neutral-content text-lg"></i>
           </span>
         </div>
       </div>
@@ -83,7 +83,7 @@
             <thead formArrayName="headers" class="border-b font-medium">
               <tr
                 *transloco="let t; read: 'tableData.vendor'"
-                class="bg-lightPurple"
+                class="bg-lightPurple rounded-tl-lg w-full"
               >
                 <ng-container
                   *ngFor="let header of headers.controls; index as ind"
@@ -91,7 +91,7 @@
                   <th
                     *ngIf="header.get('included')?.value"
                     scope="col"
-                    class="px-6 font-inter text-sm"
+                    class="px-6 py-2 font-inter text-sm"
                     [id]="'generated-invoice-id-' + ind"
                     formGroupName="{{ ind }}"
                   >
@@ -99,11 +99,34 @@
                       <p>
                         {{ header?.get("label")?.value }}
                       </p>
-                      <button (click)="sortColumnClicked(ind)">
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
+                      <button
+                        [class]="
+                          header.get('label')?.value === '#' ? 'hidden' : ''
+                        "
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
+                        class="flex flex-row items-center m-1"
+                      >
+                        <span>
+                          <i
+                            [class]="
+                              header.get('sortAsc')?.value
+                                ? 'text-darkPurple'
+                                : ''
+                            "
+                            class="bi bi-arrow-up"
+                          ></i>
+                        </span>
+                        <span>
+                          <i
+                            [class]="
+                              header.get('sortAsc')?.value
+                                ? ''
+                                : 'text-darkPurple'
+                            "
+                            class="bi bi-arrow-down"
+                          ></i>
                         </span>
                       </button>
                     </div>
@@ -135,13 +158,28 @@
               >
                 <td
                   *ngIf="
+                    headers.controls.at(CompanyUsersTable.ID)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(CompanyUsersTable.ID)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{ PerformanceUtils.getIndexOfItem(companUsers, companUser) }}
+                </td>
+                <td
+                  *ngIf="
                     headers.controls
-                      .at(this.headersMap.USER_NAME)
+                      .at(CompanyUsersTable.USERNAME)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.USER_NAME)
+                      .at(CompanyUsersTable.USERNAME)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -153,12 +191,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.USER_TYPE)
+                      .at(CompanyUsersTable.USERTYPE)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.USER_TYPE)
+                      .at(CompanyUsersTable.USERTYPE)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -170,12 +208,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.FULL_NAME)
+                      .at(CompanyUsersTable.FULL_NAME)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.FULL_NAME)
+                      .at(CompanyUsersTable.FULL_NAME)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -186,12 +224,14 @@
                 </td>
                 <td
                   *ngIf="
-                    headers.controls.at(this.headersMap.EMAIL)?.get('included')
-                      ?.value
+                    headers.controls
+                      .at(CompanyUsersTable.EMAIL)
+                      ?.get('included')?.value
                   "
                   [class]="
-                    headers.controls.at(this.headersMap.EMAIL)?.get('included')
-                      ?.value
+                    headers.controls
+                      .at(CompanyUsersTable.EMAIL)
+                      ?.get('included')?.value
                       ? ''
                       : 'hidden'
                   "
@@ -202,12 +242,12 @@
                 <td
                   *ngIf="
                     headers.controls
-                      .at(this.headersMap.MOBILE_NUMBER)
+                      .at(CompanyUsersTable.MOBILE_NUMBER)
                       ?.get('included')?.value
                   "
                   [class]="
                     headers.controls
-                      .at(this.headersMap.MOBILE_NUMBER)
+                      .at(CompanyUsersTable.MOBILE_NUMBER)
                       ?.get('included')?.value
                       ? ''
                       : 'hidden'
@@ -227,15 +267,10 @@
                       [attr.data-tip]="t('edit')"
                       (click)="openEditCompanyUserDialog(companUser)"
                     >
-                      <span class="material-symbols-outlined text-info">
-                        edit
+                      <span class="text-lg text-info">
+                        <i class="bi bi-pen text-lg"></i>
                       </span>
                     </button>
-                    <!-- <button class="btn btn-sm btn-ghost">
-                      <span class="material-symbols-outlined text-danger-600">
-                        delete
-                      </span>
-                    </button> -->
                   </div>
                 </td>
               </tr>

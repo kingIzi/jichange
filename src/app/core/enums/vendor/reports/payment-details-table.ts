@@ -1,4 +1,5 @@
 export enum PaymentDetailsTable {
+  ID,
   DATE,
   PAYER,
   CUSTOMER,

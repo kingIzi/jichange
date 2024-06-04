@@ -2,7 +2,9 @@
   "generatedInvoice": "Bili iliyotengenezwa",
   "addInvoice": "Ongeza Bili",
   "contorolNumber": "Nambari ya kudhibiti",
+  "remarks": "Maelezo",
   "generatedInvoicesTable": [
+    "#",
     "Jina la Mteja",
     "Nambari ya Bili",
     "Tarehe ya Bili",

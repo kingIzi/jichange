@@ -10,28 +10,7 @@
     <h2 *transloco="let t; read: 'generated'" class="text-lg font-bold">
       {{ t("generatedInvoice") }}
     </h2>
-    <div class="flex flex-row items-center space-x-2">
-      <!-- <a
-        (click)="openGeneratedInvoiceChart()"
-        class="flex flex-row items-center btn btn-sm border border-warning btn-ghost"
-      >
-        <span class="material-symbols-outlined text-warning"> bar_chart </span>
-      </a> -->
-      <!-- <a
-        (click)="openInvoiceDetailsDialog()"
-        class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
-      >
-        <span class="material-symbols-outlined text-darkPurple">
-          add_circle
-        </span>
-        <p
-          *transloco="let t; read: 'generated'"
-          class="text-sm text-darkPurple"
-        >
-          {{ t("addInvoice") }}
-        </p>
-      </a> -->
-    </div>
+    <div class="flex flex-row items-center space-x-2"></div>
   </div>
   <div
     [formGroup]="tableHeadersFormGroup"
@@ -45,12 +24,14 @@
             role="button"
             class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
           >
-            <span class="material-symbols-outlined text-sm"> view_week </span>
+            <span>
+              <i class="bi bi-layout-three-columns text-sm"></i>
+            </span>
             <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
               {{ t("columns") }}
             </p>
-            <span class="material-symbols-outlined lg:block hidden">
-              arrow_drop_down
+            <span>
+              <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
             </span>
           </button>
           <ul
@@ -80,10 +61,8 @@
             [placeholder]="t('search')"
             [formControl]="tableSearch"
           />
-          <span
-            class="material-symbols-outlined text-neutral-500 absolute top-1/2 left-1 -translate-y-1/2"
-          >
-            search
+          <span class="absolute left-2 top-1/2 -translate-y-1/2">
+            <i class="bi bi-search text-neutral-content text-lg"></i>
           </span>
         </div>
       </div>
@@ -95,7 +74,7 @@
             #generatedInvoiceTable
             class="min-w-full text-left text-sm font-light"
           >
-            <thead formArrayName="headers" class="border-b font-medium">
+            <!-- <thead formArrayName="headers" class="border-b font-medium">
               <tr
                 *transloco="let t; read: 'tableData.vendor'"
                 class="bg-lightPurple"
@@ -138,6 +117,66 @@
                   {{ t("action") }}
                 </th>
               </tr>
+            </thead> -->
+            <thead formArrayName="headers" class="border-b font-medium">
+              <tr
+                *transloco="let t; read: 'tableData.vendor'"
+                class="bg-lightPurple rounded-tl-lg w-full"
+              >
+                <ng-container
+                  *ngFor="let header of headers.controls; index as ind"
+                >
+                  <th
+                    *ngIf="header.get('included')?.value"
+                    scope="col"
+                    class="px-6 py-2 font-inter text-sm"
+                    [id]="'generated-invoice-id-' + ind"
+                    formGroupName="{{ ind }}"
+                  >
+                    <div class="flex items-center">
+                      <p>
+                        {{ header?.get("label")?.value }}
+                      </p>
+                      <button
+                        [class]="
+                          header.get('label')?.value === '#' ? 'hidden' : ''
+                        "
+                        (click)="
+                          PerformanceUtils.sortColumnClicked(ind, headers)
+                        "
+                        class="flex flex-row items-center m-1"
+                      >
+                        <span>
+                          <i
+                            [class]="
+                              header.get('sortAsc')?.value
+                                ? 'text-darkPurple'
+                                : ''
+                            "
+                            class="bi bi-arrow-up"
+                          ></i>
+                        </span>
+                        <span>
+                          <i
+                            [class]="
+                              header.get('sortAsc')?.value
+                                ? ''
+                                : 'text-darkPurple'
+                            "
+                            class="bi bi-arrow-down"
+                          ></i>
+                        </span>
+                      </button>
+                    </div>
+                  </th>
+                </ng-container>
+                <th
+                  *transloco="let t; read: 'defaults'"
+                  class="px-6 font-inter text-sm text-right"
+                >
+                  {{ t("action") }}
+                </th>
+              </tr>
             </thead>
             <tbody>
               <tr
@@ -155,6 +194,26 @@
                 class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
                 [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
               >
+                <td
+                  *ngIf="
+                    headers.controls.at(InvoiceListTable.ID)?.get('included')
+                      ?.value
+                  "
+                  [class]="
+                    headers.controls.at(InvoiceListTable.ID)?.get('included')
+                      ?.value
+                      ? ''
+                      : 'hidden'
+                  "
+                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                >
+                  {{
+                    PerformanceUtils.getIndexOfItem(
+                      generatedInvoices,
+                      generatedInvoice
+                    )
+                  }}
+                </td>
                 <td
                   *ngIf="
                     headers.controls
@@ -321,8 +380,8 @@
                       class="btn btn-sm btn-ghost tooltip"
                       (click)="openGeneratedInvoiceView(generatedInvoice)"
                     >
-                      <span class="material-symbols-outlined text-warning">
-                        visibility
+                      <span class="text-warning">
+                        <i class="bi bi-eye text-lg"></i>
                       </span>
                     </button>
                     <button
@@ -331,7 +390,9 @@
                       (click)="openAmmendInvoiceDialog(generatedInvoice)"
                       class="btn btn-sm btn-ghost tooltip"
                     >
-                      <span class="material-symbols-outlined"> cached </span>
+                      <span class="material-symbols-outlined">
+                        <i class="bi bi-arrow-repeat text-lg"></i>
+                      </span>
                     </button>
                     <button
                       *transloco="let t; read: 'actions'"
@@ -340,7 +401,7 @@
                       (click)="downloadInvoice(generatedInvoice)"
                     >
                       <span class="material-symbols-outlined text-linkBlue">
-                        download
+                        <i class="bi bi-download text-lg"></i>
                       </span>
                     </button>
                   </div>

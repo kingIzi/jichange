@@ -28,6 +28,46 @@
     </div>
   </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
+    <div class="flex flex-col space-y-1 col-span-full">
+      <p
+        *transloco="let t; read: 'reports.invoiceDetails.form'"
+        class="text-xs"
+      >
+        {{ t("branch") }}
+      </p>
+      <select
+        [formControl]="branch"
+        class="select select-sm select-bordered w-full"
+      >
+        <option
+          *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+          selected
+          [value]="'0'"
+        >
+          {{ t("all") }}
+        </option>
+        <ng-container *ngIf="branches.length > 0">
+          <option
+            *ngFor="
+              let branch of branches;
+              index as i;
+              trackBy: PerformanceUtils.trackByIndex
+            "
+            [value]="branch.Branch_Sno.toString()"
+          >
+            {{ branch.Name }}
+          </option>
+        </ng-container>
+      </select>
+      <span *ngIf="branch && branch.invalid && branch.touched">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+          class="text-danger-700 text-xs"
+        >
+          {{ t("branch") }}
+        </p>
+      </span>
+    </div>
     <form
       [formGroup]="formGroup"
       class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
@@ -192,41 +232,6 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <table class="min-w-full text-left text-sm font-light">
-              <!-- <thead formArrayName="headers" class="border-b font-medium">
-                <tr
-                  *transloco="let t; read: 'tableData.vendor'"
-                  class="bg-lightPurple rounded-tl-lg w-full"
-                >
-                  <ng-container
-                    *ngFor="let header of headers.controls; index as ind"
-                  >
-                    <th
-                      *ngIf="header.get('included')?.value"
-                      scope="col"
-                      class="px-6 font-inter text-sm"
-                      [id]="'generated-invoice-id-' + ind"
-                      formGroupName="{{ ind }}"
-                    >
-                      <div class="flex items-center">
-                        <p>
-                          {{ header?.get("label")?.value }}
-                        </p>
-                        <button
-                          (click)="
-                            PerformanceUtils.sortColumnClicked(ind, headers)
-                          "
-                        >
-                          <span
-                            class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                          >
-                            unfold_more
-                          </span>
-                        </button>
-                      </div>
-                    </th>
-                  </ng-container>
-                </tr>
-              </thead> -->
               <thead formArrayName="headers" class="border-b font-medium">
                 <tr
                   *transloco="let t; read: 'tableData.vendor'"

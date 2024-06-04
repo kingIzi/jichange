@@ -1,3 +1,4 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -23,28 +24,25 @@
               {{ t("customerDetails") }}
             </h2>
             <div class="flex flex-row items-center justify-between">
-              <!-- <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content rounded-full w-16">
-                  <span class="text-xl">AI</span>
+              <ng-container *ngIf="customer">
+                <div
+                  *transloco="
+                    let t;
+                    read: 'customer.customerView.customerDetails'
+                  "
+                  class="flex flex-col space-y-1"
+                >
+                  <p class="text-xs">
+                    <b>{{ t("name") }}:</b> {{ customer.Cust_Name }}
+                  </p>
+                  <p class="text-xs">
+                    <b>{{ t("email") }}:</b> {{ customer.Email }}
+                  </p>
+                  <p class="text-xs">
+                    <b>{{ t("mobile") }}:</b> {{ customer.Phone }}
+                  </p>
                 </div>
-              </div> -->
-              <div
-                *transloco="
-                  let t;
-                  read: 'customer.customerView.customerDetails'
-                "
-                class="flex flex-col space-y-1"
-              >
-                <p class="text-xs">
-                  <b>{{ t("name") }}:</b> Customer name
-                </p>
-                <p class="text-xs">
-                  <b>{{ t("email") }}:</b> customer&#64;name.com
-                </p>
-                <p class="text-xs">
-                  <b>{{ t("mobile") }}:</b> 255766373833
-                </p>
-              </div>
+              </ng-container>
             </div>
             <div class="card-actions justify-end"></div>
           </div>
@@ -138,7 +136,12 @@
                           [id]="'generated-invoice-id-' + ind"
                           formGroupName="{{ ind }}"
                         >
-                          <div class="flex items-center">
+                          <div
+                            class="flex items-center"
+                            [class]="
+                              isCashAmountColumn(ind) ? 'justify-end' : ''
+                            "
+                          >
                             <p>
                               {{ header?.get("label")?.value }}
                             </p>
@@ -185,121 +188,185 @@
                       </th>
                     </tr>
                   </thead>
-                  <!-- <tbody>
+                  <tbody>
                     <tr
                       *ngFor="
-                        let customer of customerInvoices
-                          | slice : 0 : itemPerPage;
-                        index as i
+                        let invoiceReport of invoiceReports
+                          | slice
+                            : 1 + paginator.pageSize * paginator.pageIndex - 1
+                            : 1 +
+                                paginator.pageSize * paginator.pageIndex +
+                                paginator.pageSize -
+                                1;
+                        index as ind;
+                        trackBy: PerformanceUtils.trackByIndex
                       "
                       class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                      [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
+                      [class]="ind % 2 !== 0 ? 'bg-neutral-50' : ''"
                     >
-                      <td class="whitespace-nowrap px-6 py-4">
-                        <div class="flex flex-row items-center">
-                          <p
-                            class="text-black font-semibold text-sm font-inter"
-                          >
-                            {{ customer.invoiceNo }}
-                          </p>
-                          <div class="dropdown">
-                            <div
-                              tabindex="0"
-                              role="button"
-                              class="btn btn-xs btn-ghost m-1"
-                            >
-                              <span class="material-symbols-outlined">
-                                arrow_drop_down
-                              </span>
-                            </div>
-                            <ul
-                              tabindex="0"
-                              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-                            >
-                              <li
-                                *ngFor="
-                                  let receipt of customer.receipts;
-                                  index as ind
-                                "
-                              >
-                                <button
-                                  (click)="openCustomerReceipt(receipt)"
-                                  class="flex flex-row items-center justify-between"
-                                >
-                                  <p class="text-xs text-black font-bold">
-                                    {{ receipt.receiptNo }}
-                                  </p>
-                                  <p class="text-xs text-black">
-                                    {{
-                                      convertDate(
-                                        receipt.date.toString()
-                                      ).toLocaleDateString()
-                                    }}
-                                  </p>
-                                </button>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                      </td>
                       <td
-                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                        *ngIf="
+                          headers.controls
+                            .at(CustomerViewTable.ID)
+                            ?.get('included')?.value
+                        "
+                        [class]="
+                          headers.controls
+                            .at(CustomerViewTable.ID)
+                            ?.get('included')?.value
+                            ? ''
+                            : 'hidden'
+                        "
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
                       >
                         {{
-                          convertDate(
-                            customer.date.toString()
-                          ).toLocaleDateString()
+                          PerformanceUtils.getIndexOfItem(
+                            invoiceReports,
+                            invoiceReport
+                          )
                         }}
                       </td>
                       <td
-                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                        *ngIf="
+                          headers.controls
+                            .at(CustomerViewTable.DATE)
+                            ?.get('included')?.value
+                        "
+                        [class]="
+                          headers.controls
+                            .at(CustomerViewTable.DATE)
+                            ?.get('included')?.value
+                            ? ''
+                            : 'hidden'
+                        "
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                       >
-                        {{ customer.itemName }}
+                        {{
+                          PerformanceUtils.convertDateStringToDate(
+                            invoiceReport.Invoice_Date
+                          ).toDateString()
+                        }}
                       </td>
                       <td
-                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                        *ngIf="
+                          headers.controls
+                            .at(CustomerViewTable.INVOICE_NUMBER)
+                            ?.get('included')?.value
+                        "
+                        [class]="
+                          headers.controls
+                            .at(CustomerViewTable.INVOICE_NUMBER)
+                            ?.get('included')?.value
+                            ? ''
+                            : 'hidden'
+                        "
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 font-semibold"
                       >
-                        {{ moneyFormat(customer.amount) }} TZS
+                        {{ invoiceReport.Invoice_No }}
                       </td>
                       <td
-                        class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black"
+                        *ngIf="
+                          headers.controls
+                            .at(CustomerViewTable.CONTROL_NUMBER)
+                            ?.get('included')?.value
+                        "
+                        [class]="
+                          headers.controls
+                            .at(CustomerViewTable.CONTROL_NUMBER)
+                            ?.get('included')?.value
+                            ? ''
+                            : 'hidden'
+                        "
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
+                      >
+                        {{ invoiceReport.Control_No }}
+                      </td>
+                      <td
+                        *ngIf="
+                          headers.controls
+                            .at(CustomerViewTable.AMOUNT)
+                            ?.get('included')?.value
+                        "
+                        [class]="
+                          headers.controls
+                            .at(CustomerViewTable.AMOUNT)
+                            ?.get('included')?.value
+                            ? ''
+                            : 'hidden'
+                        "
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal text-right"
+                      >
+                        {{
+                          PerformanceUtils.moneyFormat(
+                            invoiceReport.Total.toString()
+                          )
+                        }}
+                        {{ invoiceReport.Currency_Code }}
+                      </td>
+                      <td
+                        *ngIf="
+                          headers.controls
+                            .at(CustomerViewTable.STATUS)
+                            ?.get('included')?.value
+                        "
+                        [class]="
+                          headers.controls
+                            .at(CustomerViewTable.STATUS)
+                            ?.get('included')?.value
+                            ? ''
+                            : 'hidden'
+                        "
+                        class="text-sm font-inter whitespace-nowrap px-6 py-4 font-normal"
                       >
                         <button
-                          class="px-6 text-black text-xs rounded-full shadow p-2 w-full"
                           [class]="
-                            customer.status === 'Done'
-                              ? 'bg-green-200'
-                              : 'bg-orange-200'
+                            PerformanceUtils.getActiveStatusStyles(
+                              invoiceReport.goods_status,
+                              'Approved'
+                            )
                           "
                         >
-                          {{ customer.status }}
+                          {{
+                            invoiceReport.goods_status
+                              ? invoiceReport.goods_status
+                              : "-"
+                          }}
                         </button>
                       </td>
-
                       <td
                         class="text-sm font-inter whitespace-nowrap px-6 py-3"
                       >
                         <app-remove-item-dialog
                           #removeItemDialog
                         ></app-remove-item-dialog>
-                        <div class="flex flex-row items-center justify-between">
+                        <div
+                          class="flex flex-row items-center justify-end space-x-4"
+                        >
                           <button
-                            (click)="downloadAllRecipts(customer.receipts)"
+                            *transloco="let t; read: 'actions'"
+                            [routerLink]="
+                              '/vendor/customers/' +
+                              invoiceNumberToBase64(
+                                customer.Cust_Sno.toString()
+                              ) +
+                              '/' +
+                              invoiceNumberToBase64(invoiceReport.Invoice_No)
+                            "
+                            class="btn btn-sm bg-transparent tooltip"
+                            [attr.data-tip]="t('view')"
                           >
-                            <span
-                              class="material-symbols-outlined text-linkBlue"
-                            >
-                              download
+                            <span>
+                              <i class="bi bi-eye text-lg text-warning"></i>
                             </span>
                           </button>
                         </div>
                       </td>
                     </tr>
-                  </tbody> -->
+                  </tbody>
                 </table>
                 <div *transloco="let t; read: 'errors'">
                   <p
-                    *ngIf="customerInvoices.length <= 0"
+                    *ngIf="invoiceReports.length <= 0"
                     class="text-center text-sm tracking-wide pt-3 pb-1"
                   >
                     {{ t("noDataFound") }}
@@ -311,11 +378,11 @@
           <div class="flex flex-row items-center justify-end">
             <mat-paginator
               #paginator
-              [length]="customerInvoices.length"
+              [length]="invoiceReports.length"
               [pageSize]="5"
               [pageSizeOptions]="[5, 10, 20]"
               aria-label="Select page"
-              [showFirstLastButtons]="customerInvoices.length > 20"
+              [showFirstLastButtons]="invoiceReports.length > 20"
             >
             </mat-paginator>
           </div>

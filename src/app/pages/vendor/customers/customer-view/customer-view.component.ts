@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -34,6 +41,11 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { Customer } from 'src/app/core/models/vendors/customer';
+import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
+import { from, zip } from 'rxjs';
+import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import { CustomerViewTable } from 'src/app/core/enums/vendor/customers/customer-view-table';
 
 @Component({
   selector: 'app-customer-view',
@@ -46,6 +58,7 @@ import { Customer } from 'src/app/core/models/vendors/customer';
     },
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     TranslocoModule,
@@ -56,24 +69,30 @@ import { Customer } from 'src/app/core/models/vendors/customer';
     ReactiveFormsModule,
     MatPaginatorModule,
     LoaderInfiniteSpinnerComponent,
+    DisplayMessageBoxComponent,
   ],
 })
 export class CustomerViewComponent implements OnInit {
   public startLoading: boolean = false;
   public customer!: Customer;
+  public invoiceReports: InvoiceReport[] = [];
+  public invoiceReportsData: InvoiceReport[] = [];
+  public CustomerViewTable: typeof CustomerViewTable = CustomerViewTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public customerInvoices: CustomerInvoice[] = [];
-  public customerInvoicesData: CustomerInvoice[] = [];
   public headerFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild('displayMessageBox')
+  displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private customerService: CustomerService,
+    private invoiceReportService: InvoiceReportServiceService,
     private dialog: MatDialog,
     private fileHandler: FileHandlerService,
+    private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -101,8 +120,149 @@ export class CustomerViewComponent implements OnInit {
       this.searchTable(value, this.paginator);
     });
   }
-  private buildPage(customerId: string) {}
-  private searchTable(searchText: string, paginator: MatPaginator) {}
+  private buildPage(customerId: string) {
+    this.startLoading = true;
+    let customerObs = from(
+      this.customerService.getCustomerById({
+        compid: this.userProfile.InstID,
+        Sno: customerId,
+      })
+    );
+    let invoiceReportObs = from(
+      this.invoiceReportService.getInvoiceReport({
+        Comp: this.userProfile.InstID,
+        cusid: customerId,
+        stdate: '',
+        enddate: '',
+      })
+    );
+    let merged = zip(customerObs, invoiceReportObs);
+    let res = AppUtilities.pipedObservables(merged);
+    res
+      .then((results) => {
+        let [customer, invoices] = results;
+        if (
+          typeof customer.response !== 'string' &&
+          typeof customer.response !== 'number'
+        ) {
+          this.customer = customer.response;
+        }
+        if (
+          typeof invoices.response !== 'string' &&
+          typeof invoices.response !== 'number'
+        ) {
+          this.invoiceReportsData = invoices.response;
+          this.invoiceReports = this.invoiceReportsData;
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private sortTableAsc(ind: number) {
+    switch (ind) {
+      case CustomerViewTable.DATE:
+        this.invoiceReports.sort((a, b) =>
+          new Date(a.Invoice_Date) > new Date(b.Invoice_Date) ? 1 : -1
+        );
+        break;
+      case CustomerViewTable.INVOICE_NUMBER:
+        this.invoiceReports.sort((a, b) =>
+          a.Invoice_No > b.Invoice_No ? 1 : -1
+        );
+        break;
+      case CustomerViewTable.CONTROL_NUMBER:
+        this.invoiceReports.sort((a, b) =>
+          a.Control_No > b.Control_No ? 1 : -1
+        );
+        break;
+      case CustomerViewTable.AMOUNT:
+        this.invoiceReports.sort((a, b) => (a.Total > b.Total ? 1 : -1));
+        break;
+      case CustomerViewTable.STATUS:
+        this.invoiceReports.sort((a, b) =>
+          a.goods_status > b.goods_status ? 1 : -1
+        );
+        break;
+      default:
+        break;
+    }
+  }
+  private sortTableDesc(ind: number) {
+    switch (ind) {
+      case CustomerViewTable.DATE:
+        this.invoiceReports.sort((a, b) =>
+          new Date(a.Invoice_Date) < new Date(b.Invoice_Date) ? 1 : -1
+        );
+        break;
+      case CustomerViewTable.INVOICE_NUMBER:
+        this.invoiceReports.sort((a, b) =>
+          a.Invoice_No < b.Invoice_No ? 1 : -1
+        );
+        break;
+      case CustomerViewTable.CONTROL_NUMBER:
+        this.invoiceReports.sort((a, b) =>
+          a.Control_No < b.Control_No ? 1 : -1
+        );
+        break;
+      case CustomerViewTable.AMOUNT:
+        this.invoiceReports.sort((a, b) => (a.Total < b.Total ? 1 : -1));
+        break;
+      case CustomerViewTable.STATUS:
+        this.invoiceReports.sort((a, b) =>
+          a.goods_status < b.goods_status ? 1 : -1
+        );
+        break;
+      default:
+        break;
+    }
+  }
+  private customerViewTable(indexes: number[]) {
+    let keys: string[] = [];
+    if (indexes.includes(CustomerViewTable.DATE)) {
+      keys.push('Invoice_Date');
+    }
+    if (indexes.includes(CustomerViewTable.INVOICE_NUMBER)) {
+      keys.push('Invoice_No');
+    }
+    if (indexes.includes(CustomerViewTable.CONTROL_NUMBER)) {
+      keys.push('Control_No');
+    }
+    if (indexes.includes(CustomerViewTable.AMOUNT)) {
+      keys.push('Total');
+    }
+    if (indexes.includes(CustomerViewTable.STATUS)) {
+      keys.push('goods_status');
+    }
+    return keys;
+  }
+  private getActiveTableKeys() {
+    let indexes = this.headers.controls
+      .map((control, index) => {
+        return control.get('included')?.value ? index : -1;
+      })
+      .filter((num) => num !== -1);
+    return this.customerViewTable(indexes);
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    if (searchText) {
+      paginator.firstPage();
+      let text = searchText.trim().toLowerCase();
+      let keys = this.getActiveTableKeys();
+      this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
+        return keys.some((key) => company[key]?.toLowerCase().includes(text));
+      });
+    }
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.buildFormHeaders();
@@ -154,6 +314,12 @@ export class CustomerViewComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       console.log(`Dialog result: ${result}`);
     });
+  }
+  isCashAmountColumn(index: number) {
+    return index === CustomerViewTable.AMOUNT;
+  }
+  invoiceNumberToBase64(invoice_number: string) {
+    return btoa(invoice_number);
   }
   get headers() {
     return this.headerFormGroup.get('headers') as FormArray;

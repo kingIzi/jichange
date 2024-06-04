@@ -281,6 +281,9 @@ export const vendorAnimations = trigger('vendorAnimate', [
   transition(vendorReportRoutes.join(','), fadeEase()),
   transition('isLeft-1 => isRight-1', slideTo('right')),
   transition('isRight-1 => isLeft-1', slideTo('left')),
+  transition('isRight-1 => isRight-3', slideTo('right')),
+  transition('isRight-3 => isRight-1', slideTo('left')),
+  transition('isRight-3 => isLeft-1', slideTo('left')),
   transition(
     nestedRouteStates('isLeft-1', vendorInvoiceModules).join(','),
     stepper()
@@ -297,8 +300,18 @@ export const vendorAnimations = trigger('vendorAnimate', [
     nestedRouteStates('isRight-1', vendorReportsModules).join(','),
     stepper()
   ),
+  transition(
+    nestedRouteStates('isRight-3', vendorInvoiceModules).join(','),
+    stepper()
+  ),
+  transition(
+    nestedRouteStates('isRight-3', vendorReportsModules).join(','),
+    stepper()
+  ),
+  transition('isRight-3 => company-module-1', stepper()),
   transition('isLeft-1 <=> company-module-1', stepper()),
   transition('isRight-1 <=> company-module-1', stepper()),
+  transition('isRight-2 <=> isLeft-1', stepper()),
   transition('isLeft-2 => isRight-2', slideTo('right')),
   transition('isRight-2 => isLeft-2', slideTo('left')),
   transition(
