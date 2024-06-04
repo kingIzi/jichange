@@ -57,11 +57,17 @@ export class CustomerReceiptDialogComponent implements OnInit {
           []
         ),
         to: this.fb.control(payment.Customer_Name, []),
-        amount: this.fb.control(payment.PaidAmount, []),
+        amount: this.fb.control(
+          payment.PaidAmount.toString() + ' ' + payment.Currency_Code,
+          []
+        ),
         from: this.fb.control(payment.Payer_Name, []),
         for: this.fb.control(payment.Payment_Desc, []),
         method: this.fb.control(payment.Trans_Channel, []),
-        balance: this.fb.control(payment.Balance, []),
+        balance: this.fb.control(
+          payment.Balance.toString() + ' ' + payment.Currency_Code,
+          []
+        ),
         currencyCode: this.fb.control(payment.Currency_Code, []),
       });
       this.formGroups.push(group);
