@@ -28,7 +28,7 @@ export class AppUtilities {
       toast: true,
       icon: 'success',
       title: 'General Title',
-      animation: false,
+      //animation: false,
       position: 'top-right',
       showConfirmButton: false,
       timer: 3000,
@@ -36,7 +36,7 @@ export class AppUtilities {
         toast.addEventListener('mouseenter', Swal.stopTimer);
         toast.addEventListener('mouseleave', Swal.resumeTimer);
       },
-    });
+    }) as any;
     return toastMixin.fire({
       animation: true,
       title: message,

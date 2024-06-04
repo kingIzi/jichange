@@ -169,12 +169,13 @@ export class SignInComponent implements OnInit {
     });
   }
   submitSignInForm() {
-    if (this.formGroup.invalid) {
-      this.formGroup.markAllAsTouched();
-      this.formErrors();
-      return;
-    }
-    this.signIn(this.formGroup.value);
+    // if (this.formGroup.invalid) {
+    //   this.formGroup.markAllAsTouched();
+    //   this.formErrors();
+    //   return;
+    // }
+    // this.signIn(this.formGroup.value);
+    AppUtilities.sweetAlertSuccessMessage('Hello world');
   }
   get userName() {
     return this.formGroup.get('userName') as FormControl;
