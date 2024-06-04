@@ -24,12 +24,22 @@ export class AppUtilities {
   }
 
   static sweetAlertSuccessMessage(message: string) {
-    return Swal.fire({
-      position: 'top-end',
+    let toastMixin = Swal.mixin({
+      toast: true,
       icon: 'success',
-      title: message,
+      title: 'General Title',
+      animation: false,
+      position: 'top-right',
       showConfirmButton: false,
       timer: 3000,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      },
+    });
+    return toastMixin.fire({
+      animation: true,
+      title: message,
     });
   }
 

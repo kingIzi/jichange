@@ -21,7 +21,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, from, zip } from 'rxjs';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoginService } from 'src/app/core/services/login.service';
 import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
@@ -29,6 +29,10 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { NgxLoadingModule } from 'ngx-loading';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Keepalive } from '@ng-idle/keepalive';
+import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
+import { Customer } from 'src/app/core/models/vendors/customer';
+import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
+import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 
 @Component({
   selector: 'app-vendor-header',
@@ -51,6 +55,10 @@ export class VendorHeaderComponent implements OnInit {
   private idleState = 'Not started.';
   private timedOut = false;
   private lastPing!: Date;
+  public vendor: { Comp_Mas_Sno: number; Company_Name: string } = {
+    Comp_Mas_Sno: -1,
+    Company_Name: '',
+  };
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
   public userProfile!: LoginResponse;
@@ -70,6 +78,8 @@ export class VendorHeaderComponent implements OnInit {
   constructor(
     private tr: TranslocoService,
     private loginService: LoginService,
+    //private customerService: CustomerService,
+    private invoiceService: InvoiceService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private router: Router,
@@ -244,9 +254,36 @@ export class VendorHeaderComponent implements OnInit {
         return '';
     }
   }
+  private buildPage() {
+    let vendorObs = from(
+      this.invoiceService.getCompanyS({ compid: this.userProfile.InstID })
+    );
+    let res = AppUtilities.pipedObservables(zip(vendorObs));
+    res
+      .then((results) => {
+        let [vendor] = results;
+        if (typeof vendor.response !== 'string') {
+          this.vendor = vendor.response as {
+            Comp_Mas_Sno: number;
+            Company_Name: string;
+          };
+        }
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeaders();
+    this.buildPage();
   }
   getHeaderDropdownArray(index: number) {
     return this.headers.at(index).get('dropdowns') as FormArray;

@@ -79,14 +79,21 @@
         </li>
       </ul>
     </div>
-    <a [routerLink]="'/vendor'" class="text-xl cursor-pointer">
-      <img
-        class="w-20 lg:w-28"
-        src="assets/img/jichangelogo.png"
-        alt="TE Logo"
-        loading="lazy"
-      />
-    </a>
+    <div class="flex flex-row items-center">
+      <a [routerLink]="'/vendor'" class="text-xl cursor-pointer">
+        <img
+          class="w-20 lg:w-28"
+          src="assets/img/jichangelogo.png"
+          alt="TE Logo"
+          loading="lazy"
+        />
+      </a>
+      <ng-container *ngIf="vendor.Comp_Mas_Sno > 0">
+        <h1 class="text-lg head-title">
+          {{ vendor.Company_Name }}
+        </h1>
+      </ng-container>
+    </div>
   </div>
   <div
     [formGroup]="formGroup"

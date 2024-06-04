@@ -73,7 +73,12 @@ export class InvoiceService {
   }
   public async getCompanyS(body: { compid: number }) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Invoice/GetCompanyS`, body)
+      this.client.performPost<
+        { compid: number },
+        HttpDataResponse<
+          string | number | { Comp_Mas_Sno: number; Company_Name: string }
+        >
+      >(`/api/Invoice/GetCompanyS`, body)
     );
     return data;
   }
