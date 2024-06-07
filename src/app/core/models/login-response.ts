@@ -7,6 +7,7 @@ export class LoginResponse {
   role!: string;
   sessb!: string;
   uname!: string;
+  Uname!: string;
   fulname!: string;
   InstID!: number;
 }
