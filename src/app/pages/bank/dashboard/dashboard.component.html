@@ -143,7 +143,7 @@
       </a>
     </div>
     <div
-      *ngIf="transactions.length === 0"
+      *ngIf="latestTransactions.length === 0"
       class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
     >
       <p
@@ -154,7 +154,7 @@
       </p>
     </div>
     <div
-      *ngIf="transactions.length > 0"
+      *ngIf="latestTransactions.length > 0"
       class="w-full max-h-96 overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
     >
       <ul
@@ -164,9 +164,13 @@
         <li>
           <div class="flex flex-col space-y-2">
             <h6 class="font-semibold">
-              {{
+              <!-- {{
                 convertDotNetJSONDate(arr.at(0).date.toString()).toDateString()
-              }}
+              }} -->
+              <!-- {{
+                PerformanceUtils.convertDateStringToDate(arr.at(0).PaymentDate)
+              }} -->
+              Header goes here
             </h6>
             <div
               class="flex flex-col space-y-1 px-4"

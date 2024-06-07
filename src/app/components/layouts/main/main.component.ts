@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { BreadcrumbService, BreadcrumbModule } from 'xng-breadcrumb';
 import { fader } from './router-transition-animations';
 import { TranslocoService } from '@ngneat/transloco';
+import { NgxLoadingModule } from 'ngx-loading';
 
 @Component({
   selector: 'app-main',
@@ -36,9 +37,11 @@ import { TranslocoService } from '@ngneat/transloco';
     FooterComponent,
     CommonModule,
     BreadcrumbModule,
+    NgxLoadingModule,
   ],
 })
 export class MainComponent implements OnInit {
+  public routeLoading: boolean = false;
   @ViewChild('mainHeader') mainHeader!: HeaderComponent;
   constructor(
     private breadcrumbService: BreadcrumbService,
@@ -49,13 +52,13 @@ export class MainComponent implements OnInit {
     this.router.events.subscribe((event) => {
       switch (true) {
         case event instanceof NavigationStart: {
-          this.mainHeader.routeLoading = true;
+          this.routeLoading = true;
           break;
         }
         case event instanceof NavigationEnd:
         case event instanceof NavigationCancel:
         case event instanceof NavigationError: {
-          this.mainHeader.routeLoading = false;
+          this.routeLoading = false;
           break;
         }
         default: {

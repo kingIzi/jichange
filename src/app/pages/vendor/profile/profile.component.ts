@@ -109,7 +109,6 @@ export class ProfileComponent implements OnInit {
     private tr: TranslocoService,
     //private bankUserService: BankService,
     private companyUserService: CompanyUserService,
-    private activatedRoute: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
@@ -185,13 +184,7 @@ export class ProfileComponent implements OnInit {
     this.createGeneralFormGroup();
     this.createLanguageFormGroup();
     this.prepareActiveTabs();
-    this.activatedRoute.params.subscribe((params) => {
-      if (params['id']) {
-        this.requestEmployeeDetail({ sno: params['id'] });
-      } else {
-        this.router.navigate(['/auth']);
-      }
-    });
+    this.requestEmployeeDetail({ sno: this.userProfile.Usno });
   }
   saveLanguageClicked() {
     if (
@@ -230,13 +223,14 @@ export class ProfileComponent implements OnInit {
     });
     dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
       dialogRef.close();
-      this.activatedRoute.params.subscribe((params) => {
-        if (params['id']) {
-          this.requestEmployeeDetail({ sno: params['id'] });
-        } else {
-          this.router.navigate(['/auth']);
-        }
-      });
+      // this.activatedRoute.params.subscribe((params) => {
+      //   if (params['id']) {
+      //     this.requestEmployeeDetail({ sno: params['id'] });
+      //   } else {
+      //     this.router.navigate(['/auth']);
+      //   }
+      // });
+      this.requestEmployeeDetail({ sno: this.userProfile.Usno });
     });
   }
   setActiveTab(index: number) {

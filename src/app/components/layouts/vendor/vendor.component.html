@@ -1,9 +1,7 @@
-<!-- <div
-  class="relative w-full h-full"
-  [@vendorAnimate]="prepareRoute(outlet, 'animationState')"
->
-  <router-outlet #outlet="outlet"></router-outlet>
-</div> -->
+<ngx-loading
+  [show]="routeLoading"
+  [config]="{ backdropBorderRadius: '0.5px' }"
+></ngx-loading>
 
 <div class="h-screen w-screen overflow-x-hidden bg-jichangeDefault">
   <div

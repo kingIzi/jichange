@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   ViewChild,
@@ -20,6 +21,7 @@ import { VendorHeaderComponent } from '../vendor-header/vendor-header.component'
 import { vendorAnimations } from '../main/router-transition-animations';
 import { BreadcrumbModule, BreadcrumbService } from 'xng-breadcrumb';
 import { TranslocoService } from '@ngneat/transloco';
+import { NgxLoadingModule } from 'ngx-loading';
 
 @Component({
   selector: 'app-vendor',
@@ -32,16 +34,19 @@ import { TranslocoService } from '@ngneat/transloco';
     VendorHeaderComponent,
     FooterComponent,
     BreadcrumbModule,
+    NgxLoadingModule,
   ],
   animations: [vendorAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VendorComponent implements OnInit {
+  public routeLoading: boolean = false;
   @ViewChild('vendorHeader') vendorHeader!: VendorHeaderComponent;
   constructor(
     private breadcrumbService: BreadcrumbService,
     private router: Router,
-    private tr: TranslocoService
+    private tr: TranslocoService,
+    private cdr: ChangeDetectorRef
   ) {}
   private prepareVendorRoutes() {
     this.breadcrumbService.set(
@@ -117,13 +122,15 @@ export class VendorComponent implements OnInit {
     this.router.events.subscribe((event) => {
       switch (true) {
         case event instanceof NavigationStart: {
-          this.vendorHeader.routeLoading = true;
+          this.routeLoading = true;
+          this.cdr.detectChanges();
           break;
         }
         case event instanceof NavigationEnd:
         case event instanceof NavigationCancel:
         case event instanceof NavigationError: {
-          this.vendorHeader.routeLoading = false;
+          this.routeLoading = false;
+          this.cdr.detectChanges();
           break;
         }
         default: {
@@ -133,8 +140,8 @@ export class VendorComponent implements OnInit {
     });
   }
   ngOnInit(): void {
-    this.prepareVendorRoutes();
     this.routeLoaderListener();
+    this.prepareVendorRoutes();
   }
   prepareRoute(outlet: RouterOutlet, animate: string): boolean {
     return (

@@ -24,7 +24,7 @@ const routes: Routes = [
               ).then((c) => c.DashboardComponent),
           },
           {
-            path: 'profile/:id',
+            path: 'profile',
             data: {
               breadcrumb: { alias: 'profile', skip: false },
               animationState: 'profile',

@@ -1,10 +1,10 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-display-message-box #timeoutWarning></app-display-message-box>
 <app-display-message-box #timeOut></app-display-message-box>
-<ngx-loading
+<!-- <ngx-loading
   [show]="routeLoading"
   [config]="{ backdropBorderRadius: '0.5px' }"
-></ngx-loading>
+></ngx-loading> -->
 
 <div class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
@@ -192,7 +192,7 @@
         >
           <li>
             <a
-              [routerLink]="'/vendor/profile/' + userProfile.Usno"
+              [routerLink]="'/vendor/profile'"
               class="flex flex-row items-center"
             >
               <span>

@@ -59,6 +59,7 @@ import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/
 import { TableFormHeadersComponent } from 'src/app/reusables/table-form-headers/table-form-headers.component';
 import { DashboardCompanySummaryTable } from 'src/app/core/enums/bank/company/company-summary-table';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
+import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 
 @Component({
   selector: 'app-dashboard',
@@ -99,9 +100,10 @@ export class DashboardComponent implements OnInit {
   public companies: Company[] = [];
   public tableCompanies: Company[] = [];
   public tableCompaniesData: Company[] = [];
+  public latestTransactions: TransactionDetail[] = [];
   public DashboardCompanySummaryTable: typeof DashboardCompanySummaryTable =
     DashboardCompanySummaryTable;
-  public transactions: any[] = [];
+  //public transactions: any[] = [];
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -339,32 +341,119 @@ export class DashboardComponent implements OnInit {
       this.tableCompanies = this.tableCompaniesData;
     }
   }
+  public buildPage() {
+    this.inboxApprovalLoading = true;
+    this.overviewLoading = true;
+    this.tableLoading = true;
+    let approvalsObs = from(
+      this.approvalService.postCompanyInboxList({
+        design: this.userProfile.desig,
+        braid: Number(this.userProfile.braid),
+      } as CompanyInboxListForm)
+    );
+    let bankerInvoiceStatsObs = from(
+      this.reportsService.getBankerInvoiceStats({
+        sessB: this.userProfile.sessb,
+      })
+    );
+    let compListObs = from(this.companyService.getCustomersList({}));
+    let latestTransactionsObs = from(
+      this.reportsService.getLatestTransactionsList({})
+    );
+    let merged = zip(
+      approvalsObs,
+      bankerInvoiceStatsObs,
+      compListObs,
+      latestTransactionsObs
+    );
+    let res = AppUtilities.pipedObservables(merged);
+    res
+      .then((results) => {
+        let [approvals, stats, compList, latestTransactions] = results;
+        if (
+          typeof approvals.response !== 'string' &&
+          typeof approvals.response !== 'number'
+        ) {
+          this.inboxApprovals = approvals.response;
+        }
+        if (
+          typeof stats.response !== 'string' &&
+          typeof stats.response !== 'number'
+        ) {
+          this.invoiceStatistics = stats.response;
+        }
+        if (
+          typeof compList.response !== 'string' &&
+          typeof compList.response !== 'number'
+        ) {
+          this.tableCompaniesData = compList.response;
+          this.tableCompanies = this.tableCompaniesData;
+        }
+        if (
+          typeof latestTransactions.response !== 'string' &&
+          typeof latestTransactions.response !== 'number'
+        ) {
+          this.latestTransactions = latestTransactions.response;
+        }
+        this.inboxApprovalLoading = false;
+        this.overviewLoading = false;
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.inboxApprovalLoading = false;
+        this.overviewLoading = false;
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createTableHeadersFormGroup();
-    //this.buildPage();
     this.breadcrumbService.set('@dashboard', 'Child One');
-    this.requestInboxApprovals();
-    this.requestBankerInvoiceStats();
-    this.requestCompanyList();
-    //let data = JSON.parse(JSON.stringify(json));
-    //this.transactions = data.transactionDetails;
+    this.buildPage();
   }
   transactionsLatest(): any[] {
-    let groupedByDate = this.transactions.reduce((acc, obj) => {
-      let jsDate = AppUtilities.convertDotNetJsonDateToDate(obj.date);
-      let date = AppUtilities.dateToFormat(jsDate, 'yyyy-MM-dd');
+    // let groupedByDate = this.transactions.reduce((acc, obj) => {
+    //   let jsDate = AppUtilities.convertDotNetJsonDateToDate(obj.date);
+    //   let date = AppUtilities.dateToFormat(jsDate, 'yyyy-MM-dd');
+    //   if (!acc[date]) {
+    //     acc[date] = [];
+    //   }
+    //   acc[date].push(obj);
+    //   return acc;
+    // }, {});
+    // let results = Object.values(groupedByDate);
+    // results.forEach((arr: any) => {
+    //   return arr.sort((a: any, b: any) => {
+    //     let a1 = AppUtilities.convertDotNetJsonDateToDate(a.date.toString());
+    //     let b1 = AppUtilities.convertDotNetJsonDateToDate(b.date.toString());
+    //     return a1 < b1;
+    //   });
+    // });
+    // return results;
+    let groupedByDate = this.latestTransactions.reduce((acc, obj) => {
+      let paymentDate = PerformanceUtils.convertDateStringToDate(
+        obj.Payment_Date
+      );
+      let date = paymentDate.toDateString(); //AppUtilities.dateToFormat(paymentDate, 'ddd-MMM-yy');
       if (!acc[date]) {
         acc[date] = [];
       }
       acc[date].push(obj);
       return acc;
-    }, {});
+    }, {} as any);
     let results = Object.values(groupedByDate);
     results.forEach((arr: any) => {
       return arr.sort((a: any, b: any) => {
-        let a1 = AppUtilities.convertDotNetJsonDateToDate(a.date.toString());
-        let b1 = AppUtilities.convertDotNetJsonDateToDate(b.date.toString());
+        let a1 = PerformanceUtils.convertDateStringToDate(a.Payment_Date); //AppUtilities.convertDotNetJsonDateToDate(a.date.toString());
+        let b1 = PerformanceUtils.convertDateStringToDate(b.Payment_Date); //AppUtilities.convertDotNetJsonDateToDate(b.date.toString());
         return a1 < b1;
       });
     });

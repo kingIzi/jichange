@@ -94,4 +94,13 @@ export class ReportsService {
     );
     return data;
   }
+  public async getLatestTransactionsList(body: {}) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        {},
+        HttpDataResponse<string | number | TransactionDetail[]>
+      >(`/api/Setup/LatTransList`, body)
+    );
+    return data;
+  }
 }
