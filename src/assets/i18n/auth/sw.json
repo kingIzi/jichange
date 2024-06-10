@@ -140,6 +140,25 @@
       }
     }
   },
+  "changePassword": {
+    "changePassword": "Badilisha nywila",
+    "completeForm": "Jaza fomu hapa chini ili uendelee",
+    "form": {
+      "mobileNumber": "Nambari ya simu",
+      "password": "Nenosiri",
+      "confirmPassword": "Thibitisha nenosiri",
+      "placeholders": {
+        "mobileNumber": "Ingiza nambari ya simu",
+        "password": "Ingiza nenosiri",
+        "confirmPassword": "Thibitisha nenosiri"
+      },
+      "errors": {
+        "mobileNumber": "Tafadhali ingiza nambari ya simu",
+        "password": "Tafadhali jaza",
+        "confirmPassword": "Tafadhali jaza"
+      }
+    }
+  },
   "profile": {
     "settings": "Mipangilio",
     "saveChanges": "Hifadhi Mabadiliko",

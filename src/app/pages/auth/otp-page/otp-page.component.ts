@@ -12,8 +12,9 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
+import { divToggle } from '../auth-animations';
 
 @Component({
   selector: 'app-otp-page',
@@ -23,14 +24,21 @@ import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
   providers: [{ provide: TRANSLOCO_SCOPE, useValue: 'auth' }],
   templateUrl: './otp-page.component.html',
   styleUrl: './otp-page.component.scss',
+  animations: [divToggle],
 })
 export class OtpPageComponent implements OnInit {
   public formGroup!: FormGroup;
   private counterValue: number = 0;
   private intervalId: number | undefined;
   private duration: number = 2 * 60 * 1000;
-  public resendCodeCounter: number = 120; //2 minutes
-  constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+  public resendCodeCounter: number = 5; //2 minutes
+  private phoneNumber: string = '';
+  constructor(
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {}
   private createFormGroup() {
     this.formGroup = this.fb.group({
       otp: this.fb.control('', [Validators.required]),
@@ -39,14 +47,12 @@ export class OtpPageComponent implements OnInit {
   private startCounter(): void {
     this.intervalId = window.setInterval(() => {
       this.resendCodeCounter--;
+      if (this.resendCodeCounter == 0) {
+        this.stopCounter();
+      }
       console.log(this.resendCodeCounter);
       this.cdr.detectChanges();
     }, 1000);
-
-    // Stop the counter after the duration
-    setTimeout(() => {
-      this.stopCounter();
-    }, this.duration);
   }
 
   private stopCounter(): void {
@@ -58,16 +64,17 @@ export class OtpPageComponent implements OnInit {
   ngOnInit(): void {
     this.createFormGroup();
     this.startCounter();
+    this.activatedRoute.params.subscribe((params: any) => {
+      this.phoneNumber = atob(params['phone']);
+    });
   }
   resendCode() {
-    if (this.resendCodeCounter > 0) {
-    } else {
-      this.startCounter();
-    }
+    this.resendCodeCounter = 5;
+    this.startCounter();
   }
   submitForm() {
     if (this.formGroup.valid) {
-      alert('reset user password');
+      this.router.navigate([`/auth/password/${btoa(this.phoneNumber)}`]);
     } else {
       this.formGroup.markAllAsTouched();
     }

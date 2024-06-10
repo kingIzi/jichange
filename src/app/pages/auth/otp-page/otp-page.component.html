@@ -31,21 +31,22 @@
     </span>
   </div>
   <div class="w-full pb-4">
-    <a
-      (click)="resendCode()"
-      [class]="
-        resendCodeCounter > 0
-          ? 'text-gray-400 '
-          : 'text-linkBlue hover:underline cursor-pointer'
-      "
-      class="text-sm"
-    >
-      {{
-        resendCodeCounter > 0
-          ? t("resendCodeIn").replace("{}", resendCodeCounter)
-          : t("resendCode")
-      }}
-    </a>
+    <div class="relative">
+      <button
+        *ngIf="resendCodeCounter > 0; else resendCodeTemplate"
+        class="text-gray-400"
+      >
+        {{ t("resendCodeIn").replace("{}", resendCodeCounter) }}
+      </button>
+      <ng-template #resendCodeTemplate>
+        <button
+          (click)="resendCode()"
+          class="text-linkBlue hover:underline cursor-pointer"
+        >
+          {{ t("resendCode") }}
+        </button>
+      </ng-template>
+    </div>
   </div>
   <button
     form="forgot-password-form"

@@ -130,11 +130,9 @@ export class ForgotPasswordComponent implements OnInit {
 
   submitForm() {
     if (this.formGroup.valid) {
-      this.router.navigate(['/auth/otp']);
-      //this.sendPasswordReset(this.formGroup.value);
+      this.router.navigate([`/auth/otp/${btoa(this.name.value)}`]);
     } else {
       this.formGroup.markAllAsTouched();
-      //this.formErrors();
     }
   }
 

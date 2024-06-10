@@ -31,10 +31,20 @@ const routes: Routes = [
         },
       },
       {
-        path: 'otp',
+        path: 'otp/:phone',
         loadComponent: () =>
           import('./otp-page/otp-page.component').then(
             (o) => o.OtpPageComponent
+          ),
+        data: {
+          animationState: 'isLeft',
+        },
+      },
+      {
+        path: 'password/:phone',
+        loadComponent: () =>
+          import('./change-password/change-password.component').then(
+            (c) => c.ChangePasswordComponent
           ),
         data: {
           animationState: 'isLeft',

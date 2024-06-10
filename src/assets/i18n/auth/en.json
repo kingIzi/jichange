@@ -143,6 +143,25 @@
       }
     }
   },
+  "changePassword": {
+    "changePassword": "Change password",
+    "completeForm": "Complete the form below to continue",
+    "form": {
+      "mobileNumber": "Mobile number",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "placeholders": {
+        "mobileNumber": "Enter mobile number",
+        "password": "Enter password",
+        "confirmPassword": "Confirm password"
+      },
+      "errors": {
+        "mobileNumber": "Please enter mobile number",
+        "password": "Please fill",
+        "confirmPassword": "Please fill"
+      }
+    }
+  },
   "profile": {
     "settings": "Settings",
     "saveChanges": "Save Changes",
