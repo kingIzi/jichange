@@ -10,7 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -98,6 +98,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private tr: TranslocoService,
     private invoiceService: InvoiceService,
     private cdr: ChangeDetectorRef,
+    private router: Router,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -344,21 +345,48 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.buildPage();
   }
   dashboardStatisticRouterLink(name: string) {
+    // switch (name.toLocaleLowerCase()) {
+    //   case 'Transaction'.toLocaleLowerCase():
+    //     return '/vendor/reports/transactions';
+    //   case 'Customer'.toLocaleLowerCase():
+    //     return '/vendor/customers';
+    //   case 'Users'.toLocaleLowerCase():
+    //     return '/vendor/company';
+    //   case 'Pendings'.toLocaleLowerCase():
+    //     return '/vendor/invoice/list';
+    //   case 'Due'.toLocaleLowerCase():
+    //     return '/vendor/reports/invoice';
+    //   case 'Expired'.toLocaleLowerCase():
+    //     return '/vendor/reports/invoice';
+    //   default:
+    //     return '/vendor';
+    // }
     switch (name.toLocaleLowerCase()) {
       case 'Transaction'.toLocaleLowerCase():
-        return '/vendor/reports/transactions';
+        this.router.navigate(['/vendor/reports/transactions']);
+        break;
       case 'Customer'.toLocaleLowerCase():
-        return '/vendor/customers';
+        this.router.navigate(['/vendor/customers']);
+        break;
       case 'Users'.toLocaleLowerCase():
-        return '/vendor/company';
+        this.router.navigate(['/vendor/company']);
+        break;
       case 'Pendings'.toLocaleLowerCase():
-        return '/vendor/invoice/list';
+        this.router.navigate(['/vendor/invoice/list']);
+        break;
       case 'Due'.toLocaleLowerCase():
-        return '/vendor/reports/invoice';
+        this.router.navigate(['/vendor/reports/invoice'], {
+          queryParams: { q: name },
+        });
+        break;
       case 'Expired'.toLocaleLowerCase():
-        return '/vendor/reports/invoice';
+        this.router.navigate(['/vendor/reports/invoice'], {
+          queryParams: { q: name },
+        });
+        break;
       default:
-        return '/vendor';
+        this.router.navigate(['/vendor']);
+        break;
     }
   }
   openInvoiceDetailsDialog() {

@@ -124,7 +124,7 @@
           [placeholder]="t('invoiceExpire')"
           class="input input-sm input-bordered font-inter"
           [formControl]="iedate"
-          [min]="date.value"
+          [min]="edate.value"
         />
         <span *ngIf="iedate && iedate.invalid && iedate.touched">
           <p

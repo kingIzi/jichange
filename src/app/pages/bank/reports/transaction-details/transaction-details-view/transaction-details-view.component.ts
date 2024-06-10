@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -60,13 +60,15 @@ export class TransactionDetailsViewComponent implements OnInit {
   @ViewChild('downloadBtn') downloadBtn!: ElementRef;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('messageBox') messageBox!: DisplayMessageBoxComponent;
   constructor(
     private activatedRoute: ActivatedRoute,
     private reportsService: ReportsService,
     private tr: TranslocoService,
     private fileHandler: FileHandlerService,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) {}
   private buildPage(invoice_number: string) {
     this.startLoading = true;
@@ -85,11 +87,14 @@ export class TransactionDetailsViewComponent implements OnInit {
         ) {
           this.payments = payments.response;
         } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
+          let res = AppUtilities.openDisplayMessageBox(
+            this.messageBox,
             this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
+            this.tr.translate(`reports.transactionDetails.noTransactionsFound`)
           );
+          res.addEventListener('close', () => {
+            this.location.back();
+          });
         }
         this.startLoading = false;
         this.cdr.detectChanges();

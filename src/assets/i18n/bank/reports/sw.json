@@ -17,6 +17,7 @@
     "salesSummary": "Muhtasari wa Uuzaji(s)"
   },
   "transactionDetails": {
+    "noTransactionsFound": "Hakuna malipo bado yaliyotolewa kwa shughuli hii.",
     "transaction": "Shughuli",
     "transactionDetails": "Maelezo ya Shughuli",
     "transactionNumber": "Nambari ya Uhamisho",

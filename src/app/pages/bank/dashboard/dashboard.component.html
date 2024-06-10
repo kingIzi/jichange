@@ -37,8 +37,10 @@
         >
           {{ t(statistic.Name.toLocaleLowerCase()) }}
         </h4>
+        <!-- [routerLink]="dashboardStatisticRouterLink(statistic.Name)" -->
+
         <a
-          [routerLink]="dashboardStatisticRouterLink(statistic.Name)"
+          (click)="dashboardStatisticRouterLink(statistic.Name)"
           *transloco="let t; read: 'dashboard.dashboard.overview'"
           class="text-xs text-darkPurple font-inter hover:underline"
         >
@@ -175,26 +177,11 @@
               *ngFor="let trans of arr; index as ind"
             >
               <button
-                [routerLink]="'/main/reports/transactions/' + i"
+                [routerLink]="
+                  '/main/' + invoiceNumberToBase64(trans.Invoice_Sno)
+                "
                 class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
               >
-                <!-- <div class="flex flex-row items-center space-x-1">
-                  <div
-                    class="w-14 h-14 bg-success relative spiky-invoice-number"
-                  >
-                    <p
-                      class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                    >
-                      PAID
-                    </p>
-                  </div>
-                  <div class="flex flex-col">
-                    <p class="text-sm text-left">{{ trans.Payer_Name }}</p>
-                    <p class="text-xs text-neutral-500 text-left">
-                      {{ trans.Control_No }}
-                    </p>
-                  </div>
-                </div> -->
                 <div class="flex flex-row items-center space-x-1">
                   <div
                     class="w-14 h-14 bg-success relative spiky-invoice-number"

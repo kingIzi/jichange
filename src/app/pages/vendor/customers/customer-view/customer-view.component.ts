@@ -29,7 +29,6 @@ import { CustomerInvoice } from 'src/app/core/models/vendors/customer-invoice';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-//import * as json from 'src/assets/temp/data.json';
 import {
   PageEvent,
   MatPaginatorModule,
@@ -237,9 +236,6 @@ export class CustomerViewComponent implements OnInit {
     if (indexes.includes(CustomerViewTable.CONTROL_NUMBER)) {
       keys.push('Control_No');
     }
-    if (indexes.includes(CustomerViewTable.AMOUNT)) {
-      keys.push('Total');
-    }
     if (indexes.includes(CustomerViewTable.STATUS)) {
       keys.push('goods_status');
     }
@@ -261,6 +257,8 @@ export class CustomerViewComponent implements OnInit {
       this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
         return keys.some((key) => company[key]?.toLowerCase().includes(text));
       });
+    } else {
+      this.invoiceReports = this.invoiceReportsData;
     }
   }
   ngOnInit(): void {

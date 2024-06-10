@@ -43,6 +43,8 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-details-table';
+import { Company } from 'src/app/core/models/bank/company/company';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-invoice-details',
@@ -75,9 +77,16 @@ export class InvoiceDetailsComponent implements OnInit {
   public filterFormGroup!: FormGroup;
   public invoiceReports: InvoiceReport[] = [];
   public invoiceReportsData: InvoiceReport[] = [];
-  public customers: Customer[] = [];
+  //public customers: Customer[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
+  public filterFormData: {
+    companies: Company[];
+    customers: Customer[];
+  } = {
+    companies: [],
+    customers: [],
+  };
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -89,6 +98,7 @@ export class InvoiceDetailsComponent implements OnInit {
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
     private invoiceReportService: InvoiceReportServiceService,
+    private activatedRoute: ActivatedRoute,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -349,6 +359,7 @@ export class InvoiceDetailsComponent implements OnInit {
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
+    this.Comp.disable();
   }
   private buildPage() {
     this.startLoading = true;
@@ -357,16 +368,25 @@ export class InvoiceDetailsComponent implements OnInit {
         Sno: this.userProfile.InstID,
       })
     );
-    let res = AppUtilities.pipedObservables(zip(getInvoiceReport));
+    let companiesObs = from(this.reportService.getCompaniesList({}));
+    let res = AppUtilities.pipedObservables(
+      zip(getInvoiceReport, companiesObs)
+    );
     res
       .then((results) => {
-        let [customers] = results;
+        let [customers, companiesList] = results;
         if (
           customers.response &&
           typeof customers.response !== 'number' &&
           typeof customers.response !== 'string'
         ) {
-          this.customers = customers.response;
+          this.filterFormData.customers = customers.response;
+        }
+        if (
+          typeof companiesList.response !== 'number' &&
+          typeof companiesList.response !== 'string'
+        ) {
+          this.filterFormData.companies = companiesList.response as Company[];
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -389,20 +409,6 @@ export class InvoiceDetailsComponent implements OnInit {
     this.invoiceReportService
       .getInvoiceReport(body)
       .then((result) => {
-        // if (
-        //   result.response &&
-        //   typeof result.response !== 'number' &&
-        //   result.response !== 'string'
-        // ) {
-        //   this.invoiceReportsData = result.response as InvoiceReport[];
-        //   this.invoiceReports = this.invoiceReportsData;
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
         if (
           typeof result.response !== 'string' &&
           typeof result.response !== 'number' &&
@@ -435,11 +441,77 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private filterInvoiceDetailsByQuery(q: string) {
+    if (q.toLocaleLowerCase() == 'Due'.toLocaleLowerCase()) {
+      this.invoiceReportsData = this.invoiceReportsData.filter(
+        (i) => new Date(i.Due_Date) <= new Date()
+      );
+    } else if (q.toLocaleLowerCase() == 'Expired'.toLocaleLowerCase()) {
+      this.invoiceReportsData = this.invoiceReportsData.filter(
+        (i) => new Date(i.Invoice_Expired_Date) <= new Date()
+      );
+    }
+  }
+  private initialFormSubmission(q: string) {
+    let form = { ...this.filterFormGroup.value };
+    this.cusid.setValue('all');
+    form.cusid = 'all';
+    form.Comp = this.userProfile.InstID;
+    if (form.stdate) {
+      form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+    }
+    if (form.enddate) {
+      form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+    }
+    this.invoiceReportsData = [];
+    this.invoiceReports = this.invoiceReportsData;
+    this.tableLoading = true;
+    this.invoiceReportService
+      .getInvoiceReport(form)
+      .then((result) => {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number' &&
+          result.response.length == 0
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        } else if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number' &&
+          result.response.length > 0
+        ) {
+          this.invoiceReportsData = result.response as InvoiceReport[];
+          this.filterInvoiceDetailsByQuery(q);
+          this.invoiceReports = this.invoiceReportsData;
+        }
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeaderGroup();
     this.createFilterFormGroup();
     this.buildPage();
+    this.activatedRoute.queryParams.subscribe((params: any) => {
+      if (params && params['q']) {
+        this.initialFormSubmission(params['q']);
+      }
+    });
   }
   downloadSheet() {
     if (this.invoiceReportsData.length > 0) {
@@ -463,6 +535,7 @@ export class InvoiceDetailsComponent implements OnInit {
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value };
+      form.Comp = this.userProfile.InstID;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }

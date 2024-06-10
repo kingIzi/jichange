@@ -10,6 +10,7 @@
     "salesSummary": "Sale(s) Summary"
   },
   "transactionDetails": {
+    "noTransactionsFound": "There are no payments yet made for this transaction.",
     "transaction": "Transaction(s)",
     "transactionDetails": "Transaction Details",
     "transactionNumber": "Transaction Number",

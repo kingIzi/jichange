@@ -18,6 +18,7 @@
   },
   "transactionDetails": {
     "transactionDetails": "Maelezo ya Shughuli",
+    "noTransactionsFound": "Hakuna malipo bado yaliyotolewa kwa shughuli hii.",
     "transactionDetailsTable": [
       "#",
       "Tarehe ya Malipo",

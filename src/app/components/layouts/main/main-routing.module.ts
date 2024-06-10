@@ -24,6 +24,17 @@ const routes: Routes = [
               ),
           },
           {
+            path: ':id',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/transaction-details/transaction-details-view/transaction-details-view.component'
+              ).then((c) => c.TransactionDetailsViewComponent),
+            data: {
+              breadcrumb: { alias: 'transactions-id', skip: false },
+              //animationState: 'isRight',
+            },
+          },
+          {
             path: 'profile/:id',
             data: {
               breadcrumb: { alias: 'profile', skip: false },

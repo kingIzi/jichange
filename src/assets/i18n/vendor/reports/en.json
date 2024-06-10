@@ -11,6 +11,7 @@
   },
   "transactionDetails": {
     "transactionDetails": "Transaction Details",
+    "noTransactionsFound": "There are no payments yet made for this transaction.",
     "transactionDetailsTable": [
       "#",
       "Payment Date",

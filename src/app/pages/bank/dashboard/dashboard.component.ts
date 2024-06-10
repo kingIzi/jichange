@@ -10,7 +10,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -120,6 +120,7 @@ export class DashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private fb: FormBuilder,
+    private router: Router,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -420,29 +421,11 @@ export class DashboardComponent implements OnInit {
     this.buildPage();
   }
   transactionsLatest(): any[] {
-    // let groupedByDate = this.transactions.reduce((acc, obj) => {
-    //   let jsDate = AppUtilities.convertDotNetJsonDateToDate(obj.date);
-    //   let date = AppUtilities.dateToFormat(jsDate, 'yyyy-MM-dd');
-    //   if (!acc[date]) {
-    //     acc[date] = [];
-    //   }
-    //   acc[date].push(obj);
-    //   return acc;
-    // }, {});
-    // let results = Object.values(groupedByDate);
-    // results.forEach((arr: any) => {
-    //   return arr.sort((a: any, b: any) => {
-    //     let a1 = AppUtilities.convertDotNetJsonDateToDate(a.date.toString());
-    //     let b1 = AppUtilities.convertDotNetJsonDateToDate(b.date.toString());
-    //     return a1 < b1;
-    //   });
-    // });
-    // return results;
     let groupedByDate = this.latestTransactions.reduce((acc, obj) => {
       let paymentDate = PerformanceUtils.convertDateStringToDate(
         obj.Payment_Date
       );
-      let date = paymentDate.toDateString(); //AppUtilities.dateToFormat(paymentDate, 'ddd-MMM-yy');
+      let date = paymentDate.toDateString();
       if (!acc[date]) {
         acc[date] = [];
       }
@@ -452,8 +435,8 @@ export class DashboardComponent implements OnInit {
     let results = Object.values(groupedByDate);
     results.forEach((arr: any) => {
       return arr.sort((a: any, b: any) => {
-        let a1 = PerformanceUtils.convertDateStringToDate(a.Payment_Date); //AppUtilities.convertDotNetJsonDateToDate(a.date.toString());
-        let b1 = PerformanceUtils.convertDateStringToDate(b.Payment_Date); //AppUtilities.convertDotNetJsonDateToDate(b.date.toString());
+        let a1 = PerformanceUtils.convertDateStringToDate(a.Payment_Date);
+        let b1 = PerformanceUtils.convertDateStringToDate(b.Payment_Date);
         return a1 < b1;
       });
     });
@@ -527,18 +510,27 @@ export class DashboardComponent implements OnInit {
   dashboardStatisticRouterLink(name: string) {
     switch (name.toLocaleLowerCase()) {
       case 'Transaction'.toLocaleLowerCase():
-        return '/main/reports/transactions';
+        this.router.navigate(['/main/reports/transactions']);
+        break;
       case 'Vendor'.toLocaleLowerCase():
-        return '/main/reports/customers';
+        this.router.navigate(['/main/reports/customer']);
+        break;
       case 'Users'.toLocaleLowerCase():
-        return '/main/reports/userlog';
+        this.router.navigate(['/main/reports/userlog']);
+        break;
       case 'Pendings'.toLocaleLowerCase():
-        return '/main/company/inbox';
+        this.router.navigate(['/main/company/inbox']);
+        break;
       case 'Customers'.toLocaleLowerCase():
-        return '/main/company/summary';
+        this.router.navigate(['/main/company/summary']);
+        break;
       default:
-        return '/main';
+        this.router.navigate(['/main']);
+        break;
     }
+  }
+  invoiceNumberToBase64(invoice_number: string) {
+    return btoa(invoice_number);
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

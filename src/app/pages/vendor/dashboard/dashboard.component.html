@@ -33,10 +33,11 @@
         >
           {{ t(statistic.Name.toLocaleLowerCase()) }}
         </h4>
+        <!-- [routerLink]="dashboardStatisticRouterLink(statistic.Name)" -->
         <a
-          [routerLink]="dashboardStatisticRouterLink(statistic.Name)"
+          (click)="dashboardStatisticRouterLink(statistic.Name)"
           *transloco="let t; read: 'panel.dashboard.overview'"
-          class="text-xs text-darkPurple font-inter hover:underline"
+          class="text-xs text-darkPurple font-inter hover:underline cursor-pointer"
         >
           {{ t("viewMore") }}
         </a>
