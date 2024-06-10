@@ -164,13 +164,11 @@
         <li>
           <div class="flex flex-col space-y-2">
             <h6 class="font-semibold">
-              <!-- {{
-                convertDotNetJSONDate(arr.at(0).date.toString()).toDateString()
-              }} -->
-              <!-- {{
-                PerformanceUtils.convertDateStringToDate(arr.at(0).PaymentDate)
-              }} -->
-              Header goes here
+              {{
+                PerformanceUtils.convertDateStringToDate(
+                  arr.at(0).Payment_Date
+                ).toDateString()
+              }}
             </h6>
             <div
               class="flex flex-col space-y-1 px-4"
@@ -180,7 +178,7 @@
                 [routerLink]="'/main/reports/transactions/' + i"
                 class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
               >
-                <div class="flex flex-row items-center space-x-1">
+                <!-- <div class="flex flex-row items-center space-x-1">
                   <div
                     class="w-14 h-14 bg-success relative spiky-invoice-number"
                   >
@@ -191,17 +189,33 @@
                     </p>
                   </div>
                   <div class="flex flex-col">
-                    <p class="text-sm text-left">{{ trans.company }}</p>
+                    <p class="text-sm text-left">{{ trans.Payer_Name }}</p>
                     <p class="text-xs text-neutral-500 text-left">
-                      {{ trans.name }}
+                      {{ trans.Control_No }}
+                    </p>
+                  </div>
+                </div> -->
+                <div class="flex flex-row items-center space-x-1">
+                  <div
+                    class="w-14 h-14 bg-success relative spiky-invoice-number"
+                  >
+                    <p
+                      class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    >
+                      {{ trans.Status }}
+                    </p>
+                  </div>
+                  <div class="flex flex-col">
+                    <p class="text-sm text-left">{{ trans.Payer_Name }}</p>
+                    <p class="text-xs text-neutral-500 text-left">
+                      {{ trans.Control_No }}
                     </p>
                   </div>
                 </div>
                 <p class="text-xs text-success">
                   {{
-                    PerformanceUtils.moneyFormat(trans.amount.toString()) +
-                      " " +
-                      trans.currency
+                    PerformanceUtils.moneyFormat(trans.PaidAmount.toString()) +
+                      " TZS"
                   }}
                 </p>
               </button>

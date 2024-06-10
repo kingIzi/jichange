@@ -470,7 +470,7 @@ export class CreatedInvoiceListComponent implements OnInit {
   downloadInvoice(invoice: GeneratedInvoice) {
     let dialogRef = this.dialog.open(InvoiceDetailsViewComponent, {
       width: '800px',
-      height: '700px',
+      height: '800px',
       data: {
         Inv_Mas_Sno: invoice.Inv_Mas_Sno,
         userProfile: this.userProfile,

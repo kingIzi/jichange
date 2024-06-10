@@ -356,7 +356,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       case 'Due'.toLocaleLowerCase():
         return '/vendor/reports/invoice';
       case 'Expired'.toLocaleLowerCase():
-        return '/vendor/reports/cancelled';
+        return '/vendor/reports/invoice';
       default:
         return '/vendor';
     }

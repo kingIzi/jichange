@@ -372,11 +372,24 @@ export class ListComponent implements OnInit {
         throw err;
       });
   }
+  private initialFormSubmission() {
+    this.cusid.setValue('all');
+    let form = { ...this.filterTableFormGroup.value };
+    form.compid = this.userProfile.InstID;
+    if (form.stdate) {
+      form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+    }
+    if (form.enddate) {
+      form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+    }
+    this.requestTransactionDetailsList(form);
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createRequestFormGroup();
     this.createHeadersFormGroup();
     this.buildPage();
+    this.initialFormSubmission();
   }
   isCashAmountColumn(index: number) {
     return (
