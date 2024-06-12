@@ -34,6 +34,12 @@ import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/di
 import { NgxLoadingModule } from 'ngx-loading';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Keepalive } from '@ng-idle/keepalive';
+import {
+  BankCompanyMap,
+  BankHeaderMap,
+  BankReportMap,
+  BankSetupMap,
+} from 'src/app/core/enums/bank/bank-headers-map';
 
 @Component({
   selector: 'app-header',
@@ -61,41 +67,6 @@ export class HeaderComponent implements OnInit {
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
   public userProfile!: LoginResponse;
-  private headersMap = {
-    company: 0,
-    setup: 1,
-    reports: 2,
-  };
-  private companyMap = {
-    summary: 0,
-    inboxApproval: 1,
-  };
-  private setupMap = {
-    country: 0,
-    region: 1,
-    district: 2,
-    ward: 3,
-    currency: 4,
-    designation: 5,
-    branch: 6,
-    //questionName: 7,
-    smtp: 7,
-    emailText: 8,
-    bankUser: 9,
-    //language: 11,
-    suspenseAccount: 10,
-    depositAccount: 11,
-  };
-  private reportsMap = {
-    overview: 0,
-    transactionDetails: 1,
-    paymentDetails: 2,
-    invoiceDetails: 3,
-    amendmentsDetails: 4,
-    customerDetailReport: 5,
-    userLogReport: 6,
-    auditTrails: 7,
-  };
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('timeoutWarning') timeoutWarning!: DisplayMessageBoxComponent;
@@ -129,9 +100,6 @@ export class HeaderComponent implements OnInit {
         this.tr.translate(`auth.sessionManagement.timedOut.timedOutTitle`),
         this.tr.translate(`auth.sessionManagement.timedOut.timeOutMessage`)
       );
-      // timeOut.addEventListener('close', () => {
-      //   this.requestLogout();
-      // });
       this.requestLogout();
       this.cdr.detectChanges();
     });
@@ -206,11 +174,11 @@ export class HeaderComponent implements OnInit {
   }
   private switchHeaderRootLink(index: number) {
     switch (index) {
-      case this.headersMap.company:
+      case BankHeaderMap.COMPANY:
         return '/main/company';
-      case this.headersMap.setup:
+      case BankHeaderMap.SETUP:
         return '/main/setup';
-      case this.headersMap.reports:
+      case BankHeaderMap.REPORTS:
         return '/main/reports';
       default:
         return '';
@@ -218,9 +186,9 @@ export class HeaderComponent implements OnInit {
   }
   private switchCompanyLink(index: number) {
     switch (index) {
-      case this.companyMap.summary:
+      case BankCompanyMap.SUMMARY:
         return '/main/company/summary';
-      case this.companyMap.inboxApproval:
+      case BankCompanyMap.INBOX_APPROVAL:
         return '/main/company/inbox';
       default:
         return '';
@@ -228,55 +196,53 @@ export class HeaderComponent implements OnInit {
   }
   private switchSetupLinks(index: number) {
     switch (index) {
-      case this.setupMap.country:
+      case BankSetupMap.COUNTRY:
         return '/main/setup/country';
-      case this.setupMap.region:
+      case BankSetupMap.REGION:
         return '/main/setup/region';
-      case this.setupMap.district:
+      case BankSetupMap.DISTRICT:
         return '/main/setup/district';
-      case this.setupMap.ward:
+      case BankSetupMap.WARD:
         return '/main/setup/ward';
-      case this.setupMap.currency:
+      case BankSetupMap.CURRENCY:
         return '/main/setup/currency';
-      case this.setupMap.designation:
+      case BankSetupMap.DESIGNATION:
         return '/main/setup/designation';
-      case this.setupMap.branch:
+      case BankSetupMap.BRANCH:
         return '/main/setup/branch';
-      // case this.setupMap.questionName:
-      //   return '/main/setup/question';
-      case this.setupMap.smtp:
+      case BankSetupMap.SMTP:
         return '/main/setup/smtp';
-      case this.setupMap.emailText:
+      case BankSetupMap.EMAIL_TEXT:
         return '/main/setup/email';
-      case this.setupMap.bankUser:
+      case BankSetupMap.BANK_USER:
         return '/main/setup/user';
-      case this.setupMap.suspenseAccount:
+      case BankSetupMap.SUSPENSE_ACCOUNT:
         return '/main/setup/suspense';
-      case this.setupMap.depositAccount:
+      case BankSetupMap.DEPOSIT_ACCOUNT:
         return '/main/setup/deposit';
-      // case this.setupMap.language:
-      //   return '/main/setup/language';
       default:
         return '';
     }
   }
   private swicthReportsLink(index: number) {
     switch (index) {
-      case this.reportsMap.overview:
+      case BankReportMap.OVERVIEW:
         return '/main/reports/overview';
-      case this.reportsMap.transactionDetails:
+      case BankReportMap.TRANSACTION_DETAILS:
         return '/main/reports/transactions';
-      case this.reportsMap.paymentDetails:
+      case BankReportMap.PAYMENT_DETAILS:
         return '/main/reports/payment';
-      case this.reportsMap.invoiceDetails:
+      case BankReportMap.INVOICE_DETAILS:
         return '/main/reports/invoice';
-      case this.reportsMap.amendmentsDetails:
+      case BankReportMap.AMENDMENT_DETAILS:
         return '/main/reports/amendment';
-      case this.reportsMap.customerDetailReport:
+      case BankReportMap.CUSTOMER_DETAILS:
         return '/main/reports/customer';
-      case this.reportsMap.userLogReport:
+      case BankReportMap.SYSTEM_LOG:
+        return '/main/reports/syslogs';
+      case BankReportMap.USER_LOG_REPORT:
         return '/main/reports/userlog';
-      case this.reportsMap.auditTrails:
+      case BankReportMap.AUDIT_TRAILS:
         return '/main/reports/audit';
       default:
         return '';
@@ -284,11 +250,11 @@ export class HeaderComponent implements OnInit {
   }
   private getHeaderRouterLink(bankIndex: number, dropdownIndex: number) {
     switch (bankIndex) {
-      case this.headersMap.company:
+      case BankHeaderMap.COMPANY:
         return this.switchCompanyLink(dropdownIndex);
-      case this.headersMap.setup:
+      case BankHeaderMap.SETUP:
         return this.switchSetupLinks(dropdownIndex);
-      case this.headersMap.reports:
+      case BankHeaderMap.REPORTS:
         return this.swicthReportsLink(dropdownIndex);
       default:
         return '';
@@ -303,6 +269,7 @@ export class HeaderComponent implements OnInit {
         localStorage.clear();
         this.cdr.detectChanges();
         this.router.navigate(['/auth']);
+        location.reload();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(

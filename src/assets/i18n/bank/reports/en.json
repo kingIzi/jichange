@@ -156,7 +156,8 @@
     ]
   },
   "customerDetailReport": {
-    "customerDetailReport": "Vendor detail report",
+    "customerDetailReport": "Customer detail report",
+    "noVendorsFoundInBranch": "There are no vendors found in the {} branch.",
     "form": {
       "company": "Vendor",
       "region": "region",
@@ -185,6 +186,9 @@
       "Address",
       "Date posted"
     ]
+  },
+  "systemLogs": {
+    "systemLogsReport": "System logs"
   },
   "userLogReport": {
     "userLogReport": "User log report",

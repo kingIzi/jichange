@@ -106,7 +106,12 @@ export class WardListComponent implements OnInit {
       this.searchTable(value, this.paginator);
     });
   }
+  private emptyWardList() {
+    this.wardsData = [];
+    this.wards = this.wardsData;
+  }
   private requestWardList() {
+    this.emptyWardList();
     this.tableLoading = true;
     this.wardService
       .getAllWardsList({})

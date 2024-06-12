@@ -127,8 +127,55 @@ export class AmendmentComponent implements OnInit {
     if (Number(this.userProfile.braid) > 0) {
       this.branch.disable();
     }
+    if (Number(this.userProfile.braid) === 0) {
+      this.branchChangedEventHandler();
+    }
     this.companyChangedEventHandler();
     this.filterFormChanged();
+  }
+  private branchChangedEventHandler() {
+    this.branch.valueChanges.subscribe((value) => {
+      this.requestCompaniesList({ branch: value });
+    });
+  }
+  private requestCompaniesList(body: { branch: number | string }) {
+    this.startLoading = true;
+    this.reportsService
+      .getBranchedCompanyList(body)
+      .then((result) => {
+        if (
+          typeof result.response !== 'number' &&
+          typeof result.response !== 'string'
+        ) {
+          this.filterFormData.companies = result.response;
+        } else {
+          this.filterFormData.companies = [];
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr
+              .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+              .replace(
+                '{}',
+                this.filterFormData.branches.find(
+                  (b) => b.Branch_Sno.toString() === this.branch.value
+                )?.Name as string
+              )
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private companyChangedEventHandler() {
     this.startLoading = true;

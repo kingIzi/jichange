@@ -65,7 +65,7 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 })
 export class RegionListComponent implements OnInit {
   public tableLoading: boolean = false;
-  public startLoaing: boolean = false;
+  public startLoading: boolean = false;
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public RegionTable: typeof RegionTable = RegionTable;
@@ -91,7 +91,12 @@ export class RegionListComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
+  private emptyRegionList() {
+    this.regionsData = [];
+    this.regions = this.regionsData;
+  }
   private requestRegionList() {
+    this.emptyRegionList();
     this.tableLoading = true;
     this.regionService
       .getAllRegionsList({})
@@ -136,6 +141,7 @@ export class RegionListComponent implements OnInit {
     });
   }
   private requestDeleteRegion(body: { sno: number; userid: number }) {
+    this.startLoading = true;
     this.regionService
       .deleteRegion(body)
       .then((result) => {
@@ -149,16 +155,16 @@ export class RegionListComponent implements OnInit {
           );
           this.requestRegionList();
         }
-        this.startLoaing = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        // AppUtilities.requestFailedCatchError(
-        //   err,
-        //   this.displayMessageBox,
-        //   this.tr
-        // );
-        this.startLoaing = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });

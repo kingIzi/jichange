@@ -13,10 +13,10 @@ export class CurrencyService {
   constructor(private client: RequestClientService) {}
   public async getCurrencyList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<any, HttpDataResponse<Currency[]>>(
-        `/api/Currency/GetCurrencyDetails`,
-        body
-      )
+      this.client.performPost<
+        any,
+        HttpDataResponse<Currency[] | string | number>
+      >(`/api/Currency/GetCurrencyDetails`, body)
     );
     return data;
   }

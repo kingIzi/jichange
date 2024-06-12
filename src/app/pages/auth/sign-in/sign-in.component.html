@@ -1,8 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
 
-<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
-
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -59,11 +57,6 @@
           [placeholder]="t('password')"
           class="input input-bordered w-full max-w-lg bg-transparent text-black pl-6 font-inter"
         />
-        <!-- <span
-          class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-neutral-content"
-        >
-          lock
-        </span> -->
         <span class="absolute left-1 top-1/2 -translate-y-1/2">
           <i class="bi bi-lock text-neutral-content text-lg"></i>
         </span>

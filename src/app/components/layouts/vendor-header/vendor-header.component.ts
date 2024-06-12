@@ -16,6 +16,7 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormGroup,
@@ -158,6 +159,7 @@ export class VendorHeaderComponent implements OnInit {
         localStorage.clear();
         this.cdr.detectChanges();
         this.router.navigate(['/auth']);
+        location.reload();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
@@ -290,6 +292,13 @@ export class VendorHeaderComponent implements OnInit {
   }
   routerClicked(ahref: HTMLAnchorElement, value: string) {
     ahref.blur();
+  }
+  navItemClicked(ahref: HTMLAnchorElement, path: string, index: number) {
+    if (index === 0 || index === 1) {
+      this.router.navigate([path]);
+      console.log(ahref);
+      ahref.blur();
+    }
   }
   verifyCurrentRoute(path: string) {
     return location.pathname.includes(path);

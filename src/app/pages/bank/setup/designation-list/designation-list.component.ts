@@ -142,24 +142,38 @@ export class DesignationListComponent implements OnInit {
         break;
     }
   }
+  private emptyDesignationList() {
+    this.designationsData = [];
+    this.designations = this.designationsData;
+  }
   private requestDesignationList() {
-    //this.startLoading = true;
+    this.emptyDesignationList();
     this.tableLoading = true;
     this.designationService
       .getDesignationList()
-      .then((results: any) => {
-        this.designationsData = results.response === 0 ? [] : results.response;
-        this.designations = this.designationsData;
-        //this.startLoading = false;
+      .then((result) => {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.designationsData = result.response;
+          this.designations = this.designationsData;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -168,13 +182,13 @@ export class DesignationListComponent implements OnInit {
   private searchTable(searchText: string, paginator: MatPaginator) {
     if (searchText) {
       paginator.firstPage();
-      this.designations = this.designations.filter((elem) => {
+      this.designations = this.designationsData.filter((elem) => {
         return elem.Desg_Name.toLocaleLowerCase().includes(
           searchText.toLocaleLowerCase()
         );
       });
     } else {
-      this.requestDesignationList();
+      this.designations = this.designationsData;
     }
   }
   private requestDeleteDesignation(body: RemoveDesignationForm) {
@@ -192,9 +206,6 @@ export class DesignationListComponent implements OnInit {
             )
           );
           this.requestDesignationList();
-          // sal.then((res) => {
-          //   this.requestDesignationList();
-          // });
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

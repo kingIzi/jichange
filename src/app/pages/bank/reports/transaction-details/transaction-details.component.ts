@@ -19,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -109,10 +109,11 @@ export class TransactionDetailsComponent implements OnInit {
     private dialog: MatDialog,
     private tr: TranslocoService,
     private router: Router,
-    public branchService: BranchService,
+    private branchService: BranchService,
     private reportsService: ReportsService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
+    private activatedRoute: ActivatedRoute,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -132,7 +133,55 @@ export class TransactionDetailsComponent implements OnInit {
     if (Number(this.userProfile.braid) > 0) {
       this.branch.disable();
     }
+    if (Number(this.userProfile.braid) === 0) {
+      this.branchChangedEventHandler();
+    }
     this.companyChangedEventHandler();
+  }
+  private branchChangedEventHandler() {
+    this.branch.valueChanges.subscribe((value) => {
+      this.requestCompaniesList({ branch: value });
+    });
+  }
+  private requestCompaniesList(body: { branch: number | string }) {
+    this.startLoading = true;
+    this.reportsService
+      .getBranchedCompanyList(body)
+      .then((result) => {
+        if (
+          typeof result.response !== 'number' &&
+          typeof result.response !== 'string'
+        ) {
+          this.filterFormData.companies = result.response;
+        } else {
+          this.filterFormData.companies = [];
+          this.compid.setValue('all');
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr
+              .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+              .replace(
+                '{}',
+                this.filterFormData.branches.find(
+                  (b) => b.Branch_Sno.toString() === this.branch.value
+                )?.Name as string
+              )
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private companyChangedEventHandler() {
     this.startLoading = true;
@@ -435,11 +484,26 @@ export class TransactionDetailsComponent implements OnInit {
       this.transactions = this.transactionsData;
     }
   }
+  private initialSubmission() {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      console.log(params['q']);
+      if (
+        params['q'] &&
+        atob(params['q']).toLocaleLowerCase() ===
+          'Transaction'.toLocaleLowerCase()
+      ) {
+        this.compid.setValue('all');
+        this.cusid.setValue('all');
+        this.submitForm();
+      }
+    });
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeadersFormGroup();
     this.createRequestFormGroup();
     this.buildPage();
+    this.initialSubmission();
   }
   //returns true if column index as cash amount as values
   indexIncludedHeader(control: AbstractControl<any, any>) {

@@ -31,7 +31,7 @@ const routes: Routes = [
         },
       },
       {
-        path: 'otp/:phone',
+        path: 'otp',
         loadComponent: () =>
           import('./otp-page/otp-page.component').then(
             (o) => o.OtpPageComponent
@@ -41,13 +41,13 @@ const routes: Routes = [
         },
       },
       {
-        path: 'password/:phone',
+        path: 'password',
         loadComponent: () =>
           import('./change-password/change-password.component').then(
             (c) => c.ChangePasswordComponent
           ),
         data: {
-          animationState: 'isLeft',
+          animationState: 'isRight',
         },
       },
     ],

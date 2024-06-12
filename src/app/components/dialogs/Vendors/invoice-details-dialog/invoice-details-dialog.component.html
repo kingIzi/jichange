@@ -339,6 +339,7 @@
                       <input
                         #quantityInput
                         formControlName="item_qty"
+                        [min]="1"
                         type="number"
                         class="input-sm input-bordered input-ghost input w-16 my-1 mx-1"
                       />
@@ -384,6 +385,7 @@
                       <input
                         #unitPriceInput
                         formControlName="item_unit_price"
+                        [min]="1"
                         type="number"
                         class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
                       />

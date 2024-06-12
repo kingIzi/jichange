@@ -36,86 +36,80 @@
   </form>
 </dialog>
 
-<div class="flex flex-col w-full h-full">
-  <form
-    id="control-number-form"
-    [formGroup]="currencyForm"
-    class="py-10 px-10 flex flex-col divide-y"
+<form
+  id="currency-form"
+  class="p-10 flex flex-col w-full h-full divide-y"
+  [formGroup]="currencyForm"
+>
+  <h1
+    *transloco="let t; read: 'setup.currency'"
+    class="text-xl md:text-2xl p-0 col-span-full"
   >
-    <h1
-      *transloco="let t; read: 'setup.currency'"
-      class="text-xl md:text-2xl p-0"
-    >
-      {{ t("currency") }}
-    </h1>
-    <form action="" class="grid grid-cols-2 gap-3 w-full">
-      <div class="flex flex-col space-y-1 w-full py-8">
-        <h6
-          *transloco="let t; read: 'setup.currency'"
-          class="text-left text-sm"
+    {{ t("currency") }}
+  </h1>
+  <div class="grid grid-cols-2 gap-3 w-full h-full">
+    <div class="flex flex-col space-y-1 w-full py-8">
+      <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
+        {{ t("currencyName") }} <span class="text-red-600">*</span>
+      </h6>
+      <input
+        *transloco="let t; read: 'setup.currency.form.placeholders'"
+        #currencyNumber
+        [formControl]="cname"
+        type="text"
+        [placeholder]="t('name')"
+        class="input input-bordered w-full max-w-lg bg-transparent text-black"
+      />
+      <span *ngIf="cname && cname.invalid && cname.touched">
+        <p
+          *transloco="let t; read: 'setup.currency.form.errors'"
+          class="text-xs text-red-600"
         >
-          {{ t("currencyName") }} <span class="text-red-600">*</span>
-        </h6>
-        <input
-          *transloco="let t; read: 'setup.currency.form.placeholders'"
-          #currencyNumber
-          [formControl]="cname"
-          type="text"
-          [placeholder]="t('name')"
-          class="input input-bordered w-full max-w-lg bg-transparent text-black"
-        />
-        <span *ngIf="cname && cname.invalid && cname.touched">
-          <p
-            *transloco="let t; read: 'setup.currency.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("name") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1 w-full py-8">
-        <h6
-          *transloco="let t; read: 'setup.currency'"
-          class="text-left text-sm"
-        >
-          {{ t("code") }} <span class="text-red-600">*</span>
-        </h6>
-        <input
-          *transloco="let t; read: 'setup.currency.form.placeholders'"
-          #currencyNumber
-          [formControl]="code"
-          type="text"
-          [placeholder]="t('code')"
-          class="input input-bordered w-full max-w-lg bg-transparent text-black"
-        />
-        <span *ngIf="code && code.invalid && code.touched">
-          <p
-            *transloco="let t; read: 'setup.currency.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("code") }}
-          </p>
-        </span>
-      </div>
-    </form>
-    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
-      <button
-        *transloco="let t; read: 'actions'"
-        (click)="closeDialog()"
-        type="button"
-        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
-      >
-        {{ t("close") }}
-      </button>
-      <button
-        *transloco="let t; read: 'actions'"
-        (click)="submitCurrencyForm()"
-        type="submit"
-        form="control-number-form"
-        class="btn text-xs btn-outline font-inter btn-success w-24"
-      >
-        {{ t("submit") }}
-      </button>
+          {{ t("name") }}
+        </p>
+      </span>
     </div>
-  </form>
-</div>
+    <div class="flex flex-col space-y-1 w-full py-8">
+      <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
+        {{ t("code") }} <span class="text-red-600">*</span>
+      </h6>
+      <input
+        *transloco="let t; read: 'setup.currency.form.placeholders'"
+        #currencyNumber
+        [formControl]="code"
+        type="text"
+        [placeholder]="t('code')"
+        class="input input-bordered w-full max-w-lg bg-transparent text-black"
+      />
+      <span *ngIf="code && code.invalid && code.touched">
+        <p
+          *transloco="let t; read: 'setup.currency.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("code") }}
+        </p>
+      </span>
+    </div>
+  </div>
+  <div
+    class="flex flex-row space-x-2 items-center w-full justify-end pt-2 col-span-full"
+  >
+    <button
+      *transloco="let t; read: 'actions'"
+      (click)="closeDialog()"
+      type="button"
+      class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+    >
+      {{ t("close") }}
+    </button>
+    <button
+      *transloco="let t; read: 'actions'"
+      (click)="submitCurrencyForm()"
+      type="submit"
+      form="currency-form"
+      class="btn text-xs btn-outline font-inter btn-success w-24"
+    >
+      {{ t("submit") }}
+    </button>
+  </div>
+</form>

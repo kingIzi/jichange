@@ -13,7 +13,8 @@
     "warning": "Onyo",
     "any": "Yoyote",
     "confirm": "Thibitisha",
-    "close": "Funga"
+    "close": "Funga",
+    "success": "Mafanikio"
   },
   "forms": {
     "from": "Kutoka",
@@ -74,7 +75,8 @@
       "details": "Maelezo(s)",
       "payments": "Malipo(s)",
       "amendment": "Mabadiliko(s)",
-      "transaction": "Miamala(s)"
+      "transaction": "Miamala(s)",
+      "systemLogs": "Kumbukumbu za mfumo"
     }
   },
   "vendorRoutes": {
@@ -160,6 +162,7 @@
         "Maelezo ya Bili",
         "Maelezo ya Marekebisho",
         "Ripoti ya Muuzaji",
+        "Kumbukumbu za Mfumo",
         "Ripoti ya Kumbukumbu za Mtumiaji",
         "Kufuatilia Ukaguzi"
       ]

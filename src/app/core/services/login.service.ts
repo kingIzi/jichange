@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { RequestClientService } from './request-client.service';
 import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from '../models/http-data-response';
+import { ChangePasswordForm } from '../models/auth/change-password-form';
+import { ForgotPasswordResponse } from '../models/auth/forgot-password-response';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +37,48 @@ export class LoginService {
         `/api/Forgot/Getemail`,
         body
       )
+    );
+    return data;
+  }
+  public async changePassword(body: ChangePasswordForm) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        ChangePasswordForm,
+        HttpDataResponse<string | number>
+      >(`/api/Updatepwd/UpdatePwd`, body)
+    );
+    return data;
+  }
+  public async forgotPasswordLink(body: { mobile: string }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { mobile: string },
+        HttpDataResponse<ForgotPasswordResponse | string | number>
+      >(`/api/Forgot/getMobile`, body)
+    );
+    return data;
+  }
+  public async sendOtpResetPasswordLink(body: {
+    mobile: string;
+    otp_code: number | string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { mobile: string; otp_code: number | string },
+        HttpDataResponse<string | number>
+      >(`/api/Forgot/OtpValidate`, body)
+    );
+    return data;
+  }
+  public async forgotPasswordChangePasswordLink(body: {
+    mobile: string;
+    password: string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { mobile: string; password: string },
+        HttpDataResponse<string | number>
+      >(`/api/Forgot/ChangePwd`, body)
     );
     return data;
   }

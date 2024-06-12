@@ -206,4 +206,10 @@ export class AppUtilities {
     );
     return res;
   }
+
+  static navigateWithNoBack(router: Router, path: string): void {
+    router.navigate([path]).then(() => {
+      window.history.replaceState(null, '', window.location.href);
+    });
+  }
 }

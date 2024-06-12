@@ -1,10 +1,6 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-display-message-box #timeoutWarning></app-display-message-box>
 <app-display-message-box #timeOut></app-display-message-box>
-<!-- <ngx-loading
-  [show]="routeLoading"
-  [config]="{ backdropBorderRadius: '0.5px' }"
-></ngx-loading> -->
 
 <div class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
@@ -32,33 +28,22 @@
         formArrayName="headers"
       >
         <li *ngFor="let header of headers.controls; index as ind">
-          <ng-container>
-            <a
-              #ahref
-              *ngIf="ind !== 3"
-              [routerLinkActive]="'text-darkPurple'"
-              [class]="
-                verifyCurrentRoute(header.get('rootLink')?.value)
-                  ? 'text-darkPurple bg-lightPurple'
-                  : 'text-black bg-transparent'
-              "
-              class="capitalize"
-              (click)="routerClicked(ahref, header.get('rootLink')?.value)"
-              formGroupName="{{ ind }}"
-              >{{ header.get("label")?.value }}</a
-            >
-            <a
-              *ngIf="ind === 3"
-              [class]="
-                verifyCurrentRoute(header.get('rootLink')?.value)
-                  ? 'text-darkPurple bg-lightPurple'
-                  : 'text-black bg-transparent'
-              "
-              class="capitalize"
-              formGroupName="{{ ind }}"
-              >{{ header.get("label")?.value }}</a
-            >
-          </ng-container>
+          <a
+            class="font-semibold capitalize"
+            [routerLinkActive]="'text-darkPurple'"
+            [class]="
+              verifyCurrentRoute(header.get('rootLink')?.value)
+                ? 'text-darkPurple bg-lightPurple'
+                : 'text-black bg-transparent'
+            "
+            formGroupName="{{ ind }}"
+            #navItem
+            (click)="
+              navItemClicked(navItem, header.get('rootLink')?.value, ind)
+            "
+          >
+            {{ header.get("label")?.value }}
+          </a>
           <ul class="p-2 grid grid-cols-2">
             <li
               *ngFor="

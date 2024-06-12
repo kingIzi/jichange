@@ -165,22 +165,38 @@ export class CurrencyListComponent implements OnInit {
       this.currencies = this.currenciesData;
     }
   }
+  private emptyCurrencyList() {
+    this.currenciesData = [];
+    this.currencies = this.currenciesData;
+  }
   private requestCurrencyList() {
+    this.emptyCurrencyList();
     this.tableLoading = true;
     this.currencyService
       .getCurrencyList({})
       .then((result) => {
-        this.currenciesData = result.response;
-        this.currencies = this.currenciesData;
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.currenciesData = result.response;
+          this.currencies = this.currenciesData;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -195,13 +211,10 @@ export class CurrencyListComponent implements OnInit {
           typeof result.response === 'string' &&
           result.response === form.code
         ) {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
-            this.tr.translate(`setup.currency.currencyRemovedSuccessfully`)
+          let sal = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
           );
-          dialog.addEventListener('close', () => {
-            this.requestCurrencyList();
-          });
+          this.requestCurrencyList();
         }
         this.startLoading = false;
         this.cdr.detectChanges();

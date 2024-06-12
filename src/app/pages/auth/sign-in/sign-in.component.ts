@@ -4,19 +4,13 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
-  Output,
   ViewChild,
 } from '@angular/core';
 import { Popover, Ripple, initTE } from 'tw-elements';
-import {
-  MatDialog,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ControlNumberDetailsComponent } from 'src/app/components/dialogs/control-number-details/control-number-details.component';
 import { VendorRegistrationComponent } from 'src/app/components/dialogs/vendor-registration/vendor-registration.component';
 import { NgxLoadingModule } from 'ngx-loading';
-import { RequestClientService } from 'src/app/core/services/request-client.service';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -32,11 +26,8 @@ import {
 } from '@angular/forms';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
-import { toggle } from '../auth-animations';
-import { TimeoutError, timer } from 'rxjs';
 import { UserRoles } from 'src/app/core/enums/bank/user-roles';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { LoginService } from 'src/app/core/services/login.service';
@@ -125,7 +116,7 @@ export class SignInComponent implements OnInit {
     );
     return;
   }
-  private signIn(value: { uname: string; pwd: string }) {
+  private requestSignIn(value: { uname: string; pwd: string }) {
     this.startLoading = true;
     this.loginService
       .loginUser(value)
@@ -169,17 +160,15 @@ export class SignInComponent implements OnInit {
     });
   }
   submitSignInForm() {
-    if (this.formGroup.invalid) {
+    if (this.formGroup.valid) {
+      this.requestSignIn(this.formGroup.value);
+    } else {
       this.formGroup.markAllAsTouched();
-      this.formErrors();
-      return;
     }
-    this.signIn(this.formGroup.value);
   }
   get userName() {
     return this.formGroup.get('userName') as FormControl;
   }
-
   get password() {
     return this.formGroup.get('password') as FormControl;
   }

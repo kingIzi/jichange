@@ -3,6 +3,7 @@ import { RequestClientService } from '../../../request-client.service';
 import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
+import { Designation } from 'src/app/core/models/bank/setup/designation';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,9 @@ export class DesignationService {
   constructor(private client: RequestClientService) {}
   public async getDesignationList() {
     let data = await lastValueFrom(
-      this.client.performGet(`/api/EmployDet/GetdesgDetails`)
+      this.client.performGet<HttpDataResponse<Designation[] | number | string>>(
+        `/api/EmployDet/GetdesgDetails`
+      )
     );
     return data;
   }

@@ -187,16 +187,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       })
     );
     let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
-    let res = lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    );
+    let res = AppUtilities.pipedObservables(mergedObservable);
     res
       .then((results) => {
         let [invoiceDetail, invoiceItems] = results;
@@ -358,16 +349,7 @@ export class InvoiceDetailsDialogComponent implements OnInit {
     );
     let currenciesObservable = from(this.invoiceService.getCurrencyCodes());
     let mergedObservable = zip(customerNamesObservable, currenciesObservable);
-    lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    )
+    let res = AppUtilities.pipedObservables(mergedObservable)
       .then((results: Array<any>) => {
         let [customers, currencies] = results;
         this.customers = customers.response === 0 ? [] : customers.response;

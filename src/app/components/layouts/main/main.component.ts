@@ -101,6 +101,10 @@ export class MainComponent implements OnInit {
       '@amendment',
       this.tr.translate(`bankRoutes.reports.amendment`)
     );
+    this.breadcrumbService.set(
+      '@system-logs',
+      this.tr.translate(`bankRoutes.reports.systemLogs`)
+    );
     this.breadcrumbService.set('@transactions', {
       label: this.tr.translate(`bankRoutes.reports.transaction`),
       routeInterceptor(routeLink: any, breadcrumb: any) {

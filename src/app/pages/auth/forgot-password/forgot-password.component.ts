@@ -25,6 +25,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { LoginService } from 'src/app/core/services/login.service';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 
@@ -43,6 +44,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     PhoneNumberInputComponent,
+    LoaderInfiniteSpinnerComponent,
   ],
   providers: [{ provide: TRANSLOCO_SCOPE, useValue: 'auth' }],
 })
@@ -63,29 +65,25 @@ export class ForgotPasswordComponent implements OnInit {
   ngOnInit(): void {
     this.createForm();
   }
-
   private createForm() {
     this.formGroup = this.fb.group({
-      name: this.fb.control('', [
+      mobile: this.fb.control('', [
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
     });
   }
-
-  private sendPasswordReset(form: { name: string }) {
+  private requestSendPasswordReset(form: { mobile: string }) {
     this.startLoading = true;
     this.loginService
-      .sendResetPasswordLink(form)
+      .forgotPasswordLink(form)
       .then((result) => {
         if (
-          typeof result.response === 'string' &&
-          result.response.toLocaleLowerCase() === form.name.toLocaleLowerCase()
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
         ) {
-          AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`auth.forgotPassword.resetPasswordSuccessfull`)
-          );
-          this.router.navigate(['/auth/otp']);
+          sessionStorage.setItem('otp', JSON.stringify(result.response));
+          this.router.navigate([`/auth/otp`]);
         } else {
           this.sendPasswordFailed();
         }
@@ -93,21 +91,15 @@ export class ForgotPasswordComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private sendPasswordSuccessfull() {
-    return AppUtilities.openSuccessMessageBox(
-      this.successMessageBox,
-      this.tr.translate(`auth.forgotPassword.resetPasswordSuccessfull`)
-    );
   }
   private sendPasswordFailed() {
     AppUtilities.openDisplayMessageBox(
@@ -119,7 +111,7 @@ export class ForgotPasswordComponent implements OnInit {
   private formErrors(
     errorsPath: string = 'auth.forgotPassword.form.errors.dialogs'
   ) {
-    if (this.name.invalid) {
+    if (this.mobile.invalid) {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`${errorsPath}.invalidFormError`),
@@ -127,16 +119,14 @@ export class ForgotPasswordComponent implements OnInit {
       );
     }
   }
-
   submitForm() {
     if (this.formGroup.valid) {
-      this.router.navigate([`/auth/otp/${btoa(this.name.value)}`]);
+      this.requestSendPasswordReset(this.formGroup.value);
     } else {
       this.formGroup.markAllAsTouched();
     }
   }
-
-  get name() {
-    return this.formGroup.get('name') as FormControl;
+  get mobile() {
+    return this.formGroup.get('mobile') as FormControl;
   }
 }

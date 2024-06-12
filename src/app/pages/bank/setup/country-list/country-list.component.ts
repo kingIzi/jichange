@@ -77,12 +77,10 @@ export class CountryListComponent implements OnInit {
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CountryTable: typeof CountryTable = CountryTable;
-  // public headersMap = {
-  //   COUNTRY_NAME: 0,
-  // };
-  private userProfile = JSON.parse(
-    localStorage.getItem('userProfile') as string
-  ) as LoginResponse;
+  // private userProfile = JSON.parse(
+  //   localStorage.getItem('userProfile') as string
+  // ) as LoginResponse;
+  private userProfile!: LoginResponse;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -96,6 +94,12 @@ export class CountryListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createHeadersForm() {
     this.countryForm = this.fb.group({
       headers: this.fb.array([], []),
@@ -113,8 +117,12 @@ export class CountryListComponent implements OnInit {
       this.searchTable(value, this.paginator);
     });
   }
-  private async getCountryList() {
-    //this.startLoading = true;
+  private emptyCountryList() {
+    this.countriesData = [];
+    this.countries = this.countriesData;
+  }
+  private getCountryList() {
+    this.emptyCountryList();
     this.tableLoading = true;
     this.countryService
       .getCountryList({})
@@ -126,18 +134,17 @@ export class CountryListComponent implements OnInit {
           this.countriesData = [];
           this.countries = this.countriesData;
         }
-        //this.startLoading = false;
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
-        //this.startLoading = false;
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.tableLoading = false;
+        this.cdr.detectChanges();
         throw err;
       });
   }
@@ -211,6 +218,7 @@ export class CountryListComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    this.parseUserProfile();
     this.createHeadersForm();
     this.getCountryList();
   }

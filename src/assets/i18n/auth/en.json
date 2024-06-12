@@ -130,9 +130,11 @@
   },
   "otp": {
     "verifyAccount": "Verify account",
-    "verifyAccountMessage": "A code was sent to your mobile number, please enter the code below to proceed",
+    "verifyAccountMessage": "A code was sent to your mobile number {}, please enter the code below to proceed",
     "resendCodeIn": "Resend code in {} seconds",
     "resendCode": "Resend code",
+    "noSessionFound": "Failed to retrieve code. Please re-enter your mobile number and try again.",
+    "invalidCode": "The code you have entered is invalid. Please try again.",
     "form": {
       "code": "Code",
       "placeholders": {
@@ -146,6 +148,10 @@
   "changePassword": {
     "changePassword": "Change password",
     "completeForm": "Complete the form below to continue",
+    "isEmpty": "Please fill",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "passowordChangedSuccessfully": "Password changed successfully",
+    "failedToUpdatePassword": "Failed to update failed password.",
     "form": {
       "mobileNumber": "Mobile number",
       "password": "Password",
@@ -165,6 +171,7 @@
   "profile": {
     "settings": "Settings",
     "saveChanges": "Save Changes",
+    "passowordChangedSuccessfully": "Password changed successfully",
     "activeTabs": [
       {
         "label": "General",
@@ -198,6 +205,10 @@
             "currentPassword": "Enter current password",
             "newPassword": "Enter new Password",
             "confirmPassword": "Confirm new Password"
+          },
+          "errors": {
+            "isEmpty": "Please fill",
+            "passwordsDoNotMatch": "Passwords do not match."
           }
         }
       },

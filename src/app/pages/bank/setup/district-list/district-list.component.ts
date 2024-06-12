@@ -104,7 +104,12 @@ export class DistrictListComponent implements OnInit {
       this.searchTable(value, this.paginator);
     });
   }
+  private emptyDistrictList() {
+    this.districtsData = [];
+    this.districts = this.districtsData;
+  }
   private requestDistrictList() {
+    this.emptyDistrictList();
     this.tableLoading = true;
     this.districtService
       .getAllDistrictList({})
@@ -146,9 +151,6 @@ export class DistrictListComponent implements OnInit {
             )
           );
           this.requestDistrictList();
-          // msg.then((res) => {
-          //   this.requestDistrictList();
-          // });
         }
         this.startLoading = false;
         this.cdr.detectChanges();

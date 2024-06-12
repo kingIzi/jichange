@@ -14,7 +14,8 @@
     "warning": "Warning",
     "any": "Any",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "success": "Success"
   },
   "forms": {
     "from": "From",
@@ -76,6 +77,7 @@
         "Invoice Details",
         "Amendments Details",
         "Vendor Report",
+        "System Logs",
         "User Log Report",
         "Audit Trails"
       ]
@@ -138,7 +140,8 @@
       "details": "Detail(s)",
       "payments": "Payment(s)",
       "amendment": "Amendment(s)",
-      "transaction": "Transaction(s)"
+      "transaction": "Transaction(s)",
+      "systemLogs": "System logs"
     }
   },
   "vendorRoutes": {

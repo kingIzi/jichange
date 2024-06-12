@@ -127,9 +127,11 @@
   },
   "otp": {
     "verifyAccount": "Thibitisha akaunti",
-    "verifyAccountMessage": "Msimbo umetumwa kwa nambari ya simu yako, tafadhali ingiza msimbo hapa chini ili kuendelea",
+    "verifyAccountMessage": "Msimbo umetumwa kwa nambari ya simu {}, tafadhali ingiza msimbo hapa chini ili kuendelea",
     "resendCodeIn": "Tuma tena msimbo baada ya sekunde {}",
     "resendCode": "Tuma tena msimbo",
+    "noSessionFound": "Imeshindwa kurejesha msimbo. Tafadhali ingiza tena nambari yako ya simu na ujaribu tena.",
+    "invalidCode": "Msimbo ulioingiza ni batili. Tafadhali jaribu tena.",
     "form": {
       "code": "Msimbo",
       "placeholders": {
@@ -143,6 +145,10 @@
   "changePassword": {
     "changePassword": "Badilisha nywila",
     "completeForm": "Jaza fomu hapa chini ili uendelee",
+    "isEmpty": "Tafadhali jaza",
+    "passwordsDoNotMatch": "Nywila hazilingani.",
+    "passowordChangedSuccessfully": "Nywila imebadilishwa kwa mafanikio",
+    "failedToUpdatePassword": "Imeshindwa kusasisha nenosiri lililoshindwa.",
     "form": {
       "mobileNumber": "Nambari ya simu",
       "password": "Nenosiri",
@@ -162,6 +168,9 @@
   "profile": {
     "settings": "Mipangilio",
     "saveChanges": "Hifadhi Mabadiliko",
+    "passowordChangedSuccessfully": "Nywila imebadilishwa kwa mafanikio",
+    "isEmpty": "Please fill",
+    "passwordsDoNotMatch": "Passwords do not match.",
     "activeTabs": [
       {
         "label": "Jumla",
@@ -195,6 +204,10 @@
             "currentPassword": "Ingiza nenosiri la sasa",
             "newPassword": "Ingiza nenosiri jipya",
             "confirmPassword": "Thibitisha nenosiri jipya"
+          },
+          "errors": {
+            "isEmpty": "Tafadhali jaza",
+            "passwordsDoNotMatch": "Nywila hazilingani."
           }
         }
       },

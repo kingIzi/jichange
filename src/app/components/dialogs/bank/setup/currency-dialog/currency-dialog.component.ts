@@ -90,13 +90,10 @@ export class CurrencyDialogComponent implements OnInit {
           typeof result.response === 'string' &&
           result.response.toLocaleLowerCase() === '1'.toLocaleLowerCase()
         ) {
-          let dialog = AppUtilities.openSuccessMessageBox(
-            this.successMessageBox,
+          let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`setup.currency.modifiedCurrencySuccessfully`)
           );
-          dialog.addEventListener('close', () => {
-            this.added.emit();
-          });
+          this.added.emit();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

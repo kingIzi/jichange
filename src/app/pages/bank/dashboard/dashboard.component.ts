@@ -510,10 +510,14 @@ export class DashboardComponent implements OnInit {
   dashboardStatisticRouterLink(name: string) {
     switch (name.toLocaleLowerCase()) {
       case 'Transaction'.toLocaleLowerCase():
-        this.router.navigate(['/main/reports/transactions']);
+        this.router.navigate(['/main/reports/transactions'], {
+          queryParams: { q: btoa(name) },
+        });
         break;
       case 'Vendor'.toLocaleLowerCase():
-        this.router.navigate(['/main/reports/customer']);
+        this.router.navigate(['/main/reports/customer'], {
+          queryParams: { q: btoa(name) },
+        });
         break;
       case 'Users'.toLocaleLowerCase():
         this.router.navigate(['/main/reports/userlog']);

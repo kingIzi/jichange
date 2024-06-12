@@ -148,7 +148,8 @@
     ]
   },
   "customerDetailReport": {
-    "customerDetailReport": "Ripoti ya Maelezo ya Muuzaji",
+    "customerDetailReport": "Ripoti ya Maelezo ya Muteja",
+    "noVendorsFoundInBranch": "Hakuna wachuuzi wanaopatikana katika tawi la {}.",
     "form": {
       "company": "Muuzaji",
       "region": "Mkoa",
@@ -177,6 +178,9 @@
       "Anwani",
       "Tarehe ya Kutuma"
     ]
+  },
+  "systemLogs": {
+    "systemLogsReport": "Kumbukumbu za mfumo"
   },
   "userLogReport": {
     "userLogReport": "Ripoti ya Kumbukumbu za Mtumiaji",

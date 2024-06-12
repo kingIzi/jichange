@@ -346,6 +346,18 @@ const routes: Routes = [
             },
           },
           {
+            path: 'syslogs',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/system-logs/system-logs.component'
+              ).then((s) => s.SystemLogsComponent),
+            data: {
+              breadcrumb: { alias: 'system-logs', skip: false },
+              animationState: 'reports-module-7',
+              //reuseRoute: true,
+            },
+          },
+          {
             path: 'userlog',
             loadComponent: () =>
               import(
@@ -353,7 +365,7 @@ const routes: Routes = [
               ).then((m) => m.UserLogReportComponent),
             data: {
               breadcrumb: { alias: 'userLog', skip: false },
-              animationState: 'reports-module-7',
+              animationState: 'reports-module-8',
               reuseRoute: true,
             },
           },
@@ -365,7 +377,7 @@ const routes: Routes = [
               ).then((m) => m.AuditTrailsComponent),
             data: {
               breadcrumb: { alias: 'audit', skip: false },
-              animationState: 'reports-module-8',
+              animationState: 'reports-module-9',
               reuseRoute: true,
             },
           },

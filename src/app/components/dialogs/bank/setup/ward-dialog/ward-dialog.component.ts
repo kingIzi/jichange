@@ -91,18 +91,7 @@ export class WardDialogComponent implements OnInit {
     this.startLoading = true;
     let countryList = from(this.districtService.getAllDistrictList({}));
     let mergedRes = zip(countryList);
-    let res = lastValueFrom(
-      mergedRes.pipe(
-        map((results) => {
-          return results;
-        }),
-        catchError((err) => {
-          this.startLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        })
-      )
-    );
+    let res = AppUtilities.pipedObservables(mergedRes);
     res
       .then((results) => {
         let [districts] = results;

@@ -97,17 +97,28 @@ export class BranchListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private emptyBranchList() {
+    this.branchesData = [];
+    this.branches = this.branchesData;
+  }
   private getBranchList() {
+    this.emptyBranchList();
     this.tableLoading = true;
     this.branchService
       .postBranchList({})
-      .then((results: any) => {
-        if (results.response instanceof Array) {
-          this.branchesData = results.response as Branch[];
+      .then((result) => {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.branchesData = result.response;
           this.branches = this.branchesData;
         } else {
-          this.branchesData = [];
-          this.branches = this.branchesData;
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -165,16 +176,10 @@ export class BranchListComponent implements OnInit {
     this.branchService
       .removeBranch(sno)
       .then((results: any) => {
-        this.tableLoading = false;
-        this.successMessageBox.title = this.tr.translate(
-          `setup.branch.form.dialog.removedSuccessfully`
+        let sal = AppUtilities.sweetAlertSuccessMessage(
+          this.tr.translate(`setup.branch.form.dialog.removedSuccessfully`)
         );
-        let dialog = this.successMessageBox.openDialog();
-        timer(2000).subscribe(() => {
-          this.getBranchList();
-          dialog.close();
-          this.cdr.detectChanges();
-        });
+        this.getBranchList();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(

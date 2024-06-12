@@ -9,9 +9,13 @@ import {
   ViewChild,
 } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -27,15 +31,16 @@ import { BankUserDialogComponent } from 'src/app/components/dialogs/bank/setup/b
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-form';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
 import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
+import { LoginService } from 'src/app/core/services/login.service';
 import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-//import { Tab, initTE } from 'tw-elements';
 
 enum PROFILE_OPTIONS {
   GENERAL,
@@ -91,12 +96,11 @@ export class ProfileComponent implements OnInit {
     },
   ];
   public startLoading: boolean = false;
-  //public formGroups: FormGroup[] = [];
   public generalFormGroup!: FormGroup;
   public languageFormGroup!: FormGroup;
+  public changePasswordFormGroup!: FormGroup;
   public selectedTabIndex: number = 0;
   public activeTabs: any[] = [];
-  //public employeeDetail: typeof EmployeeDetail = EmployeeDetail;
   public companyUser!: CompanyUser;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public PROFILE_OPTIONS: typeof PROFILE_OPTIONS = PROFILE_OPTIONS;
@@ -104,14 +108,15 @@ export class ProfileComponent implements OnInit {
   @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('messageBox') messageBox!: DisplayMessageBoxComponent;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
-    //private bankUserService: BankService,
     private companyUserService: CompanyUserService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
+    private loginService: LoginService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -119,6 +124,34 @@ export class ProfileComponent implements OnInit {
     if (userProfile) {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
+  }
+  private passwordsMatchValidator(formGroup: FormGroup): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      let password = formGroup.get('pwd');
+      let confirmPassword = formGroup.get('confirmPwd');
+      if (
+        password?.value &&
+        confirmPassword?.value &&
+        password.value !== confirmPassword.value
+      ) {
+        return { passwordMismatch: true };
+      }
+      return null;
+    };
+  }
+  private createChangePasswordFormGroup() {
+    this.changePasswordFormGroup = this.fb.group({
+      type: this.fb.control(this.userProfile.check.toLocaleUpperCase(), []),
+      pwd: this.fb.control('', [Validators.required]),
+      confirmPwd: this.fb.control('', [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, []),
+    });
+    this.pwd.addValidators(
+      this.passwordsMatchValidator(this.changePasswordFormGroup)
+    );
+    this.confirmPwd.addValidators(
+      this.passwordsMatchValidator(this.changePasswordFormGroup)
+    );
   }
   private createGeneralFormGroup() {
     this.generalFormGroup = this.fb.group({
@@ -150,7 +183,6 @@ export class ProfileComponent implements OnInit {
       role: this.userProfile.role,
     });
     this.generalFormGroup.disable();
-    //this.generalFormGroup.get('role')?.disable();
   }
   private requestEmployeeDetail(body: { sno: string | number }) {
     this.startLoading = true;
@@ -179,11 +211,43 @@ export class ProfileComponent implements OnInit {
         throw err;
       });
   }
+  private requestChangePassword(form: ChangePasswordForm) {
+    this.startLoading = true;
+    this.loginService
+      .changePassword(form)
+      .then((result) => {
+        if (
+          result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase()
+        ) {
+          let res = AppUtilities.openDisplayMessageBox(
+            this.messageBox,
+            this.tr.translate(`defaults.success`),
+            this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
+          );
+          res.addEventListener('close', () => {
+            this.changePasswordFormGroup.reset();
+          });
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createGeneralFormGroup();
     this.createLanguageFormGroup();
     this.prepareActiveTabs();
+    this.createChangePasswordFormGroup();
     this.requestEmployeeDetail({ sno: this.userProfile.Usno });
   }
   saveLanguageClicked() {
@@ -223,17 +287,29 @@ export class ProfileComponent implements OnInit {
     });
     dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
       dialogRef.close();
-      // this.activatedRoute.params.subscribe((params) => {
-      //   if (params['id']) {
-      //     this.requestEmployeeDetail({ sno: params['id'] });
-      //   } else {
-      //     this.router.navigate(['/auth']);
-      //   }
-      // });
       this.requestEmployeeDetail({ sno: this.userProfile.Usno });
     });
   }
   setActiveTab(index: number) {
     this.selectedTabIndex = index;
+  }
+  changePasswordClicked() {
+    if (this.changePasswordFormGroup.valid) {
+      this.requestChangePassword(this.changePasswordFormGroup.value);
+    } else {
+      this.changePasswordFormGroup.markAllAsTouched();
+    }
+  }
+  get type() {
+    return this.changePasswordFormGroup.get(`type`) as FormControl;
+  }
+  get pwd() {
+    return this.changePasswordFormGroup.get(`pwd`) as FormControl;
+  }
+  get confirmPwd() {
+    return this.changePasswordFormGroup.get(`confirmPwd`) as FormControl;
+  }
+  get userid() {
+    return this.changePasswordFormGroup.get(`userid`) as FormControl;
   }
 }

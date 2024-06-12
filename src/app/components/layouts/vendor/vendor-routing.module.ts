@@ -106,6 +106,11 @@ const routes: Routes = [
             data: { breadcrumb: { skip: true } },
             children: [
               {
+                path: '',
+                redirectTo: 'list',
+                pathMatch: 'full',
+              },
+              {
                 path: 'list',
                 loadComponent: () =>
                   import(

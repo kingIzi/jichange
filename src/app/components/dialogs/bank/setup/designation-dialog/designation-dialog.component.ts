@@ -102,7 +102,7 @@ export class DesignationDialogComponent implements OnInit {
   }
   ngOnInit(): void {
     this.parseUserProfile();
-    if (this.data) {
+    if (this.data.designationData) {
       this.createEditForm(this.data.designationData);
     } else {
       this.createForm();
@@ -147,9 +147,9 @@ export class DesignationDialogComponent implements OnInit {
   submitDesignationForm() {
     if (this.designationForm.valid) {
       this.requestPostDesignation(this.designationForm.value);
+    } else {
+      this.designationForm.markAllAsTouched();
     }
-    this.designationForm.markAllAsTouched();
-    this.formErrors();
   }
   get desg() {
     return this.designationForm.get('desg') as FormControl;
