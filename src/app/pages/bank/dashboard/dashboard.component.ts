@@ -357,7 +357,7 @@ export class DashboardComponent implements OnInit {
         sessB: this.userProfile.sessb,
       })
     );
-    let compListObs = from(this.companyService.getCustomersList({}));
+    let compListObs = from(this.companyService.getLatestCompanies({}));
     let latestTransactionsObs = from(
       this.reportsService.getLatestTransactionsList({})
     );

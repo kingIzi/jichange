@@ -52,17 +52,26 @@ export class CompanyService {
     return data;
   }
   public async getCustomersList(body: {}) {
-    const data = await lastValueFrom(
+    let data = await lastValueFrom(
       this.client.performPost(`/api/Company/getcompanys_S`, body)
     );
     return data as HttpDataResponse<Company[] | number | string>;
   }
   public async postCompanyUsersList(body: { compid: number }) {
-    const data = await lastValueFrom(
+    let data = await lastValueFrom(
       this.client.performPost<
         { compid: number },
         HttpDataResponse<CompanyUser[] | string>
       >(`/api/CompanyUsers/GetCompanyUserss`, body)
+    );
+    return data;
+  }
+  public async getLatestCompanies(body: {}) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        {},
+        HttpDataResponse<string | number | Company[]>
+      >(`/api/Setup/LatestComp`, body)
     );
     return data;
   }

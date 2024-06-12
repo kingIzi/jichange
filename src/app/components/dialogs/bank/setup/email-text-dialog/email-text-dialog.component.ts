@@ -56,10 +56,12 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 export class EmailTextDialogComponent implements OnInit {
   public flows: string[] = [
     'On Registration',
-    'User Registration',
-    'On Approve',
-    'On Return',
-    'OTP Activation',
+    'On Invoice Generation',
+    'On Receipt',
+    'On Invoice Cancellation',
+    'On Invoice Ammendent',
+    'On OTP',
+    'On User Registration',
   ];
   public emailTextForm!: FormGroup;
   public userProfile!: LoginResponse;

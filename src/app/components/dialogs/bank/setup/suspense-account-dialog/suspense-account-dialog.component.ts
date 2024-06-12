@@ -138,11 +138,11 @@ export class SuspenseAccountDialogComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -162,9 +162,9 @@ export class SuspenseAccountDialogComponent implements OnInit {
   submitSuspenseAccountForm() {
     if (this.suspenseAccountForm.valid) {
       this.requestPostSuspenseAccount(this.suspenseAccountForm.value);
+    } else {
+      this.suspenseAccountForm.markAllAsTouched();
     }
-    this.suspenseAccountForm.markAllAsTouched();
-    this.formErrors();
   }
   get account() {
     return this.suspenseAccountForm.get('account') as FormControl;

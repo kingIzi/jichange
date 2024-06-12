@@ -99,12 +99,32 @@ export class SuspenseAccountListComponent implements OnInit {
   }
   private sortTableAsc(ind: number) {
     switch (ind) {
+      case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
+        this.suspenseAccounts.sort((a, b) =>
+          (a.Sus_Acc_No || '') > (b.Sus_Acc_No || '') ? 1 : -1
+        );
+        break;
+      case SuspenseAccountTable.STATUS:
+        this.suspenseAccounts.sort((a, b) =>
+          (a.Status || '') > (b.Status || '') ? 1 : -1
+        );
+        break;
       default:
         break;
     }
   }
   private sortTableDesc(ind: number) {
     switch (ind) {
+      case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
+        this.suspenseAccounts.sort((a, b) =>
+          (a.Sus_Acc_No || '') < (b.Sus_Acc_No || '') ? 1 : -1
+        );
+        break;
+      case SuspenseAccountTable.STATUS:
+        this.suspenseAccounts.sort((a, b) =>
+          (a.Status || '') < (b.Status || '') ? 1 : -1
+        );
+        break;
       default:
         break;
     }

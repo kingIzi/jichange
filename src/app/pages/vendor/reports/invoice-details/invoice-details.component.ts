@@ -444,11 +444,11 @@ export class InvoiceDetailsComponent implements OnInit {
   private filterInvoiceDetailsByQuery(q: string) {
     if (q.toLocaleLowerCase() == 'Due'.toLocaleLowerCase()) {
       this.invoiceReportsData = this.invoiceReportsData.filter(
-        (i) => new Date(i.Due_Date) <= new Date()
+        (i) => new Date(i.Due_Date) >= new Date()
       );
     } else if (q.toLocaleLowerCase() == 'Expired'.toLocaleLowerCase()) {
       this.invoiceReportsData = this.invoiceReportsData.filter(
-        (i) => new Date(i.Invoice_Expired_Date) <= new Date()
+        (i) => new Date(i.Invoice_Expired_Date) >= new Date()
       );
     }
   }

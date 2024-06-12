@@ -65,7 +65,7 @@
         "emailText",
         "bankUser",
         "Suspense account",
-        "Deposit account"
+        "Vendor account"
       ]
     },
     {
@@ -129,7 +129,7 @@
       "bankUser": "Bank user(s)",
       "language": "Language(s)",
       "suspense": "Suspense account",
-      "deposit": "Deposit account"
+      "deposit": "Vendor account"
     },
     "reports": {
       "overview": "Report(s)",

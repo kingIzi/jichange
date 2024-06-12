@@ -3,6 +3,7 @@
   "addInvoice": "Add Invoice",
   "createInvoice": "Create Invoice",
   "form": {
+    "details": "Invoice details",
     "invoiceNo": "Invoice number",
     "invoiceDate": "Invoice date",
     "dueDate": "Invoice due date",

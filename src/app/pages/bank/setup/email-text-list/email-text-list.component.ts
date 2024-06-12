@@ -248,9 +248,6 @@ export class EmailTextListComponent implements OnInit {
             this.tr.translate(`setup.emailText.deletedEmailText`)
           );
           this.requestEmailTextList();
-          // m.then((res) => {
-          //   this.requestEmailTextList();
-          // });
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

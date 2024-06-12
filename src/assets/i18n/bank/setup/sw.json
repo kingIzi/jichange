@@ -404,7 +404,7 @@
   },
   "depositAccount": {
     "addDepositAccount": "Ongeza",
-    "depositAccount": "Akaunti ya amana",
+    "depositAccount": "akaunti ya muuzaji",
     "addedDepositSuccessfully": "Akaunti ya amana limeongezwa kwa mafanikio!",
     "modifiedDepositSuccessfully": "Akaunti ya amana limebadilishwa kwa mafanikio!",
     "failedToUpdateDeposit": "Imeshindwa ku ongezwa Akaunti ya amana.",

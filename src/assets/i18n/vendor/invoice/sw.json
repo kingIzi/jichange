@@ -3,6 +3,7 @@
   "addInvoice": "Ongeza Bili",
   "createInvoice": "Unda Bili",
   "form": {
+    "details": "Maelezo ya ankara",
     "invoiceNo": "Nambari ya Bili",
     "invoiceDate": "Tarehe ya Bili",
     "dueDate": "Tarehe ya Kulipwa",

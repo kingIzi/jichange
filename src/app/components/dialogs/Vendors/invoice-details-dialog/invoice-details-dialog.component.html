@@ -41,11 +41,487 @@
   </form>
 </dialog>
 
-<div class="flex flex-col w-full h-full">
+<!-- class="py-10 px-10 flex flex-col divide-y w-full h-full overflow-y-auto overflow-x-hidden" -->
+
+<form
+  id="control-number-form"
+  [formGroup]="invoiceDetailsForm"
+  class="p-10 flex flex-col divide-y w-full h-full overflow-y-auto overflow-x-hidden"
+>
+  <h1 *transloco="let t; read: 'invoice'" class="text-xl md:text-2xl p-0">
+    {{ t("createInvoice") }}
+  </h1>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full py-4">
+    <h1
+      *transloco="let t; read: 'invoice.form'"
+      class="text-sm p-0 col-span-full font-semibold"
+    >
+      {{ t("details") }}
+    </h1>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("invoiceNo") }}<span class="text-red-600">*</span>
+      </p>
+      <input
+        *transloco="let t; read: 'invoice.form.placeholders'"
+        type="text"
+        [placeholder]="t('invoiceNo')"
+        class="input input-sm input-bordered font-inter uppercase placeholder:capitalize"
+        [formControl]="invno"
+        #invoiceNoInput
+      />
+      <span *ngIf="invno && invno.invalid && invno.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("invoiceNo") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("invoiceDate") }}<span class="text-red-600">*</span>
+      </p>
+      <input
+        *transloco="let t; read: 'invoice.form.placeholders'"
+        type="date"
+        [placeholder]="t('invoiceDate')"
+        class="input input-sm input-bordered font-inter"
+        [formControl]="date"
+        #invoiceDateInput
+      />
+      <span *ngIf="date && date.invalid && date.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("invoiceDate") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("dueDate") }}<span class="text-red-600">*</span>
+      </p>
+      <input
+        *transloco="let t; read: 'invoice.form.placeholders'"
+        type="date"
+        [placeholder]="t('dueDate')"
+        class="input input-sm input-bordered font-inter"
+        [formControl]="edate"
+        [min]="date.value"
+      />
+      <span *ngIf="edate && edate.invalid && edate.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("dueDate") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("invoiceExpire") }}<span class="text-red-600">*</span>
+      </p>
+      <input
+        *transloco="let t; read: 'invoice.form.placeholders'"
+        type="date"
+        [placeholder]="t('invoiceExpire')"
+        class="input input-sm input-bordered font-inter"
+        [formControl]="iedate"
+        [min]="edate.value"
+      />
+      <span *ngIf="iedate && iedate.invalid && iedate.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("invoiceExpire") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("customer") }}<span class="text-red-600">*</span>
+      </p>
+      <select
+        #customerInput
+        (change)="changeCustomer(customerInput.value)"
+        [formControl]="chus"
+        class="select select-sm select-bordered w-full font-normal"
+      >
+        <option
+          *transloco="let t; read: 'invoice.form.placeholders'"
+          disabled
+          selected
+          [value]="t('customer')"
+        >
+          {{ t("customer") }}
+        </option>
+        <option
+          *transloco="let t; read: 'invoice.form'"
+          class="text-sm italic w-full text-center font-inter"
+          [value]="t('addNewCustomer')"
+        >
+          {{ t("addNewCustomer") }}
+        </option>
+        <option
+          *ngFor="
+            let customer of customers;
+            index as ind;
+            trackBy: PerformanceUtils.trackByIndex
+          "
+          [value]="customer.Cus_Mas_Sno"
+        >
+          {{ customer.Customer_Name }}
+        </option>
+      </select>
+      <span *ngIf="chus && chus.invalid && chus.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("customer") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("paymentType") }}<span class="text-red-600">*</span>
+      </p>
+      <select
+        [formControl]="ptype"
+        class="select select-sm select-bordered w-full font-normal"
+      >
+        <option
+          *transloco="let t; read: 'invoice.form.placeholders'"
+          disabled
+          selected
+        >
+          {{ t("paymentType") }}
+        </option>
+        <option [value]="'Flexible'">Flexible</option>
+        <option [value]="'Fixed'">Fixed</option>
+      </select>
+      <span *ngIf="ptype && ptype.invalid && ptype.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("paymentType") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("currency") }}<span class="text-red-600">*</span>
+      </p>
+      <select
+        [formControl]="ccode"
+        class="select select-sm select-bordered w-full font-normal"
+      >
+        <option
+          *transloco="let t; read: 'invoice.form.placeholders'"
+          disabled
+          selected
+        >
+          {{ t("currency") }}
+        </option>
+        <option
+          *ngFor="let currency of currencies"
+          [value]="currency.Currency_Code"
+        >
+          {{ currency.Currency_Code }}
+        </option>
+      </select>
+      <span *ngIf="ccode && ccode.invalid && ccode.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("currency") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1">
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+        {{ t("invoiceRemark") }}
+      </p>
+      <input
+        *transloco="let t; read: 'invoice.form.placeholders'"
+        type="text"
+        [placeholder]="t('invoiceRemark')"
+        class="input input-sm input-bordered font-inter"
+        [formControl]="Inv_remark"
+        #InvRemark
+      />
+      <span *ngIf="Inv_remark && Inv_remark.invalid && Inv_remark.touched">
+        <p
+          *transloco="let t; read: 'invoice.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("invoiceRemark") }}
+        </p>
+      </span>
+    </div>
+    <h1
+      *transloco="let t; read: 'invoice.form'"
+      class="text-sm p-0 col-span-full font-semibold"
+    >
+      {{ t("itemDetails") }}
+    </h1>
+    <div class="flex flex-col col-span-full pt-2">
+      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="max-h-56 overflow-y-auto">
+            <table class="min-w-full text-left text-sm font-light">
+              <thead class="border-b font-medium">
+                <tr *transloco="let t; read: 'tableData'">
+                  <th
+                    *transloco="let t; read: 'invoice.form'"
+                    class="text-xs font-inter py-4"
+                  >
+                    {{ t("description") }}
+                  </th>
+                  <th
+                    *transloco="let t; read: 'invoice.form'"
+                    class="text-xs font-inter py-4"
+                  >
+                    {{ t("quantity") }}
+                  </th>
+                  <th
+                    *transloco="let t; read: 'invoice.form'"
+                    class="text-xs font-inter py-4"
+                  >
+                    {{ t("unitPrice") }}
+                  </th>
+                  <th
+                    *transloco="let t; read: 'invoice.form'"
+                    class="text-xs font-inter py-4"
+                  >
+                    {{ t("totalPrice") }}
+                  </th>
+                  <th
+                    *transloco="let t; read: 'invoice.form'"
+                    class="text-xs font-inter py-4"
+                  >
+                    {{ t("remarks") }}
+                  </th>
+                  <th
+                    *transloco="let t; read: 'defaults'"
+                    class="text-xs font-inter py-4"
+                  >
+                    {{ t("action") }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="details">
+                <tr
+                  formGroupName="{{ ind }}"
+                  *ngFor="let i of details.controls; index as ind"
+                >
+                  <td>
+                    <input
+                      formControlName="item_description"
+                      type="text"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1"
+                    />
+                    <span
+                      *ngIf="
+                        details.controls.at(ind)?.get('item_description') &&
+                        details.controls.at(ind)?.get('item_description')
+                          ?.invalid &&
+                        details.controls.at(ind)?.get('item_description')
+                          ?.touched
+                      "
+                    >
+                      <p
+                        *transloco="
+                          let t;
+                          read: 'invoice.form.errors.itemDetails'
+                        "
+                        class="text-xs text-red-600"
+                      >
+                        {{ t("missingDescription") }}
+                      </p>
+                    </span>
+                  </td>
+                  <td class="h-8">
+                    <input
+                      #quantityInput
+                      formControlName="item_qty"
+                      [min]="1"
+                      type="number"
+                      class="input-sm input-bordered input-ghost input w-16 my-1 mx-1"
+                    />
+                    <span
+                      *ngIf="
+                        details.controls.at(ind)?.get('item_qty') &&
+                        details.controls.at(ind)?.get('item_qty')?.invalid &&
+                        details.controls.at(ind)?.get('item_qty')?.touched
+                      "
+                    >
+                      <ng-container
+                        *transloco="
+                          let t;
+                          read: 'invoice.form.errors.itemDetails'
+                        "
+                      >
+                        <p
+                          *ngIf="
+                            details.controls
+                              .at(ind)
+                              ?.get('item_qty')
+                              ?.hasError('min')
+                          "
+                          class="text-xs text-red-600"
+                        >
+                          {{ t("noQuantity") }}
+                        </p>
+                        <p
+                          *ngIf="
+                            details.controls
+                              .at(ind)
+                              ?.get('item_qty')
+                              ?.hasError('required')
+                          "
+                          class="text-xs text-red-600"
+                        >
+                          {{ t("missingQuantity") }}
+                        </p>
+                      </ng-container>
+                    </span>
+                  </td>
+                  <td>
+                    <input
+                      #unitPriceInput
+                      formControlName="item_unit_price"
+                      [min]="1"
+                      type="number"
+                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
+                    />
+                    <span
+                      *ngIf="
+                        details.controls.at(ind)?.get('item_unit_price') &&
+                        details.controls.at(ind)?.get('item_unit_price')
+                          ?.invalid &&
+                        details.controls.at(ind)?.get('item_unit_price')
+                          ?.touched
+                      "
+                    >
+                      <ng-container
+                        *transloco="
+                          let t;
+                          read: 'invoice.form.errors.itemDetails'
+                        "
+                      >
+                        <p
+                          *ngIf="
+                            details.controls
+                              .at(ind)
+                              ?.get('item_unit_price')
+                              ?.hasError('min')
+                          "
+                          class="text-xs text-red-600"
+                        >
+                          {{ t("noUnitPrice") }}
+                        </p>
+                        <p
+                          *ngIf="
+                            details.controls
+                              .at(ind)
+                              ?.get('item_unit_price')
+                              ?.hasError('required')
+                          "
+                          class="text-xs text-red-600"
+                        >
+                          {{ t("missingUnitPrice") }}
+                        </p>
+                      </ng-container>
+                    </span>
+                  </td>
+                  <td>
+                    <input
+                      formControlName="item_total_amount"
+                      type="number"
+                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1 disabled"
+                      [readOnly]="true"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      formControlName="remarks"
+                      type="text"
+                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
+                    />
+                  </td>
+                  <td class="flex flex-row items-center justify-center">
+                    <button
+                      (click)="addItemDetail(ind)"
+                      [class]="
+                        ind === details.controls.length - 1 ? 'block' : 'hidden'
+                      "
+                    >
+                      <span class="material-symbols-outlined text-success">
+                        add
+                      </span>
+                    </button>
+                    <button
+                      (click)="removeItemDetail(ind)"
+                      [class]="
+                        ind === 0 && details.controls.length === 1
+                          ? 'hidden'
+                          : ''
+                      "
+                    >
+                      <span class="material-symbols-outlined text-danger-600">
+                        delete
+                      </span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-row items-center">
+        <p *transloco="let t; read: 'invoice.form'">
+          {{ t("totalPrice") }}:{{ accumulateData() }} {{ ccode.value }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div
+    class="flex flex-row space-x-2 items-center w-full justify-end pt-2 col-span-full"
+  >
+    <button
+      *transloco="let t; read: 'actions'"
+      (click)="closeDialog()"
+      type="button"
+      class="btn text-xs btn-ghost text-neutral-500 font-inter w-24"
+    >
+      {{ t("close") }}
+    </button>
+    <button
+      *transloco="let t; read: 'actions'"
+      (click)="submitInvoiceDetailsForm()"
+      type="submit"
+      form="control-number-form"
+      class="btn text-xs btn-outline font-inter btn-success w-24"
+    >
+      {{ t("submit") }}
+    </button>
+  </div>
+</form>
+
+<!-- <div class="flex flex-col w-full h-full">
   <form
     id="control-number-form"
     [formGroup]="invoiceDetailsForm"
-    class="py-10 px-10 flex flex-col divide-y h-full"
+    class="py-10 px-10 flex flex-col divide-y h-full overflow-y-auto overflow-x-hidden"
   >
     <h1 *transloco="let t; read: 'invoice'" class="text-xl md:text-2xl p-0">
       {{ t("createInvoice") }}
@@ -501,4 +977,4 @@
       </button>
     </div>
   </form>
-</div>
+</div> -->

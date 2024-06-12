@@ -40,6 +40,8 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { TimeoutError } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 
 @Component({
   selector: 'app-bank-user-list',
@@ -71,6 +73,7 @@ export class BankUserListComponent implements OnInit {
   public tableHeadersFormGroup!: FormGroup;
   public employeeDetails: EmployeeDetail[] = [];
   public employeeDetailsData: EmployeeDetail[] = [];
+  public branches: Branch[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public EmployeeTable: typeof EmployeeTable = EmployeeTable;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -81,6 +84,7 @@ export class BankUserListComponent implements OnInit {
     private fb: FormBuilder,
     private tr: TranslocoService,
     private bankService: BankService,
+    private branchService: BranchService,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -186,6 +190,29 @@ export class BankUserListComponent implements OnInit {
       default:
         break;
     }
+  }
+  private requestBranchDetailsList() {
+    this.startLoading = true;
+    this.branchService
+      .postBranchList({})
+      .then((result) => {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.branches = result.response;
+        }
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private requestBankDetails() {
     this.tableLoading = true;

@@ -408,7 +408,7 @@
   },
   "depositAccount": {
     "addDepositAccount": "Add",
-    "depositAccount": "Deposit Account",
+    "depositAccount": "Vendor Account",
     "addedDepositSuccessfully": "Added deposit account successfully!",
     "modifiedDepositSuccessfully": "Modified deposit account successfully!",
     "failedToUpdateDeposit": "Failed to update deposit account.",
