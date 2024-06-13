@@ -114,7 +114,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
       goods_status: this.fb.control('', []),
       total: this.fb.control('', [Validators.required]),
       details: this.fb.array([], [Validators.required]),
-      reason: this.fb.control('', [Validators.required]),
+      reason: this.fb.control('', []),
     });
   }
   private buildPage() {
@@ -365,7 +365,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     return moneyFormat;
   }
   submitInvoiceDetailsForm() {
-    if (this.formGroup.value) {
+    if (this.formGroup.valid) {
       this.confirmAddAmendment.nativeElement.showModal();
     } else {
       this.formGroup.markAllAsTouched();

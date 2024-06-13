@@ -15,6 +15,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { ActivatedRoute } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -77,6 +78,7 @@ export class VendorDetailReportComponent implements OnInit {
     private tr: TranslocoService,
     private branchService: BranchService,
     private reportsService: ReportsService,
+    private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -305,6 +307,12 @@ export class VendorDetailReportComponent implements OnInit {
     this.createTableFilterForm();
     this.createTableHeadersFormGroup();
     this.buildPage();
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params && params['q']) {
+        let q = atob(params['q']);
+        this.submitTableFilterForm();
+      }
+    });
   }
   submitTableFilterForm() {
     let form = {} as any;

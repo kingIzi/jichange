@@ -48,9 +48,9 @@
       "itemDetails": {
         "missingDescription": "Tafadhali jaza",
         "missingQuantity": "Eleza kiasi",
-        "noQuantity": "Haiwezi kuwa 0",
+        "noQuantity": "Zaidi ya 0",
         "missingUnitPrice": "Eleza bei ya kitengo",
-        "noUnitPrice": "Haiwezi kuwa 0"
+        "noUnitPrice": "Zaidi ya 0"
       }
     },
     "dialog": {
@@ -152,6 +152,17 @@
           "failedToCancelInvoice": "Imeshindwa kughairi ankara."
         }
       }
+    }
+  },
+  "refund": {
+    "refundPayment": "Malipo ya Marejesho",
+    "form": {
+      "fullRefund": "Marejesho kamili",
+      "fullRefundDescription": "Rejesha kiasi kamili {}",
+      "partialRefund": "Marejesho ya sehemu",
+      "partialRefundDescription": "Rejesha kiasi cha sehemu",
+      "refundAmount": "Kiasi cha Marejesho",
+      "refundMessage": "Marejesho huchukua siku 5 hadi 10 kuonekana kwenye taarifa ya mteja wako."
     }
   }
 }

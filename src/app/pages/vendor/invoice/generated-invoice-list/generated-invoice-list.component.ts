@@ -49,6 +49,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/generated-invoice-list-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AmendmentDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/amendment-details-dialog/amendment-details-dialog.component';
+import { RefundInvoiceComponent } from 'src/app/components/dialogs/Vendors/refund-invoice/refund-invoice.component';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -293,10 +294,7 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
     });
     dialogRef.componentInstance.viewReady.asObservable().subscribe((view) => {
       this.fileHandler
-        .downloadPdf(
-          view,
-          `generated-invoice-${generatedInvoice.Invoice_No}.pdf`
-        )
+        .downloadPdf(view, `invoice-${generatedInvoice.Invoice_No}.pdf`)
         .then((results) => {
           this.cdr.detectChanges();
         })
@@ -347,6 +345,15 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       this.requestGeneratedInvoice();
     });
   }
+  openRefundInvoiceDialog(invoice: GeneratedInvoice) {
+    let dialogRef = this.dialog.open(RefundInvoiceComponent, {
+      width: '500px',
+      disableClose: true,
+      data: {
+        invid: invoice.Inv_Mas_Sno,
+      },
+    });
+  }
   getActiveStatusStyles(status: string) {
     return status
       ? status.toLocaleLowerCase() === 'active'
@@ -369,7 +376,6 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
     dialog.invoiceId = invoice.Inv_Mas_Sno;
     dialog.cancelledInvoice.asObservable().subscribe(() => {
       this.requestGeneratedInvoice();
-      //this.requestCreatedInvoiceList();
     });
     dialog.openDialog();
   }

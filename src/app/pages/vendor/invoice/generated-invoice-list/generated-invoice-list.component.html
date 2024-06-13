@@ -89,7 +89,10 @@
                     [id]="'generated-invoice-id-' + ind"
                     formGroupName="{{ ind }}"
                   >
-                    <div class="flex items-center">
+                    <div
+                      class="flex items-center"
+                      [class]="isCashAmountColumn(ind) ? 'justify-end' : ''"
+                    >
                       <p>
                         {{ header?.get("label")?.value }}
                       </p>
@@ -242,14 +245,17 @@
                 >
                   <button
                     [class]="
-                      getActiveStatusStyles(generatedInvoice.Payment_Type)
+                      PerformanceUtils.getActiveStatusStyles(
+                        generatedInvoice.Payment_Type,
+                        'Fixed',
+                        'bg-purple-100',
+                        'text-black',
+                        'bg-teal-100',
+                        'text-black'
+                      )
                     "
                   >
-                    {{
-                      generatedInvoice.Payment_Type
-                        ? generatedInvoice.Payment_Type.trim()
-                        : "-"
-                    }}
+                    {{ generatedInvoice.Payment_Type }}
                   </button>
                 </td>
                 <td
@@ -338,6 +344,16 @@
                     >
                       <span class="text-warning">
                         <i class="bi bi-eye text-lg"></i>
+                      </span>
+                    </button>
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('refund')"
+                      class="btn btn-sm btn-ghost tooltip"
+                      (click)="openRefundInvoiceDialog(generatedInvoice)"
+                    >
+                      <span class="text-info">
+                        <i class="bi bi-cash"></i>
                       </span>
                     </button>
                     <button

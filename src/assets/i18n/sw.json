@@ -29,7 +29,8 @@
     "saveChanges": "Save changes?",
     "view": "Tazama",
     "edit": "Hariri",
-    "delete": "Futa"
+    "delete": "Futa",
+    "refund": "Refund"
   },
   "errors": {
     "errorOccured": "Kosa limetokea",

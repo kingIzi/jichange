@@ -1,0 +1,76 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<form
+  id="control-number-form"
+  [formGroup]="formGroup"
+  class="p-10 flex flex-col divide-y w-full h-full max-h-[32rem] overflow-y-auto overflow-x-hidden"
+>
+  <h1
+    *transloco="let t; read: 'invoice.refund'"
+    class="text-xl md:text-2xl p-0"
+  >
+    {{ t("refundPayment") }}
+  </h1>
+  <div class="flex flex-col h-full w-full py-4">
+    <div class="p-4 flex flex-row items-center space-x-2">
+      <input
+        id="full-refund"
+        type="radio"
+        name="radio-1"
+        class="radio radio-xs"
+      />
+      <label for="full-refund flex flex-col">
+        <p
+          *transloco="let t; read: 'invoice.refund.form'"
+          class="font-semibold text-sm"
+        >
+          {{ t("fullRefund") }}
+        </p>
+        <p
+          *transloco="let t; read: 'invoice.refund.form'"
+          class="font-normal text-sm"
+        >
+          {{ fullRefundDescription(t("fullRefundDescription")) }}
+        </p>
+      </label>
+      <!-- <div class="flex flex-col">
+        <p
+          *transloco="let t; read: 'invoice.refund.form'"
+          class="font-semibold text-sm"
+        >
+          {{ t("fullRefund") }}
+        </p>
+        <p
+          *transloco="let t; read: 'invoice.refund.form'"
+          class="font-normal text-sm"
+        >
+          {{ fullRefundDescription(t("fullRefundDescription")) }}
+        </p>
+      </div> -->
+    </div>
+  </div>
+  <div
+    class="flex flex-row space-x-2 items-center w-full justify-end pt-2 col-span-full"
+  >
+    <button
+      *transloco="let t; read: 'actions'"
+      (click)="closeDialog()"
+      type="button"
+      class="btn text-xs btn-ghost text-neutral-500 font-inter w-24"
+    >
+      {{ t("close") }}
+    </button>
+    <button
+      *transloco="let t; read: 'actions'"
+      (click)="submitRefund()"
+      type="submit"
+      form="control-number-form"
+      class="btn text-xs btn-outline font-inter btn-success w-24"
+    >
+      {{ t("submit") }}
+    </button>
+  </div>
+</form>
