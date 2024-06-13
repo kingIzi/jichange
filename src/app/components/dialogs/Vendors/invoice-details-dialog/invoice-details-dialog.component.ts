@@ -166,9 +166,9 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
         : ''
     );
     if (this.data.customerId && this.data.customerId > 0) {
-      this.chus.setValue(this.data.customerId);
+      this.customerName.setValue(this.data.customerId);
     } else {
-      this.chus.setValue(this.generatedInvoice.Chus_Mas_No ?? '');
+      this.customerName.setValue(this.generatedInvoice.Chus_Mas_No ?? '');
     }
     //this.goods_status.setValue(this.generatedInvoice.goods_status);
     this.ccode.setValue(this.generatedInvoice.Currency_Code);
