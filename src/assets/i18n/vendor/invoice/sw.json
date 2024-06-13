@@ -162,6 +162,7 @@
       "partialRefund": "Marejesho ya sehemu",
       "partialRefundDescription": "Rejesha kiasi cha sehemu",
       "refundAmount": "Kiasi cha Marejesho",
+      "enterRefundAmount": "Ingiza kiasi cha marejesho",
       "refundMessage": "Marejesho huchukua siku 5 hadi 10 kuonekana kwenye taarifa ya mteja wako."
     }
   }

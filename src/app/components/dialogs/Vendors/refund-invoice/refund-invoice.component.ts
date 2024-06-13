@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -41,6 +42,8 @@ export class RefundInvoiceComponent implements OnInit {
   public formGroup!: FormGroup;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('refundInvoice', { static: true })
+  refundInvoice!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RefundInvoiceComponent>,
@@ -105,9 +108,6 @@ export class RefundInvoiceComponent implements OnInit {
       );
       let desc = `( ${total} ${this.generatedInvoice.Currency_Code} )`;
       return description.replace('{}', desc);
-      // return `${description.replace('{}', total)} (${
-      //   this.generatedInvoice.Currency_Code
-      // })`;
     } else {
       return '';
     }
@@ -117,9 +117,10 @@ export class RefundInvoiceComponent implements OnInit {
   }
   submitRefund() {
     if (this.formGroup.valid) {
-      //
+      this.refundInvoice.nativeElement.showModal();
     } else {
       this.formGroup.markAllAsTouched();
     }
   }
+  refund() {}
 }

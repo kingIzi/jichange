@@ -2,6 +2,37 @@
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
+<dialog #refundInvoice class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("confirm") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'actions'">
+      {{ t("saveChanges") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          (click)="refundInvoice.close()"
+          *transloco="let t; read: 'defaults'"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          (click)="refundInvoice.close(); refund()"
+          *transloco="let t; read: 'defaults'"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("confirm") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
 
 <form
   id="control-number-form"
@@ -14,15 +45,10 @@
   >
     {{ t("refundPayment") }}
   </h1>
-  <div class="flex flex-col h-full w-full py-4">
-    <div class="p-4 flex flex-row items-center space-x-2">
-      <input
-        id="full-refund"
-        type="radio"
-        name="radio-1"
-        class="radio radio-xs"
-      />
-      <label for="full-refund flex flex-col">
+  <div class="flex flex-col h-full w-full py-4 space-y-4">
+    <div class="p-4 flex flex-row items-center space-x-2 border">
+      <input type="radio" id="full-refund" name="age" class="radio radio-xs" />
+      <label for="full-refund" class="flex flex-col w-full">
         <p
           *transloco="let t; read: 'invoice.refund.form'"
           class="font-semibold text-sm"
@@ -36,21 +62,56 @@
           {{ fullRefundDescription(t("fullRefundDescription")) }}
         </p>
       </label>
-      <!-- <div class="flex flex-col">
+    </div>
+    <div class="p-4 flex flex-row items-center space-x-2 border">
+      <input
+        #partialCheckBox
+        type="radio"
+        id="partial-refund"
+        name="age"
+        class="radio radio-xs"
+      />
+      <label for="partial-refund" class="flex flex-col w-full">
         <p
           *transloco="let t; read: 'invoice.refund.form'"
           class="font-semibold text-sm"
         >
-          {{ t("fullRefund") }}
+          {{ t("partialRefund") }}
         </p>
         <p
           *transloco="let t; read: 'invoice.refund.form'"
           class="font-normal text-sm"
         >
-          {{ fullRefundDescription(t("fullRefundDescription")) }}
+          {{ t("partialRefundDescription") }}
         </p>
-      </div> -->
+        <div class="flex flex-row items-center space-x-4 pt-2">
+          <p
+            *transloco="let t; read: 'invoice.refund.form'"
+            class="font-normal text-sm"
+          >
+            {{ t("refundAmount") }}
+          </p>
+          <div class="flex flex-row items-center space-x-2">
+            <input
+              *transloco="let t; read: 'invoice.refund.form'"
+              type="number"
+              [min]="1"
+              class="input-sm input-bordered border"
+              [placeholder]="t('enterRefundAmount')"
+            />
+            <p *ngIf="generatedInvoice" class="font-semibold text-sm">
+              {{ generatedInvoice.Currency_Code }}
+            </p>
+          </div>
+        </div>
+      </label>
     </div>
+    <p
+      *transloco="let t; read: 'invoice.refund.form'"
+      class="font-light text-xs italic"
+    >
+      {{ t("refundMessage") }}
+    </p>
   </div>
   <div
     class="flex flex-row space-x-2 items-center w-full justify-end pt-2 col-span-full"

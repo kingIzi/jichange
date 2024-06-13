@@ -453,7 +453,6 @@ export class CreatedInvoiceListComponent implements OnInit {
   openEditInvoiceDialog(generatedInvoice: GeneratedInvoice) {
     let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
       width: '800px',
-      height: '700px',
       disableClose: true,
       data: {
         invid: generatedInvoice.Inv_Mas_Sno,

@@ -169,6 +169,7 @@
       "partialRefund": "Partial refund",
       "partialRefundDescription": "Refund a partial amount",
       "refundAmount": "Refund amount",
+      "enterRefundAmount": "Enter refund amount",
       "refundMessage": "Refunds take 5 to 10 days to appear on your customer's statement."
     }
   }
