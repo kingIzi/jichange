@@ -113,7 +113,6 @@ export class ProfileComponent implements OnInit {
     private fb: FormBuilder,
     private tr: TranslocoService,
     private companyUserService: CompanyUserService,
-    private router: Router,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private loginService: LoginService,

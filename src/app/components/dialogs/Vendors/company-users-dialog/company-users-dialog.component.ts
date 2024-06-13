@@ -3,6 +3,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -69,6 +70,8 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('addCompanyUserDialog', { static: true })
+  addCompanyUserDialog!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
@@ -285,14 +288,15 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   setControlValue(control: FormControl, value: string) {
     control.setValue(value.trim());
   }
+  addCompanyUser() {
+    this.requestAddCompanyUser(this.companyUsersForm.value);
+  }
   submitCompanyUsersForm() {
-    if (this.companyUsersForm.invalid) {
-      this.companyUsersForm.markAllAsTouched();
-      return;
-    } else {
-      console.log(this.companyUsersForm.value);
+    if (this.companyUsersForm.valid) {
       this.chname.setValue('00' + this.pos.value);
-      this.requestAddCompanyUser(this.companyUsersForm.value);
+      this.addCompanyUserDialog.nativeElement.showModal();
+    } else {
+      this.companyUsersForm.markAllAsTouched();
     }
   }
   get pos() {

@@ -67,7 +67,6 @@
               <div class="flex flex-col space-y-1 w-full">
                 <h6 class="text-left text-sm">
                   {{ activeTabs[selectedTabIndex].form.firstName }}
-                  <span class="text-red-600">*</span>
                 </h6>
                 <input
                   type="text"
@@ -92,7 +91,6 @@
               <div class="flex flex-col space-y-1 w-full">
                 <h6 class="text-left text-sm">
                   {{ activeTabs[selectedTabIndex].form.lastName }}
-                  <span class="text-red-600">*</span>
                 </h6>
                 <input
                   #controlNumber
@@ -117,8 +115,7 @@
               </div>
               <div class="flex flex-col space-y-1 w-full">
                 <h6 class="text-left text-sm">
-                  {{ activeTabs[selectedTabIndex].form.email }}
-                  <span class="text-red-600">*</span>
+                  {{ activeTabs[selectedTabIndex].form.branch }}
                 </h6>
                 <input
                   *transloco="
@@ -128,7 +125,7 @@
                   #controlNumber
                   type="text"
                   [placeholder]="
-                    activeTabs[selectedTabIndex].form.placeholders.email
+                    activeTabs[selectedTabIndex].form.placeholders.branch
                   "
                   formControlName="email"
                   class="input input-bordered w-full max-w-lg bg-transparent text-black"
@@ -137,7 +134,6 @@
               <div class="flex flex-col space-y-1 w-full">
                 <h6 class="text-left text-sm">
                   {{ activeTabs[selectedTabIndex].form.role }}
-                  <span class="text-red-600">*</span>
                 </h6>
                 <select
                   class="select select-bordered w-full max-w-lg bg-transparent text-black"

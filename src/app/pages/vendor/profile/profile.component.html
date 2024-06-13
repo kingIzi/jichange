@@ -92,6 +92,31 @@
               </div>
               <div class="flex flex-col space-y-1 w-full">
                 <h6 class="text-left text-sm">
+                  {{ activeTabs[selectedTabIndex].form.mobile }}
+                </h6>
+                <input
+                  #controlNumber
+                  type="text"
+                  [placeholder]="
+                    activeTabs[selectedTabIndex].form.placeholders.mobile
+                  "
+                  formControlName="mobile"
+                  class="input input-bordered w-full max-w-lg bg-transparent text-black"
+                />
+                <span
+                  *ngIf="
+                    generalFormGroup.get('mobile') &&
+                    generalFormGroup.get('mobile')?.invalid &&
+                    generalFormGroup.get('mobile')?.touched
+                  "
+                >
+                  <p class="text-xs text-red-600">
+                    {{ activeTabs[selectedTabIndex].form.errors.lastName }}
+                  </p>
+                </span>
+              </div>
+              <div class="flex flex-col space-y-1 w-full">
+                <h6 class="text-left text-sm">
                   {{ activeTabs[selectedTabIndex].form.email }}
                   <span class="text-red-600">*</span>
                 </h6>
@@ -100,7 +125,6 @@
                     let t;
                     read: 'setup.countryDialog.form.placeholders'
                   "
-                  #controlNumber
                   type="text"
                   [placeholder]="
                     activeTabs[selectedTabIndex].form.placeholders.email

@@ -179,14 +179,16 @@
         "form": {
           "firstName": "First name",
           "lastName": "Last name",
-          "email": "Email Address",
+          "branch": "Branch",
           "mobile": "Mobile number",
           "role": "User role",
+          "email": "Email Address",
           "placeholders": {
             "firstName": "Enter first name",
             "lastName": "Enter last name",
-            "email": "Enter email address",
-            "role": "Select user role"
+            "branch": "Enter branch",
+            "role": "Select user role",
+            "email": "Enter Email Address"
           },
           "errors": {
             "firstName": "Cannot be empty",

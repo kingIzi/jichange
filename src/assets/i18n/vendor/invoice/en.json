@@ -91,6 +91,7 @@
   },
   "invoiceDetailsForm": {
     "invoiceDetails": "Invoice details",
+    "noCustomersFound": "No customers found for vendor.",
     "form": {
       "company": "Vendor",
       "customer": "Customer",

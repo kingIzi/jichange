@@ -178,13 +178,13 @@
         "form": {
           "firstName": "Jina la Kwanza",
           "lastName": "Jina la Mwisho",
-          "email": "Anwani ya Barua pepe",
+          "branch": "Tawi",
           "mobile": "Namba ya Simu",
           "role": "Jukumu la Mtumiaji",
           "placeholders": {
             "firstName": "Ingiza jina la kwanza",
             "lastName": "Ingiza jina la mwisho",
-            "email": "Ingiza anwani ya barua pepe",
+            "branch": "Ingiza Tawi",
             "role": "Chagua jukumu la mtumiaji"
           },
           "errors": {

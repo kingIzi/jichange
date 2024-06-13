@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -40,7 +41,15 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
-import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  from,
+  lastValueFrom,
+  map,
+  startWith,
+  zip,
+} from 'rxjs';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { Currency } from 'src/app/core/models/vendors/currency';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
@@ -48,6 +57,10 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { SubmitMessageBoxComponent } from '../../submit-message-box/submit-message-box.component';
 import { CustomersDialogComponent } from '../customers-dialog/customers-dialog.component';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
+import { Autocomplete, Input, initTE } from 'tw-elements';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-invoice-details-dialog',
@@ -66,6 +79,9 @@ import { CustomerName } from 'src/app/core/models/vendors/customer-name';
     LoaderInfiniteSpinnerComponent,
     SubmitMessageBoxComponent,
     MatDialogModule,
+    MatAutocompleteModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   providers: [
     {
@@ -74,17 +90,18 @@ import { CustomerName } from 'src/app/core/models/vendors/customer-name';
     },
   ],
 })
-export class InvoiceDetailsDialogComponent implements OnInit {
-  public startLoading: boolean = false;
+export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
   private userProfile!: LoginResponse;
+  public startLoading: boolean = false;
   public generatedInvoice!: GeneratedInvoice;
   public invoices: GeneratedInvoice[] = [];
   public customers: CustomerName[] = [];
+  public filteredCustomers!: Observable<CustomerName[]>;
   public currencies: Currency[] = [];
   public companies!: { Comp_Mas_Sno: number; Company_Name: string };
   public invoiceDetailsForm!: FormGroup;
   public addedInvoice = new EventEmitter<any>();
-  PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -94,6 +111,8 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
   @ViewChild('confirmAddInvoiceDetail')
   confirmAddInvoiceDetail!: ElementRef<HTMLDialogElement>;
+  @ViewChild('customer', { static: true })
+  customer!: ElementRef<HTMLInputElement>;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -173,6 +192,18 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       this.itemDetailQuantityPriceChanged(group);
     });
   }
+  private autocompleteEventListener() {
+    this.filteredCustomers = this.customerName.valueChanges.pipe(
+      startWith(''),
+      map((value) => this.customerAutoCompleteData(value || ''))
+    );
+  }
+  private customerAutoCompleteData(value: string): CustomerName[] {
+    let filterValue = value.toLocaleLowerCase();
+    return this.customers.filter((customer) =>
+      customer.Customer_Name.toLocaleLowerCase().includes(filterValue)
+    );
+  }
   private createGeneratedInvoiceViewForm() {
     this.startLoading = true;
     let invoiceDetailsObservable = from(
@@ -230,7 +261,8 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       edate: this.fb.control('', [Validators.required]),
       iedate: this.fb.control('', [Validators.required]),
       ptype: this.fb.control('', [Validators.required]),
-      chus: this.fb.control('', [Validators.required]),
+      chus: this.fb.control('', []),
+      customerName: this.fb.control('', [Validators.required]),
       ccode: this.fb.control('', [Validators.required]),
       comno: this.fb.control(0, [Validators.required]),
       ctype: this.fb.control('0', [Validators.required]),
@@ -350,10 +382,20 @@ export class InvoiceDetailsDialogComponent implements OnInit {
     let currenciesObservable = from(this.invoiceService.getCurrencyCodes());
     let mergedObservable = zip(customerNamesObservable, currenciesObservable);
     let res = AppUtilities.pipedObservables(mergedObservable)
-      .then((results: Array<any>) => {
+      .then((results) => {
         let [customers, currencies] = results;
-        this.customers = customers.response === 0 ? [] : customers.response;
-        this.currencies = currencies.response === 0 ? [] : currencies.response;
+        if (
+          typeof customers.response !== 'string' &&
+          typeof customers.response !== 'number'
+        ) {
+          this.customers = customers.response;
+        }
+        if (
+          typeof currencies.response !== 'string' &&
+          typeof currencies.response !== 'number'
+        ) {
+          this.currencies = currencies.response;
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -385,14 +427,18 @@ export class InvoiceDetailsDialogComponent implements OnInit {
     });
   }
   ngOnInit(): void {
+    initTE({ Input });
     this.parseUserProfile();
     this.createForm();
-    this.buildPage();
     if (this.data && this.data.invid) {
       this.createGeneratedInvoiceViewForm();
     } else {
       this.addItemDetail();
     }
+  }
+  ngAfterViewInit(): void {
+    this.buildPage();
+    this.autocompleteEventListener();
   }
   addItemDetail(ind: number = -1) {
     let group = this.fb.group({
@@ -416,14 +462,17 @@ export class InvoiceDetailsDialogComponent implements OnInit {
       }
     }
   }
-  setControlValue(control: FormControl, value: string) {
-    control.setValue(value.trim());
-  }
   closeDialog() {
     this.dialogRef.close();
   }
   submitInvoiceDetailsForm() {
     if (this.invoiceDetailsForm.valid) {
+      let customer = this.customers.find(
+        (c) =>
+          c.Customer_Name.toLocaleLowerCase() ===
+          this.customerName.value.toLocaleLowerCase()
+      );
+      this.chus.setValue(customer?.Cus_Mas_Sno);
       this.confirmAddInvoiceDetail.nativeElement.showModal();
     } else {
       this.invoiceDetailsForm.markAllAsTouched();
@@ -510,6 +559,9 @@ export class InvoiceDetailsDialogComponent implements OnInit {
   }
   get sno() {
     return this.invoiceDetailsForm.get('sno') as FormControl;
+  }
+  get customerName() {
+    return this.invoiceDetailsForm.get('customerName') as FormControl;
   }
   // private get goods_status() {
   //   return this.invoiceDetailsForm.get('goods_status') as FormControl;

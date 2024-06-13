@@ -46,6 +46,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BankUserDialogComponent } from 'src/app/components/dialogs/bank/setup/bank-user-dialog/bank-user-dialog.component';
 import { LoginService } from 'src/app/core/services/login.service';
 import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-form';
+import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { Branch } from 'src/app/core/models/bank/setup/branch';
 
 enum PROFILE_OPTIONS {
   GENERAL,
@@ -110,6 +112,7 @@ export class ProfileComponent implements OnInit {
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public PROFILE_OPTIONS: typeof PROFILE_OPTIONS = PROFILE_OPTIONS;
   public userProfile!: LoginResponse;
+  public filterFormData: { branches: Branch[] } = { branches: [] };
   @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -119,6 +122,7 @@ export class ProfileComponent implements OnInit {
     private bankUserService: BankService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
+    private branchService: BranchService,
     private loginService: LoginService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
@@ -178,14 +182,47 @@ export class ProfileComponent implements OnInit {
         this.activeTabs = activeTabs;
       });
   }
+  private requestBranchList() {
+    this.startLoading = true;
+    this.branchService
+      .postBranchList({})
+      .then((result) => {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.filterFormData.branches = result.response;
+          let branch = this.filterFormData.branches.find(
+            (b) => b.Sno === Number(this.userProfile.braid)
+          );
+          this.generalFormGroup.get('email')?.setValue(branch?.Name);
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
+  private disableGeneralFormGroupData() {
+    this.generalFormGroup.get(`fname`)?.disable();
+    this.generalFormGroup.get(`lname`)?.disable();
+    this.generalFormGroup.get(`email`)?.disable();
+    this.generalFormGroup.get(`role`)?.disable();
+  }
   private setGeneralFormGroupData() {
-    this.generalFormGroup.setValue({
-      fname: this.employeeDetail.First_Name,
-      lname: this.employeeDetail.Last_name,
-      email: this.employeeDetail.Email_Address,
-      role: this.userProfile.role,
-    });
-    this.generalFormGroup.get('role')?.disable();
+    this.generalFormGroup
+      .get('fname')
+      ?.setValue(this.employeeDetail.First_Name);
+    this.generalFormGroup.get('lname')?.setValue(this.employeeDetail.Last_name);
+    this.disableGeneralFormGroupData();
   }
   private requestEmployeeDetail(body: { sno: string | number }) {
     this.startLoading = true;
@@ -247,6 +284,7 @@ export class ProfileComponent implements OnInit {
     this.createLanguageFormGroup();
     this.prepareActiveTabs();
     this.requestEmployeeDetail({ sno: this.userProfile.Usno });
+    this.requestBranchList();
   }
   saveLanguageClicked() {
     if (
