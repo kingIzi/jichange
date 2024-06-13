@@ -182,6 +182,18 @@
   "systemLogs": {
     "systemLogsReport": "Kumbukumbu za mfumo"
   },
+  "vendorReport": {
+    "vendorReport": "Ripoti ya Vendor",
+    "vendorReportTable": [
+      "#",
+      "Jina la Muuzaji",
+      "Simu",
+      "TIN",
+      "Namba ya Akaunti",
+      "Hali",
+      "Mkaguzi"
+    ]
+  },
   "userLogReport": {
     "userLogReport": "Ripoti ya Kumbukumbu za Mtumiaji",
     "form": {

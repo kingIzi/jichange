@@ -7,7 +7,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -111,6 +111,7 @@ export class CustomerDetailReportComponent implements OnInit {
     private companyService: CompanyService,
     private branchService: BranchService,
     private fileHandler: FileHandlerService,
+    private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private tr: TranslocoService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -136,7 +137,7 @@ export class CustomerDetailReportComponent implements OnInit {
     }
     this.regionChangeEventHandler();
   }
-  private async createTableHeadersFormGroup() {
+  private createTableHeadersFormGroup() {
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -243,7 +244,7 @@ export class CustomerDetailReportComponent implements OnInit {
         throw err;
       });
   }
-  private async buildPage() {
+  private buildPage() {
     this.startLoading = true;
     let companiesObs = from(
       this.reportsService.getBranchedCompanyList({
@@ -384,7 +385,12 @@ export class CustomerDetailReportComponent implements OnInit {
         break;
     }
   }
+  private emptyCustomerDetails() {
+    this.customersData = [];
+    this.customers = this.customersData;
+  }
   private requestCustomerDetails(form: any) {
+    this.emptyCustomerDetails();
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
@@ -441,18 +447,30 @@ export class CustomerDetailReportComponent implements OnInit {
       this.customers = this.customersData;
     }
   }
+  private initData(q: string) {
+    if (q.toLocaleLowerCase() === 'Customers'.toLocaleLowerCase()) {
+      this.Comp.setValue('0');
+      this.reg.setValue('0');
+      this.dist.setValue('0');
+      this.submitTableFilterForm();
+    }
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.buildPage();
     this.createTableFilterForm();
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params && params['q']) {
+        let q = atob(params['q']);
+        this.initData(q);
+      }
+    });
   }
   submitTableFilterForm() {
     if (this.tableFilterFormGroup.valid) {
       let form = { ...this.tableFilterFormGroup.value };
       form.branch = this.branch.value;
-      this.customersData = [];
-      this.customers = this.customersData;
       this.requestCustomerDetails(form);
     } else {
       this.tableFilterFormGroup.markAllAsTouched();

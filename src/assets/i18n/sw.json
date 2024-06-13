@@ -67,16 +67,16 @@
       "deposit": "akaunti ya muuzaji"
     },
     "reports": {
-      "overview": "Ripoti(s)",
-      "invoice": "Muswada(s)",
+      "overview": "Ripoti",
+      "invoice": "Muswada",
       "userLog": "Majedwali ya Watumiaji",
-      "vendor": "Muuzaji(s)",
+      "vendor": "Muteja",
       "audit": "Uchunguzi",
-      "details": "Maelezo(s)",
-      "payments": "Malipo(s)",
-      "amendment": "Mabadiliko(s)",
-      "transaction": "Miamala(s)",
-      "systemLogs": "Kumbukumbu za mfumo"
+      "details": "Maelezo",
+      "payments": "Malipo",
+      "amendment": "Mabadiliko",
+      "transaction": "Miamala",
+      "vendorReport": "Ripoti ya Vendor"
     }
   },
   "vendorRoutes": {
@@ -161,8 +161,8 @@
         "Maelezo ya Malipo",
         "Maelezo ya Bili",
         "Maelezo ya Marekebisho",
-        "Ripoti ya Muuzaji",
-        "Kumbukumbu za Mfumo",
+        "Ripoti ya Muteja",
+        "Ripoti ya Vendor",
         "Ripoti ya Kumbukumbu za Mtumiaji",
         "Kufuatilia Ukaguzi"
       ]

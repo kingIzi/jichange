@@ -526,7 +526,9 @@ export class DashboardComponent implements OnInit {
         this.router.navigate(['/main/company/inbox']);
         break;
       case 'Customers'.toLocaleLowerCase():
-        this.router.navigate(['/main/company/summary']);
+        this.router.navigate(['/main/reports/customer'], {
+          queryParams: { q: btoa(name) },
+        });
         break;
       default:
         this.router.navigate(['/main']);

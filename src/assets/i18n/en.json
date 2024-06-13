@@ -76,8 +76,8 @@
         "Payment Details",
         "Invoice Details",
         "Amendments Details",
-        "Vendor Report",
-        "System Logs",
+        "Customers Report",
+        "Vendors Report",
         "User Log Report",
         "Audit Trails"
       ]
@@ -135,13 +135,13 @@
       "overview": "Report(s)",
       "invoice": "Invoice(s)",
       "userLog": "User Logs",
-      "vendor": "Vendor(s)",
+      "vendor": "Customer(s)",
       "audit": "Audit",
       "details": "Detail(s)",
       "payments": "Payment(s)",
       "amendment": "Amendment(s)",
       "transaction": "Transaction(s)",
-      "systemLogs": "System logs"
+      "vendorReport": "Vendor report"
     }
   },
   "vendorRoutes": {

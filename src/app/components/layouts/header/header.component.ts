@@ -238,8 +238,8 @@ export class HeaderComponent implements OnInit {
         return '/main/reports/amendment';
       case BankReportMap.CUSTOMER_DETAILS:
         return '/main/reports/customer';
-      case BankReportMap.SYSTEM_LOG:
-        return '/main/reports/syslogs';
+      case BankReportMap.VENDORS:
+        return '/main/reports/vendors';
       case BankReportMap.USER_LOG_REPORT:
         return '/main/reports/userlog';
       case BankReportMap.AUDIT_TRAILS:

@@ -190,6 +190,18 @@
   "systemLogs": {
     "systemLogsReport": "System logs"
   },
+  "vendorReport": {
+    "vendorReport": "Vendor report",
+    "vendorReportTable": [
+      "#",
+      "Vendor name",
+      "Mobile",
+      "TIN",
+      "Account N°",
+      "Status",
+      "Checker"
+    ]
+  },
   "userLogReport": {
     "userLogReport": "User log report",
     "form": {

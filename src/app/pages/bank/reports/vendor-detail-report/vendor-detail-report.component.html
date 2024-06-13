@@ -1,0 +1,382 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<div class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.vendorReport'"
+      class="text-lg font-bold"
+    >
+      {{ t("vendorReport") }}
+    </h2>
+    <div class="flex flex-row items-center space-x-2">
+      <!-- <a
+            (click)="downloadSheet()"
+            class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+          >
+            <span>
+              <i class="bi bi-download text-success text-lg"></i>
+            </span>
+          </a> -->
+    </div>
+  </div>
+  <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
+    <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'reports.invoiceDetails.form'"
+          class="text-xs"
+        >
+          {{ t("branch") }}
+        </p>
+        <select
+          [formControl]="branch"
+          class="select select-sm select-bordered w-full"
+        >
+          <option
+            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
+            selected
+            [value]="'0'"
+          >
+            {{ t("all") }}
+          </option>
+          <ng-container *ngIf="filterFormData.branches.length > 0">
+            <option
+              *ngFor="
+                let branch of filterFormData.branches;
+                index as i;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="branch.Branch_Sno.toString()"
+            >
+              {{ branch.Name }}
+            </option>
+          </ng-container>
+        </select>
+        <span *ngIf="branch && branch.invalid && branch.touched">
+          <p
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            class="text-danger-700 text-xs"
+          >
+            {{ t("branch") }}
+          </p>
+        </span>
+      </div>
+      <div class="col-span-full flex flex-row items-center justify-end">
+        <button
+          *transloco="let t; read: 'actions'"
+          type="button"
+          (click)="submitTableFilterForm()"
+          class="btn btn-sm text-darkPurple bg-lightPurple"
+        >
+          {{ t("submit") }}
+        </button>
+      </div>
+    </form>
+    <div class="flex flex-col px-2 py-4">
+      <div class="flex flex-row items-center justify-end">
+        <div class="flex flex-row items-center space-x-2">
+          <div class="dropdown">
+            <button
+              tabindex="0"
+              role="button"
+              class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+            >
+              <span>
+                <i class="bi bi-layout-three-columns text-sm"></i>
+              </span>
+              <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+                {{ t("columns") }}
+              </p>
+              <span>
+                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
+              </span>
+            </button>
+            <ul
+              tabindex="0"
+              class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li *ngFor="let control of headers.controls">
+                <label class="label cursor-pointer">
+                  <span class="label-text text-xs font-normal">{{
+                    control.get("label")?.value
+                  }}</span>
+                  <input
+                    type="checkbox"
+                    [formControl]="
+                      PerformanceUtils.getFormControl(control, 'included')
+                    "
+                    class="checkbox checkbox-xs"
+                  />
+                </label>
+              </li>
+            </ul>
+          </div>
+          <div class="relative">
+            <input
+              *transloco="let t; read: 'defaults'"
+              type="search"
+              class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+              id="exampleSearch"
+              [placeholder]="t('search')"
+              [formControl]="tableSearch"
+            />
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+          <div class="overflow-y-auto shadow">
+            <table
+              [formGroup]="tableHeadersFormGroup"
+              class="min-w-full text-left text-sm font-light"
+            >
+              <thead formArrayName="headers" class="border-b font-medium">
+                <tr
+                  *transloco="let t; read: 'tableData.vendor'"
+                  class="bg-lightPurple rounded w-full"
+                >
+                  <ng-container
+                    *ngFor="let header of headers.controls; index as ind"
+                  >
+                    <th
+                      *ngIf="header.get('included')?.value"
+                      scope="col"
+                      class="px-6 py-2 font-inter text-sm"
+                      [id]="'generated-invoice-id-' + ind"
+                      formGroupName="{{ ind }}"
+                    >
+                      <div class="flex items-center">
+                        <p>
+                          {{ header?.get("label")?.value }}
+                        </p>
+                        <button
+                          [class]="
+                            header.get('label')?.value === '#' ? 'hidden' : ''
+                          "
+                          (click)="
+                            PerformanceUtils.sortColumnClicked(ind, headers)
+                          "
+                          class="flex flex-row items-center m-1"
+                        >
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? 'text-darkPurple'
+                                  : ''
+                              "
+                              class="bi bi-arrow-up"
+                            ></i>
+                          </span>
+                          <span>
+                            <i
+                              [class]="
+                                header.get('sortAsc')?.value
+                                  ? ''
+                                  : 'text-darkPurple'
+                              "
+                              class="bi bi-arrow-down"
+                            ></i>
+                          </span>
+                        </button>
+                      </div>
+                    </th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let company of companies
+                      | slice
+                        : 1 + paginator.pageSize * paginator.pageIndex - 1
+                        : 1 +
+                            paginator.pageSize * paginator.pageIndex +
+                            paginator.pageSize -
+                            1;
+                    index as i
+                  "
+                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
+                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
+                >
+                  <td
+                    *ngIf="
+                      headers.controls.at(VendorReportTable.ID)?.get('included')
+                        ?.value
+                    "
+                    [class]="
+                      headers.controls.at(VendorReportTable.ID)?.get('included')
+                        ?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
+                  >
+                    {{ PerformanceUtils.getIndexOfItem(companies, company) }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorReportTable.VENDOR_NAME)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorReportTable.VENDOR_NAME)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.CompName }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorReportTable.MOBILE_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorReportTable.MOBILE_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.MobNo }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorReportTable.TIN_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorReportTable.TIN_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{ company.TinNo }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorReportTable.ACCOUNT_NUMBER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorReportTable.ACCOUNT_NUMBER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    {{
+                      company.AccountNo
+                        ? company.AccountNo.slice(-4).padStart(
+                            company.AccountNo.length,
+                            "x"
+                          )
+                        : "-"
+                    }}
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorReportTable.STATUS)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorReportTable.STATUS)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  >
+                    <button
+                      [class]="
+                        PerformanceUtils.getActiveStatusStyles(
+                          company.Status,
+                          'Approved'
+                        )
+                      "
+                    >
+                      {{ company.Status }}
+                    </button>
+                  </td>
+                  <td
+                    *ngIf="
+                      headers.controls
+                        .at(VendorReportTable.CHECKER)
+                        ?.get('included')?.value
+                    "
+                    [class]="
+                      headers.controls
+                        .at(VendorReportTable.CHECKER)
+                        ?.get('included')?.value
+                        ? ''
+                        : 'hidden'
+                    "
+                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                    [class]="
+                      company.Checker.toLocaleLowerCase() == 'yes'
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    "
+                  >
+                    {{ company.Checker }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-container *ngIf="!tableLoading">
+              <div *transloco="let t; read: 'errors'">
+                <p
+                  *ngIf="companies.length <= 0"
+                  class="text-center text-sm tracking-wide pt-3 pb-1"
+                >
+                  {{ t("noDataFound") }}
+                </p>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="tableLoading">
+              <div class="w-full grid place-items-center mt-6">
+                <span
+                  class="loading loading-spinner loading-sm bg-darkPurple"
+                ></span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-row items-center justify-end">
+        <mat-paginator
+          #paginator
+          [length]="companies.length"
+          [pageSize]="5"
+          [pageSizeOptions]="[5, 10, 20]"
+          aria-label="Select page"
+          [showFirstLastButtons]="companies.length > 20"
+        >
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

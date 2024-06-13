@@ -96,7 +96,6 @@ export class ChangePasswordComponent implements OnInit {
           result.message.toLocaleLowerCase() === 'Success'.toLocaleLowerCase()
         ) {
           this.router.navigate(['/auth']);
-          location.reload();
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,

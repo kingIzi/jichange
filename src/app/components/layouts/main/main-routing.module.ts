@@ -346,15 +346,14 @@ const routes: Routes = [
             },
           },
           {
-            path: 'syslogs',
+            path: 'vendors',
             loadComponent: () =>
               import(
-                '../../../pages/bank/reports/system-logs/system-logs.component'
-              ).then((s) => s.SystemLogsComponent),
+                '../../../pages/bank/reports/vendor-detail-report/vendor-detail-report.component'
+              ).then((s) => s.VendorDetailReportComponent),
             data: {
-              breadcrumb: { alias: 'system-logs', skip: false },
+              breadcrumb: { alias: 'vendors', skip: false },
               animationState: 'reports-module-7',
-              //reuseRoute: true,
             },
           },
           {
