@@ -5,6 +5,6 @@ export enum GeneratedInvoiceListTable {
   INVOICE_DATE,
   PAYMENT_TYPE,
   TOTAL_AMOUNT,
-  DELIVERY_STATUS,
+  CONTROL_NUMBER,
   CANCEL_INVOICE,
 }

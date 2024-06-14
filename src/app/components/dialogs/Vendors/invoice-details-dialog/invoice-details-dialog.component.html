@@ -47,7 +47,7 @@
   class="p-10 flex flex-col divide-y w-full h-full max-h-[32rem] overflow-y-auto overflow-x-hidden"
 >
   <h1 *transloco="let t; read: 'invoice'" class="text-xl md:text-2xl p-0">
-    {{ t("createInvoice") }}
+    {{ isEditable() ? t("editInvoice") : t("createInvoice") }}
   </h1>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full py-4">
     <h1
@@ -146,10 +146,12 @@
       </p>
       <input
         type="text"
-        placeholder="Pick one"
+        *transloco="let t; read: 'invoice.form.placeholders'"
+        [placeholder]="t('customer')"
         aria-label="Number"
         matInput
         [formControl]="customerName"
+        [readOnly]="isEditable()"
         [matAutocomplete]="auto"
         class="input input-sm input-bordered font-inter w-full"
       />
@@ -160,38 +162,6 @@
         }}</mat-option>
         }
       </mat-autocomplete>
-      <!-- <select
-        #customerInput
-        (change)="changeCustomer(customerInput.value)"
-        [formControl]="chus"
-        class="select select-sm select-bordered w-full font-normal"
-      >
-        <option
-          *transloco="let t; read: 'invoice.form.placeholders'"
-          disabled
-          selected
-          [value]="t('customer')"
-        >
-          {{ t("customer") }}
-        </option>
-        <option
-          *transloco="let t; read: 'invoice.form'"
-          class="text-sm italic w-full text-center font-inter"
-          [value]="t('addNewCustomer')"
-        >
-          {{ t("addNewCustomer") }}
-        </option>
-        <option
-          *ngFor="
-            let customer of customers;
-            index as ind;
-            trackBy: PerformanceUtils.trackByIndex
-          "
-          [value]="customer.Cus_Mas_Sno"
-        >
-          {{ customer.Customer_Name }}
-        </option>
-      </select> -->
       <span
         *ngIf="customerName && customerName.invalid && customerName.touched"
       >
@@ -319,12 +289,12 @@
                   >
                     {{ t("totalPrice") }}
                   </th>
-                  <th
+                  <!-- <th
                     *transloco="let t; read: 'invoice.form'"
                     class="text-xs font-inter py-4"
                   >
                     {{ t("remarks") }}
-                  </th>
+                  </th> -->
                   <th
                     *transloco="let t; read: 'defaults'"
                     class="text-xs font-inter py-4"
@@ -374,7 +344,7 @@
                       formControlName="item_qty"
                       [min]="1"
                       type="number"
-                      class="input-sm input-bordered input-ghost input w-16 my-1 mx-1"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1"
                     />
                     <span
                       *ngIf="
@@ -420,7 +390,7 @@
                       formControlName="item_unit_price"
                       [min]="1"
                       type="number"
-                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1"
                     />
                     <span
                       *ngIf="
@@ -466,17 +436,17 @@
                     <input
                       formControlName="item_total_amount"
                       type="number"
-                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1 disabled"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1 disabled"
                       [readOnly]="true"
                     />
                   </td>
-                  <td>
+                  <!-- <td>
                     <input
                       formControlName="remarks"
                       type="text"
                       class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
                     />
-                  </td>
+                  </td> -->
                   <td class="flex flex-row items-center justify-center">
                     <button
                       (click)="addItemDetail(ind)"

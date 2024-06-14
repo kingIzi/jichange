@@ -61,7 +61,7 @@ export class CustomersDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public userProfile!: LoginResponse;
   public customerForm!: FormGroup;
-  public attachInvoice = new EventEmitter<number>();
+  //public attachInvoice = new EventEmitter<number>();
   public addedCustomer = new EventEmitter<void>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -152,10 +152,7 @@ export class CustomersDialogComponent implements OnInit {
       check_status: this.fb.control(''),
     });
   }
-  private requestAddCustomer(
-    body: AddCustomerForm,
-    attachInvoice: boolean = false
-  ) {
+  private requestAddCustomer(body: AddCustomerForm) {
     this.startLoading = true;
     this.customerService
       .addCustomer(body)
@@ -182,11 +179,7 @@ export class CustomersDialogComponent implements OnInit {
           let success = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`customer.addedCustomerSuccessfully`)
           );
-          if (attachInvoice) {
-            this.attachInvoice.emit(result.response as number);
-          } else {
-            this.addedCustomer.emit();
-          }
+          this.addedCustomer.emit();
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -226,9 +219,12 @@ export class CustomersDialogComponent implements OnInit {
       //this.formErrors();
     }
   }
-  addCustomer(attachInvoice: boolean, dialog: HTMLDialogElement) {
-    dialog.close();
-    this.requestAddCustomer(this.customerForm.value, attachInvoice);
+  // addCustomer(attachInvoice: boolean, dialog: HTMLDialogElement) {
+  //   dialog.close();
+  //   this.requestAddCustomer(this.customerForm.value, attachInvoice);
+  // }
+  addCustomer() {
+    this.requestAddCustomer(this.customerForm.value);
   }
   get CName() {
     return this.customerForm.get('CName') as FormControl;

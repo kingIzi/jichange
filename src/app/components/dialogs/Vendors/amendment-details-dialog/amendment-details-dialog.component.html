@@ -314,12 +314,12 @@
                   >
                     {{ t("totalPrice") }}
                   </th>
-                  <th
+                  <!-- <th
                     *transloco="let t; read: 'invoice.form'"
                     class="text-xs font-inter py-4"
                   >
                     {{ t("remarks") }}
-                  </th>
+                  </th> -->
                   <th
                     *transloco="let t; read: 'defaults'"
                     class="text-xs font-inter py-4"
@@ -363,8 +363,9 @@
                     <input
                       #quantityInput
                       formControlName="item_qty"
+                      [min]="1"
                       type="number"
-                      class="input-sm input-bordered input-ghost input w-16 my-1 mx-1"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1"
                     />
                     <span
                       *ngIf="
@@ -407,9 +408,10 @@
                   <td>
                     <input
                       #unitPriceInput
+                      [min]="1"
                       formControlName="item_unit_price"
                       type="number"
-                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1"
                     />
                     <span
                       *ngIf="
@@ -455,16 +457,17 @@
                     <input
                       formControlName="item_total_amount"
                       type="number"
-                      class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
+                      class="input-sm input-bordered input-ghost input my-1 mx-1"
+                      [readOnly]="true"
                     />
                   </td>
-                  <td>
+                  <!-- <td>
                     <input
                       formControlName="remarks"
                       type="text"
                       class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
                     />
-                  </td>
+                  </td> -->
                   <td class="flex flex-row items-center justify-center">
                     <button
                       (click)="addItemDetail(ind)"

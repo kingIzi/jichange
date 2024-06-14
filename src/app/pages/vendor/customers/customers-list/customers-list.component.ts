@@ -308,13 +308,13 @@ export class CustomersListComponent implements OnInit {
       width: '800px',
       disableClose: true,
     });
-    dialogRef.componentInstance.attachInvoice
-      .asObservable()
-      .subscribe((customerId) => {
-        dialogRef.close();
-        this.openAttachCustomerToInvoiceDialog(customerId);
-        this.requestCustomerNames();
-      });
+    // dialogRef.componentInstance.attachInvoice
+    //   .asObservable()
+    //   .subscribe((customerId) => {
+    //     dialogRef.close();
+    //     this.openAttachCustomerToInvoiceDialog(customerId);
+    //     this.requestCustomerNames();
+    //   });
     dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
       dialogRef.close();
       this.requestCustomerNames();
@@ -326,13 +326,13 @@ export class CustomersListComponent implements OnInit {
       data: customer,
       disableClose: true,
     });
-    dialogRef.componentInstance.attachInvoice
-      .asObservable()
-      .subscribe((customerId) => {
-        dialogRef.close();
-        this.openAttachCustomerToInvoiceDialog(customerId);
-        this.requestCustomerNames();
-      });
+    // dialogRef.componentInstance.attachInvoice
+    //   .asObservable()
+    //   .subscribe((customerId) => {
+    //     dialogRef.close();
+    //     this.openAttachCustomerToInvoiceDialog(customerId);
+    //     this.requestCustomerNames();
+    //   });
     dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
       dialogRef.close();
       this.requestCustomerNames();

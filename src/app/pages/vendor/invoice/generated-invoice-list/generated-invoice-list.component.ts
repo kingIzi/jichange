@@ -38,6 +38,7 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -50,6 +51,7 @@ import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/ge
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AmendmentDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/amendment-details-dialog/amendment-details-dialog.component';
 import { RefundInvoiceComponent } from 'src/app/components/dialogs/Vendors/refund-invoice/refund-invoice.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -77,6 +79,7 @@ import { RefundInvoiceComponent } from 'src/app/components/dialogs/Vendors/refun
     LoaderRainbowComponent,
     CancelGeneratedInvoiceComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -125,7 +128,7 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       this.headers,
       this.fb,
       this,
-      6,
+      7,
       true
     );
     this.tableSearch.valueChanges.subscribe((value) => {
@@ -157,9 +160,9 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       case GeneratedInvoiceListTable.TOTAL_AMOUNT:
         this.generatedInvoices.sort((a, b) => (a.Total > b.Total ? 1 : -1));
         break;
-      case GeneratedInvoiceListTable.DELIVERY_STATUS:
+      case GeneratedInvoiceListTable.CONTROL_NUMBER:
         this.generatedInvoices.sort((a, b) =>
-          a?.delivery_status?.trim() > b?.delivery_status.trim() ? 1 : -1
+          (a.Control_No || '') > (b.Control_No || '') ? 1 : -1
         );
         break;
       default:
@@ -191,9 +194,9 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
       case GeneratedInvoiceListTable.TOTAL_AMOUNT:
         this.generatedInvoices.sort((a, b) => (a.Total < b.Total ? 1 : -1));
         break;
-      case GeneratedInvoiceListTable.DELIVERY_STATUS:
+      case GeneratedInvoiceListTable.CONTROL_NUMBER:
         this.generatedInvoices.sort((a, b) =>
-          a?.delivery_status?.trim() < b?.delivery_status?.trim() ? 1 : -1
+          (a.Control_No || '') < (b.Control_No || '') ? 1 : -1
         );
         break;
       default:

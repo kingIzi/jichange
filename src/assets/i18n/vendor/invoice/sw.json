@@ -2,6 +2,7 @@
   "invoiceDetails": "Maelezo ya Bili",
   "addInvoice": "Ongeza Bili",
   "createInvoice": "Unda Bili",
+  "editInvoice": "Hariri ankara",
   "form": {
     "details": "Maelezo ya ankara",
     "invoiceNo": "Nambari ya Bili",
@@ -31,7 +32,7 @@
       "invoiceDate": "Ingiza tarehe ya bili",
       "dueDate": "Ingiza tarehe ya kulipwa kwa bili",
       "invoiceExpire": "Ingiza tarehe ya kumalizika kwa bili",
-      "customer": "Chagua mteja",
+      "customer": "Ingiza jina la mteja",
       "paymentType": "Chagua aina ya malipo",
       "status": "Chagua hali",
       "invoiceRemark": "Ingiza alama ya ankara"

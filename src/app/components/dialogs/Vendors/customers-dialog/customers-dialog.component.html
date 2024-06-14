@@ -24,15 +24,15 @@
         >
           {{ t("close") }}
         </button>
-        <button
+        <!-- <button
           (click)="addCustomer(true, addCustomerDialog)"
           *transloco="let t; read: 'customer.form.actions'"
           class="btn btn-ghost btn-xs btn-info text-linkBlue"
         >
           {{ t("attachInvoice") }}
-        </button>
+        </button> -->
         <button
-          (click)="addCustomer(false, addCustomerDialog)"
+          (click)="addCustomerDialog.close(); addCustomer()"
           *transloco="let t; read: 'customer.form.actions'"
           class="btn btn-ghost btn-xs btn-info text-linkBlue"
         >

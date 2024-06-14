@@ -258,6 +258,11 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     this.sno.setValue(this.invoice.Inv_Mas_Sno);
     this.reason.setValue(this.invoice.Reason);
     this.appendItems();
+    this.disableFormFields();
+  }
+  private disableFormFields() {
+    this.invno.disable();
+    this.date.disable();
   }
   private appendItems() {
     this.invoices.forEach((item) => {
@@ -293,15 +298,17 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     this.invoiceService
       .addAmendment(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response > 0
-        ) {
+        if (typeof result.response === 'number' && result.response > 0) {
           let sal = AppUtilities.sweetAlertSuccessMessage(
             this.tr.translate(`generated.invoiceAmendedSuccessfully`)
           );
           this.amended.emit();
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`generated.failedToRetrieveAmendedInvoice`)
+          );
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -360,8 +367,8 @@ export class AmendmentDetailsDialogComponent implements OnInit {
       0
     );
     let moneyFormat = AppUtilities.moneyFormat(sumAmount.toString());
-    this.total.setValue(moneyFormat);
-    this.auname.setValue(moneyFormat);
+    this.total.setValue(sumAmount.toFixed(2));
+    this.auname.setValue(sumAmount.toFixed(2));
     return moneyFormat;
   }
   submitInvoiceDetailsForm() {
@@ -372,10 +379,10 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     }
   }
   addAmendment() {
-    // if (this.data?.invid) {
-    //   this.requestAmendInvoice(this.formGroup.value);
-    // }
-    this.requestAmendInvoice(this.formGroup.value);
+    let form = { ...this.formGroup.value };
+    form.invno = this.invno.value;
+    form.date = this.date.value;
+    this.requestAmendInvoice(form);
   }
   get invno() {
     return this.formGroup.get('invno') as FormControl;

@@ -345,12 +345,12 @@
                   <td
                     *ngIf="
                       headers.controls
-                        .at(GeneratedInvoiceListTable.DELIVERY_STATUS)
+                        .at(GeneratedInvoiceListTable.CONTROL_NUMBER)
                         ?.get('included')?.value
                     "
                     [class]="
                       headers.controls
-                        .at(GeneratedInvoiceListTable.DELIVERY_STATUS)
+                        .at(GeneratedInvoiceListTable.CONTROL_NUMBER)
                         ?.get('included')?.value
                         ? ''
                         : 'hidden'
@@ -358,8 +358,8 @@
                     class="text-sm font-inter whitespace-nowrap px-6 py-4 text-right"
                   >
                     {{
-                      generatedInvoice.delivery_status
-                        ? generatedInvoice?.delivery_status?.trim()
+                      generatedInvoice.Control_No
+                        ? generatedInvoice?.Control_No
                         : "-"
                     }}
                   </td>

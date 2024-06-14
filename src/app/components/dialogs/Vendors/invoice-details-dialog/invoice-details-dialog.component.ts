@@ -168,7 +168,8 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
     if (this.data.customerId && this.data.customerId > 0) {
       this.customerName.setValue(this.data.customerId);
     } else {
-      this.customerName.setValue(this.generatedInvoice.Chus_Mas_No ?? '');
+      this.customerName.setValue(this.generatedInvoice.Chus_Name ?? '');
+      this.chus.setValue(this.generatedInvoice.Chus_Mas_No);
     }
     //this.goods_status.setValue(this.generatedInvoice.goods_status);
     this.ccode.setValue(this.generatedInvoice.Currency_Code);
@@ -178,6 +179,11 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
     this.sno.setValue(this.generatedInvoice.Inv_Mas_Sno);
 
     this.appendItems();
+    this.disableFormFields();
+  }
+  private disableFormFields() {
+    this.invno.disable();
+    this.date.disable();
   }
   private appendItems() {
     this.invoices.forEach((item) => {
@@ -381,7 +387,8 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
     );
     let currenciesObservable = from(this.invoiceService.getCurrencyCodes());
     let mergedObservable = zip(customerNamesObservable, currenciesObservable);
-    let res = AppUtilities.pipedObservables(mergedObservable)
+    let res = AppUtilities.pipedObservables(mergedObservable);
+    res
       .then((results) => {
         let [customers, currencies] = results;
         if (
@@ -479,7 +486,14 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
     }
   }
   addInvoice() {
-    this.requestAddInvoiceForm(this.invoiceDetailsForm.value);
+    if (this.isEditable()) {
+      let form = { ...this.invoiceDetailsForm.value };
+      form.invno = this.invno.value;
+      form.date = this.date.value;
+      this.requestAddInvoiceForm(form);
+    } else {
+      this.requestAddInvoiceForm(this.invoiceDetailsForm.value);
+    }
   }
   removeItemDetail(ind: number) {
     if (ind > 0) {
@@ -510,16 +524,19 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
       width: '800px',
       disableClose: true,
     });
-    dialogRef.componentInstance.attachInvoice
-      .asObservable()
-      .subscribe((customerId) => {
-        dialogRef.close();
-        this.buildPage();
-      });
+    // dialogRef.componentInstance.attachInvoice
+    //   .asObservable()
+    //   .subscribe((customerId) => {
+    //     dialogRef.close();
+    //     this.buildPage();
+    //   });
     dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
       dialogRef.close();
       this.buildPage();
     });
+  }
+  isEditable(): boolean {
+    return this.data && this.data.invid ? true : false;
   }
   get invno() {
     return this.invoiceDetailsForm.get('invno') as FormControl;

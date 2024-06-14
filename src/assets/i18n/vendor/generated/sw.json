@@ -10,9 +10,10 @@
     "Tarehe ya Bili",
     "Aina ya Malipo",
     "Jumla",
-    "Hali ya Uwasilishaji",
+    "Nambari ya kudhibiti",
     "Ghairi ankara"
   ],
+  "failedToRetrieveAmendedInvoice": "Imeshindwa kurekebisha ankara.",
   "amend": "Amend",
   "amendInvoice": "Rekebisha ankara",
   "invoiceAmendedSuccessfully": "Ankara iliyorekebishwa kwa mafanikio!",
@@ -27,7 +28,8 @@
   "form": {
     "reason": "Sababu",
     "placeholders": {
-      "reason": "Weka sababu"
+      "reason": "Weka sababu",
+      "searchGeneratedInvoiceTable": "Tafuta kwa jina au ankara"
     },
     "errors": {
       "reason": "Tafadhali weka sababu"

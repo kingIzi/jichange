@@ -15,7 +15,7 @@
       "confirm": "Confirm",
       "areYouSureYouWantToAddANewCustomer": "Are you sure you want to add a new customer?",
       "attachInvoice": "Yes, attach invoice",
-      "addCustomer": "just add Customer"
+      "addCustomer": "Add Customer"
     },
     "placeholders": {
       "customerName": "Enter customer name",

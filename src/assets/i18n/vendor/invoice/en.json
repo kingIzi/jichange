@@ -2,6 +2,7 @@
   "invoiceDetails": "Invoice cancelled",
   "addInvoice": "Add Invoice",
   "createInvoice": "Create Invoice",
+  "editInvoice": "Edit invoice",
   "form": {
     "details": "Invoice details",
     "invoiceNo": "Invoice number",
@@ -32,7 +33,7 @@
       "invoiceDate": "Enter invoice date",
       "dueDate": "Enter invoice due date",
       "invoiceExpire": "enter the invoice's expiry date",
-      "customer": "Select a customer",
+      "customer": "Enter customer name",
       "paymentType": "Select a payment type",
       "status": "Select a status",
       "currency": "Select a currency",
@@ -53,9 +54,9 @@
       "itemDetails": {
         "missingDescription": "Please fill",
         "missingQuantity": "Specify",
-        "noQuantity": "Greater than 0",
+        "noQuantity": "Cannot be greater than 0",
         "missingUnitPrice": "Specify",
-        "noUnitPrice": "Greater than 0"
+        "noUnitPrice": "Cannot be greater than 0"
       }
     },
     "dialog": {

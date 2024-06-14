@@ -10,9 +10,10 @@
     "Invoice Date",
     "Payment type",
     "Total Amount",
-    "Delivery Status",
+    "Control N°",
     "Cancel invoice"
   ],
+  "failedToRetrieveAmendedInvoice": "Failed to amend invoice.",
   "amend": "Amend",
   "amendInvoice": "Amend Invoice",
   "invoiceAmendedSuccessfully": "Amended invoice successfully!",
@@ -27,7 +28,8 @@
   "form": {
     "reason": "Reason",
     "placeholders": {
-      "reason": "Enter reason"
+      "reason": "Enter reason",
+      "searchGeneratedInvoiceTable": "Search by name or invoice"
     },
     "errors": {
       "reason": "Please enter reason"
