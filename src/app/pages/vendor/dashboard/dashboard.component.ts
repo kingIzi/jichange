@@ -240,20 +240,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.generatedInvoices = this.generatedInvoicesData.filter(
-        (elem: GeneratedInvoice) => {
-          return (
-            elem?.Chus_Name?.toLocaleLowerCase().includes(text) ||
-            elem.Invoice_No.toLocaleLowerCase().includes(text) ||
-            elem.Payment_Type.toLocaleLowerCase().includes(text)
-          );
-        }
-      );
-    } else {
-      this.generatedInvoices = this.generatedInvoicesData;
+    this.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
   private assignInvoiceStatistics(
