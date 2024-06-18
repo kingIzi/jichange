@@ -2,13 +2,43 @@
   "companyUsers": "Watumiaji wa muuzaji",
   "addCompanyButton": "Ongeza watumiaji wa muuzaji",
   "failedToRetrieveCompanyUser": "Imeshindwa kupata mtumiaji wa muuzaji.",
+  "searchBy": "Tafuta kwa jina la mtumiaji, jina kamili au barua pepe",
   "companyTable": [
-    "#",
-    "Jina la mtumiaji",
-    "Aina ya mtumiaji",
-    "Jina kamili",
-    "Barua pepe",
-    "Namba ya simu"
+    {
+      "label": "Nambari",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "Jina la Mtumiaji",
+      "value": "Username",
+      "desc": ""
+    },
+    {
+      "label": "Aina ya Mtumiaji",
+      "value": "Usertype",
+      "desc": ""
+    },
+    {
+      "label": "Jina Kamili",
+      "value": "Fullname",
+      "desc": ""
+    },
+    {
+      "label": "Barua pepe",
+      "value": "Email",
+      "desc": ""
+    },
+    {
+      "label": "Namba ya Simu",
+      "value": "Mobile",
+      "desc": ""
+    },
+    {
+      "label": "Vitendo",
+      "value": "Action",
+      "desc": ""
+    }
   ],
   "companyUsersForm": {
     "role": "Jukumu",

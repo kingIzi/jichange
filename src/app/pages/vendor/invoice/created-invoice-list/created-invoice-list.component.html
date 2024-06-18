@@ -58,10 +58,11 @@
                 <span class="label-text text-xs font-normal">{{
                   control.get("label")?.value
                 }}</span>
-                <!-- [formControl]="getFormControl(control, 'included')" -->
                 <input
                   type="checkbox"
-                  [formControl]="getFormControl(control, 'included')"
+                  [formControl]="
+                    PerformanceUtils.getFormControl(control, 'included')
+                  "
                   class="checkbox checkbox-xs"
                 />
               </label>
@@ -70,11 +71,11 @@
         </div>
         <div class="relative">
           <input
-            *transloco="let t; read: 'defaults'"
+            *transloco="let t; read: 'invoice.createdInvoice'"
             type="search"
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
-            [placeholder]="t('search')"
+            [placeholder]="t('searchTableBy')"
             [formControl]="tableSearch"
           />
           <span class="absolute left-2 top-1/2 -translate-y-1/2">
@@ -86,353 +87,190 @@
     <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
         <div class="overflow-y-auto shadow">
-          <table
-            #generatedInvoiceTable
-            class="min-w-full text-left text-sm font-light"
-          >
-            <thead formArrayName="headers" class="border-b font-medium">
-              <tr
-                *transloco="let t; read: 'tableData.vendor'"
-                class="bg-lightPurple rounded-tl-lg w-full"
+          <ng-container *ngIf="tableColumns$ | async as displayedColumns">
+            <table
+              mat-table
+              matSort
+              [dataSource]="dataSource"
+              class="mat-elevation-z2 w-full"
+            >
+              <ng-container
+                *ngFor="
+                  let column of displayedColumns;
+                  trackBy: PerformanceUtils.trackByIndex;
+                  index as ind;
+                  last
+                "
+                [matColumnDef]="column.label"
               >
-                <ng-container
-                  *ngFor="let header of headers.controls; index as ind"
-                >
-                  <th
-                    *ngIf="header.get('included')?.value"
-                    scope="col"
-                    class="px-6 py-2 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
-                    formGroupName="{{ ind }}"
-                  >
-                    <div class="flex items-center">
-                      <p>
-                        {{ header?.get("label")?.value }}
-                      </p>
-                      <button
-                        [class]="
-                          header.get('label')?.value === '#' ? 'hidden' : ''
-                        "
-                        (click)="
-                          PerformanceUtils.sortColumnClicked(ind, headers)
-                        "
-                        class="flex flex-row items-center m-1"
+                <th mat-header-cell *matHeaderCellDef>
+                  <div class="relative">
+                    <div
+                      *ngIf="tableSortableColumns(column); else notSortable"
+                      [mat-sort-header]="tableSortableColumns(column)"
+                      sortActionDescription="{{ column.desc }}"
+                      [ngClass]="tableHeaderStyle(column.value)"
+                      class="text-black font-semibold"
+                    >
+                      {{ column.label }}
+                    </div>
+                    <ng-template #notSortable>
+                      <div
+                        [ngClass]="tableHeaderStyle(column.value)"
+                        class="text-black font-semibold"
                       >
-                        <span>
-                          <i
-                            [class]="
-                              header.get('sortAsc')?.value
-                                ? 'text-darkPurple'
-                                : ''
-                            "
-                            class="bi bi-arrow-up"
-                          ></i>
+                        {{ column.label }}
+                      </div>
+                    </ng-template>
+                  </div>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <ng-container
+                    *ngIf="
+                      ind !== displayedColumns.length - 1;
+                      else actionTemplate
+                    "
+                  >
+                    <p
+                      *ngIf="
+                        column.value !== 'Cancel Invoice' &&
+                          column.value !== 'Approve Invoice';
+                        else cancelInvoiceTemplate
+                      "
+                      [class]="tableValueStyle(element, column.value)"
+                    >
+                      {{ tableValue(element, column.value) }}
+                    </p>
+                    <ng-template #cancelInvoiceTemplate>
+                      <ng-container
+                        *ngIf="
+                          column.value === 'Cancel Invoice';
+                          else approveInvoiceTemplate
+                        "
+                      >
+                        <app-cancel-generated-invoice
+                          [invoiceId]="element.Inv_Mas_Sno"
+                          [userId]="userProfile.Usno"
+                          #cancelGeneratedInvoice
+                        ></app-cancel-generated-invoice>
+                        <button
+                          (click)="
+                            cancelInvoice(element, cancelGeneratedInvoice)
+                          "
+                          *transloco="let t; read: 'defaults'"
+                          class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
+                        >
+                          {{ t("cancel") }}
+                        </button>
+                      </ng-container>
+                      <ng-template #approveInvoiceTemplate>
+                        <ng-container
+                          *ngIf="
+                            userProfile.Usno.toString().toLocaleLowerCase() !==
+                            element?.AuditBy?.trim()
+                              ?.toString()
+                              ?.toLocaleLowerCase()
+                          "
+                        >
+                          <app-submit-message-box
+                            #submitMessageBox
+                          ></app-submit-message-box>
+                          <button
+                            (click)="approveInvoice(element, submitMessageBox)"
+                            class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
+                          >
+                            {{
+                              determineApprovalStatus(element.approval_status)
+                            }}
+                          </button>
+                        </ng-container>
+                        <ng-container
+                          *ngIf="
+                            userProfile.Usno.toString().toLocaleLowerCase() ===
+                            element?.AuditBy?.trim()
+                              ?.toString()
+                              ?.toLocaleLowerCase()
+                          "
+                        >
+                          <mark class="p-1">No Access</mark>
+                        </ng-container>
+                      </ng-template>
+                    </ng-template>
+                  </ng-container>
+                  <ng-template #actionTemplate>
+                    <div class="flex flex-row items-center justify-end">
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        [attr.data-tip]="t('view')"
+                        class="btn btn-sm btn-ghost tooltip"
+                        (click)="openInvoiceReportView(element)"
+                      >
+                        <span class="text-warning">
+                          <i class="bi bi-eye text-lg"></i>
                         </span>
-                        <span>
-                          <i
-                            [class]="
-                              header.get('sortAsc')?.value
-                                ? ''
-                                : 'text-darkPurple'
-                            "
-                            class="bi bi-arrow-down"
-                          ></i>
+                      </button>
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        [attr.data-tip]="t('edit')"
+                        class="btn btn-sm btn-ghost tooltip"
+                        (click)="openEditInvoiceDialog(element)"
+                      >
+                        <span class="text-info">
+                          <i class="bi bi-pen text-lg"></i>
+                        </span>
+                      </button>
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        [attr.data-tip]="t('download')"
+                        class="btn btn-sm btn-ghost tooltip"
+                        (click)="downloadInvoice(element)"
+                      >
+                        <span class="material-symbols-outlined text-linkBlue">
+                          <i class="bi bi-download text-lg"></i>
                         </span>
                       </button>
                     </div>
-                  </th>
-                </ng-container>
-                <th
-                  *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm text-right"
-                >
-                  {{ t("action") }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                  </ng-template>
+                </td>
+              </ng-container>
               <tr
-                *ngFor="
-                  let invoice of invoiceList
-                    | slice
-                      : 1 + paginator.pageSize * paginator.pageIndex - 1
-                      : 1 +
-                          paginator.pageSize * paginator.pageIndex +
-                          paginator.pageSize -
-                          1;
-                  trackBy: PerformanceUtils.trackByIndex;
+                mat-header-row
+                *matHeaderRowDef="tableHeader(displayedColumns)"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="
+                  let row;
+                  columns: tableHeader(displayedColumns);
                   index as i
                 "
-                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-              >
+              ></tr>
+              <tr class="mat-row" *matNoDataRow>
                 <td
-                  *ngIf="
-                    headers.controls.at(InvoiceListTable.ID)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(InvoiceListTable.ID)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  *transloco="let t; read: 'errors'"
+                  class="mat-cell"
+                  [attr.colspan]="tableColumns.length"
                 >
-                  {{ PerformanceUtils.getIndexOfItem(invoiceList, invoice) }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.CUSTOMER_NAME)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.CUSTOMER_NAME)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ invoice.Chus_Name }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.INVOICE_NUMBER)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.INVOICE_NUMBER)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 font-semibold"
-                >
-                  {{ invoice.Invoice_No }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.INVOICE_DATE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.INVOICE_DATE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{
-                    PerformanceUtils.convertDateStringToDate(
-                      invoice.Invoice_Date.toString()
-                    ).toDateString()
-                  }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.APPROVE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.APPROVE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  <ng-container
-                    *ngIf="
-                      userProfile.Usno.toString().toLocaleLowerCase() !==
-                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
-                    "
+                  <p
+                    *ngIf="tableSearch.value && dataSource.data.length > 0"
+                    class="text-xs lg:text-sm py-2 px-4"
                   >
-                    <app-submit-message-box
-                      #submitMessageBox
-                    ></app-submit-message-box>
-                    <button
-                      (click)="approveInvoice(invoice, submitMessageBox)"
-                      class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
-                    >
-                      {{ determineApprovalStatus(invoice.approval_status) }}
-                    </button>
-                  </ng-container>
-                  <ng-container
-                    *ngIf="
-                      userProfile.Usno.toString().toLocaleLowerCase() ===
-                      invoice?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
-                    "
+                    {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
+                  </p>
+                  <p
+                    *ngIf="dataSource.data.length <= 0"
+                    class="text-center text-sm tracking-wide pt-3 pb-1"
                   >
-                    <mark class="p-1">No Access</mark>
-                  </ng-container>
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.CANCEL_INVOICE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.CANCEL_INVOICE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  <app-cancel-generated-invoice
-                    [invoiceId]="invoice.Inv_Mas_Sno"
-                    [userId]="userProfile.Usno"
-                    #cancelGeneratedInvoice
-                  ></app-cancel-generated-invoice>
-                  <button
-                    (click)="cancelInvoice(invoice, cancelGeneratedInvoice)"
-                    class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
-                  >
-                    Cancel
-                  </button>
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.PAYMENT_TYPE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.PAYMENT_TYPE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  <button
-                    [class]="
-                      PerformanceUtils.getActiveStatusStyles(
-                        invoice.Payment_Type,
-                        'Flexible',
-                        'bg-teal-100',
-                        'text-black',
-                        'bg-indigo-100',
-                        'text-black'
-                      )
-                    "
-                  >
-                    {{
-                      invoice.Payment_Type ? invoice.Payment_Type.trim() : "-"
-                    }}
-                  </button>
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.TOTAL_AMOUNT)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.TOTAL_AMOUNT)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4 text-right"
-                >
-                  {{
-                    PerformanceUtils.moneyFormat(invoice.Total.toString()) +
-                      " " +
-                      invoice.Currency_Code
-                  }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(InvoiceListTable.APPROVAL_STATUS)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(InvoiceListTable.APPROVAL_STATUS)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  <button
-                    [class]="
-                      PerformanceUtils.getActiveStatusStyles(
-                        invoice.goods_status,
-                        'Approved'
-                      )
-                    "
-                  >
-                    {{ invoice.goods_status ? invoice.goods_status : "-" }}
-                  </button>
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
-                  <div class="flex flex-row items-center justify-end">
-                    <button
-                      *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('view')"
-                      class="btn btn-sm btn-ghost tooltip"
-                      (click)="openInvoiceReportView(invoice)"
-                    >
-                      <span class="text-warning">
-                        <i class="bi bi-eye text-lg"></i>
-                      </span>
-                    </button>
-                    <button
-                      *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('edit')"
-                      class="btn btn-sm btn-ghost tooltip"
-                      (click)="openEditInvoiceDialog(invoice)"
-                    >
-                      <span class="text-info">
-                        <i class="bi bi-pen text-lg"></i>
-                      </span>
-                    </button>
-                    <button
-                      *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('download')"
-                      class="btn btn-sm btn-ghost tooltip"
-                      (click)="downloadInvoice(invoice)"
-                    >
-                      <span class="material-symbols-outlined text-linkBlue">
-                        <i class="bi bi-download text-lg"></i>
-                      </span>
-                    </button>
-                  </div>
+                    {{ t("noDataFound") }}
+                  </p>
                 </td>
               </tr>
-            </tbody>
-          </table>
-          <ng-container *ngIf="!tableLoading">
-            <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="invoiceList.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
-            </div>
+            </table>
           </ng-container>
           <ng-container *ngIf="tableLoading">
             <div class="w-full grid place-items-center mt-6">
               <span
-                class="loading loading-spinner loading-sm bg-darkPurple"
+                class="loading loading-spinner loading-lg bg-darkPurple"
               ></span>
             </div>
           </ng-container>
@@ -442,11 +280,9 @@
     <div class="flex flex-row items-center justify-end">
       <mat-paginator
         #paginator
-        [length]="invoiceList.length"
         [pageSize]="5"
         [pageSizeOptions]="[5, 10, 20]"
         aria-label="Select page"
-        [showFirstLastButtons]="invoiceList.length > 20"
       >
       </mat-paginator>
     </div>

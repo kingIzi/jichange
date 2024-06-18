@@ -51,7 +51,10 @@ import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/ge
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AmendmentDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/amendment-details-dialog/amendment-details-dialog.component';
 import { RefundInvoiceComponent } from 'src/app/components/dialogs/Vendors/refund-invoice/refund-invoice.component';
-import { Observable } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import * as json from 'src/assets/temp/data.json';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -80,19 +83,22 @@ import { Observable } from 'rxjs';
     CancelGeneratedInvoiceComponent,
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
+    MatSortModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
+export class GeneratedInvoiceListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public generatedInvoices: GeneratedInvoice[] = [];
   public generatedInvoicesData: GeneratedInvoice[] = [];
   public tableHeadersFormGroup!: FormGroup;
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<GeneratedInvoice>;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public InvoiceListTable: typeof GeneratedInvoiceListTable =
-    GeneratedInvoiceListTable;
   @ViewChild('generatedInvoiceTable', { static: true })
   generatedInvoiceTable!: ElementRef<HTMLTableElement>;
   @ViewChild('successMessageBox')
@@ -100,6 +106,7 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private tr: TranslocoService,
@@ -117,101 +124,106 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
   }
   //create formGroup for each header item in table
   private createHeadersForm() {
+    let TABLE_SHOWING = 7;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `generatedInvoicesTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      7,
-      true
-    );
+    this.tr
+      .selectTranslate(`generatedInvoicesTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0
+                ? false
+                : index < TABLE_SHOWING || index === labels.length - 1,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number): void {
-    switch (ind) {
-      case GeneratedInvoiceListTable.INVOICE_NUMBER:
-        this.generatedInvoices.sort((a, b) =>
-          a.Invoice_No > b.Invoice_No ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.INVOICE_DATE:
-        this.generatedInvoices.sort((a, b) =>
-          new Date(a.Invoice_Date) > new Date(b.Invoice_Date) ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.CUSTOMER_NAME:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Chus_Name?.trim() > b?.Chus_Name?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.PAYMENT_TYPE:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Payment_Type?.trim() > b?.Payment_Type?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.TOTAL_AMOUNT:
-        this.generatedInvoices.sort((a, b) => (a.Total > b.Total ? 1 : -1));
-        break;
-      case GeneratedInvoiceListTable.CONTROL_NUMBER:
-        this.generatedInvoices.sort((a, b) =>
-          (a.Control_No || '') > (b.Control_No || '') ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private resetTableColumns() {
+    this.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableColumns$ = of(this.tableColumns);
   }
-  private sortTableDesc(ind: number): void {
-    switch (ind) {
-      case GeneratedInvoiceListTable.INVOICE_NUMBER:
-        this.generatedInvoices.sort((a, b) =>
-          a.Invoice_No < b.Invoice_No ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.INVOICE_DATE:
-        this.generatedInvoices.sort((a, b) =>
-          new Date(a.Invoice_Date) < new Date(b.Invoice_Date) ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.CUSTOMER_NAME:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Chus_Name?.trim() < b?.Chus_Name?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.PAYMENT_TYPE:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Payment_Type?.trim() < b?.Payment_Type?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.TOTAL_AMOUNT:
-        this.generatedInvoices.sort((a, b) => (a.Total < b.Total ? 1 : -1));
-        break;
-      case GeneratedInvoiceListTable.CONTROL_NUMBER:
-        this.generatedInvoices.sort((a, b) =>
-          (a.Control_No || '') < (b.Control_No || '') ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (
+      data: GeneratedInvoice,
+      filter: string
+    ) => {
+      return (
+        data.Chus_Name.toLocaleLowerCase().includes(
+          filter.toLocaleLowerCase()
+        ) ||
+        data.Invoice_No.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+      );
+    };
+  }
+  private dataSourceSortingAccessor() {
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'Invoice_Date':
+          return new Date(item['Invoice_Date']);
+        default:
+          return item[property];
+      }
+    };
+  }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<GeneratedInvoice>(
+      this.generatedInvoices
+    );
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
+  }
+  private emptyGeneratedInvoice() {
+    this.generatedInvoicesData = [];
+    this.generatedInvoices = this.generatedInvoicesData;
   }
   private requestGeneratedInvoice() {
+    this.emptyGeneratedInvoice();
     this.tableLoading = true;
     this.invoiceService
       .postSignedDetails({ compid: this.userProfile.InstID })
       .then((result) => {
-        if (typeof result.response === 'string') {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.generatedInvoices = result.response;
+          this.prepareDataSource();
         } else {
-          this.generatedInvoicesData = result.response;
-          this.generatedInvoices = this.generatedInvoicesData;
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -226,41 +238,86 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       });
   }
+  //action to filter table by search key up
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    this.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeadersForm();
     this.requestGeneratedInvoice();
   }
-  ngAfterViewInit(): void {}
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.generatedInvoices, element);
+      case 'Invoice_Date':
+        return PerformanceUtils.convertDateStringToDate(
+          element[key]
+        ).toDateString();
+      case 'Total':
+        return (
+          PerformanceUtils.moneyFormat(element[key].toString()) +
+          ' ' +
+          element['Currency_Code']
+        );
+      case 'Control_No':
+        return element['Control_No'] ? element['Control_No'] : '-';
+      default:
+        return element[key];
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Chus_Name':
+        return `${style} text-black font-semibold`;
+      case 'Payment_Type':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element.Payment_Type,
+          `Fixed`,
+          `bg-purple-100`,
+          `text-purple-700`,
+          `bg-teal-100`,
+          `text-teal-700`
+        )} text-center w-fit`;
+      case 'Total':
+        return `${style} text-right`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Total':
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Total':
+      case 'Chus_Name':
+      case 'Invoice_No':
+      case 'Payment_Type':
+      case 'Control_No':
+      case 'Invoice_Date':
+        return column.value;
+      default:
+        return '';
+    }
+  }
   getValueArray(ind: number) {
     return this.headers.controls.at(ind)?.get('values') as FormArray;
-  }
-  moneyFormat(value: string) {
-    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-  convertDotNetJSONDate(dotNetJSONDate: string) {
-    const timestamp = parseInt(
-      dotNetJSONDate.replace(/\/Date\((\d+)\)\//, '$1'),
-      10
-    );
-    return new Date(timestamp).toLocaleDateString();
-  }
-  //action to filter table by search key up
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.generatedInvoices = this.generatedInvoicesData.filter(
-        (elem: GeneratedInvoice) => {
-          return (
-            elem?.Chus_Name?.toLocaleLowerCase().includes(text) ||
-            elem.Invoice_No.toLocaleLowerCase().includes(text)
-          );
-        }
-      );
-    } else {
-      this.generatedInvoices = this.generatedInvoicesData;
-    }
   }
   //opens generate chart dialog
   openGeneratedInvoiceChart() {
@@ -363,9 +420,6 @@ export class GeneratedInvoiceListComponent implements OnInit, AfterViewInit {
         ? 'bg-green-100 text-green-600 px-4 py-1 rounded-lg shadow'
         : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow'
       : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
-  }
-  isCashAmountColumn(index: number) {
-    return index === GeneratedInvoiceListTable.TOTAL_AMOUNT;
   }
   cancelInvoice(
     invoice: GeneratedInvoice,

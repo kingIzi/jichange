@@ -1,7 +1,34 @@
 {
   "customer": "Customer(s)",
   "addCustomer": "Add Customer",
-  "customersTable": ["#", "Customer name", "Email Id", "Mobile No"],
+  "searchBy": "Search by name or email",
+  "customersTable": [
+    {
+      "label": "No.",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "Customer name",
+      "value": "Cust_Name",
+      "desc": ""
+    },
+    {
+      "label": "Email Address",
+      "value": "Email",
+      "desc": ""
+    },
+    {
+      "label": "Mobile Number",
+      "value": "Phone",
+      "desc": ""
+    },
+    {
+      "label": "Action(s)",
+      "value": "Action",
+      "desc": ""
+    }
+  ],
   "addedCustomerSuccessfully": "Added customer successfully!",
   "removedCustomerSuccessfully": "Removed customer successfully!",
   "form": {
@@ -46,12 +73,41 @@
     },
     "customerViewTableTitle": "Transactions",
     "customerInvoicesTable": [
-      "#",
-      "Created",
-      "Invoice N°",
-      "Control N°",
-      "Amount",
-      "status"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Created",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Amount",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "status",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Action(s)",
+        "value": "Action",
+        "desc": ""
+      }
     ]
   }
 }

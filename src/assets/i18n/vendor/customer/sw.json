@@ -1,7 +1,34 @@
 {
   "customer": "Mteja(s)",
   "addCustomer": "Ongeza Mteja",
-  "customersTable": ["#", "Jina la Mteja", "Barua pepe", "Nambari ya Simu"],
+  "searchBy": "Tafuta kwa jina au barua pepe",
+  "customersTable": [
+    {
+      "label": "Nambari",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "Jina la Mteja",
+      "value": "Cust_Name",
+      "desc": ""
+    },
+    {
+      "label": "Barua pepe",
+      "value": "Email",
+      "desc": ""
+    },
+    {
+      "label": "Namba ya Simu",
+      "value": "Phone",
+      "desc": ""
+    },
+    {
+      "label": "Vitendo",
+      "value": "Action",
+      "desc": ""
+    }
+  ],
   "addedCustomerSuccessfully": "Aliongeza wateja kwa mafanikio!",
   "removedCustomerSuccessfully": "Kuondolewa kwa wateja kwa mafanikio!",
   "form": {
@@ -46,12 +73,41 @@
     },
     "customerViewTableTitle": "Miamala",
     "customerInvoicesTable": [
-      "#",
-      "Aliumba",
-      "Nambari ya Bili",
-      "Nambari ya kudhibiti",
-      "Kiasi",
-      "Hali"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Iliundwa",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "hali",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Vitendo",
+        "value": "Action",
+        "desc": ""
+      }
     ]
   }
 }

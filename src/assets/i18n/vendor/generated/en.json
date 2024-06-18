@@ -4,14 +4,51 @@
   "contorolNumber": "Control number",
   "remarks": "Remarks",
   "generatedInvoicesTable": [
-    "#",
-    "Customer name",
-    "Invoice No",
-    "Invoice Date",
-    "Payment type",
-    "Total Amount",
-    "Control N°",
-    "Cancel invoice"
+    {
+      "label": "No.",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "Customer name",
+      "value": "Chus_Name",
+      "desc": "Sort by Customer name"
+    },
+    {
+      "label": "Invoice N°",
+      "value": "Invoice_No",
+      "desc": "Sort by Invoice number"
+    },
+    {
+      "label": "Invoice Date",
+      "value": "Invoice_Date",
+      "desc": "Sort by Invoice date"
+    },
+    {
+      "label": "Payment type",
+      "value": "Payment_Type",
+      "desc": "Sort by Payment type"
+    },
+    {
+      "label": "Total Amount",
+      "value": "Total",
+      "desc": "Sort by Total Amount"
+    },
+    {
+      "label": "Control N°",
+      "value": "Control_No",
+      "desc": "Sort by Control number"
+    },
+    {
+      "label": "Cancel Invoice",
+      "value": "Cancel Invoice",
+      "desc": ""
+    },
+    {
+      "label": "Action(s)",
+      "value": "Action",
+      "desc": ""
+    }
   ],
   "failedToRetrieveAmendedInvoice": "Failed to amend invoice.",
   "amend": "Amend",

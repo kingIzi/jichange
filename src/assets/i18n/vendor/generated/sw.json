@@ -4,14 +4,51 @@
   "contorolNumber": "Nambari ya kudhibiti",
   "remarks": "Maelezo",
   "generatedInvoicesTable": [
-    "#",
-    "Jina la Mteja",
-    "Nambari ya Bili",
-    "Tarehe ya Bili",
-    "Aina ya Malipo",
-    "Jumla",
-    "Nambari ya kudhibiti",
-    "Ghairi ankara"
+    {
+      "label": "Na.",
+      "value": "",
+      "desc": ""
+    },
+    {
+      "label": "Jina la mteja",
+      "value": "Chus_Name",
+      "desc": "Panga kwa Jina la mteja"
+    },
+    {
+      "label": "Nambari ya Ankara",
+      "value": "Invoice_No",
+      "desc": "Panga kwa Nambari ya ankara"
+    },
+    {
+      "label": "Tarehe ya Ankara",
+      "value": "Invoice_Date",
+      "desc": "Panga kwa Tarehe ya ankara"
+    },
+    {
+      "label": "Aina ya Malipo",
+      "value": "Payment_Type",
+      "desc": "Panga kwa Aina ya malipo"
+    },
+    {
+      "label": "Jumla ya Kiasi",
+      "value": "Total",
+      "desc": "Panga kwa Jumla ya kiasi"
+    },
+    {
+      "label": "Nambari ya Udhibiti",
+      "value": "Control_No",
+      "desc": "Panga kwa Nambari ya udhibiti"
+    },
+    {
+      "label": "Katisha Ankara",
+      "value": "",
+      "desc": ""
+    },
+    {
+      "label": "Kitendo",
+      "value": "Action",
+      "desc": ""
+    }
   ],
   "failedToRetrieveAmendedInvoice": "Imeshindwa kurekebisha ankara.",
   "amend": "Amend",

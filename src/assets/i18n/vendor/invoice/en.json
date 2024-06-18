@@ -81,11 +81,41 @@
     }
   },
   "cancelledInvoiceTable": [
-    "#",
-    "Invoice No",
-    "Customer name",
-    "Amount",
-    "Date Created"
+    {
+      "label": "No.",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "Posted",
+      "value": "p_date",
+      "desc": ""
+    },
+    {
+      "label": "Invoice N°",
+      "value": "Invoice_No",
+      "desc": ""
+    },
+    {
+      "label": "Customer name",
+      "value": "Customer_Name",
+      "desc": ""
+    },
+    {
+      "label": "Total Amount",
+      "value": "Invoice_Amount",
+      "desc": ""
+    },
+    {
+      "label": "Control N°",
+      "value": "Control_No",
+      "desc": ""
+    },
+    {
+      "label": "Reason",
+      "value": "Reason",
+      "desc": ""
+    }
   ],
   "amendments": {
     "amendments": "Amendments"
@@ -130,16 +160,58 @@
   },
   "createdInvoice": {
     "createdInvoice": "Created Invoice(s)",
+    "searchTableBy": "Search by name or invoice",
     "createdInvoiceTable": [
-      "#",
-      "Customer name",
-      "Invoice No",
-      "Invoice Date",
-      "Approve",
-      "Cancel Invoice",
-      "Payment type",
-      "Total Amount",
-      "Approval Status"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Customer name",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Invoice Date",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Approve",
+        "value": "Approve Invoice",
+        "desc": ""
+      },
+      {
+        "label": "Cancel Invoice",
+        "value": "Cancel Invoice",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Total",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Action(s)",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "failedToDownloadInvoice": "Failed to download invoice.",
     "sureCancelInvoice": "Are you sure you want to cancel invoice {}",

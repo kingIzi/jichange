@@ -2,13 +2,43 @@
   "companyUsers": "Vendor users",
   "addCompanyButton": "Add vendor users",
   "failedToRetrieveCompanyUser": "Failed to retrieve vendor user.",
+  "searchBy": "Search by username, full name or email",
   "companyTable": [
-    "#",
-    "User name",
-    "User type",
-    "Full name",
-    "Email ID",
-    "Mobile No"
+    {
+      "label": "No.",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "User name",
+      "value": "Username",
+      "desc": ""
+    },
+    {
+      "label": "User type",
+      "value": "Usertype",
+      "desc": ""
+    },
+    {
+      "label": "Full name",
+      "value": "Fullname",
+      "desc": ""
+    },
+    {
+      "label": "Email Address",
+      "value": "Email",
+      "desc": ""
+    },
+    {
+      "label": "Mobile Number",
+      "value": "Mobile",
+      "desc": ""
+    },
+    {
+      "label": "Action(s)",
+      "value": "Action",
+      "desc": ""
+    }
   ],
   "companyUsersForm": {
     "role": "Role",

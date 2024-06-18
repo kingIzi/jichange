@@ -46,6 +46,10 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { CustomerDetailsTable } from 'src/app/core/enums/vendor/customers/customers-details-table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { Observable, of } from 'rxjs';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-customers-list',
@@ -67,6 +71,8 @@ import { CustomerDetailsTable } from 'src/app/core/enums/vendor/customers/custom
     DisplayMessageBoxComponent,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -83,18 +89,18 @@ export class CustomersListComponent implements OnInit {
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<Customer>;
   public CustomerDetailsTable: typeof CustomerDetailsTable =
     CustomerDetailsTable;
-  // private headersMap = {
-  //   customerName: 0,
-  //   emailId: 1,
-  //   mobileNo: 2,
-  // };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private activatedRoute: ActivatedRoute,
@@ -111,6 +117,21 @@ export class CustomersListComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (data: Customer, filter: string) => {
+      return (
+        data.Cust_Name.toLocaleLowerCase().includes(
+          filter.toLocaleLowerCase()
+        ) || data.Email.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+      );
+    };
+  }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<Customer>(this.customers);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+  }
   private requestCustomerNames() {
     this.tableLoading = true;
     this.customerService
@@ -119,14 +140,19 @@ export class CustomersListComponent implements OnInit {
         reg: '0',
         dist: '0',
       })
-      .then((results) => {
+      .then((result) => {
         if (
-          results.response &&
-          typeof results.response !== 'string' &&
-          typeof results.response !== 'number'
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
         ) {
-          this.customersData = results.response;
-          this.customers = this.customersData;
+          this.customers = result.response;
+          this.prepareDataSource();
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -172,101 +198,55 @@ export class CustomersListComponent implements OnInit {
         throw err;
       });
   }
-  private sortTableAsc(ind: number): void {
-    switch (ind) {
-      case CustomerDetailsTable.NAME:
-        this.customers.sort((a, b) =>
-          a.Cust_Name.trim().toLocaleLowerCase() >
-          b.Cust_Name.trim().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CustomerDetailsTable.EMAIL:
-        this.customers.sort((a, b) =>
-          a.Email.trim().toLocaleLowerCase() >
-          b.Email.trim().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CustomerDetailsTable.MOBILE_NUMBER:
-        this.customers.sort((a, b) =>
-          a.Phone.trim().toLocaleLowerCase() >
-          b.Phone.trim().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number): void {
-    switch (ind) {
-      case CustomerDetailsTable.NAME:
-        this.customers.sort((a, b) =>
-          a.Cust_Name.trim().toLocaleLowerCase() <
-          b.Cust_Name.trim().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CustomerDetailsTable.EMAIL:
-        this.customers.sort((a, b) =>
-          a.Email.trim().toLocaleLowerCase() <
-          b.Email.trim().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CustomerDetailsTable.MOBILE_NUMBER:
-        this.customers.sort((a, b) =>
-          a.Phone.trim().toLocaleLowerCase() <
-          b.Phone.trim().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
   private buildHeadersForm() {
+    let TABLE_SHOWING = 5;
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `customersTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this
-    );
+    this.tr
+      .selectTranslate(`customersTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index < TABLE_SHOWING || index === labels.length - 1,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      this.customers = this.customersData.filter((elem: Customer) => {
-        return (
-          elem.Cust_Name.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          ) ||
-          elem.Email.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          ) ||
-          elem.Phone.toLocaleLowerCase().includes(
-            searchText.toLocaleLowerCase()
-          )
-        );
+  private resetTableColumns() {
+    this.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
       });
-    } else {
-      this.customers = this.customersData;
+    this.tableColumns$ = of(this.tableColumns);
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    this.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
   private openAttachCustomerToInvoiceDialog(customerId: number) {
@@ -293,14 +273,43 @@ export class CustomersListComponent implements OnInit {
       }
     });
   }
-  sortColumn(ind: number) {
-    let sortAsc = this.headers.at(ind).get('sortAsc');
-    if (!sortAsc?.value) {
-      this.sortTableDesc(ind);
-      sortAsc?.setValue(true);
-    } else {
-      this.sortTableAsc(ind);
-      sortAsc?.setValue(false);
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Cust_Name':
+      case 'Email':
+      case 'Phone':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.customers, element);
+      default:
+        return element[key];
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Cust_Name':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
     }
   }
   openCustomersDialog() {
@@ -308,13 +317,6 @@ export class CustomersListComponent implements OnInit {
       width: '800px',
       disableClose: true,
     });
-    // dialogRef.componentInstance.attachInvoice
-    //   .asObservable()
-    //   .subscribe((customerId) => {
-    //     dialogRef.close();
-    //     this.openAttachCustomerToInvoiceDialog(customerId);
-    //     this.requestCustomerNames();
-    //   });
     dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
       dialogRef.close();
       this.requestCustomerNames();
@@ -326,13 +328,6 @@ export class CustomersListComponent implements OnInit {
       data: customer,
       disableClose: true,
     });
-    // dialogRef.componentInstance.attachInvoice
-    //   .asObservable()
-    //   .subscribe((customerId) => {
-    //     dialogRef.close();
-    //     this.openAttachCustomerToInvoiceDialog(customerId);
-    //     this.requestCustomerNames();
-    //   });
     dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
       dialogRef.close();
       this.requestCustomerNames();

@@ -21,23 +21,28 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
 import {
+  Observable,
   catchError,
   firstValueFrom,
   from,
   lastValueFrom,
   map,
+  of,
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { PaymentDetailsTable } from 'src/app/core/enums/vendor/reports/payment-details-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
@@ -65,6 +70,8 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     TranslocoModule,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
@@ -86,12 +93,17 @@ export class PaymentDetailsComponent implements OnInit {
   public invoices: GeneratedInvoice[] = [];
   public payments: PaymentDetail[] = [];
   public paymentsData: PaymentDetail[] = [];
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<PaymentDetail>;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public PaymentDetailsTable: typeof PaymentDetailsTable = PaymentDetailsTable;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
@@ -121,131 +133,46 @@ export class PaymentDetailsComponent implements OnInit {
     this.customerChanged();
   }
   private async createHeaderGroup() {
+    let TABLE_SHOWING = 8;
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `paymentDetails.paymentsTable`,
-      this.scope,
-      this.tableHeaders,
-      this.fb,
-      this,
-      7,
-      true
-    );
+    this.tr
+      .selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          this.tableHeaders.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case PaymentDetailsTable.DATE:
-        this.payments.sort((a, b) =>
-          new Date(a.Payment_Date) > new Date(b.Payment_Date) ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.PAYER:
-        this.payments.sort((a, b) => (a.Payer_Name > b.Payer_Name ? 1 : -1));
-        break;
-      case PaymentDetailsTable.CUSTOMER:
-        this.payments.sort((a, b) =>
-          a.Customer_Name > b.Customer_Name ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.INVOICE_NUMBER:
-        this.payments.sort((a, b) => (a.Invoice_Sno > b.Invoice_Sno ? 1 : -1));
-        break;
-      case PaymentDetailsTable.CONTROL_NUMBER:
-        this.payments.sort((a, b) => (a.Control_No > b.Control_No ? 1 : -1));
-        break;
-      case PaymentDetailsTable.CHANNEL:
-        this.payments.sort((a, b) =>
-          a.Trans_Channel > b.Trans_Channel ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.TRANSACTION_NUMBER:
-        this.payments.sort((a, b) =>
-          a.Payment_Trans_No > b.Payment_Trans_No ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.RECEIPT_NUMBER:
-        this.payments.sort((a, b) => (a.Receipt_No > b.Receipt_No ? 1 : -1));
-        break;
-      case PaymentDetailsTable.PAID_AMOUNT:
-        this.payments.sort((a, b) => (a.PaidAmount > b.PaidAmount ? 1 : -1));
-        break;
-      case PaymentDetailsTable.BALANCE:
-        this.payments.sort((a, b) => (a.Balance > b.Balance ? 1 : -1));
-        break;
-      case PaymentDetailsTable.TOTAL_AMOUNT:
-        this.payments.sort((a, b) =>
-          a.Requested_Amount > b.Requested_Amount ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.PAYMENT_TYPE:
-        this.payments.sort((a, b) =>
-          a.Payment_Type > b.Payment_Type ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case PaymentDetailsTable.DATE:
-        this.payments.sort((a, b) =>
-          new Date(a.Payment_Date) < new Date(b.Payment_Date) ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.PAYER:
-        this.payments.sort((a, b) => (a.Payer_Name < b.Payer_Name ? 1 : -1));
-        break;
-      case PaymentDetailsTable.CUSTOMER:
-        this.payments.sort((a, b) =>
-          a.Customer_Name < b.Customer_Name ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.INVOICE_NUMBER:
-        this.payments.sort((a, b) => (a.Invoice_Sno < b.Invoice_Sno ? 1 : -1));
-        break;
-      case PaymentDetailsTable.CONTROL_NUMBER:
-        this.payments.sort((a, b) => (a.Control_No < b.Control_No ? 1 : -1));
-        break;
-      case PaymentDetailsTable.CHANNEL:
-        this.payments.sort((a, b) =>
-          a.Trans_Channel < b.Trans_Channel ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.TRANSACTION_NUMBER:
-        this.payments.sort((a, b) =>
-          a.Payment_Trans_No < b.Payment_Trans_No ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.RECEIPT_NUMBER:
-        this.payments.sort((a, b) => (a.Receipt_No < b.Receipt_No ? 1 : -1));
-        break;
-      case PaymentDetailsTable.PAID_AMOUNT:
-        this.payments.sort((a, b) => (a.PaidAmount < b.PaidAmount ? 1 : -1));
-        break;
-      case PaymentDetailsTable.BALANCE:
-        this.payments.sort((a, b) => (a.Balance < b.Balance ? 1 : -1));
-        break;
-      case PaymentDetailsTable.TOTAL_AMOUNT:
-        this.payments.sort((a, b) =>
-          a.Requested_Amount < b.Requested_Amount ? 1 : -1
-        );
-        break;
-      case PaymentDetailsTable.PAYMENT_TYPE:
-        this.payments.sort((a, b) =>
-          a.Payment_Type < b.Payment_Type ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private resetTableColumns() {
+    this.tableColumns = this.tableHeaders.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableColumns$ = of(this.tableColumns);
   }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
     if (this.cust.invalid) {
@@ -367,6 +294,48 @@ export class PaymentDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (data: PaymentDetail, filter: string) => {
+      return data.Invoice_Sno.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.Control_No &&
+          data.Control_No.toLocaleLowerCase().includes(
+            filter.toLocaleLowerCase()
+          ))
+        ? true
+        : false ||
+          (data.Company_Name &&
+            data.Company_Name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false ||
+          (data.Customer_Name &&
+            data.Customer_Name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false;
+    };
+  }
+  private dataSourceSortingAccessor() {
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'Payment_Date':
+          return new Date(item['Payment_Date']);
+        default:
+          return item[property];
+      }
+    };
+  }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<PaymentDetail>(this.payments);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
+  }
   private requestPaymentReport(value: PaymentDetailReportForm) {
     this.paymentsData = [];
     this.payments = this.paymentsData;
@@ -389,8 +358,10 @@ export class PaymentDetailsComponent implements OnInit {
           typeof results.response !== 'number' &&
           results.response.length > 0
         ) {
-          this.paymentsData = results.response;
-          this.payments = this.paymentsData;
+          // this.paymentsData = results.response;
+          // this.payments = this.paymentsData;
+          this.payments = results.response;
+          this.prepareDataSource();
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -459,15 +430,9 @@ export class PaymentDetailsComponent implements OnInit {
     return this.paymentKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      let keys = this.getActiveTableKeys();
-      this.payments = this.paymentsData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.payments = this.paymentsData;
+    this.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -485,6 +450,83 @@ export class PaymentDetailsComponent implements OnInit {
       PaymentDetailsTable.BALANCE ||
       PaymentDetailsTable.PAID_AMOUNT
     );
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Payment_Date':
+      case 'Payer_Name':
+      case 'Customer_Name':
+      case 'Invoice_Sno':
+      case 'Control_No':
+      case 'Trans_Channel':
+      case 'Payment_Trans_No':
+      case 'Receipt_No':
+      case 'Requested_Amount':
+      case 'PaidAmount':
+      case 'Balance':
+      case 'Payment_Type':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Requested_Amount':
+      case 'PaidAmount':
+      case 'Balance':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Invoice_No':
+        return `${style} text-black font-semibold`;
+      case 'Payment_Type':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element.Payment_Type,
+          `Fixed`,
+          `bg-purple-100`,
+          `text-purple-700`,
+          `bg-teal-100`,
+          `text-teal-700`
+        )} text-center w-fit`;
+      case 'Requested_Amount':
+      case 'PaidAmount':
+      case 'Balance':
+        return `${style} text-right`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.payments, element);
+      case 'Payment_Date':
+        return PerformanceUtils.convertDateStringToDate(
+          element[key]
+        ).toDateString();
+      case 'Requested_Amount':
+      case 'PaidAmount':
+      case 'Balance':
+        return (
+          PerformanceUtils.moneyFormat(element[key].toString()) +
+          ' ' +
+          element['Currency_Code']
+        );
+      case 'Control_No':
+        return element['Control_No'] ? element['Control_No'] : '-';
+      default:
+        return element[key];
+    }
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
   }
   downloadSheet() {
     if (this.paymentsData.length > 0) {

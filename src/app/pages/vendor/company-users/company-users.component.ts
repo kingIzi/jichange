@@ -20,16 +20,19 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { TimeoutError } from 'rxjs';
+import { Observable, TimeoutError, of } from 'rxjs';
 import { CompanyUsersDialogComponent } from 'src/app/components/dialogs/Vendors/company-users-dialog/company-users-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { CompanyUsersTable } from 'src/app/core/enums/vendor/company/company-users-table';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
@@ -50,6 +53,8 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatDialogModule,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   templateUrl: './company-users.component.html',
   styleUrl: './company-users.component.scss',
@@ -69,16 +74,14 @@ export class CompanyUsersComponent implements OnInit {
   public userProfile!: LoginResponse;
   public CompanyUsersTable: typeof CompanyUsersTable = CompanyUsersTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  // public headersMap = {
-  //   USER_NAME: 0,
-  //   USER_TYPE: 1,
-  //   FULL_NAME: 2,
-  //   EMAIL: 3,
-  //   MOBILE_NUMBER: 3,
-  // };
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<CompanyUser>;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -93,15 +96,46 @@ export class CompanyUsersComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<CompanyUser>(this.companUsers);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+  }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (data: CompanyUser, filter: string) => {
+      return data.Username.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.Fullname &&
+          data.Fullname.toLocaleLowerCase().includes(
+            filter.toLocaleLowerCase()
+          ))
+        ? true
+        : false ||
+          (data.Email &&
+            data.Email.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
+        ? true
+        : false;
+    };
+  }
   private requestCompanyUsers() {
     this.tableLoading = true;
     this.companyService
       .postCompanyUsersList({ compid: this.userProfile.InstID })
-      .then((results) => {
-        if (typeof results.response === 'string') {
+      .then((result) => {
+        if (
+          typeof result.response !== 'string' &&
+          typeof result.response !== 'number'
+        ) {
+          this.companUsers = result.response;
+          this.prepareDataSource();
         } else {
-          this.companUsersData = results.response;
-          this.companUsers = this.companUsersData;
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -118,125 +152,107 @@ export class CompanyUsersComponent implements OnInit {
       });
   }
   private createHeadersFormGroup() {
+    let TABLE_SHOWING = 6;
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      'companyTable',
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      6,
-      true
-    );
+    this.tr
+      .selectTranslate(`companyTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0
+                ? false
+                : index < TABLE_SHOWING || index === labels.length - 1,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
+  }
+  private resetTableColumns() {
+    this.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableColumns$ = of(this.tableColumns);
   }
   //returns a form control given a name
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case CompanyUsersTable.USERNAME:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Username?.toLocaleLowerCase() > b?.Username?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyUsersTable.USERTYPE:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Usertype?.toLocaleLowerCase() > b?.Usertype?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyUsersTable.FULL_NAME:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Fullname?.toLocaleLowerCase() > b?.Fullname?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyUsersTable.EMAIL:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Email?.toLocaleLowerCase() > b?.Email?.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyUsersTable.MOBILE_NUMBER:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Mobile?.toLocaleLowerCase() > b?.Mobile?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case CompanyUsersTable.USERNAME:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Username?.toLocaleLowerCase() < b?.Username?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyUsersTable.USERTYPE:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Usertype?.toLocaleLowerCase() < b?.Usertype?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyUsersTable.FULL_NAME:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Fullname?.toLocaleLowerCase() < b?.Fullname?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyUsersTable.EMAIL:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Email?.toLocaleLowerCase() < b?.Email?.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyUsersTable.MOBILE_NUMBER:
-        this.companUsers.sort((a: CompanyUser, b: CompanyUser) =>
-          a?.Mobile?.toLocaleLowerCase() < b?.Mobile?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.companUsers = this.companUsersData.filter((elem: CompanyUser) => {
-        return (
-          elem?.Username.toLocaleLowerCase().includes(text) ||
-          elem?.Fullname.toLocaleLowerCase().includes(text) ||
-          elem?.Email.toLocaleLowerCase().includes(text)
-        );
-      });
-    } else {
-      this.companUsers = this.companUsersData;
+    this.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeadersFormGroup();
     this.requestCompanyUsers();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Username':
+      case 'Usertype':
+      case 'Fullname':
+      case 'Email':
+      case 'Mobile':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Username':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.companUsers, element);
+      default:
+        return element[key];
+    }
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');

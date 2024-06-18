@@ -115,24 +115,96 @@
     }
   },
   "cancelledInvoiceTable": [
-    "#",
-    "Nambari ya Bili",
-    "Jina la Mteja",
-    "Kiasi",
-    "Tarehe Iliyoundwa"
+    {
+      "label": "Nambari",
+      "value": "No.",
+      "desc": ""
+    },
+    {
+      "label": "Imetumwa",
+      "value": "p_date",
+      "desc": ""
+    },
+    {
+      "label": "Nambari ya Ankara",
+      "value": "Invoice_No",
+      "desc": ""
+    },
+    {
+      "label": "Jina la Mteja",
+      "value": "Customer_Name",
+      "desc": ""
+    },
+    {
+      "label": "Kiasi cha Jumla",
+      "value": "Invoice_Amount",
+      "desc": ""
+    },
+    {
+      "label": "Nambari ya Kudhibiti",
+      "value": "Control_No",
+      "desc": ""
+    },
+    {
+      "label": "Sababu",
+      "value": "Reason",
+      "desc": ""
+    }
   ],
   "createdInvoice": {
     "createdInvoice": "Ankara zilizoundwa",
+    "searchTableBy": "Tafuta kwa jina la mteja au nambari ya ankara",
     "createdInvoiceTable": [
-      "#",
-      "Jina la Mteja",
-      "Nambari ya Bili",
-      "Tarehe ya Bili",
-      "idhinisha",
-      "Katisha Ankara",
-      "Aina ya Malipo",
-      "Jumla",
-      "Hali ya idhini"
+      {
+        "label": "Na.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Mteja",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Ankara",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Idhinisha",
+        "value": "Approve Invoice",
+        "desc": ""
+      },
+      {
+        "label": "Futa Ankara",
+        "value": "Cancel Invoice",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Jumla",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Kitendo/Vitendo",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "failedToDownloadInvoice": "Imeshindwa kupakua ankara.",
     "sureCancelInvoice": "Una uhakika unataka kughairi ankara {}",

@@ -12,22 +12,73 @@
   "transactionDetails": {
     "transactionDetails": "Transaction Details",
     "noTransactionsFound": "There are no payments yet made for this transaction.",
+    "searchBy": "Search by invoice number",
     "transactionDetailsTable": [
-      "#",
-      "Payment Date",
-      "Invoice N°",
-      "Total Amount",
-      "Paid Amount",
-      "Balance",
-      "Control N°",
-      "Payment type",
-      "Payment Method",
-      "Transaction N°",
-      "Receipt N°"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Payment Date",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Paid Amount",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Balance",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Payment Method",
+        "value": "Trans_Channel",
+        "desc": ""
+      },
+      {
+        "label": "Transaction N°",
+        "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Receipt N°",
+        "value": "Receipt_No",
+        "desc": ""
+      },
+      {
+        "label": "Action(s)",
+        "value": "Action",
+        "desc": ""
+      }
     ]
   },
   "amendmentDetails": {
     "amendment": "Amendment(s)",
+    "searchBy": "Search by invoice number, control number or customer",
     "form": {
       "status": "Status",
       "paymentType": "Payment Type",
@@ -37,17 +88,50 @@
       }
     },
     "amendmentTable": [
-      "#",
-      "Due date",
-      "Invoice N°",
-      "Control N°",
-      "Customer",
-      "Payment type",
-      "Reason",
-      "Expiry date"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Due date",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Reason",
+        "value": "Reason",
+        "desc": ""
+      },
+      {
+        "label": "Expiry date",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      }
     ]
   },
   "invoiceDetails": {
+    "searchBy": "Search by Invoice number, control number, vendor or customer",
     "invoiceDetails": "Invoice details",
     "noInvoicesFound": "No Invoices found.",
     "form": {
@@ -76,36 +160,137 @@
       }
     },
     "invoiceDetailsTable": [
-      "#",
-      "Created",
-      "Invoice N°",
-      "Control N°",
-      "Payment Type",
-      "TOTAL",
-      "Status",
-      "Vendor",
-      "Customer",
-      "Invoice Date",
-      "Due Date",
-      "Expiry Date"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Posted",
+        "value": "p_date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payment Type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Invoice Date",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Due Date",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Expiry Date",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      }
     ]
   },
   "paymentDetails": {
     "payment": "Payment(s)",
+    "searchBy": "Search by Invoice number, control number, vendor or customer",
     "paymentsTable": [
-      "#",
-      "Date",
-      "Payer",
-      "Customer",
-      "Invoice N°",
-      "Control N°",
-      "Channel",
-      "Transaction N°",
-      "Receipt No",
-      "Amount",
-      "Balance",
-      "Total amount",
-      "Payment type"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Payment Date",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Payer",
+        "value": "Payer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payment Method",
+        "value": "Trans_Channel",
+        "desc": ""
+      },
+      {
+        "label": "Transaction N°",
+        "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Receipt N°",
+        "value": "Receipt_No",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Paid Amount",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Balance",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      }
     ]
   },
   "customerDetailReport": {

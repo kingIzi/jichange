@@ -14,7 +14,8 @@
     "any": "Yoyote",
     "confirm": "Thibitisha",
     "close": "Funga",
-    "success": "Mafanikio"
+    "success": "Mafanikio",
+    "cancel": "Katisha"
   },
   "forms": {
     "from": "Kutoka",
@@ -41,7 +42,8 @@
     "validDate": "Tafadhali chagua tarehe halali",
     "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano.",
     "timeoutError": "Ombi limepitwa na wakati. Tafadhali thibitisha muunganisho wako au jaribu tena.",
-    "invalidForm": "Fomu batili"
+    "invalidForm": "Fomu batili",
+    "noFilterItemFound": "Hakuna data iliyopatikana inayolingana na kichujio."
   },
   "dialogs": {
     "sureSaveChanges": "Je, una uhakika unataka kuokoa mabadiliko?"

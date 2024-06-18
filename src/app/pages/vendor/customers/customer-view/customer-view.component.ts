@@ -41,10 +41,13 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
-import { from, zip } from 'rxjs';
+import { Observable, from, of, zip } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { CustomerViewTable } from 'src/app/core/enums/vendor/customers/customer-view-table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-customer-view',
@@ -69,6 +72,8 @@ import { CustomerViewTable } from 'src/app/core/enums/vendor/customers/customer-
     MatPaginatorModule,
     LoaderInfiniteSpinnerComponent,
     DisplayMessageBoxComponent,
+    MatTableModule,
+    MatSortModule,
   ],
 })
 export class CustomerViewComponent implements OnInit {
@@ -76,6 +81,10 @@ export class CustomerViewComponent implements OnInit {
   public customer!: Customer;
   public invoiceReports: InvoiceReport[] = [];
   public invoiceReportsData: InvoiceReport[] = [];
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<InvoiceReport>;
   public CustomerViewTable: typeof CustomerViewTable = CustomerViewTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headerFormGroup!: FormGroup;
@@ -83,6 +92,7 @@ export class CustomerViewComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
@@ -101,23 +111,77 @@ export class CustomerViewComponent implements OnInit {
     }
   }
   private buildFormHeaders() {
+    let TABLE_SHOWING = 6;
     this.headerFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `customerView.customerInvoicesTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      6,
-      true
-    );
+    this.tr
+      .selectTranslate(`customerView.customerInvoicesTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0
+                ? false
+                : index < TABLE_SHOWING || index === labels.length - 1,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
+  }
+  private resetTableColumns() {
+    this.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableColumns$ = of(this.tableColumns);
+  }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (data: InvoiceReport, filter: string) => {
+      return data.Invoice_No.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      );
+    };
+  }
+  private dataSourceSortingAccessor() {
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'Invoice_Date':
+          return new Date(item['Invoice_Date']);
+        default:
+          return item[property];
+      }
+    };
+  }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<InvoiceReport>(
+      this.invoiceReports
+    );
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private buildPage(customerId: string) {
     this.startLoading = true;
@@ -150,8 +214,10 @@ export class CustomerViewComponent implements OnInit {
           typeof invoices.response !== 'string' &&
           typeof invoices.response !== 'number'
         ) {
-          this.invoiceReportsData = invoices.response;
-          this.invoiceReports = this.invoiceReportsData;
+          // this.invoiceReportsData = invoices.response;
+          // this.invoiceReports = this.invoiceReportsData;
+          this.invoiceReports = invoices.response;
+          this.prepareDataSource();
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -166,64 +232,6 @@ export class CustomerViewComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case CustomerViewTable.DATE:
-        this.invoiceReports.sort((a, b) =>
-          new Date(a.Invoice_Date) > new Date(b.Invoice_Date) ? 1 : -1
-        );
-        break;
-      case CustomerViewTable.INVOICE_NUMBER:
-        this.invoiceReports.sort((a, b) =>
-          a.Invoice_No > b.Invoice_No ? 1 : -1
-        );
-        break;
-      case CustomerViewTable.CONTROL_NUMBER:
-        this.invoiceReports.sort((a, b) =>
-          a.Control_No > b.Control_No ? 1 : -1
-        );
-        break;
-      case CustomerViewTable.AMOUNT:
-        this.invoiceReports.sort((a, b) => (a.Total > b.Total ? 1 : -1));
-        break;
-      case CustomerViewTable.STATUS:
-        this.invoiceReports.sort((a, b) =>
-          a.goods_status > b.goods_status ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case CustomerViewTable.DATE:
-        this.invoiceReports.sort((a, b) =>
-          new Date(a.Invoice_Date) < new Date(b.Invoice_Date) ? 1 : -1
-        );
-        break;
-      case CustomerViewTable.INVOICE_NUMBER:
-        this.invoiceReports.sort((a, b) =>
-          a.Invoice_No < b.Invoice_No ? 1 : -1
-        );
-        break;
-      case CustomerViewTable.CONTROL_NUMBER:
-        this.invoiceReports.sort((a, b) =>
-          a.Control_No < b.Control_No ? 1 : -1
-        );
-        break;
-      case CustomerViewTable.AMOUNT:
-        this.invoiceReports.sort((a, b) => (a.Total < b.Total ? 1 : -1));
-        break;
-      case CustomerViewTable.STATUS:
-        this.invoiceReports.sort((a, b) =>
-          a.goods_status < b.goods_status ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
   }
   private customerViewTable(indexes: number[]) {
     let keys: string[] = [];
@@ -250,15 +258,9 @@ export class CustomerViewComponent implements OnInit {
     return this.customerViewTable(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.trim().toLowerCase();
-      let keys = this.getActiveTableKeys();
-      this.invoiceReports = this.invoiceReportsData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.invoiceReports = this.invoiceReportsData;
+    this.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -270,6 +272,40 @@ export class CustomerViewComponent implements OnInit {
         this.buildPage(customerId);
       }
     });
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.invoiceReports, element);
+      case 'Invoice_Date':
+        return PerformanceUtils.convertDateStringToDate(
+          element[key]
+        ).toDateString();
+      case 'Total':
+        return (
+          PerformanceUtils.moneyFormat(element[key].toString()) +
+          ' ' +
+          element['Currency_Code']
+        );
+      case 'Control_No':
+        return element['Control_No'] ? element['Control_No'] : '-';
+      default:
+        return element[key];
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Total':
+        return `${style} text-right`;
+      case 'goods_status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element.goods_status,
+          'Approved'
+        )} w-fit`;
+      default:
+        return `${style} text-black font-normal`;
+    }
   }
   convertDate(date: string) {
     return AppUtilities.convertDotNetJsonDateToDate(date);
@@ -318,6 +354,31 @@ export class CustomerViewComponent implements OnInit {
   }
   invoiceNumberToBase64(invoice_number: string) {
     return btoa(invoice_number);
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Invoice_Date':
+      case 'Invoice_No':
+      case 'Control_No':
+      case 'Total':
+      case 'goods_status':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Total':
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
   }
   get headers() {
     return this.headerFormGroup.get('headers') as FormArray;

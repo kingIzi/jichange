@@ -33,7 +33,15 @@ import {
   Validators,
 } from '@angular/forms';
 import { LoginResponse } from 'src/app/core/models/login-response';
-import { from, zip, lastValueFrom, map, catchError } from 'rxjs';
+import {
+  from,
+  zip,
+  lastValueFrom,
+  map,
+  catchError,
+  Observable,
+  of,
+} from 'rxjs';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
@@ -50,6 +58,9 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { CancelledInvoiceTable } from 'src/app/core/enums/vendor/reports/cancelled-invoice-table';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -66,6 +77,8 @@ import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/
     DisplayMessageBoxComponent,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   templateUrl: './invoice-cancelled.component.html',
   styleUrl: './invoice-cancelled.component.scss',
@@ -82,6 +95,10 @@ export class InvoiceCancelledComponent implements OnInit {
   public tableLoading: boolean = false;
   public invoicesListData: CancelledInvoice[] = [];
   public invoicesList: CancelledInvoice[] = [];
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<CancelledInvoice>;
   public filterFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public companies: Company[] = [];
@@ -94,6 +111,7 @@ export class InvoiceCancelledComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -112,21 +130,54 @@ export class InvoiceCancelledComponent implements OnInit {
     }
   }
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 7;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `cancelledInvoiceTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `cancelledInvoiceTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this
+    // );
+    this.tr
+      .selectTranslate(`cancelledInvoiceTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
+  }
+  private resetTableColumns() {
+    this.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableColumns$ = of(this.tableColumns);
   }
   private createFilterForm() {
     this.filterFormGroup = this.fb.group({
@@ -287,19 +338,73 @@ export class InvoiceCancelledComponent implements OnInit {
       this.invoicesList = this.invoicesListData;
     }
   }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (
+      data: CancelledInvoice,
+      filter: string
+    ) => {
+      return data.Invoice_No.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.Control_No &&
+          data.Control_No.toLocaleLowerCase().includes(
+            filter.toLocaleLowerCase()
+          ))
+        ? true
+        : false ||
+          (data.Chus_Name &&
+            data.Chus_Name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false ||
+          (data.Customer_Name &&
+            data.Customer_Name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false;
+    };
+  }
+  private dataSourceSortingAccessor() {
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'p_date':
+          return new Date(item['p_date']);
+        default:
+          return item[property];
+      }
+    };
+  }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<CancelledInvoice>(
+      this.invoicesList
+    );
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
+  }
   private requestCancelledInvoice(value: any) {
     this.invoicesListData = [];
     this.invoicesList = this.invoicesListData;
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(value)
-      .then((results) => {
+      .then((result) => {
         if (
-          results.response &&
-          typeof results.response !== 'string' &&
-          typeof results.response !== 'number'
+          typeof result.response !== 'number' &&
+          typeof result.response !== 'string'
         ) {
-          this.invoicesListData = results.response;
+          this.invoicesList = result.response;
+          this.prepareDataSource();
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.invoicesListData = [];
           this.invoicesList = this.invoicesListData;
         }
         this.tableLoading = false;
@@ -321,6 +426,67 @@ export class InvoiceCancelledComponent implements OnInit {
     this.createTableHeadersFormGroup();
     this.createFilterForm();
     this.buildPage();
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'p_date':
+      case 'Invoice_No':
+      case 'Control_No':
+      case 'Customer_Name':
+      case 'Chus_Name':
+      case 'Invoice_Amount':
+      case 'Reason':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Invoice_Amount':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Invoice_No':
+        return `${style} text-black font-semibold`;
+      case 'Invoice_Amount':
+        return `${style} text-black text-right`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.invoicesList, element);
+      case 'p_date':
+        return PerformanceUtils.convertDateStringToDate(
+          element[key]
+        ).toDateString();
+      case 'Invoice_Amount':
+        return (
+          PerformanceUtils.moneyFormat(element[key].toString()) +
+          ' ' +
+          element['Currency_Code']
+        );
+      case 'Control_No':
+        return element['Control_No'] ? element['Control_No'] : '-';
+      case 'Customer_Name':
+        return element['Customer_Name']
+          ? element['Customer_Name']
+          : element['Chus_Name'];
+      default:
+        return element[key];
+    }
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
   }
   submitFilterForm() {
     if (this.filterFormGroup.valid) {

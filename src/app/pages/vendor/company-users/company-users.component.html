@@ -54,7 +54,9 @@
                 }}</span>
                 <input
                   type="checkbox"
-                  [formControl]="getFormControl(control, 'included')"
+                  [formControl]="
+                    PerformanceUtils.getFormControl(control, 'included')
+                  "
                   class="checkbox checkbox-xs"
                 />
               </label>
@@ -63,11 +65,11 @@
         </div>
         <div class="relative">
           <input
-            *transloco="let t; read: 'defaults'"
+            *transloco="let t; read: 'company'"
             type="search"
             class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
-            [placeholder]="t('search')"
+            [placeholder]="t('searchBy')"
             [formControl]="tableSearch"
           />
           <span class="absolute left-2 top-1/2 -translate-y-1/2">
@@ -79,212 +81,105 @@
     <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
         <div class="overflow-y-auto shadow">
-          <table #companyTable class="min-w-full text-left text-sm font-light">
-            <thead formArrayName="headers" class="border-b font-medium">
-              <tr
-                *transloco="let t; read: 'tableData.vendor'"
-                class="bg-lightPurple rounded-tl-lg w-full"
+          <ng-container *ngIf="tableColumns$ | async as displayedColumns">
+            <table
+              mat-table
+              matSort
+              [dataSource]="dataSource"
+              class="mat-elevation-z2 w-full"
+            >
+              <ng-container
+                *ngFor="
+                  let column of displayedColumns;
+                  trackBy: PerformanceUtils.trackByIndex;
+                  index as ind;
+                  last
+                "
+                [matColumnDef]="column.label"
               >
-                <ng-container
-                  *ngFor="let header of headers.controls; index as ind"
-                >
-                  <th
-                    *ngIf="header.get('included')?.value"
-                    scope="col"
-                    class="px-6 py-2 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
-                    formGroupName="{{ ind }}"
-                  >
-                    <div class="flex items-center">
-                      <p>
-                        {{ header?.get("label")?.value }}
-                      </p>
-                      <button
-                        [class]="
-                          header.get('label')?.value === '#' ? 'hidden' : ''
-                        "
-                        (click)="
-                          PerformanceUtils.sortColumnClicked(ind, headers)
-                        "
-                        class="flex flex-row items-center m-1"
+                <th mat-header-cell *matHeaderCellDef>
+                  <div class="relative">
+                    <div
+                      *ngIf="tableSortableColumns(column); else notSortable"
+                      [mat-sort-header]="tableSortableColumns(column)"
+                      sortActionDescription="{{ column.desc }}"
+                      [ngClass]="tableHeaderStyle(column.value)"
+                      class="text-black font-semibold"
+                    >
+                      {{ column.label }}
+                    </div>
+                    <ng-template #notSortable>
+                      <div
+                        [ngClass]="tableHeaderStyle(column.value)"
+                        class="text-black font-semibold"
                       >
-                        <span>
-                          <i
-                            [class]="
-                              header.get('sortAsc')?.value
-                                ? 'text-darkPurple'
-                                : ''
-                            "
-                            class="bi bi-arrow-up"
-                          ></i>
-                        </span>
-                        <span>
-                          <i
-                            [class]="
-                              header.get('sortAsc')?.value
-                                ? ''
-                                : 'text-darkPurple'
-                            "
-                            class="bi bi-arrow-down"
-                          ></i>
+                        {{ column.label }}
+                      </div>
+                    </ng-template>
+                  </div>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <ng-container
+                    *ngIf="
+                      ind !== displayedColumns.length - 1;
+                      else actionTemplate
+                    "
+                  >
+                    <p [class]="tableValueStyle(element, column.value)">
+                      {{ tableValue(element, column.value) }}
+                    </p>
+                  </ng-container>
+                  <ng-template #actionTemplate>
+                    <div
+                      class="flex flex-row items-center justify-end space-x-2"
+                    >
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        class="btn btn-sm btn-ghost tooltip"
+                        [attr.data-tip]="t('edit')"
+                        (click)="openEditCompanyUserDialog(element)"
+                      >
+                        <span class="text-lg text-info">
+                          <i class="bi bi-pen text-lg"></i>
                         </span>
                       </button>
                     </div>
-                  </th>
-                </ng-container>
-                <th
-                  *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm text-right"
-                >
-                  {{ t("action") }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                  </ng-template>
+                </td>
+              </ng-container>
               <tr
-                *ngFor="
-                  let companUser of companUsers
-                    | slice
-                      : 1 + paginator.pageSize * paginator.pageIndex - 1
-                      : 1 +
-                          paginator.pageSize * paginator.pageIndex +
-                          paginator.pageSize -
-                          1;
-                  index as ind;
-                  trackBy: PerformanceUtils.trackByIndex
+                mat-header-row
+                *matHeaderRowDef="tableHeader(displayedColumns)"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="
+                  let row;
+                  columns: tableHeader(displayedColumns);
+                  index as i
                 "
-                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                [class]="ind % 2 !== 0 ? 'bg-neutral-50' : ''"
-              >
+              ></tr>
+              <tr class="mat-row" *matNoDataRow>
                 <td
-                  *ngIf="
-                    headers.controls.at(CompanyUsersTable.ID)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(CompanyUsersTable.ID)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
+                  *transloco="let t; read: 'errors'"
+                  class="mat-cell"
+                  [attr.colspan]="tableColumns.length"
                 >
-                  {{ PerformanceUtils.getIndexOfItem(companUsers, companUser) }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(CompanyUsersTable.USERNAME)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(CompanyUsersTable.USERNAME)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ companUser.Username }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(CompanyUsersTable.USERTYPE)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(CompanyUsersTable.USERTYPE)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ companUser.Usertype }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(CompanyUsersTable.FULL_NAME)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(CompanyUsersTable.FULL_NAME)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ companUser.Fullname }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(CompanyUsersTable.EMAIL)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(CompanyUsersTable.EMAIL)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ companUser.Email }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls
-                      .at(CompanyUsersTable.MOBILE_NUMBER)
-                      ?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls
-                      .at(CompanyUsersTable.MOBILE_NUMBER)
-                      ?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ companUser.Mobile ? companUser.Mobile : "-" }}
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
-                  <!-- <app-remove-item-dialog
-                    #removeItemDialog
-                  ></app-remove-item-dialog> -->
-                  <div class="flex flex-row items-center justify-end space-x-2">
-                    <button
-                      *transloco="let t; read: 'actions'"
-                      class="btn btn-sm btn-ghost tooltip"
-                      [attr.data-tip]="t('edit')"
-                      (click)="openEditCompanyUserDialog(companUser)"
-                    >
-                      <span class="text-lg text-info">
-                        <i class="bi bi-pen text-lg"></i>
-                      </span>
-                    </button>
-                  </div>
+                  <p
+                    *ngIf="tableSearch.value && dataSource.data.length > 0"
+                    class="text-xs lg:text-sm py-2 px-4"
+                  >
+                    {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
+                  </p>
+                  <p
+                    *ngIf="dataSource.data.length <= 0"
+                    class="text-center text-sm tracking-wide pt-3 pb-1"
+                  >
+                    {{ t("noDataFound") }}
+                  </p>
                 </td>
               </tr>
-            </tbody>
-          </table>
-          <ng-container *ngIf="!tableLoading">
-            <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="companUsers.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
-            </div>
+            </table>
           </ng-container>
           <ng-container *ngIf="tableLoading">
             <div class="w-full grid place-items-center mt-6">
@@ -299,11 +194,8 @@
     <div class="flex flex-row items-center justify-end">
       <mat-paginator
         #paginator
-        [length]="companUsers.length"
-        [pageSize]="5"
         [pageSizeOptions]="[5, 10, 20]"
         aria-label="Select page"
-        [showFirstLastButtons]="companUsers.length > 20"
       >
       </mat-paginator>
     </div>

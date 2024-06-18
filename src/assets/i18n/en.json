@@ -15,7 +15,8 @@
     "any": "Any",
     "confirm": "Confirm",
     "close": "Close",
-    "success": "Success"
+    "success": "Success",
+    "cancel": "Cancel"
   },
   "forms": {
     "from": "From",
@@ -42,7 +43,8 @@
     "validDate": "Please select a valid date",
     "contactSupport": "An unexpected error occurred, please try again or contact support.",
     "timeoutError": "Request timed out. Please verify your connection or try again.",
-    "invalidForm": "Invalid form"
+    "invalidForm": "Invalid form",
+    "noFilterItemFound": "No data found matching the filter."
   },
   "dialogs": {
     "sureSaveChanges": "Are you sure you want to save changes?"
