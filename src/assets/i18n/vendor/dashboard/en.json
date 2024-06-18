@@ -26,13 +26,36 @@
     "viewAllInvoices": "View All",
     "latestTransactionsTitle": "Generated invoice(s)",
     "latestTransactionsTable": [
-      "#",
-      "Customer name",
-      "Invoice No",
-      "Invoice Date",
-      "Payment type",
-      "Total Amount",
-      "Delivery Status"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Customer name",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Invoice No",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Invoice Date",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Total",
+        "desc": ""
+      }
     ]
   }
 }

@@ -41,12 +41,15 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
-import { TimeoutError, from, zip } from 'rxjs';
+import { Observable, TimeoutError, from, of, zip } from 'rxjs';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { GeneratedInvoiceListTable } from 'src/app/core/enums/vendor/invoices/generated-invoice-list-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-dashboard',
@@ -65,6 +68,8 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -83,6 +88,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   public tableHeadersFormGroup!: FormGroup;
   public generatedInvoices: GeneratedInvoice[] = [];
   public generatedInvoicesData: GeneratedInvoice[] = [];
+  private originalTableColumns: TableColumnsData[] = [];
+  public tableColumns: TableColumnsData[] = [];
+  public tableColumns$!: Observable<TableColumnsData[]>;
+  public dataSource!: MatTableDataSource<GeneratedInvoice>;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public GeneratedInvoiceListTable: typeof GeneratedInvoiceListTable =
     GeneratedInvoiceListTable;
@@ -92,6 +101,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -107,84 +117,58 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
-  private sortTableAsc(ind: number): void {
-    switch (ind) {
-      case GeneratedInvoiceListTable.INVOICE_NUMBER:
-        this.generatedInvoices.sort((a, b) =>
-          a.Invoice_No > b.Invoice_No ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.INVOICE_DATE:
-        this.generatedInvoices.sort((a, b) =>
-          new Date(a.Invoice_Date) > new Date(b.Invoice_Date) ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.CUSTOMER_NAME:
-        this.generatedInvoices.sort((a, b) =>
-          a.Chus_Name > b.Chus_Name ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.PAYMENT_TYPE:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Payment_Type?.trim() > b?.Payment_Type?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.TOTAL_AMOUNT:
-        this.generatedInvoices.sort((a, b) => (a.Total > b.Total ? 1 : -1));
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number): void {
-    switch (ind) {
-      case GeneratedInvoiceListTable.INVOICE_NUMBER:
-        this.generatedInvoices.sort((a, b) =>
-          a.Invoice_No < b.Invoice_No ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.INVOICE_DATE:
-        this.generatedInvoices.sort((a, b) =>
-          new Date(a.Invoice_Date) < new Date(b.Invoice_Date) ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.CUSTOMER_NAME:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Chus_Name?.trim() < b?.Chus_Name?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.PAYMENT_TYPE:
-        this.generatedInvoices.sort((a, b) =>
-          a?.Payment_Type?.trim() < b?.Payment_Type?.trim() ? 1 : -1
-        );
-        break;
-      case GeneratedInvoiceListTable.TOTAL_AMOUNT:
-        this.generatedInvoices.sort((a, b) => (a.Total < b.Total ? 1 : -1));
-        break;
-      default:
-        break;
-    }
-  }
-
   //create formGroup for each header item in table
   private createHeadersForm() {
+    let TABLE_SHOWING = 6;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `dashboard.latestTransactionsTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      6,
-      true
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `dashboard.latestTransactionsTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this,
+    //   6,
+    //   true
+    // );
+    this.tr
+      .selectTranslate(`dashboard.latestTransactionsTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.originalTableColumns = labels;
+        this.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
+  }
+  private resetTableColumns() {
+    this.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableColumns$ = of(this.tableColumns);
   }
   private createTransactionChart() {
     let canvas = this.transactionChart.nativeElement as HTMLCanvasElement;
@@ -285,6 +269,47 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.invoiceStatistics = result.response as DashboardOverviewStatistic[];
     }
   }
+  private dataSourceFilter() {
+    this.dataSource.filterPredicate = (
+      data: GeneratedInvoice,
+      filter: string
+    ) => {
+      return data.Invoice_No.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.Control_No &&
+          data.Control_No.toLocaleLowerCase().includes(
+            filter.toLocaleLowerCase()
+          ))
+        ? true
+        : false ||
+          (data.Chus_Name &&
+            data.Chus_Name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false;
+    };
+  }
+  private dataSourceSortingAccessor() {
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      switch (property) {
+        case 'Invoice_Date':
+          return new Date(item['Invoice_Date']);
+        default:
+          return item[property];
+      }
+    };
+  }
+  private prepareDataSource() {
+    this.dataSource = new MatTableDataSource<GeneratedInvoice>(
+      this.generatedInvoices
+    );
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
+  }
   private assignGeneratedInvoice(
     results: HttpDataResponse<string | GeneratedInvoice[]>
   ) {
@@ -295,8 +320,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.tr.translate(`errors.noDataFound`)
       );
     } else {
-      this.generatedInvoicesData = results.response;
-      this.generatedInvoices = this.generatedInvoicesData;
+      // this.generatedInvoicesData = results.response;
+      // this.generatedInvoices = this.generatedInvoicesData;
+      this.generatedInvoices = results.response;
+      this.prepareDataSource();
     }
     this.tableLoading = false;
     this.cdr.detectChanges();
@@ -344,23 +371,69 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.createHeadersForm();
     this.buildPage();
   }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Chus_Name':
+      case 'Invoice_No':
+      case 'Invoice_Date':
+      case 'Payment_Type':
+      case 'Total':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Total':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Invoice_No':
+        return `${style} text-black font-semibold`;
+      case 'Payment_Type':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element.Payment_Type,
+          `Fixed`,
+          `bg-purple-100`,
+          `text-purple-700`,
+          `bg-teal-100`,
+          `text-teal-700`
+        )} text-center w-fit`;
+      case 'Total':
+        return `${style} text-right`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(this.generatedInvoices, element);
+      case 'Invoice_Date':
+        return PerformanceUtils.convertDateStringToDate(
+          element[key]
+        ).toDateString();
+      case 'Total':
+        return (
+          PerformanceUtils.moneyFormat(element[key].toString()) +
+          ' ' +
+          element['Currency_Code']
+        );
+      default:
+        return element[key];
+    }
+  }
   dashboardStatisticRouterLink(name: string) {
-    // switch (name.toLocaleLowerCase()) {
-    //   case 'Transaction'.toLocaleLowerCase():
-    //     return '/vendor/reports/transactions';
-    //   case 'Customer'.toLocaleLowerCase():
-    //     return '/vendor/customers';
-    //   case 'Users'.toLocaleLowerCase():
-    //     return '/vendor/company';
-    //   case 'Pendings'.toLocaleLowerCase():
-    //     return '/vendor/invoice/list';
-    //   case 'Due'.toLocaleLowerCase():
-    //     return '/vendor/reports/invoice';
-    //   case 'Expired'.toLocaleLowerCase():
-    //     return '/vendor/reports/invoice';
-    //   default:
-    //     return '/vendor';
-    // }
     switch (name.toLocaleLowerCase()) {
       case 'Transaction'.toLocaleLowerCase():
         this.router.navigate(['/vendor/reports/transactions']);

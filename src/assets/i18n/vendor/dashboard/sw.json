@@ -25,13 +25,36 @@
     },
     "latestTransactionsTitle": "Ankara iliyotengenezwa",
     "latestTransactionsTable": [
-      "#",
-      "Jina la Mteja",
-      "Nambari ya Bili",
-      "Tarehe ya Bili",
-      "Aina ya Malipo",
-      "Jumla",
-      "Hali ya Uwasilishaji"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Mteja",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Ankara",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi cha Jumla",
+        "value": "Total",
+        "desc": ""
+      }
     ]
   }
 }
