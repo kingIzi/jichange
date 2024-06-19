@@ -16,12 +16,15 @@ import {
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
+import { Observable, of } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { EmailTextDialogComponent } from 'src/app/components/dialogs/bank/setup/email-text-dialog/email-text-dialog.component';
@@ -30,6 +33,7 @@ import { EmailTextTable } from 'src/app/core/enums/bank/setup/email-text-table';
 import { RemoveEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/remove-email-text-form';
 import { EmailText } from 'src/app/core/models/bank/setup/email-text';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { EmailTextService } from 'src/app/core/services/bank/setup/email-text/email-text.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -52,6 +56,8 @@ import { BreadcrumbService } from 'xng-breadcrumb';
     ReactiveFormsModule,
     LoaderInfiniteSpinnerComponent,
     RemoveItemDialogComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -64,8 +70,21 @@ import { BreadcrumbService } from 'xng-breadcrumb';
 export class EmailTextListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public emailtexts: EmailText[] = [];
-  public emailtextsData: EmailText[] = [];
+  // public emailtexts: EmailText[] = [];
+  // public emailtextsData: EmailText[] = [];
+  public tableData: {
+    emailtexts: EmailText[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<EmailText>;
+  } = {
+    emailtexts: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<EmailText>([]),
+  };
   public tableFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -73,6 +92,7 @@ export class EmailTextListComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -88,138 +108,207 @@ export class EmailTextListComponent implements OnInit {
     }
   }
   private createTableHeaders() {
+    let TABLE_SHOWING = 5;
     this.tableFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `emailText.emailTextsTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      3
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `emailText.emailTextsTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this,
+    //   3
+    // );
+    this.tr
+      .selectTranslate(`emailText.emailTextsTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(index < TABLE_SHOWING, []),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.emailtexts = this.emailtextsData.filter((emailText) => {
-        return (
-          emailText.Email_Text.toLocaleLowerCase().includes(text) ||
-          emailText.Local_Text.toLocaleLowerCase().includes(text) ||
-          emailText.Subject.toLocaleLowerCase().includes(text) ||
-          emailText.Local_subject.toLocaleLowerCase().includes(text)
-        );
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
       });
-    } else {
-      this.emailtexts = this.emailtextsData;
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+  }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case EmailTextTable.CREATED:
-        this.emailtexts.sort((a, b) =>
-          new Date(a?.Effective_Date).toLocaleDateString().toLocaleLowerCase() >
-          new Date(b?.Effective_Date).toLocaleDateString().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.SUBJECT_ENGLISH:
-        this.emailtexts.sort((a, b) =>
-          a?.Subject.toLocaleLowerCase() > b?.Subject.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.EMAL_TEXT_ENGLISH:
-        this.emailtexts.sort((a, b) =>
-          a?.Email_Text.toLocaleLowerCase() > b?.Email_Text.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.SUBJECT_KISWAHILI:
-        this.emailtexts.sort((a, b) =>
-          a?.Local_subject.toLocaleLowerCase() >
-          b?.Local_subject.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.EMAIL_TEXT_KISWAHILI:
-        this.emailtexts.sort((a, b) =>
-          a?.Local_Text.toLocaleLowerCase() > b?.Local_Text.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
+  // private sortTableAsc(ind: number) {
+  //   switch (ind) {
+  //     case EmailTextTable.CREATED:
+  //       this.emailtexts.sort((a, b) =>
+  //         new Date(a?.Effective_Date).toLocaleDateString().toLocaleLowerCase() >
+  //         new Date(b?.Effective_Date).toLocaleDateString().toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.SUBJECT_ENGLISH:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Subject.toLocaleLowerCase() > b?.Subject.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.EMAL_TEXT_ENGLISH:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Email_Text.toLocaleLowerCase() > b?.Email_Text.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.SUBJECT_KISWAHILI:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Local_subject.toLocaleLowerCase() >
+  //         b?.Local_subject.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.EMAIL_TEXT_KISWAHILI:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Local_Text.toLocaleLowerCase() > b?.Local_Text.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  // private sortTableDesc(ind: number) {
+  //   switch (ind) {
+  //     case EmailTextTable.CREATED:
+  //       this.emailtexts.sort((a, b) =>
+  //         new Date(a?.Effective_Date).toLocaleDateString().toLocaleLowerCase() <
+  //         new Date(b?.Effective_Date).toLocaleDateString().toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.SUBJECT_ENGLISH:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Subject.toLocaleLowerCase() < b?.Subject.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.EMAL_TEXT_ENGLISH:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Email_Text.toLocaleLowerCase() < b?.Email_Text.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.SUBJECT_KISWAHILI:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Local_subject.toLocaleLowerCase() <
+  //         b?.Local_subject.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmailTextTable.EMAIL_TEXT_KISWAHILI:
+  //       this.emailtexts.sort((a, b) =>
+  //         a?.Local_Text.toLocaleLowerCase() < b?.Local_Text.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: EmailText,
+      filter: string
+    ) => {
+      return data.Subject &&
+        data.Subject.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+        ? true
+        : false;
+    };
   }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case EmailTextTable.CREATED:
-        this.emailtexts.sort((a, b) =>
-          new Date(a?.Effective_Date).toLocaleDateString().toLocaleLowerCase() <
-          new Date(b?.Effective_Date).toLocaleDateString().toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.SUBJECT_ENGLISH:
-        this.emailtexts.sort((a, b) =>
-          a?.Subject.toLocaleLowerCase() < b?.Subject.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.EMAL_TEXT_ENGLISH:
-        this.emailtexts.sort((a, b) =>
-          a?.Email_Text.toLocaleLowerCase() < b?.Email_Text.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.SUBJECT_KISWAHILI:
-        this.emailtexts.sort((a, b) =>
-          a?.Local_subject.toLocaleLowerCase() <
-          b?.Local_subject.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmailTextTable.EMAIL_TEXT_KISWAHILI:
-        this.emailtexts.sort((a, b) =>
-          a?.Local_Text.toLocaleLowerCase() < b?.Local_Text.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private dataSourceSortingAccessor() {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
+      switch (property) {
+        case 'Effective_Date':
+          return new Date(item['Effective_Date']);
+        default:
+          return item[property];
+      }
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<EmailText>(
+      this.tableData.emailtexts
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private requestEmailTextList() {
     this.tableLoading = true;
     this.emailTextService
       .getAllEmailTextList({})
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.emailtextsData = result.response;
-          this.emailtexts = this.emailtextsData;
+        // if (
+        //   result.response &&
+        //   typeof result.response !== 'number' &&
+        //   typeof result.response !== 'string'
+        // ) {
+        //   this.emailtextsData = result.response;
+        //   this.emailtexts = this.emailtextsData;
+        // }
+        // this.tableLoading = false;
+        // this.cdr.detectChanges();
+        if (result.response instanceof Array) {
+          this.tableData.emailtexts = result.response;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.emailtexts = [];
         }
+        this.prepareDataSource();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -273,6 +362,50 @@ export class EmailTextListComponent implements OnInit {
     this.parseUserProfile();
     this.createTableHeaders();
     this.requestEmailTextList();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Effective_Date':
+      case 'Subject':
+      case 'Local_subject':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Subject':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.emailtexts,
+          element
+        );
+      case 'Effective_Date':
+        return new Date(element[key]).toDateString();
+      default:
+        return element[key];
+    }
   }
   openEmailTextForm() {
     let dialogRef = this.dialog.open(EmailTextDialogComponent, {

@@ -37,11 +37,14 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { TimeoutError } from 'rxjs';
+import { Observable, TimeoutError, of } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-bank-user-list',
@@ -59,6 +62,8 @@ import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.se
     LoaderInfiniteSpinnerComponent,
     RemoveItemDialogComponent,
     DisplayMessageBoxComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -71,14 +76,28 @@ export class BankUserListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  public employeeDetails: EmployeeDetail[] = [];
-  public employeeDetailsData: EmployeeDetail[] = [];
+  // public employeeDetails: EmployeeDetail[] = [];
+  // public employeeDetailsData: EmployeeDetail[] = [];
+  public tableData: {
+    employeeDetails: EmployeeDetail[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<EmployeeDetail>;
+  } = {
+    employeeDetails: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<EmployeeDetail>([]),
+  };
   public branches: Branch[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public EmployeeTable: typeof EmployeeTable = EmployeeTable;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -89,108 +108,144 @@ export class BankUserListComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 7;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `bankUser.bankUserTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      6,
-      true
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `bankUser.bankUserTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this,
+    //   6,
+    //   true
+    // );
+    this.tr
+      .selectTranslate(`bankUser.bankUserTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case EmployeeTable.FULL_NAME:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Full_Name.toLocaleLowerCase() > b.Full_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.DESIGNATION:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Desg_name.toLocaleLowerCase() > b.Desg_name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.EMAIL:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Email_Address.toLocaleLowerCase() >
-          b.Email_Address.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.MOBILE_NUMBER:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Mobile_No.toLocaleLowerCase() > b.Mobile_No.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.STATUS:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Emp_Status.toLocaleLowerCase() > b.Emp_Status.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case EmployeeTable.FULL_NAME:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Full_Name.toLocaleLowerCase() < b.Full_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.DESIGNATION:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Desg_name.toLocaleLowerCase() < b.Desg_name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.EMAIL:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Email_Address.toLocaleLowerCase() <
-          b.Email_Address.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.MOBILE_NUMBER:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Mobile_No.toLocaleLowerCase() < b.Mobile_No.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case EmployeeTable.STATUS:
-        this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
-          a.Emp_Status.toLocaleLowerCase() < b.Emp_Status.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
+  // private sortTableAsc(ind: number) {
+  //   switch (ind) {
+  //     case EmployeeTable.FULL_NAME:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Full_Name.toLocaleLowerCase() > b.Full_Name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.DESIGNATION:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Desg_name.toLocaleLowerCase() > b.Desg_name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.EMAIL:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Email_Address.toLocaleLowerCase() >
+  //         b.Email_Address.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.MOBILE_NUMBER:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Mobile_No.toLocaleLowerCase() > b.Mobile_No.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.STATUS:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Emp_Status.toLocaleLowerCase() > b.Emp_Status.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  // private sortTableDesc(ind: number) {
+  //   switch (ind) {
+  //     case EmployeeTable.FULL_NAME:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Full_Name.toLocaleLowerCase() < b.Full_Name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.DESIGNATION:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Desg_name.toLocaleLowerCase() < b.Desg_name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.EMAIL:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Email_Address.toLocaleLowerCase() <
+  //         b.Email_Address.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.MOBILE_NUMBER:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Mobile_No.toLocaleLowerCase() < b.Mobile_No.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case EmployeeTable.STATUS:
+  //       this.employeeDetails.sort((a: EmployeeDetail, b: EmployeeDetail) =>
+  //         a.Emp_Status.toLocaleLowerCase() < b.Emp_Status.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
   private requestBranchDetailsList() {
     this.startLoading = true;
     this.branchService
@@ -214,14 +269,47 @@ export class BankUserListComponent implements OnInit {
         throw err;
       });
   }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: EmployeeDetail,
+      filter: string
+    ) => {
+      return data.Full_Name &&
+        data.Full_Name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+        ? true
+        : false ||
+          (data.Desg_name &&
+            data.Desg_name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false;
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<EmployeeDetail>(
+      this.tableData.employeeDetails
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+  }
   private requestBankDetails() {
     this.tableLoading = true;
     this.bankService
       .postEmployeeDetails({})
-      .then((results: any) => {
-        this.employeeDetailsData =
-          results.response === 0 ? [] : results.response;
-        this.employeeDetails = this.employeeDetailsData;
+      .then((result) => {
+        if (result.response instanceof Array) {
+          this.tableData.employeeDetails = result.response;
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.employeeDetails = [];
+        }
+        this.prepareDataSource();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -256,29 +344,63 @@ export class BankUserListComponent implements OnInit {
     return keys;
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
-      let keys = this.bankUserListKeys(indexes);
-      this.employeeDetails = this.employeeDetailsData.filter(
-        (employeeDetail: any) => {
-          return keys.some((key) =>
-            employeeDetail[key]?.toLocaleLowerCase().includes(text)
-          );
-        }
-      );
-    } else {
-      this.employeeDetails = this.employeeDetailsData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.requestBankDetails();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Full_Name':
+      case 'Desg_name':
+      case 'Email_Address':
+      case 'Mobile_No':
+      case 'Emp_Status':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Full_Name':
+        return `${style} text-black font-semibold`;
+      case 'Emp_Status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Active'
+        )} text-center w-fit`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.employeeDetails,
+          element
+        );
+      default:
+        return element[key];
+    }
   }
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;

@@ -28,7 +28,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
-import { TimeoutError } from 'rxjs';
+import { Observable, TimeoutError, of } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
@@ -36,6 +36,9 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { SuspenseAccountTable } from 'src/app/core/enums/bank/setup/suspense-account-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -52,6 +55,8 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -64,14 +69,28 @@ export class SuspenseAccountListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  public suspenseAccounts: SuspenseAccount[] = [];
-  public suspenseAccountsData: SuspenseAccount[] = [];
+  // public suspenseAccounts: SuspenseAccount[] = [];
+  // public suspenseAccountsData: SuspenseAccount[] = [];
+  public tableData: {
+    suspenseAccounts: SuspenseAccount[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<SuspenseAccount>;
+  } = {
+    suspenseAccounts: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<SuspenseAccount>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public SuspenseAccountTable: typeof SuspenseAccountTable =
     SuspenseAccountTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -81,72 +100,137 @@ export class SuspenseAccountListComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersFormGroup() {
+    let TABLE_SHOWING = 5;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `suspenseAccount.suspenseAccountsTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `suspenseAccount.suspenseAccountsTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this
+    // );
+    this.tr
+      .selectTranslate(`suspenseAccount.suspenseAccountsTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(index < TABLE_SHOWING, []),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
-        this.suspenseAccounts.sort((a, b) =>
-          (a.Sus_Acc_No || '') > (b.Sus_Acc_No || '') ? 1 : -1
-        );
-        break;
-      case SuspenseAccountTable.STATUS:
-        this.suspenseAccounts.sort((a, b) =>
-          (a.Status || '') > (b.Status || '') ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
-        this.suspenseAccounts.sort((a, b) =>
-          (a.Sus_Acc_No || '') < (b.Sus_Acc_No || '') ? 1 : -1
-        );
-        break;
-      case SuspenseAccountTable.STATUS:
-        this.suspenseAccounts.sort((a, b) =>
-          (a.Status || '') < (b.Status || '') ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  // private sortTableAsc(ind: number) {
+  //   switch (ind) {
+  //     case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
+  //       this.suspenseAccounts.sort((a, b) =>
+  //         (a.Sus_Acc_No || '') > (b.Sus_Acc_No || '') ? 1 : -1
+  //       );
+  //       break;
+  //     case SuspenseAccountTable.STATUS:
+  //       this.suspenseAccounts.sort((a, b) =>
+  //         (a.Status || '') > (b.Status || '') ? 1 : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  // private sortTableDesc(ind: number) {
+  //   switch (ind) {
+  //     case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
+  //       this.suspenseAccounts.sort((a, b) =>
+  //         (a.Sus_Acc_No || '') < (b.Sus_Acc_No || '') ? 1 : -1
+  //       );
+  //       break;
+  //     case SuspenseAccountTable.STATUS:
+  //       this.suspenseAccounts.sort((a, b) =>
+  //         (a.Status || '') < (b.Status || '') ? 1 : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: SuspenseAccount,
+      filter: string
+    ) => {
+      return data.Sus_Acc_No &&
+        data.Sus_Acc_No.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+        ? true
+        : false;
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<SuspenseAccount>(
+      this.tableData.suspenseAccounts
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
   }
   private requestSuspenseAccountList() {
     this.tableLoading = true;
     this.suspenseAccountService
       .getSuspenseAccountList({})
       .then((result) => {
-        if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.suspenseAccountsData = result.response;
-          this.suspenseAccounts = this.suspenseAccountsData;
+        // if (
+        //   typeof result.response !== 'number' &&
+        //   typeof result.response !== 'string'
+        // ) {
+        //   this.suspenseAccountsData = result.response;
+        //   this.suspenseAccounts = this.suspenseAccountsData;
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        // }
+        // this.tableLoading = false;
+        // this.cdr.detectChanges();
+        if (result.response instanceof Array) {
+          this.tableData.suspenseAccounts = result.response;
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.suspenseAccounts = [];
         }
+        this.prepareDataSource();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -162,22 +246,60 @@ export class SuspenseAccountListComponent implements OnInit {
       });
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.suspenseAccounts = this.suspenseAccountsData.filter((account) => {
-        return (
-          account?.Sus_Acc_No?.toLocaleLowerCase().includes(text) ||
-          account?.Status?.toLocaleLowerCase().includes(text)
-        );
-      });
-    } else {
-      this.suspenseAccounts = this.suspenseAccountsData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
     this.createHeadersFormGroup();
     this.requestSuspenseAccountList();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Sus_Acc_No':
+      case 'Status':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Name':
+        return `${style} text-black font-semibold`;
+      case 'Status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Active'
+        )} text-center w-fit`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.suspenseAccounts,
+          element
+        );
+      default:
+        return element[key];
+    }
   }
   openAddSuspenseAccountDialog() {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {

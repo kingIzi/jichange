@@ -1,6 +1,7 @@
 {
   "countryDialog": {
     "country": "Country",
+    "searchBy": "Search by country",
     "addCountry": "Add Country",
     "form": {
       "placeholders": {
@@ -19,10 +20,27 @@
         "modifiedSuccessfully": "Country modified successfully!"
       }
     },
-    "countriesTable": ["#", "Country"]
+    "countriesTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Country",
+        "value": "Country_Name",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "regionDialog": {
     "region": "Region",
+    "searchBy": "Search by country or region",
     "addRegion": "Add region",
     "removeRegion": "Remove region",
     "sureRemoveRegion": "Are you sure you want to remove this region?",
@@ -46,11 +64,33 @@
         "missingStatus": "Please select a status"
       }
     },
-    "regionsTable": ["#", "Country", "Region", "Status"]
+    "regionsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Country",
+        "value": "Country_Name",
+        "desc": ""
+      },
+      {
+        "label": "Region",
+        "value": "Region_Name",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "districtDialog": {
     "addDistrict": "Add District",
     "district": "District",
+    "searchBy": "Search by district or region",
     "removeDistrict": "Remove District",
     "sureRemoveDistrict": "Are you sure you want to remove this district",
     "deletedDistrictSuccessfully": "District successfully deleted.",
@@ -74,11 +114,38 @@
         "missingStatus": "Please select a status"
       }
     },
-    "districtsTable": ["#", "Region", "District", "Status"]
+    "districtsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Region",
+        "value": "Region_Name",
+        "desc": ""
+      },
+      {
+        "label": "District",
+        "value": "District_Name",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "District_Status",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "wardDialog": {
     "addWard": "Add Ward",
     "ward": "Ward",
+    "searchBy": "Search by ward or district",
     "removeWard": "Remove ward",
     "sureRemoveWard": "Are you sure you want to remove ward",
     "deletedWardSuccessfully": "Deleted ward successfully!",
@@ -102,10 +169,37 @@
         "missingStatus": "Please select a status"
       }
     },
-    "wardsTable": ["#", "District", "Ward", "Status"]
+    "wardsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "District",
+        "value": "District_Name",
+        "desc": ""
+      },
+      {
+        "label": "Ward",
+        "value": "Ward_Name",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Ward_Status",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "currency": {
     "addCurrency": "Add Currency",
+    "searchBy": "Search by currency code or name",
     "currency": "Currency",
     "currencyName": "Name",
     "code": "Code",
@@ -131,10 +225,32 @@
         "failedToModifyCurrency": "Failed to modify currency."
       }
     },
-    "currenciesTable": ["#", "Code", "Name"]
+    "currenciesTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Code",
+        "value": "Currency_Code",
+        "desc": ""
+      },
+      {
+        "label": "Name",
+        "value": "Currency_Name",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "designation": {
     "addDesignation": "Add Designation",
+    "searchBy": "Search by designation",
     "addedDesignationSuccessfully": "Added designation successfully!",
     "designation": "Designation",
     "form": {
@@ -156,10 +272,27 @@
         "failedToAddDesignation": "Failed to add designation."
       }
     },
-    "designationsTable": ["#", "Designation"]
+    "designationsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Designation",
+        "value": "Desg_Name",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "branch": {
     "addBranch": "Add branch",
+    "searchBy": "Search by branch or location",
     "branch": "Branch",
     "location": "Location",
     "form": {
@@ -186,7 +319,33 @@
         "removedSuccessfully": "Branch deleted successfully!"
       }
     },
-    "branchesTable": ["#", "Branch", "Location", "Status"]
+    "branchesTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Branch",
+        "value": "Name",
+        "desc": ""
+      },
+      {
+        "label": "Location",
+        "value": "Location",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "questionName": {
     "addQuestionName": "Add question",
@@ -213,6 +372,7 @@
   },
   "smtp": {
     "addSmtp": "Add Smtp",
+    "searchBy": "Search by port or username",
     "smtp": "Simple Mail Transfer Protocol",
     "removeSmtp": "Remove SMTP",
     "sureRemoveSmtp": "Are you sure you want to remove this smtp?",
@@ -256,17 +416,51 @@
       }
     },
     "smtpTable": [
-      "#",
-      "From Address",
-      "DATE CREATED",
-      "Address",
-      "Port number",
-      "Username",
-      "SSL Enable"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "From Address",
+        "value": "From_Address",
+        "desc": ""
+      },
+      {
+        "label": "Created",
+        "value": "Effective_Date",
+        "desc": ""
+      },
+      {
+        "label": "Address",
+        "value": "SMTP_Address",
+        "desc": ""
+      },
+      {
+        "label": "Port number",
+        "value": "SMTP_Port",
+        "desc": ""
+      },
+      {
+        "label": "Username",
+        "value": "SMTP_UName",
+        "desc": ""
+      },
+      {
+        "label": "SSL Enable",
+        "value": "SSL_Enable",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
     ]
   },
   "emailText": {
     "addEmailText": "Add email text",
+    "searchBy": "Search by subject",
     "emailText": "Email Text",
     "removeEmailText": "Remove email",
     "sureRemoveEmailText": "Are you sure you want to remove this email?",
@@ -305,16 +499,36 @@
       }
     },
     "emailTextsTable": [
-      "#",
-      "Created",
-      "Subject English",
-      "Subject Swahili",
-      "Email text",
-      "Email Swahili text"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Created",
+        "value": "Effective_Date",
+        "desc": ""
+      },
+      {
+        "label": "Subject English",
+        "value": "Subject",
+        "desc": ""
+      },
+      {
+        "label": "Subject Swahili",
+        "value": "Local_subject",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
     ]
   },
   "bankUser": {
     "userDetails": "User details",
+    "searchBy": "Search by name or designation",
     "addBankUser": "Add User",
     "bankUser": "Bank user",
     "addedBankUserSuccessfully": "Added user successfully!",
@@ -367,13 +581,41 @@
       }
     },
     "bankUserTable": [
-      "#",
-      "Branch",
-      "Full name",
-      "Designation",
-      "Email",
-      "Mobile number",
-      "Status"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Full name",
+        "value": "Full_Name",
+        "desc": ""
+      },
+      {
+        "label": "Designation",
+        "value": "Desg_name",
+        "desc": ""
+      },
+      {
+        "label": "Email Address",
+        "value": "Email_Address",
+        "desc": ""
+      },
+      {
+        "label": "Mobile number",
+        "value": "Mobile_No",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Emp_Status",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
     ]
   },
   "language": {
@@ -388,6 +630,7 @@
   "suspenseAccount": {
     "addSuspenseAccount": "Add",
     "suspenseAccount": "Suspense Account",
+    "searchBy": "Search by account",
     "addedSuspenseAccountSuccessfully": "Added suspense account successfully!",
     "form": {
       "placeholders": {
@@ -404,10 +647,32 @@
         "failedToAddSuspenseAccount": "Failed to add suspense account."
       }
     },
-    "suspenseAccountsTable": ["#", "Suspense Account No", "Status"]
+    "suspenseAccountsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Suspense Account",
+        "value": "Sus_Acc_No",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   },
   "depositAccount": {
     "addDepositAccount": "Add",
+    "searchBy": "Search by company or account",
     "depositAccount": "Vendor Account",
     "addedDepositSuccessfully": "Added deposit account successfully!",
     "modifiedDepositSuccessfully": "Modified deposit account successfully!",
@@ -435,6 +700,32 @@
         "sureRemoveAccount": "Are you sure you want to remove this account?"
       }
     },
-    "depositAccountTable": ["#", "Vendor", "Account", "Reason"]
+    "depositAccountTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "Company",
+        "desc": ""
+      },
+      {
+        "label": "Account",
+        "value": "Deposit_Acc_No",
+        "desc": ""
+      },
+      {
+        "label": "Reason",
+        "value": "Reason",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
   }
 }

@@ -159,28 +159,33 @@
                 >
                   <p
                     *ngIf="
-                      tableSearch.value && tableData.dataSource.data.length > 0
+                      tableSearch.value &&
+                      tableData.dataSource.data.length > 0 &&
+                      !tableLoading
                     "
                     class="text-xs lg:text-sm py-2 px-4"
                   >
                     {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                   </p>
                   <p
-                    *ngIf="tableData.dataSource.data.length <= 0"
+                    *ngIf="
+                      tableData.dataSource.data.length <= 0 && !tableLoading
+                    "
                     class="text-center text-sm tracking-wide pt-3 pb-1"
                   >
                     {{ t("noDataFound") }}
                   </p>
+                  <div
+                    *ngIf="tableLoading"
+                    class="w-full grid place-items-center mt-6"
+                  >
+                    <span
+                      class="loading loading-spinner loading-lg bg-darkPurple"
+                    ></span>
+                  </div>
                 </td>
               </tr>
             </table>
-          </ng-container>
-          <ng-container *ngIf="tableLoading">
-            <div class="w-full grid place-items-center mt-6">
-              <span
-                class="loading loading-spinner loading-sm bg-darkPurple"
-              ></span>
-            </div>
           </ng-container>
         </div>
       </div>

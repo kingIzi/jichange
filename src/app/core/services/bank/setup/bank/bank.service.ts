@@ -12,10 +12,10 @@ export class BankService {
   constructor(private client: RequestClientService) {}
   public async postEmployeeDetails(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<any, HttpDataResponse<EmployeeDetail[]>>(
-        `/api/EmployDet/GetEmpDetails`,
-        body
-      )
+      this.client.performPost<
+        any,
+        HttpDataResponse<EmployeeDetail[] | string | number>
+      >(`/api/EmployDet/GetEmpDetails`, body)
     );
     return data;
   }

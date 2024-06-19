@@ -37,7 +37,7 @@ import {
 import { Designation } from 'src/app/core/models/bank/setup/designation';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
-import { TimeoutError } from 'rxjs';
+import { Observable, TimeoutError, of } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -47,6 +47,9 @@ import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/distric
 import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { DesignationTable } from 'src/app/core/enums/bank/setup/designation-table';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-designation-list',
@@ -65,6 +68,8 @@ import { DesignationTable } from 'src/app/core/enums/bank/setup/designation-tabl
     RemoveItemDialogComponent,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -77,14 +82,28 @@ export class DesignationListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public designations: Designation[] = [];
-  public designationsData: Designation[] = [];
+  // public designations: Designation[] = [];
+  // public designationsData: Designation[] = [];
+  public tableData: {
+    designations: Designation[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Designation>;
+  } = {
+    designations: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Designation>([]),
+  };
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public DesignationTable: typeof DesignationTable = DesignationTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private designationService: DesignationService,
@@ -100,71 +119,132 @@ export class DesignationListComponent implements OnInit {
     }
   }
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 5;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `designation.designationsTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `designation.designationsTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this
+    // );
+    this.tr
+      .selectTranslate(`designation.designationsTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(index < TABLE_SHOWING, []),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case DesignationTable.NAME:
-        this.designations.sort((a, b) =>
-          a.Desg_Name.toLocaleLowerCase() > b.Desg_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case DesignationTable.NAME:
-        this.designations.sort((a, b) =>
-          a.Desg_Name.toLocaleLowerCase() < b.Desg_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
+  // private sortTableAsc(ind: number) {
+  //   switch (ind) {
+  //     case DesignationTable.NAME:
+  //       this.designations.sort((a, b) =>
+  //         a.Desg_Name.toLocaleLowerCase() > b.Desg_Name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  // private sortTableDesc(ind: number) {
+  //   switch (ind) {
+  //     case DesignationTable.NAME:
+  //       this.designations.sort((a, b) =>
+  //         a.Desg_Name.toLocaleLowerCase() < b.Desg_Name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Designation,
+      filter: string
+    ) => {
+      return data.Desg_Name &&
+        data.Desg_Name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+        ? true
+        : false;
+    };
   }
-  private emptyDesignationList() {
-    this.designationsData = [];
-    this.designations = this.designationsData;
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Designation>(
+      this.tableData.designations
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
   }
   private requestDesignationList() {
-    this.emptyDesignationList();
+    this.tableData.designations = [];
     this.tableLoading = true;
     this.designationService
       .getDesignationList()
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.designationsData = result.response;
-          this.designations = this.designationsData;
+        // if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number'
+        // ) {
+        //   this.designationsData = result.response;
+        //   this.designations = this.designationsData;
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        // }
+        // this.tableLoading = false;
+        // this.cdr.detectChanges();
+        if (result.response instanceof Array) {
+          this.tableData.designations = result.response;
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.designations = [];
         }
+        this.prepareDataSource();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -180,15 +260,9 @@ export class DesignationListComponent implements OnInit {
       });
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      this.designations = this.designationsData.filter((elem) => {
-        return elem.Desg_Name.toLocaleLowerCase().includes(
-          searchText.toLocaleLowerCase()
-        );
-      });
-    } else {
-      this.designations = this.designationsData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private requestDeleteDesignation(body: RemoveDesignationForm) {
@@ -233,6 +307,46 @@ export class DesignationListComponent implements OnInit {
     this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestDesignationList();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Desg_Name':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Desg_Name':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.designations,
+          element
+        );
+      default:
+        return element[key];
+    }
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');

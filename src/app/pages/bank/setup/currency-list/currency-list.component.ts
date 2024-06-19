@@ -15,13 +15,15 @@ import {
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
-import { TimeoutError } from 'rxjs';
+import { Observable, TimeoutError, of } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { CurrencyDialogComponent } from 'src/app/components/dialogs/bank/setup/currency-dialog/currency-dialog.component';
@@ -31,6 +33,7 @@ import { CurrencyTable } from 'src/app/core/enums/bank/setup/currency-table';
 import { RemoveCurrencyForm } from 'src/app/core/models/bank/forms/setup/currency/remove-currency-form';
 import { Currency } from 'src/app/core/models/bank/setup/currency';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CurrencyService } from 'src/app/core/services/bank/setup/currency/currency.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -54,6 +57,8 @@ import { BreadcrumbService } from 'xng-breadcrumb';
     SuccessMessageBoxComponent,
     RemoveItemDialogComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -66,8 +71,21 @@ export class CurrencyListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableFormGroup!: FormGroup;
-  public currenciesData: Currency[] = [];
-  public currencies: Currency[] = [];
+  // public currenciesData: Currency[] = [];
+  // public currencies: Currency[] = [];
+  public tableData: {
+    currencies: Currency[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Currency>;
+  } = {
+    currencies: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Currency>([]),
+  };
   private userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CurrencyTable: typeof CurrencyTable = CurrencyTable;
@@ -76,6 +94,7 @@ export class CurrencyListComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private currencyService: CurrencyService,
     private dialog: MatDialog,
@@ -91,103 +110,165 @@ export class CurrencyListComponent implements OnInit {
     }
   }
   private createTableFormGroup() {
+    let TABLE_SHOWING = 5;
     this.tableFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `currency.currenciesTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this
-    );
+    // TableUtilities.createHeaders(
+    //   this.tr,
+    //   `currency.currenciesTable`,
+    //   this.scope,
+    //   this.headers,
+    //   this.fb,
+    //   this
+    // );
+    this.tr
+      .selectTranslate(`currency.currenciesTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(index < TABLE_SHOWING, []),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case CurrencyTable.CODE:
-        this.currencies.sort((a, b) =>
-          a.Currency_Code.toLocaleLowerCase() >
-          b.Currency_Code.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CurrencyTable.NAME:
-        this.currencies.sort((a, b) =>
-          a.Currency_Name.toLocaleLowerCase() >
-          b.Currency_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case CurrencyTable.CODE:
-        this.currencies.sort((a, b) =>
-          a.Currency_Code.toLocaleLowerCase() <
-          b.Currency_Code.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CurrencyTable.NAME:
-        this.currencies.sort((a, b) =>
-          a.Currency_Name.toLocaleLowerCase() <
-          b.Currency_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.currencies = this.currenciesData.filter((currency) => {
-        return (
-          currency.Currency_Code.toLocaleLowerCase().includes(text) ||
-          currency.Currency_Name.toLocaleLowerCase().includes(text)
-        );
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
       });
-    } else {
-      this.currencies = this.currenciesData;
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+  }
+  // private sortTableAsc(ind: number) {
+  //   switch (ind) {
+  //     case CurrencyTable.CODE:
+  //       this.currencies.sort((a, b) =>
+  //         a.Currency_Code.toLocaleLowerCase() >
+  //         b.Currency_Code.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case CurrencyTable.NAME:
+  //       this.currencies.sort((a, b) =>
+  //         a.Currency_Name.toLocaleLowerCase() >
+  //         b.Currency_Name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  // private sortTableDesc(ind: number) {
+  //   switch (ind) {
+  //     case CurrencyTable.CODE:
+  //       this.currencies.sort((a, b) =>
+  //         a.Currency_Code.toLocaleLowerCase() <
+  //         b.Currency_Code.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     case CurrencyTable.NAME:
+  //       this.currencies.sort((a, b) =>
+  //         a.Currency_Name.toLocaleLowerCase() <
+  //         b.Currency_Name.toLocaleLowerCase()
+  //           ? 1
+  //           : -1
+  //       );
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
+  private searchTable(searchText: string, paginator: MatPaginator) {
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
-  private emptyCurrencyList() {
-    this.currenciesData = [];
-    this.currencies = this.currenciesData;
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Currency,
+      filter: string
+    ) => {
+      return data.Currency_Code &&
+        data.Currency_Code.toLocaleLowerCase().includes(
+          filter.toLocaleLowerCase()
+        )
+        ? true
+        : false ||
+          (data.Currency_Name &&
+            data.Currency_Name.toLocaleLowerCase().includes(
+              filter.toLocaleLowerCase()
+            ))
+        ? true
+        : false;
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Currency>(
+      this.tableData.currencies
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
   }
   private requestCurrencyList() {
-    this.emptyCurrencyList();
+    //this.emptyCurrencyList();
+    this.tableData.currencies = [];
     this.tableLoading = true;
     this.currencyService
       .getCurrencyList({})
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.currenciesData = result.response;
-          this.currencies = this.currenciesData;
+        // if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number'
+        // ) {
+        //   this.currenciesData = result.response;
+        //   this.currencies = this.currenciesData;
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        // }
+        // this.tableLoading = false;
+        // this.cdr.detectChanges();
+        if (result.response instanceof Array) {
+          this.tableData.currencies = result.response;
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.currencies = [];
         }
+        this.prepareDataSource();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -234,6 +315,47 @@ export class CurrencyListComponent implements OnInit {
     this.parseUserProfile();
     this.createTableFormGroup();
     this.requestCurrencyList();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Currency_Code':
+      case 'Currency_Name':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'Action':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Currency_Code':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.currencies,
+          element
+        );
+      default:
+        return element[key];
+    }
   }
   openCurrencyForm() {
     let dialogRef = this.dialog.open(CurrencyDialogComponent, {
