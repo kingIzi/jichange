@@ -80,14 +80,20 @@ export class InvoiceDetailsComponent implements OnInit {
   public userProfile!: LoginResponse;
   public tableFormGroup!: FormGroup;
   public filterFormGroup!: FormGroup;
-  public invoiceReports: InvoiceReport[] = [];
-  public invoiceReportsData: InvoiceReport[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<InvoiceReport>;
+  public tableData: {
+    invoiceReports: InvoiceReport[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<InvoiceReport>;
+  } = {
+    invoiceReports: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<InvoiceReport>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
   public filterFormData: {
     companies: Company[];
     customers: Customer[];
@@ -125,8 +131,8 @@ export class InvoiceDetailsComponent implements OnInit {
     this.tr
       .selectTranslate(`invoiceDetails.invoiceDetailsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0 ? false : index < TABLE_SHOWING,
@@ -147,7 +153,7 @@ export class InvoiceDetailsComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -156,7 +162,7 @@ export class InvoiceDetailsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private invoiceReportKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -204,9 +210,9 @@ export class InvoiceDetailsComponent implements OnInit {
     return this.invoiceReportKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private createFilterFormGroup() {
@@ -260,8 +266,7 @@ export class InvoiceDetailsComponent implements OnInit {
       });
   }
   private requestInvoiceDetails(body: InvoiceReportForm) {
-    this.invoiceReportsData = [];
-    this.invoiceReports = this.invoiceReportsData;
+    this.tableData.invoiceReports = [];
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)
@@ -276,12 +281,14 @@ export class InvoiceDetailsComponent implements OnInit {
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.invoiceReports = [];
+          this.prepareDataSource();
         } else if (
           typeof result.response !== 'string' &&
           typeof result.response !== 'number' &&
           result.response.length > 0
         ) {
-          this.invoiceReports = result.response;
+          this.tableData.invoiceReports = result.response;
           this.prepareDataSource();
         }
         this.tableLoading = false;
@@ -300,17 +307,20 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private filterInvoiceDetailsByQuery(q: string) {
     if (q.toLocaleLowerCase() == 'Due'.toLocaleLowerCase()) {
-      this.invoiceReportsData = this.invoiceReportsData.filter(
+      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
         (i) => new Date(i.Due_Date) >= new Date()
       );
     } else if (q.toLocaleLowerCase() == 'Expired'.toLocaleLowerCase()) {
-      this.invoiceReportsData = this.invoiceReportsData.filter(
+      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
         (i) => new Date(i.Invoice_Expired_Date) >= new Date()
       );
     }
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (data: InvoiceReport, filter: string) => {
+    this.tableData.dataSource.filterPredicate = (
+      data: InvoiceReport,
+      filter: string
+    ) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -335,7 +345,10 @@ export class InvoiceDetailsComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'p_date':
           return new Date(item['p_date']);
@@ -351,11 +364,11 @@ export class InvoiceDetailsComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<InvoiceReport>(
-      this.invoiceReports
+    this.tableData.dataSource = new MatTableDataSource<InvoiceReport>(
+      this.tableData.invoiceReports
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
@@ -370,8 +383,7 @@ export class InvoiceDetailsComponent implements OnInit {
     if (form.enddate) {
       form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
     }
-    this.invoiceReportsData = [];
-    this.invoiceReports = this.invoiceReportsData;
+    this.tableData.invoiceReports = [];
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(form)
@@ -386,6 +398,8 @@ export class InvoiceDetailsComponent implements OnInit {
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.invoiceReports = [];
+          this.prepareDataSource();
         } else if (
           typeof result.response !== 'string' &&
           typeof result.response !== 'number' &&
@@ -394,7 +408,7 @@ export class InvoiceDetailsComponent implements OnInit {
           // this.invoiceReportsData = result.response as InvoiceReport[];
           // this.filterInvoiceDetailsByQuery(q);
           // this.invoiceReports = this.invoiceReportsData;
-          this.invoiceReports = result.response;
+          this.tableData.invoiceReports = result.response;
           this.filterInvoiceDetailsByQuery(q);
           this.prepareDataSource();
         }
@@ -481,7 +495,10 @@ export class InvoiceDetailsComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.invoiceReports, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.invoiceReports,
+          element
+        );
       case 'p_date':
       case 'Invoice_Date':
       case 'Due_Date':
@@ -502,9 +519,9 @@ export class InvoiceDetailsComponent implements OnInit {
     }
   }
   downloadSheet() {
-    if (this.invoiceReportsData.length > 0) {
+    if (this.tableData.invoiceReports.length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.invoiceReportsData,
+        this.tableData.invoiceReports,
         this.getActiveKeys(),
         'invoice_details_report',
         ['Payment_Date']

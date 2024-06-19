@@ -84,17 +84,22 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 export class CustomersListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public customersData: Customer[] = [];
-  public customers: Customer[] = [];
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<Customer>;
-  public CustomerDetailsTable: typeof CustomerDetailsTable =
-    CustomerDetailsTable;
+  public tableData: {
+    customers: Customer[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Customer>;
+  } = {
+    customers: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Customer>([]),
+  };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -118,7 +123,10 @@ export class CustomersListComponent implements OnInit {
     }
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (data: Customer, filter: string) => {
+    this.tableData.dataSource.filterPredicate = (
+      data: Customer,
+      filter: string
+    ) => {
       return (
         data.Cust_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -127,9 +135,11 @@ export class CustomersListComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<Customer>(this.customers);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource = new MatTableDataSource<Customer>(
+      this.tableData.customers
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
   }
   private requestCustomerNames() {
@@ -145,7 +155,7 @@ export class CustomersListComponent implements OnInit {
           typeof result.response !== 'string' &&
           typeof result.response !== 'number'
         ) {
-          this.customers = result.response;
+          this.tableData.customers = result.response;
           this.prepareDataSource();
         } else {
           AppUtilities.openDisplayMessageBox(
@@ -207,8 +217,8 @@ export class CustomersListComponent implements OnInit {
     this.tr
       .selectTranslate(`customersTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index < TABLE_SHOWING || index === labels.length - 1,
@@ -232,7 +242,7 @@ export class CustomersListComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -241,12 +251,12 @@ export class CustomersListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private openAttachCustomerToInvoiceDialog(customerId: number) {
@@ -289,7 +299,10 @@ export class CustomersListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.customers, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.customers,
+          element
+        );
       default:
         return element[key];
     }

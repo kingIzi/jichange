@@ -15,18 +15,21 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { from, zip } from 'rxjs';
+import { Observable, from, of, zip } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { VendorReportTable } from 'src/app/core/enums/bank/reports/vendor-report-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
@@ -47,6 +50,8 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     DisplayMessageBoxComponent,
     ReactiveFormsModule,
     MatPaginatorModule,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -62,9 +67,19 @@ export class VendorDetailReportComponent implements OnInit {
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public VendorReportTable: typeof VendorReportTable = VendorReportTable;
-  public companies: Company[] = [];
-  public companiesData: Company[] = [];
+  public tableData: {
+    companies: Company[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Company>;
+  } = {
+    companies: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Company>([]),
+  };
   public filterFormData: {
     branches: Branch[];
   } = {
@@ -73,6 +88,7 @@ export class VendorDetailReportComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -97,23 +113,46 @@ export class VendorDetailReportComponent implements OnInit {
     }
   }
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 7;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `vendorReport.vendorReportTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      7,
-      true
-    );
+    this.tr
+      .selectTranslate(`vendorReport.vendorReportTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
+  }
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private buildPage() {
     this.startLoading = true;
@@ -143,28 +182,55 @@ export class VendorDetailReportComponent implements OnInit {
         throw err;
       });
   }
-  private emptyCompanies() {
-    this.companiesData = [];
-    this.companies = this.companiesData;
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Company,
+      filter: string
+    ) => {
+      return data.CompName.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      );
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Company>(
+      this.tableData.companies
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
   }
   private requestCompaniesList(body: { branch: number | string }) {
-    this.emptyCompanies();
+    this.tableData.companies = [];
     this.tableLoading = true;
     this.reportsService
       .getBranchedCompanyList(body)
       .then((result) => {
         if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
+          typeof result.response === 'string' &&
+          typeof result.response === 'number'
         ) {
-          this.companiesData = result.response;
-          this.companies = this.companiesData;
-        } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.companies = [];
+          this.prepareDataSource();
+        } else if (
+          result.response instanceof Array &&
+          result.response.length === 0
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.companies = [];
+          this.prepareDataSource();
+        } else {
+          this.tableData.companies = result.response as Company[];
+          this.prepareDataSource();
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -179,86 +245,6 @@ export class VendorDetailReportComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case VendorReportTable.VENDOR_NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() > b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorReportTable.MOBILE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() > b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorReportTable.TIN_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.TinNo.toLocaleLowerCase() > b.TinNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorReportTable.ACCOUNT_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.AccountNo.toLocaleLowerCase() > b.AccountNo.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorReportTable.STATUS:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Status.toLocaleLowerCase() > b.Status.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorReportTable.CHECKER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Checker.toLocaleLowerCase() > b.Checker.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case VendorReportTable.VENDOR_NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() < b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorReportTable.MOBILE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() < b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorReportTable.TIN_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.TinNo.toLocaleLowerCase() < b.TinNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorReportTable.ACCOUNT_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.AccountNo.toLocaleLowerCase() < b.AccountNo.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorReportTable.STATUS:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Status.toLocaleLowerCase() < b.Status.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorReportTable.CHECKER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Checker.toLocaleLowerCase() < b.Checker.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -291,15 +277,9 @@ export class VendorDetailReportComponent implements OnInit {
     return this.companyKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.trim().toLowerCase();
-      let keys = this.getTableActiveKeys();
-      this.companies = this.companiesData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.companies = this.companiesData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -313,6 +293,62 @@ export class VendorDetailReportComponent implements OnInit {
         this.submitTableFilterForm();
       }
     });
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'CompName':
+      case 'MobNo':
+      case 'TinNo':
+      case 'AccountNo':
+      case 'Status':
+      case 'Checker':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let Checker = (value: string) => {
+      if (!value) return `text-black font-normal`;
+      return value.toLocaleLowerCase() === 'no'
+        ? `text-red-600`
+        : `text-green-600`;
+    };
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'CompName':
+        return `${style} text-black font-semibold`;
+      case 'Status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element.Status,
+          'Approved'
+        )} w-fit`;
+      case 'Checker':
+        return Checker(element[key]);
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.companies,
+          element
+        );
+      default:
+        return element[key] ? element[key] : '-';
+    }
   }
   submitTableFilterForm() {
     let form = {} as any;

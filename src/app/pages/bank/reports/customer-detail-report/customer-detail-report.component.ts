@@ -27,6 +27,7 @@ import {
   from,
   lastValueFrom,
   map,
+  of,
   toArray,
   zip,
 } from 'rxjs';
@@ -56,6 +57,9 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -72,6 +76,8 @@ import { LoginResponse } from 'src/app/core/models/login-response';
     LoaderRainbowComponent,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -97,14 +103,26 @@ export class CustomerDetailReportComponent implements OnInit {
     districts: [],
     branches: [],
   };
-  public customers: Customer[] = [];
-  public customersData: Customer[] = [];
+  public tableData: {
+    customers: Customer[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Customer>;
+  } = {
+    customers: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Customer>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public VendorDetailsReportTable: typeof VendorDetailsReportTable =
     VendorDetailsReportTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private fb: FormBuilder,
     private reportsService: ReportsService,
@@ -138,23 +156,50 @@ export class CustomerDetailReportComponent implements OnInit {
     this.regionChangeEventHandler();
   }
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 6;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `customerDetailReport.customerDetailReportTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      6,
-      true
-    );
+    this.tr
+      .selectTranslate(
+        `customerDetailReport.customerDetailReportTable`,
+        {},
+        this.scope
+      )
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
+  }
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private fetchDistricts(body: { Sno: string }) {
     this.startLoading = true;
@@ -315,89 +360,75 @@ export class CustomerDetailReportComponent implements OnInit {
       );
     }
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case VendorDetailsReportTable.CUSTOMER_NAME:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a.Cust_Name.toLocaleLowerCase() > b.Cust_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorDetailsReportTable.PHONE:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a?.ConPerson?.toLocaleLowerCase() > b?.ConPerson?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorDetailsReportTable.EMAIL:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorDetailsReportTable.ADDRESS:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a.Address.toLocaleLowerCase() > b.Address.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorDetailsReportTable.DATE_POSTED:
-        this.customers.sort((a: Customer, b: Customer) =>
-          new Date(a.Posted_Date) > new Date(b.Posted_Date) ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Customer,
+      filter: string
+    ) => {
+      return data.Cust_Name.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.Email &&
+          data.Email.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
+        ? true
+        : false;
+    };
   }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case VendorDetailsReportTable.CUSTOMER_NAME:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a.Cust_Name.toLocaleLowerCase() < b.Cust_Name.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorDetailsReportTable.PHONE:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a?.ConPerson?.toLocaleLowerCase() < b?.ConPerson?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case VendorDetailsReportTable.EMAIL:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorDetailsReportTable.ADDRESS:
-        this.customers.sort((a: Customer, b: Customer) =>
-          a.Address.toLocaleLowerCase() < b.Address.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case VendorDetailsReportTable.DATE_POSTED:
-        this.customers.sort((a: Customer, b: Customer) =>
-          new Date(a.Posted_Date) < new Date(b.Posted_Date) ? 1 : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private dataSourceSortingAccessor() {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
+      switch (property) {
+        case 'Posted_Date':
+          return new Date(item['Due_Date']);
+        default:
+          return item[property];
+      }
+    };
   }
-  private emptyCustomerDetails() {
-    this.customersData = [];
-    this.customers = this.customersData;
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Customer>(
+      this.tableData.customers
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private requestCustomerDetails(form: any) {
-    this.emptyCustomerDetails();
+    this.tableData.customers = [];
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
-      .then((results: any) => {
+      .then((result) => {
+        if (
+          typeof result.response === 'string' &&
+          typeof result.response === 'number'
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.customers = [];
+          this.prepareDataSource();
+        } else if (
+          result.response instanceof Array &&
+          result.response.length === 0
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.customers = [];
+          this.prepareDataSource();
+        } else {
+          this.tableData.customers = result.response as Customer[];
+          this.prepareDataSource();
+        }
         this.tableLoading = false;
-        this.customersData = results.response === 0 ? [] : results.response;
-        this.customers = this.customersData;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -436,15 +467,9 @@ export class CustomerDetailReportComponent implements OnInit {
     return this.customerKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let keys = this.getActiveTableKeys();
-      let text = searchText.trim().toLowerCase();
-      this.customers = this.customersData.filter((customer: any) => {
-        return keys.some((key) => customer[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.customers = this.customersData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private initData(q: string) {
@@ -467,6 +492,52 @@ export class CustomerDetailReportComponent implements OnInit {
       }
     });
   }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'Posted_Date':
+      case 'Cust_Name':
+      case 'Phone':
+      case 'Email':
+      case 'Address':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'Cust_Name':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.customers,
+          element
+        );
+      case 'Posted_Date':
+        return PerformanceUtils.convertDateStringToDate(
+          element[key]
+        ).toDateString();
+      default:
+        return element[key] ? element[key] : '-';
+    }
+  }
   submitTableFilterForm() {
     if (this.tableFilterFormGroup.valid) {
       let form = { ...this.tableFilterFormGroup.value };
@@ -487,9 +558,9 @@ export class CustomerDetailReportComponent implements OnInit {
     return control.get(name) as FormControl;
   }
   downloadSheet() {
-    if (this.customersData.length > 0) {
+    if (this.tableData.customers.length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.customersData,
+        this.tableData.customers,
         this.getActiveTableKeys(),
         'vendors_report',
         ['Posted_Date']

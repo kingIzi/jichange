@@ -91,13 +91,20 @@ export class GeneratedInvoiceListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public generatedInvoices: GeneratedInvoice[] = [];
-  public generatedInvoicesData: GeneratedInvoice[] = [];
   public tableHeadersFormGroup!: FormGroup;
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<GeneratedInvoice>;
+  public tableData: {
+    generatedInvoices: GeneratedInvoice[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<GeneratedInvoice>;
+  } = {
+    generatedInvoices: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('generatedInvoiceTable', { static: true })
   generatedInvoiceTable!: ElementRef<HTMLTableElement>;
@@ -132,8 +139,8 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.tr
       .selectTranslate(`generatedInvoicesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0
@@ -159,7 +166,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -168,10 +175,10 @@ export class GeneratedInvoiceListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (
+    this.tableData.dataSource.filterPredicate = (
       data: GeneratedInvoice,
       filter: string
     ) => {
@@ -184,7 +191,10 @@ export class GeneratedInvoiceListComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -194,20 +204,16 @@ export class GeneratedInvoiceListComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.generatedInvoices
+    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
+      this.tableData.generatedInvoices
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private emptyGeneratedInvoice() {
-    this.generatedInvoicesData = [];
-    this.generatedInvoices = this.generatedInvoicesData;
-  }
   private requestGeneratedInvoice() {
-    this.emptyGeneratedInvoice();
+    this.tableData.generatedInvoices = [];
     this.tableLoading = true;
     this.invoiceService
       .postSignedDetails({ compid: this.userProfile.InstID })
@@ -216,7 +222,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
           typeof result.response !== 'string' &&
           typeof result.response !== 'number'
         ) {
-          this.generatedInvoices = result.response;
+          this.tableData.generatedInvoices = result.response;
           this.prepareDataSource();
         } else {
           AppUtilities.openDisplayMessageBox(
@@ -240,9 +246,9 @@ export class GeneratedInvoiceListComponent implements OnInit {
   }
   //action to filter table by search key up
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -256,7 +262,10 @@ export class GeneratedInvoiceListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.generatedInvoices, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.generatedInvoices,
+          element
+        );
       case 'Invoice_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]
@@ -327,7 +336,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       data: {
         headersMap: GeneratedInvoiceListTable,
         headers: this.headers.controls.map((c) => c.get('label')?.value),
-        generatedInvoices: this.generatedInvoicesData,
+        generatedInvoices: this.tableData.generatedInvoices,
       },
     });
   }

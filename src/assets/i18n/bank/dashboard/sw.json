@@ -1,5 +1,6 @@
 {
   "dashboard": {
+    "searchBy": "Tafuta kwa jina au nambari ya TIN",
     "overview": {
       "name": "Maelezo",
       "transaction": "Shughuli",
@@ -35,11 +36,36 @@
         "noDataFound": "Hakuna data iliyopatikana"
       },
       "companySummary": [
-        "Jina",
-        "Barua pepe",
-        "Nambari ya TIN",
-        "Nambari ya Simu",
-        "Hali"
+        {
+          "label": "Nambari",
+          "value": "No.",
+          "desc": ""
+        },
+        {
+          "label": "Jina",
+          "value": "CompName",
+          "desc": ""
+        },
+        {
+          "label": "Anwani ya Barua Pepe",
+          "value": "Email",
+          "desc": ""
+        },
+        {
+          "label": "Nambari ya TIN",
+          "value": "TinNo",
+          "desc": ""
+        },
+        {
+          "label": "Nambari ya Simu",
+          "value": "MobNo",
+          "desc": ""
+        },
+        {
+          "label": "Hali",
+          "value": "Status",
+          "desc": ""
+        }
       ]
     },
     "invoiceData": {

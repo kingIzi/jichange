@@ -8,6 +8,7 @@ import { VendorDetailsReportForm } from 'src/app/core/models/bank/forms/reports/
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
+import { UserLog } from 'src/app/core/models/bank/reports/user-log';
 
 @Injectable({
   providedIn: 'root',
@@ -52,7 +53,10 @@ export class ReportsService {
   }
   public async getUserLogTimes(body: { stdate: string; enddate: string }) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/UserLog/LogtimeRep`, body)
+      this.client.performPost<
+        { stdate: string; enddate: string },
+        HttpDataResponse<UserLog[] | number | string>
+      >(`/api/UserLog/LogtimeRep`, body)
     );
     return data;
   }

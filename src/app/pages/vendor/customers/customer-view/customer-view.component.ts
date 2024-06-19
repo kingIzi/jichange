@@ -79,13 +79,19 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 export class CustomerViewComponent implements OnInit {
   public startLoading: boolean = false;
   public customer!: Customer;
-  public invoiceReports: InvoiceReport[] = [];
-  public invoiceReportsData: InvoiceReport[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<InvoiceReport>;
-  public CustomerViewTable: typeof CustomerViewTable = CustomerViewTable;
+  public tableData: {
+    invoiceReports: InvoiceReport[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<InvoiceReport>;
+  } = {
+    invoiceReports: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<InvoiceReport>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headerFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
@@ -119,8 +125,8 @@ export class CustomerViewComponent implements OnInit {
     this.tr
       .selectTranslate(`customerView.customerInvoicesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0
@@ -146,7 +152,7 @@ export class CustomerViewComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -155,17 +161,23 @@ export class CustomerViewComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (data: InvoiceReport, filter: string) => {
+    this.tableData.dataSource.filterPredicate = (
+      data: InvoiceReport,
+      filter: string
+    ) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       );
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -175,11 +187,11 @@ export class CustomerViewComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<InvoiceReport>(
-      this.invoiceReports
+    this.tableData.dataSource = new MatTableDataSource<InvoiceReport>(
+      this.tableData.invoiceReports
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
@@ -214,9 +226,7 @@ export class CustomerViewComponent implements OnInit {
           typeof invoices.response !== 'string' &&
           typeof invoices.response !== 'number'
         ) {
-          // this.invoiceReportsData = invoices.response;
-          // this.invoiceReports = this.invoiceReportsData;
-          this.invoiceReports = invoices.response;
+          this.tableData.invoiceReports = invoices.response;
           this.prepareDataSource();
         }
         this.startLoading = false;
@@ -258,9 +268,9 @@ export class CustomerViewComponent implements OnInit {
     return this.customerViewTable(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -276,7 +286,10 @@ export class CustomerViewComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.invoiceReports, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.invoiceReports,
+          element
+        );
       case 'Invoice_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]

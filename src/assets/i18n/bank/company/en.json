@@ -1,6 +1,7 @@
 {
   "summary": {
     "name": "Vendors",
+    "searchBy": "Search by name or TIN number",
     "actions": {
       "addCompany": "Add Vendor",
       "addedCompanySuccessfully": "Added Company successfully!",
@@ -12,18 +13,56 @@
       "createDepositAccount": "Add deposit account"
     },
     "companySummary": [
-      "#",
-      "Name",
-      "Email",
-      "TIN N°",
-      "Mobile N°",
-      "Status",
-      "Account N°",
-      "Address",
-      "Director name",
-      "PostBox",
-      "Telephone N°",
-      "Posted"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Name",
+        "value": "CompName",
+        "desc": ""
+      },
+      {
+        "label": "Email Address",
+        "value": "Email",
+        "desc": ""
+      },
+      {
+        "label": "TIN N°",
+        "value": "TinNo",
+        "desc": ""
+      },
+      {
+        "label": "Mobile N°",
+        "value": "MobNo",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Account N°",
+        "value": "AccountNo",
+        "desc": ""
+      },
+      {
+        "label": "Residential Address",
+        "value": "Address",
+        "desc": ""
+      },
+      {
+        "label": "Director name",
+        "value": "DirectorName",
+        "desc": ""
+      },
+      {
+        "label": "Action(s)",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "companyForm": {
       "details": "Details",
@@ -115,6 +154,7 @@
     "name": "Inbox Approval",
     "companyApproval": "Company Approval",
     "approvedSuccessfully": "Company approved successfully!",
+    "searchBy": "Search by name",
     "form": {
       "pleaseSelect": "Please select",
       "suspense": "Suspense account",
@@ -136,12 +176,36 @@
       }
     },
     "inboxApprovalTable": [
-      "#",
-      "Name",
-      "Address",
-      "Email",
-      "Mobile No",
-      "Status"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Name",
+        "value": "CompName",
+        "desc": ""
+      },
+      {
+        "label": "Residential Address",
+        "value": "Address",
+        "desc": ""
+      },
+      {
+        "label": "Email Address",
+        "value": "Email",
+        "desc": ""
+      },
+      {
+        "label": "Mobile N°",
+        "value": "MobNo",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Status",
+        "desc": ""
+      }
     ]
   }
 }

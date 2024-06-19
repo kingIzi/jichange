@@ -87,6 +87,7 @@
   "invoiceDetailsForm": {
     "invoiceDetails": "Maelezo ya Bili",
     "noCustomersFound": "Hakuna wateja waliopatikana kwa muuzaji.",
+    "noInvoicesFound": "Hakuna ankara iliyopatikana.",
     "form": {
       "company": "Muuzaji",
       "customer": "Muuzaji",

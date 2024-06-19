@@ -68,16 +68,22 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 export class CompanyUsersComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public companUsers: CompanyUser[] = [];
-  public companUsersData: CompanyUser[] = [];
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
-  public CompanyUsersTable: typeof CompanyUsersTable = CompanyUsersTable;
+  public tableData: {
+    companUsers: CompanyUser[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<CompanyUser>;
+  } = {
+    companUsers: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<CompanyUser>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<CompanyUser>;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -97,13 +103,18 @@ export class CompanyUsersComponent implements OnInit {
     }
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<CompanyUser>(this.companUsers);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource = new MatTableDataSource<CompanyUser>(
+      this.tableData.companUsers
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (data: CompanyUser, filter: string) => {
+    this.tableData.dataSource.filterPredicate = (
+      data: CompanyUser,
+      filter: string
+    ) => {
       return data.Username.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -128,7 +139,7 @@ export class CompanyUsersComponent implements OnInit {
           typeof result.response !== 'string' &&
           typeof result.response !== 'number'
         ) {
-          this.companUsers = result.response;
+          this.tableData.companUsers = result.response;
           this.prepareDataSource();
         } else {
           AppUtilities.openDisplayMessageBox(
@@ -160,8 +171,8 @@ export class CompanyUsersComponent implements OnInit {
     this.tr
       .selectTranslate(`companyTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0
@@ -187,7 +198,7 @@ export class CompanyUsersComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -196,16 +207,16 @@ export class CompanyUsersComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   //returns a form control given a name
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -249,7 +260,10 @@ export class CompanyUsersComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.companUsers, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.companUsers,
+          element
+        );
       default:
         return element[key];
     }

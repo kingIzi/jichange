@@ -88,18 +88,30 @@ export class PaymentDetailsComponent implements OnInit {
   public filterFormGroup!: FormGroup;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public companies: Company[] = [];
-  public customers: CustomerName[] = [];
-  public invoices: GeneratedInvoice[] = [];
-  public payments: PaymentDetail[] = [];
-  public paymentsData: PaymentDetail[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<PaymentDetail>;
+  public formData: {
+    companies: Company[];
+    customers: CustomerName[];
+    invoices: GeneratedInvoice[];
+  } = {
+    companies: [],
+    customers: [],
+    invoices: [],
+  };
+  public tableData: {
+    payments: PaymentDetail[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<PaymentDetail>;
+  } = {
+    payments: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<PaymentDetail>([]),
+  };
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public PaymentDetailsTable: typeof PaymentDetailsTable = PaymentDetailsTable;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -141,8 +153,8 @@ export class PaymentDetailsComponent implements OnInit {
     this.tr
       .selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0 ? false : index < TABLE_SHOWING,
@@ -163,7 +175,7 @@ export class PaymentDetailsComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.tableHeaders.controls
+    this.tableData.tableColumns = this.tableHeaders.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -172,7 +184,7 @@ export class PaymentDetailsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
     if (this.cust.invalid) {
@@ -227,19 +239,19 @@ export class PaymentDetailsComponent implements OnInit {
                 this.tr.translate(`defaults.failed`),
                 this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
               );
-              this.invoices = [];
+              this.formData.invoices = [];
             } else if (
               typeof result.response !== 'string' &&
               typeof result.response !== 'number' &&
               result.response.length > 0
             ) {
-              this.invoices = result.response as any;
+              this.formData.invoices = result.response as any;
             }
             this.startLoading = false;
             this.cdr.detectChanges();
           })
           .catch((err) => {
-            this.invoices = [];
+            this.formData.invoices = [];
             AppUtilities.requestFailedCatchError(
               err,
               this.displayMessageBox,
@@ -250,7 +262,7 @@ export class PaymentDetailsComponent implements OnInit {
             throw err;
           });
       } else {
-        this.invoices = [];
+        this.formData.invoices = [];
       }
     });
   }
@@ -271,14 +283,14 @@ export class PaymentDetailsComponent implements OnInit {
           typeof companies.response !== 'string' &&
           typeof companies.response !== 'number'
         ) {
-          this.companies = companies.response;
+          this.formData.companies = companies.response;
         }
         if (
           customers.response &&
           typeof customers.response !== 'string' &&
           typeof customers.response !== 'number'
         ) {
-          this.customers = customers.response;
+          this.formData.customers = customers.response;
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -295,7 +307,10 @@ export class PaymentDetailsComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (data: PaymentDetail, filter: string) => {
+    this.tableData.dataSource.filterPredicate = (
+      data: PaymentDetail,
+      filter: string
+    ) => {
       return data.Invoice_Sno.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -320,7 +335,10 @@ export class PaymentDetailsComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Payment_Date':
           return new Date(item['Payment_Date']);
@@ -330,15 +348,16 @@ export class PaymentDetailsComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<PaymentDetail>(this.payments);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource = new MatTableDataSource<PaymentDetail>(
+      this.tableData.payments
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
   private requestPaymentReport(value: PaymentDetailReportForm) {
-    this.paymentsData = [];
-    this.payments = this.paymentsData;
+    this.tableData.payments = [];
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
@@ -353,14 +372,14 @@ export class PaymentDetailsComponent implements OnInit {
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.payments = [];
+          this.prepareDataSource();
         } else if (
           typeof results.response !== 'string' &&
           typeof results.response !== 'number' &&
           results.response.length > 0
         ) {
-          // this.paymentsData = results.response;
-          // this.payments = this.paymentsData;
-          this.payments = results.response;
+          this.tableData.payments = results.response;
           this.prepareDataSource();
         }
         this.tableLoading = false;
@@ -430,9 +449,9 @@ export class PaymentDetailsComponent implements OnInit {
     return this.paymentKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -484,7 +503,7 @@ export class PaymentDetailsComponent implements OnInit {
   tableValueStyle(element: any, key: string) {
     let style = 'text-xs lg:text-sm leading-relaxed';
     switch (key) {
-      case 'Invoice_No':
+      case 'Invoice_Sno':
         return `${style} text-black font-semibold`;
       case 'Payment_Type':
         return `${PerformanceUtils.getActiveStatusStyles(
@@ -506,7 +525,10 @@ export class PaymentDetailsComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.payments, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.payments,
+          element
+        );
       case 'Payment_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]
@@ -529,9 +551,9 @@ export class PaymentDetailsComponent implements OnInit {
     return columns.map((col) => col.label);
   }
   downloadSheet() {
-    if (this.paymentsData.length > 0) {
+    if (this.tableData.payments.length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.paymentsData,
+        this.tableData.payments,
         this.getActiveTableKeys(),
         'payments_report',
         ['Payment_Date']

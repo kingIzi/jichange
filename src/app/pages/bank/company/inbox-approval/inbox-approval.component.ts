@@ -42,7 +42,7 @@ import {
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { clientInterceptor } from 'src/app/core/interceptors/client.interceptor';
-import { TimeoutError, throwError } from 'rxjs';
+import { Observable, TimeoutError, of, throwError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { ApproveCompanyInboxComponent } from 'src/app/components/dialogs/bank/company/approve-company-inbox/approve-company-inbox.component';
@@ -53,6 +53,9 @@ import { CompanyInboxListForm } from 'src/app/core/models/bank/forms/company/inb
 import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -71,6 +74,8 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
     SuccessMessageBoxComponent,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -83,8 +88,19 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 export class InboxApprovalComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public companies: Company[] = [];
-  public companiesData: Company[] = [];
+  public tableData: {
+    companies: Company[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Company>;
+  } = {
+    companies: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Company>([]),
+  };
   public tableHeadersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -94,10 +110,10 @@ export class InboxApprovalComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,
-    //private companyService: CompanyService,
     private approvalService: ApprovalService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
@@ -111,93 +127,51 @@ export class InboxApprovalComponent implements OnInit {
     }
   }
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 6;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `inboxApproval.inboxApprovalTable`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      6,
-      true
-    );
+    this.tr
+      .selectTranslate(`inboxApproval.inboxApprovalTable`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0
+                ? false
+                : index < TABLE_SHOWING || index === labels.length - 1,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case CompanyInboxTable.NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() > b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyInboxTable.ADDRESS:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Address.toLocaleLowerCase() > b.Address.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyInboxTable.EMAIL:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyInboxTable.MOBILE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() > b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyInboxTable.STATUS:
-        this.companies.sort((a: Company, b: Company) =>
-          a?.Status?.toLocaleLowerCase() > b?.Status?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case CompanyInboxTable.NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() < b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanyInboxTable.ADDRESS:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Address.toLocaleLowerCase() < b.Address.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyInboxTable.EMAIL:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyInboxTable.MOBILE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() < b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanyInboxTable.STATUS:
-        this.companies.sort((a: Company, b: Company) =>
-          a?.Status?.toLocaleLowerCase() < b?.Status?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -226,6 +200,25 @@ export class InboxApprovalComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.companyKeys(indexes);
   }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Company,
+      filter: string
+    ) => {
+      return data.CompName &&
+        data.CompName.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+        ? true
+        : false;
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Company>(
+      this.tableData.companies
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+  }
   private requestCompanyInbox() {
     this.tableLoading = true;
     let inbox = this.approvalService.postCompanyInboxList({
@@ -233,9 +226,20 @@ export class InboxApprovalComponent implements OnInit {
       braid: Number(this.userProfile.braid),
     } as CompanyInboxListForm);
     inbox
-      .then((results: any) => {
-        this.companiesData = results.response === 0 ? [] : results.response;
-        this.companies = this.companiesData;
+      .then((result) => {
+        if (
+          typeof result.response === 'number' ||
+          typeof result.response === 'string'
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+        } else {
+          this.tableData.companies = result.response;
+          this.prepareDataSource();
+        }
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -251,15 +255,9 @@ export class InboxApprovalComponent implements OnInit {
       });
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let keys = this.getTableActiveKeys();
-      let text = searchText.trim().toLowerCase();
-      this.companies = this.companiesData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.companies = this.companiesData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -270,9 +268,51 @@ export class InboxApprovalComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'CompName':
+      case 'Email':
+      case 'MobNo':
+      case 'Status':
+      case 'Address':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'CompName':
+        return `${style} text-black font-semibold`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.companies,
+          element
+        );
+      default:
+        return element[key];
+    }
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
   downloadSheet() {
     this.fileHandler.downloadExcelTable(
-      this.companiesData,
+      this.tableData.companies,
       this.getTableActiveKeys(),
       'pending_approval_companies',
       []

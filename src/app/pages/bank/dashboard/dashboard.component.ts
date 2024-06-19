@@ -30,7 +30,16 @@ import {
 import { Company } from 'src/app/core/models/bank/company/company';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { LoginResponse } from 'src/app/core/models/login-response';
-import { TimeoutError, catchError, from, lastValueFrom, map, zip } from 'rxjs';
+import {
+  Observable,
+  TimeoutError,
+  catchError,
+  from,
+  lastValueFrom,
+  map,
+  of,
+  zip,
+} from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { CompanySummaryDialogComponent } from 'src/app/components/dialogs/bank/company/company-summary-dialog/company-summary-dialog.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -60,6 +69,9 @@ import { TableFormHeadersComponent } from 'src/app/reusables/table-form-headers/
 import { DashboardCompanySummaryTable } from 'src/app/core/enums/bank/company/company-summary-table';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-dashboard',
@@ -81,6 +93,8 @@ import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-
     SuccessMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
     TableFormHeadersComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   providers: [
     {
@@ -97,13 +111,20 @@ export class DashboardComponent implements OnInit {
   public overviewLoading: boolean = false;
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   public inboxApprovals: Company[] = [];
-  public companies: Company[] = [];
-  public tableCompanies: Company[] = [];
-  public tableCompaniesData: Company[] = [];
   public latestTransactions: TransactionDetail[] = [];
-  public DashboardCompanySummaryTable: typeof DashboardCompanySummaryTable =
-    DashboardCompanySummaryTable;
-  //public transactions: any[] = [];
+  public tableData: {
+    tableCompanies: Company[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Company>;
+  } = {
+    tableCompanies: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Company>([]),
+  };
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -111,6 +132,7 @@ export class DashboardComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private tr: TranslocoService,
     private breadcrumbService: BreadcrumbService,
@@ -129,124 +151,51 @@ export class DashboardComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
-  private sortTableAsc(index: number) {
-    switch (index) {
-      case DashboardCompanySummaryTable.NAME:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() > b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.EMAIL:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.TIN_NUMBER:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.TinNo.toLocaleLowerCase() > b.TinNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.MOBILE_NUMBER:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() > b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.STATUS:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a?.Status?.toLocaleLowerCase() > b?.Status?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(index: number) {
-    switch (index) {
-      case DashboardCompanySummaryTable.NAME:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() < b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.EMAIL:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.TIN_NUMBER:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.TinNo.toLocaleLowerCase() < b.TinNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.MOBILE_NUMBER:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() < b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case DashboardCompanySummaryTable.STATUS:
-        this.tableCompanies.sort((a: Company, b: Company) =>
-          a?.Status?.toLocaleLowerCase() < b?.Status?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
   private createTableHeadersFormGroup() {
+    let TABLE_SHOWING = 6;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `dashboard.onboardCustomers.companySummary`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this
-    );
+    this.tr
+      .selectTranslate(
+        `dashboard.onboardCustomers.companySummary`,
+        {},
+        this.scope
+      )
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0 ? false : index < TABLE_SHOWING,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private requestCompanyList() {
-    this.tableLoading = true;
-    this.companyService
-      .getCustomersList({})
-      .then((result) => {
-        if (
-          typeof result.response === 'number' ||
-          typeof result.response === 'string'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        } else {
-          this.tableCompaniesData = result.response;
-          this.tableCompanies = this.tableCompaniesData;
-        }
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-        throw err;
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
       });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private requestInboxApprovals() {
     this.inboxApprovalLoading = true;
@@ -325,21 +274,32 @@ export class DashboardComponent implements OnInit {
     }
     return keys;
   }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Company,
+      filter: string
+    ) => {
+      return data.CompName.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.TinNo &&
+          data.TinNo.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
+        ? true
+        : false;
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Company>(
+      this.tableData.tableCompanies
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+  }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let indexes = this.headers.controls
-        .map((control, index) => {
-          return control.get('included')?.value ? index : -1;
-        })
-        .filter((num) => num !== -1);
-      let text = searchText.trim().toLowerCase(); // Use toLowerCase() instead of toLocalLowercase()
-      let keys = this.companyKeys(indexes);
-      this.tableCompanies = this.tableCompanies.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.tableCompanies = this.tableCompaniesData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   public buildPage() {
@@ -387,8 +347,8 @@ export class DashboardComponent implements OnInit {
           typeof compList.response !== 'string' &&
           typeof compList.response !== 'number'
         ) {
-          this.tableCompaniesData = compList.response;
-          this.tableCompanies = this.tableCompaniesData;
+          this.tableData.tableCompanies = compList.response;
+          this.prepareDataSource();
         }
         if (
           typeof latestTransactions.response !== 'string' &&
@@ -457,6 +417,53 @@ export class DashboardComponent implements OnInit {
   }
   dateToFormat(date: string) {
     return new Date(date);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'CompName':
+      case 'Email':
+      case 'TinNo':
+      case 'MobNo':
+      case 'Status':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'CompName':
+        return `${style} text-black font-semibold`;
+      case 'Status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Approved'
+        )} text-center w-fit`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.tableCompanies,
+          element
+        );
+      default:
+        return element[key];
+    }
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
   }
   openEditCompanySummaryDialog(company: Company) {
     let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {

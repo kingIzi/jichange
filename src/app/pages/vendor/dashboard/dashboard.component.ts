@@ -86,15 +86,20 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   public inboxApprovals: any[] = [];
   public transactions: any[] = [];
   public tableHeadersFormGroup!: FormGroup;
-  public generatedInvoices: GeneratedInvoice[] = [];
-  public generatedInvoicesData: GeneratedInvoice[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<GeneratedInvoice>;
+  public tableData: {
+    generatedInvoices: GeneratedInvoice[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<GeneratedInvoice>;
+  } = {
+    generatedInvoices: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public GeneratedInvoiceListTable: typeof GeneratedInvoiceListTable =
-    GeneratedInvoiceListTable;
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   @ViewChild('transactionChart') transactionChart!: ElementRef;
   @ViewChild('operationsChart') operationsChart!: ElementRef;
@@ -124,21 +129,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `dashboard.latestTransactionsTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this,
-    //   6,
-    //   true
-    // );
     this.tr
       .selectTranslate(`dashboard.latestTransactionsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0 ? false : index < TABLE_SHOWING,
@@ -159,7 +154,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -168,7 +163,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private createTransactionChart() {
     let canvas = this.transactionChart.nativeElement as HTMLCanvasElement;
@@ -240,9 +235,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private assignInvoiceStatistics(
@@ -259,7 +254,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (
+    this.tableData.dataSource.filterPredicate = (
       data: GeneratedInvoice,
       filter: string
     ) => {
@@ -281,7 +276,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -291,11 +289,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.generatedInvoices
+    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
+      this.tableData.generatedInvoices
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
@@ -309,9 +307,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.tr.translate(`errors.noDataFound`)
       );
     } else {
-      // this.generatedInvoicesData = results.response;
-      // this.generatedInvoices = this.generatedInvoicesData;
-      this.generatedInvoices = results.response;
+      this.tableData.generatedInvoices = results.response;
       this.prepareDataSource();
     }
     this.tableLoading = false;
@@ -407,7 +403,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.generatedInvoices, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.generatedInvoices,
+          element
+        );
       case 'Invoice_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]

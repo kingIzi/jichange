@@ -1,5 +1,6 @@
 {
   "dashboard": {
+    "searchBy": "Search by name or TIN number",
     "overview": {
       "name": "Overview",
       "transaction": "Transaction(s)",
@@ -34,7 +35,38 @@
       "errors": {
         "noDataFound": "No data found"
       },
-      "companySummary": ["Name", "Email", "TIN N°", "Mobile N°", "Status"]
+      "companySummary": [
+        {
+          "label": "No.",
+          "value": "No.",
+          "desc": ""
+        },
+        {
+          "label": "Name",
+          "value": "CompName",
+          "desc": ""
+        },
+        {
+          "label": "Email Address",
+          "value": "Email",
+          "desc": ""
+        },
+        {
+          "label": "TIN N°",
+          "value": "TinNo",
+          "desc": ""
+        },
+        {
+          "label": "Mobile N°",
+          "value": "MobNo",
+          "desc": ""
+        },
+        {
+          "label": "Status",
+          "value": "Status",
+          "desc": ""
+        }
+      ]
     },
     "invoiceData": {
       "message": "Failed to retrieve invoice data."

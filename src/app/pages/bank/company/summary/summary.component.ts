@@ -43,7 +43,7 @@ import {
 } from '@angular/forms';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
-import { TimeoutError, lastValueFrom } from 'rxjs';
+import { Observable, TimeoutError, lastValueFrom, of } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -51,6 +51,9 @@ import { CompanyService } from 'src/app/core/services/bank/company/summary/compa
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { CompanySummaryTable } from 'src/app/core/enums/bank/company/company-summary-table';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 
 @Component({
   selector: 'app-summary',
@@ -69,6 +72,8 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     ReactiveFormsModule,
     SuccessMessageBoxComponent,
     DisplayMessageBoxComponent,
+    MatTableModule,
+    MatSortModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -79,19 +84,29 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
   ],
 })
 export class SummaryComponent implements OnInit {
-  public companies: Company[] = [];
-  public companiesData: Company[] = [];
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  public includedHeaders: AbstractControl<any, any>[] = [];
+  public tableData: {
+    companies: Company[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<Company>;
+  } = {
+    companies: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<Company>([]),
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public CompanySummaryTable: typeof CompanySummaryTable = CompanySummaryTable;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
     private client: RequestClientService,
@@ -103,158 +118,51 @@ export class SummaryComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersFormGroup() {
+    let TABLE_SHOWING = 7;
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    TableUtilities.createHeaders(
-      this.tr,
-      `summary.companySummary`,
-      this.scope,
-      this.headers,
-      this.fb,
-      this,
-      7,
-      true
-    );
+    this.tr
+      .selectTranslate(`summary.companySummary`, {}, this.scope)
+      .subscribe((labels: TableColumnsData[]) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
+          let col = this.fb.group({
+            included: this.fb.control(
+              index === 0
+                ? false
+                : index < TABLE_SHOWING || index === labels.length - 1,
+              []
+            ),
+            label: this.fb.control(column.label, []),
+            value: this.fb.control(column.value, []),
+          });
+          col.get(`included`)?.valueChanges.subscribe((included) => {
+            this.resetTableColumns();
+          });
+          if (index === labels.length - 1) {
+            col.disable();
+          }
+          this.headers.push(col);
+        });
+        this.resetTableColumns();
+      });
     this.tableSearch.valueChanges.subscribe((value) => {
       this.searchTable(value, this.paginator);
     });
   }
-  private sortTableAsc(ind: number) {
-    switch (ind) {
-      case CompanySummaryTable.NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() > b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanySummaryTable.ADDRESS:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Address.toLocaleLowerCase() > b.Address.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.EMAIL:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Email.toLocaleLowerCase() > b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.TIN_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.TinNo.toLocaleLowerCase() > b.TinNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.MOBILE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() > b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.STATUS:
-        this.companies.sort((a: Company, b: Company) =>
-          a?.Status?.toLocaleLowerCase() > b?.Status?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanySummaryTable.DIRECTOR_NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.DirectorName.toLocaleLowerCase() >
-          b.DirectorName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanySummaryTable.POST_BOX:
-        this.companies.sort((a: Company, b: Company) =>
-          a.PostBox.toLocaleLowerCase() > b.PostBox.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.TELEPHONE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.TelNo.toLocaleLowerCase() > b.TelNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.DATE_POSTED:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Posteddate.toLocaleLowerCase() > b.Posteddate.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private sortTableDesc(ind: number) {
-    switch (ind) {
-      case CompanySummaryTable.NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.CompName.toLocaleLowerCase() < b.CompName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanySummaryTable.ADDRESS:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Address.toLocaleLowerCase() < b.Address.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.EMAIL:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Email.toLocaleLowerCase() < b.Email.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.TIN_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.TinNo.toLocaleLowerCase() < b.TinNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.MOBILE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.MobNo.toLocaleLowerCase() < b.MobNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.STATUS:
-        this.companies.sort((a: Company, b: Company) =>
-          a?.Status?.toLocaleLowerCase() < b?.Status?.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanySummaryTable.DIRECTOR_NAME:
-        this.companies.sort((a: Company, b: Company) =>
-          a.DirectorName.toLocaleLowerCase() <
-          b.DirectorName.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      case CompanySummaryTable.POST_BOX:
-        this.companies.sort((a: Company, b: Company) =>
-          a.PostBox.toLocaleLowerCase() < b.PostBox.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.TELEPHONE_NUMBER:
-        this.companies.sort((a: Company, b: Company) =>
-          a.TelNo.toLocaleLowerCase() < b.TelNo.toLocaleLowerCase() ? 1 : -1
-        );
-        break;
-      case CompanySummaryTable.DATE_POSTED:
-        this.companies.sort((a: Company, b: Company) =>
-          a.Posteddate.toLocaleLowerCase() < b.Posteddate.toLocaleLowerCase()
-            ? 1
-            : -1
-        );
-        break;
-      default:
-        break;
-    }
-  }
-  private filterIncludedTableHeaders() {
-    this.includedHeaders = this.headers.controls.filter(
-      (control) => control.get('included')?.value
-    );
+  private resetTableColumns() {
+    this.tableData.tableColumns = this.headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -290,9 +198,30 @@ export class SummaryComponent implements OnInit {
     }
     return keys;
   }
+  private dataSourceFilter() {
+    this.tableData.dataSource.filterPredicate = (
+      data: Company,
+      filter: string
+    ) => {
+      return data.CompName.toLocaleLowerCase().includes(
+        filter.toLocaleLowerCase()
+      ) ||
+        (data.TinNo &&
+          data.TinNo.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
+        ? true
+        : false;
+    };
+  }
+  private prepareDataSource() {
+    this.tableData.dataSource = new MatTableDataSource<Company>(
+      this.tableData.companies
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
+    this.dataSourceFilter();
+  }
   private requestList() {
-    this.companiesData = [];
-    this.companies = this.companiesData;
+    this.tableData.companies = [];
     this.tableLoading = true;
     this.companyService
       .getCustomersList({})
@@ -307,8 +236,8 @@ export class SummaryComponent implements OnInit {
             this.tr.translate(`errors.noDataFound`)
           );
         } else {
-          this.companiesData = result.response;
-          this.companies = this.companiesData;
+          this.tableData.companies = result.response;
+          this.prepareDataSource();
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -334,20 +263,72 @@ export class SummaryComponent implements OnInit {
     return this.companyKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.trim().toLowerCase();
-      let keys = this.getTableActiveKeys();
-      this.companies = this.companiesData.filter((company: any) => {
-        return keys.some((key) => company[key]?.toLowerCase().includes(text));
-      });
-    } else {
-      this.companies = this.companiesData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit() {
     this.createHeadersFormGroup();
     this.requestList();
+  }
+  tableHeader(columns: TableColumnsData[]) {
+    return columns.map((col) => col.label);
+  }
+  tableSortableColumns(column: TableColumnsData) {
+    switch (column.value) {
+      case 'CompName':
+      case 'Email':
+      case 'TinNo':
+      case 'MobNo':
+      case 'Status':
+      case 'AccountNo':
+      case 'Address':
+      case 'DirectorName':
+        return column.value;
+      default:
+        return '';
+    }
+  }
+  tableHeaderStyle(key: string) {
+    let style = 'flex flex-row items-center';
+    switch (key) {
+      case 'AccountNo':
+        return `${style} justify-end`;
+      default:
+        return `${style}`;
+    }
+  }
+  tableValueStyle(element: any, key: string) {
+    let style = 'text-xs lg:text-sm leading-relaxed';
+    switch (key) {
+      case 'CompName':
+        return `${style} text-black font-semibold`;
+      case 'AccountNo':
+        return `${style} text-black text-right`;
+      case 'Status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Approved'
+        )} text-center w-fit`;
+      default:
+        return `${style} text-black font-normal`;
+    }
+  }
+  tableValue(element: any, key: string) {
+    switch (key) {
+      case 'No.':
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.companies,
+          element
+        );
+      case 'AccountNo':
+        return element.AccountNo
+          ? element.AccountNo.slice(-4).padStart(element.AccountNo.length, 'x')
+          : '-';
+      default:
+        return element[key];
+    }
   }
   getValueArray(ind: number) {
     return this.headers.controls.at(ind)?.get('values') as FormArray;
@@ -389,7 +370,7 @@ export class SummaryComponent implements OnInit {
   }
   downloadSheet() {
     this.fileHandler.downloadExcelTable(
-      this.companiesData,
+      this.tableData.companies,
       this.getTableActiveKeys(),
       'vendors_summary',
       ['Posteddate']

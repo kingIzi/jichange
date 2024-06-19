@@ -1,6 +1,7 @@
 {
   "summary": {
     "name": "Wachuuzi",
+    "searchBy": "Tafuta kwa jina au nambari ya TIN",
     "actions": {
       "addCompany": "Ongeza muuzaji",
       "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
@@ -12,18 +13,56 @@
       "createDepositAccount": "Ongeza akaunti ya amana"
     },
     "companySummary": [
-      "#",
-      "Jina",
-      "Barua pepe",
-      "Nambari ya TIN",
-      "Simu ya nyumbani",
-      "Hali",
-      "Namba ya Akaunti",
-      "Anwani",
-      "Jina la Mkurugenzi",
-      "Sanduku la posta",
-      "Namba ya simu",
-      "Tarehe Iliyotumwa"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina",
+        "value": "CompName",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Barua Pepe",
+        "value": "Email",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya TIN",
+        "value": "TinNo",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Simu",
+        "value": "MobNo",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Akaunti",
+        "value": "AccountNo",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Makazi",
+        "value": "Address",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Mkurugenzi",
+        "value": "DirectorName",
+        "desc": ""
+      },
+      {
+        "label": "Kitendo",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "companyForm": {
       "details": "Details",
@@ -113,6 +152,7 @@
   },
   "inboxApproval": {
     "name": "Idhini ya Kikasha",
+    "searchBy": "Tafuta kwa jina",
     "companyApproval": "Idhini ya Kampuni",
     "approvedSuccessfully": "Kampuni imeidhinishwa kwa mafanikio!",
     "form": {
@@ -135,6 +175,37 @@
         "failedToApprove": "Kushindwa kuidhinisha kampuni."
       }
     },
-    "inboxApprovalTable": ["#", "Jina", "Anuani", "Barua pepe", "Simu", "Hali"]
+    "inboxApprovalTable": [
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina",
+        "value": "CompName",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Makazi",
+        "value": "Address",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Barua Pepe",
+        "value": "Email",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Simu",
+        "value": "MobNo",
+        "desc": ""
+      },
+      {
+        "label": "Kitendo",
+        "value": "Status",
+        "desc": ""
+      }
+    ]
   }
 }

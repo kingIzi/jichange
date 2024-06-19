@@ -61,6 +61,7 @@ import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -93,21 +94,32 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 export class InvoiceCancelledComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public invoicesListData: CancelledInvoice[] = [];
-  public invoicesList: CancelledInvoice[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<CancelledInvoice>;
+  public tableData: {
+    invoicesList: CancelledInvoice[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<CancelledInvoice>;
+  } = {
+    invoicesList: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<CancelledInvoice>([]),
+  };
   public filterFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
-  public companies: Company[] = [];
-  public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
-  public invoices: GeneratedInvoice[] = [];
+  public filterFormData: {
+    companies: Company[];
+    customers: CustomerName[];
+    invoices: GeneratedInvoice[];
+  } = {
+    companies: [],
+    customers: [],
+    invoices: [],
+  };
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public CancelledInvoiceTable: typeof CancelledInvoiceTable =
-    CancelledInvoiceTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -135,19 +147,11 @@ export class InvoiceCancelledComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `cancelledInvoiceTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`cancelledInvoiceTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0 ? false : index < TABLE_SHOWING,
@@ -168,7 +172,7 @@ export class InvoiceCancelledComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -177,7 +181,7 @@ export class InvoiceCancelledComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private createFilterForm() {
     this.filterFormGroup = this.fb.group({
@@ -211,21 +215,21 @@ export class InvoiceCancelledComponent implements OnInit {
               AppUtilities.openDisplayMessageBox(
                 this.displayMessageBox,
                 this.tr.translate(`defaults.failed`),
-                this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
+                this.tr.translate(`invoice.invoiceDetailsForm.noInvoicesFound`)
               );
-              this.invoices = [];
+              this.filterFormData.invoices = [];
             } else if (
               typeof result.response !== 'string' &&
               typeof result.response !== 'number' &&
               result.response.length > 0
             ) {
-              this.invoices = result.response as any;
+              this.filterFormData.invoices = result.response as any;
             }
             this.startLoading = false;
             this.cdr.detectChanges();
           })
           .catch((err) => {
-            this.invoices = [];
+            this.filterFormData.invoices = [];
             AppUtilities.requestFailedCatchError(
               err,
               this.displayMessageBox,
@@ -236,7 +240,7 @@ export class InvoiceCancelledComponent implements OnInit {
             throw err;
           });
       } else {
-        this.invoices = [];
+        this.filterFormData.invoices = [];
       }
     });
   }
@@ -258,14 +262,14 @@ export class InvoiceCancelledComponent implements OnInit {
           typeof companies.response !== 'string' &&
           typeof companies.response !== 'number'
         ) {
-          this.companies = companies.response;
+          this.filterFormData.companies = companies.response;
         }
         if (
           customers.response &&
           typeof customers.response !== 'string' &&
           typeof customers.response !== 'number'
         ) {
-          this.customers = customers.response;
+          this.filterFormData.customers = customers.response;
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -325,21 +329,13 @@ export class InvoiceCancelledComponent implements OnInit {
     }
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    if (searchText) {
-      paginator.firstPage();
-      let text = searchText.toLocaleLowerCase();
-      this.invoicesList = this.invoicesListData.filter((elem) => {
-        return (
-          elem.Customer_Name.toLocaleLowerCase().includes(text) ||
-          elem.Invoice_No.toLocaleLowerCase().includes(text)
-        );
-      });
-    } else {
-      this.invoicesList = this.invoicesListData;
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (
+    this.tableData.dataSource.filterPredicate = (
       data: CancelledInvoice,
       filter: string
     ) => {
@@ -367,7 +363,10 @@ export class InvoiceCancelledComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'p_date':
           return new Date(item['p_date']);
@@ -377,35 +376,45 @@ export class InvoiceCancelledComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<CancelledInvoice>(
-      this.invoicesList
+    this.tableData.dataSource = new MatTableDataSource<CancelledInvoice>(
+      this.tableData.invoicesList
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
   private requestCancelledInvoice(value: any) {
-    this.invoicesListData = [];
-    this.invoicesList = this.invoicesListData;
+    this.tableData.invoicesList = [];
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(value)
       .then((result) => {
         if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
+          typeof result.response === 'string' &&
+          typeof result.response === 'number'
         ) {
-          this.invoicesList = result.response;
-          this.prepareDataSource();
-        } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
-          this.invoicesListData = [];
-          this.invoicesList = this.invoicesListData;
+          this.tableData.invoicesList = [];
+          this.prepareDataSource();
+        } else if (
+          result.response instanceof Array &&
+          result.response.length === 0
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.invoicesList = [];
+          this.prepareDataSource();
+        } else {
+          this.tableData.invoicesList = result.response as CancelledInvoice[];
+          this.prepareDataSource();
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -464,7 +473,10 @@ export class InvoiceCancelledComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.invoicesList, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.invoicesList,
+          element
+        );
       case 'p_date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]

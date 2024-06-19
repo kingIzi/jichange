@@ -18,6 +18,7 @@
   },
   "transactionDetails": {
     "noTransactionsFound": "Hakuna malipo bado yaliyotolewa kwa shughuli hii.",
+    "searchBy": "Tafuta kwa nambari ya ankara",
     "transaction": "Shughuli",
     "transactionDetails": "Maelezo ya Shughuli",
     "transactionNumber": "Nambari ya Uhamisho",
@@ -36,17 +37,66 @@
     "attachment": "Viambatanisho",
     "note": "Maelezo",
     "transactionDetailsTable": [
-      "#",
-      "Tarehe ya Malipo",
-      "Nambari ya Ankara",
-      "Jumla ya Kiasi",
-      "Kiasi Kilicholipwa",
-      "Kiasi kilichobaki",
-      "Nambari ya udhibiti",
-      "Aina ya Malipo",
-      "Njia ya Malipo",
-      "Nambari ya Muamala",
-      "Nambari ya Risiti"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Malipo",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi cha Jumla",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi Kilicholipwa",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Baki",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Njia ya Malipo",
+        "value": "Trans_Channel",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Muamala",
+        "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Risiti",
+        "value": "Receipt_No",
+        "desc": ""
+      },
+      {
+        "label": "Kitendo",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "statusOptions": {
       "pending": "Inasubiri",
@@ -67,23 +117,88 @@
   },
   "paymentDetails": {
     "payment": "Malipo",
+    "searchBy": "Tafuta kwa ankara, nambari ya kudhibiti au mlipaji",
     "paymentsTable": [
-      "#",
-      "Tarehe ya malipo",
-      "Nambari ya Invoice",
-      "Nambari ya Muamala",
-      "Nambari ya Kudhibiti",
-      "Mfereji",
-      "Nambari ya Risiti",
-      "Kiasi",
-      "Salio",
-      "Kutoka",
-      "Kwenda",
-      "Kwa"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Malipo",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Kutoka",
+        "value": "Payer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Kwenda",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Muamala",
+        "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Risiti",
+        "value": "Receipt_No",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Njia ya Malipo",
+        "value": "Trans_Channel",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Kilicholipwa",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Baki",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Muuzaji",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Kwa",
+        "value": "Payment_Desc",
+        "desc": ""
+      }
     ]
   },
   "amendmentDetails": {
     "amendment": "Marekebisho",
+    "searchBy": "Tafuta kwa ankara au nambari ya kudhibiti",
     "form": {
       "status": "Hali",
       "paymentType": "Aina ya Malipo",
@@ -93,18 +208,51 @@
       }
     },
     "amendmentTable": [
-      "#",
-      "Tarehe ya Muda wa Kulipa",
-      "Nambari ya Invoice",
-      "Nambari ya Kudhibiti",
-      "Mteja",
-      "Aina ya Malipo",
-      "Sababu",
-      "Tarehe ya Mwisho ya Uhalali"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Kukamilika",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Mteja",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Sababu",
+        "value": "Reason",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Kuisha",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      }
     ]
   },
   "invoiceDetails": {
     "invoiceDetails": "Maelezo ya Bili",
+    "searchBy": "Search by invoice or control number",
     "form": {
       "company": "Muuzaji",
       "customer": "Muteja",
@@ -133,23 +281,72 @@
       }
     },
     "invoiceDetailsTable": [
-      "#",
-      "Imeundwa",
-      "Ankara N°",
-      "Nambari ya Udhibiti",
-      "Aina ya Malipo",
-      "JUMLA",
-      "Hali",
-      "Muuzaji",
-      "Mteja",
-      "Tarehe ya Ankara",
-      "Tarehe ya Mwisho",
-      "Tarehe ya Kumalizika"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Iliyowekwa",
+        "value": "p_date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Jumla ya Kiasi",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Muuzaji",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Mteja",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Imeundwa",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Kukamilika",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Kuisha",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      }
     ]
   },
   "customerDetailReport": {
     "customerDetailReport": "Ripoti ya Maelezo ya Muteja",
     "noVendorsFoundInBranch": "Hakuna wachuuzi wanaopatikana katika tawi la {}.",
+    "searchBy": "Tafuta kwa jina au barua pepe",
     "form": {
       "company": "Muuzaji",
       "region": "Mkoa",
@@ -171,12 +368,36 @@
       }
     },
     "customerDetailReportTable": [
-      "#",
-      "Jina la Mteja",
-      "Simu",
-      "Barua pepe",
-      "Anwani",
-      "Tarehe ya Kutuma"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Kutumwa",
+        "value": "Posted_Date",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Mteja",
+        "value": "Cust_Name",
+        "desc": ""
+      },
+      {
+        "label": "Simu",
+        "value": "Phone",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Barua Pepe",
+        "value": "Email",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Makazi",
+        "value": "Address",
+        "desc": ""
+      }
     ]
   },
   "systemLogs": {
@@ -184,18 +405,48 @@
   },
   "vendorReport": {
     "vendorReport": "Ripoti ya Vendor",
+    "searchBy": "Tafuta kwa muuzaji",
     "vendorReportTable": [
-      "#",
-      "Jina la Muuzaji",
-      "Simu",
-      "TIN",
-      "Namba ya Akaunti",
-      "Hali",
-      "Mkaguzi"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Muuzaji",
+        "value": "CompName",
+        "desc": ""
+      },
+      {
+        "label": "Simu ya Mkononi",
+        "value": "MobNo",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya TIN",
+        "value": "TinNo",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Akaunti",
+        "value": "AccountNo",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Mkaguzi",
+        "value": "Checker",
+        "desc": ""
+      }
     ]
   },
   "userLogReport": {
     "userLogReport": "Ripoti ya Kumbukumbu za Mtumiaji",
+    "searchBy": "Tafuta kwa jina au anwani ya Ip",
     "form": {
       "startDate": "Tarehe ya Kuanzia",
       "endDate": "Tarehe ya Mwisho",
@@ -210,16 +461,41 @@
       }
     },
     "userLogReportTable": [
-      "#",
-      "Jina Kamili",
-      "Anwani ya IP",
-      "Maelezo",
-      "Wakati wa Kuingia",
-      "Wakati wa Kutoka"
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina Kamili",
+        "value": "Full_Name",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya IP",
+        "value": "Ipadd",
+        "desc": ""
+      },
+      {
+        "label": "Maelezo",
+        "value": "Description",
+        "desc": ""
+      },
+      {
+        "label": "Muda wa Kuingia",
+        "value": "Login_Time",
+        "desc": ""
+      },
+      {
+        "label": "Muda wa Kutoka",
+        "value": "Logout_Time",
+        "desc": ""
+      }
     ]
   },
   "auditTrails": {
     "auditTrails": "Kufuatilia Ukaguzi",
+    "searchBy": "Tafuta kwa aina ya kitendo",
     "form": {
       "selectPage": "Chagua ukarasa",
       "company": "Kampuni",
@@ -242,13 +518,41 @@
       }
     },
     "auditTrailsTable": [
-      "#",
-      "Hatua",
-      "Jina la Safu",
-      "Thamani ya Zamani",
-      "Thamani Mpya",
-      "Imetumwa na",
-      "Tarehe ya Ukaguzi"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Aina",
+        "value": "atype",
+        "desc": ""
+      },
+      {
+        "label": "Safu",
+        "value": "colname",
+        "desc": ""
+      },
+      {
+        "label": "Thamani ya Zamani",
+        "value": "ovalue",
+        "desc": ""
+      },
+      {
+        "label": "Thamani Mpya",
+        "value": "nvalue",
+        "desc": ""
+      },
+      {
+        "label": "Imetumwa na",
+        "value": "aby",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Ukaguzi",
+        "value": "adate",
+        "desc": ""
+      }
     ]
   }
 }

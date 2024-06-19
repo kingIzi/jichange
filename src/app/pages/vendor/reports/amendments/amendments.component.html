@@ -35,9 +35,9 @@
           >
             {{ t("all") }}
           </option>
-          <ng-container *ngIf="companies.length > 0">
+          <ng-container *ngIf="filterFormData.companies.length > 0">
             <option
-              *ngFor="let comp of companies; index as i"
+              *ngFor="let comp of filterFormData.companies; index as i"
               [value]="comp.CompSno"
             >
               {{ comp.CompName }}
@@ -71,9 +71,9 @@
           >
             {{ t("all") }}
           </option>
-          <ng-container *ngIf="customers.length > 0">
+          <ng-container *ngIf="filterFormData.customers.length > 0">
             <option
-              *ngFor="let customer of customers; index as i"
+              *ngFor="let customer of filterFormData.customers; index as i"
               [value]="customer.Cus_Mas_Sno"
             >
               {{ customer.Customer_Name }}
@@ -103,9 +103,9 @@
           <option *transloco="let t; read: 'defaults'" selected [value]="''">
             {{ t("any") }}
           </option>
-          <ng-container *ngIf="invoices.length > 0">
+          <ng-container *ngIf="filterFormData.invoices.length > 0">
             <option
-              *ngFor="let invoice of invoices; index as i"
+              *ngFor="let invoice of filterFormData.invoices; index as i"
               [value]="invoice.Invoice_No"
             >
               {{ invoice.Invoice_No }}
@@ -225,11 +225,13 @@
       <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
-            <ng-container *ngIf="tableColumns$ | async as displayedColumns">
+            <ng-container
+              *ngIf="tableData.tableColumns$ | async as displayedColumns"
+            >
               <table
                 mat-table
                 matSort
-                [dataSource]="dataSource"
+                [dataSource]="tableData.dataSource"
                 class="mat-elevation-z2 w-full"
               >
                 <ng-container
@@ -280,34 +282,41 @@
                     index as i
                   "
                 ></tr>
-                <tr class="mat-row w-full" *matNoDataRow>
+                <tr class="mat-row" *matNoDataRow>
                   <td
                     *transloco="let t; read: 'errors'"
-                    class="mat-cell w-full"
-                    [attr.colspan]="tableColumns.length"
+                    class="mat-cell"
+                    [attr.colspan]="tableData.tableColumns.length"
                   >
                     <p
-                      *ngIf="tableSearch.value && dataSource.data.length > 0"
+                      *ngIf="
+                        tableSearch.value &&
+                        tableData.dataSource.data.length > 0 &&
+                        !tableLoading
+                      "
                       class="text-xs lg:text-sm py-2 px-4"
                     >
                       {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                     </p>
                     <p
-                      *ngIf="dataSource.data.length <= 0"
-                      class="text-center text-sm tracking-wide pt-3 pb-1 w-full"
+                      *ngIf="
+                        tableData.dataSource.data.length <= 0 && !tableLoading
+                      "
+                      class="text-center text-sm tracking-wide pt-3 pb-1"
                     >
                       {{ t("noDataFound") }}
                     </p>
+                    <div
+                      *ngIf="tableLoading"
+                      class="w-full grid place-items-center mt-6"
+                    >
+                      <span
+                        class="loading loading-spinner loading-lg bg-darkPurple"
+                      ></span>
+                    </div>
                   </td>
                 </tr>
               </table>
-            </ng-container>
-            <ng-container *ngIf="tableLoading">
-              <div class="w-full grid place-items-center mt-6">
-                <span
-                  class="loading loading-spinner loading-sm bg-darkPurple"
-                ></span>
-              </div>
             </ng-container>
           </div>
         </div>

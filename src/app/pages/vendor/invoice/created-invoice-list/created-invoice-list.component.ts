@@ -87,14 +87,20 @@ export class CreatedInvoiceListComponent implements OnInit {
   public tableHeadersFormGroup!: FormGroup;
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
-  public InvoiceListTable: typeof InvoiceListTable = InvoiceListTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public invoiceList: GeneratedInvoice[] = [];
-  public invoiceListData: GeneratedInvoice[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<GeneratedInvoice>;
+  public tableData: {
+    invoiceList: GeneratedInvoice[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<GeneratedInvoice>;
+  } = {
+    invoiceList: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  };
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
@@ -126,8 +132,8 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.tr
       .selectTranslate(`createdInvoice.createdInvoiceTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0
@@ -153,7 +159,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -162,16 +168,16 @@ export class CreatedInvoiceListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (
+    this.tableData.dataSource.filterPredicate = (
       data: GeneratedInvoice,
       filter: string
     ) => {
@@ -184,7 +190,10 @@ export class CreatedInvoiceListComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -194,20 +203,16 @@ export class CreatedInvoiceListComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.invoiceList
+    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
+      this.tableData.invoiceList
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private emptyGeneratedInvoice() {
-    this.invoiceListData = [];
-    this.invoiceList = this.invoiceList;
-  }
   private requestCreatedInvoiceList() {
-    this.emptyGeneratedInvoice();
+    this.tableData.invoiceList = [];
     this.tableLoading = true;
     this.invoiceService
       .getCreatedInvoiceList({ compid: this.userProfile.InstID })
@@ -216,7 +221,7 @@ export class CreatedInvoiceListComponent implements OnInit {
           typeof result.response !== 'string' &&
           typeof result.response !== 'number'
         ) {
-          this.invoiceList = result.response;
+          this.tableData.invoiceList = result.response;
           this.prepareDataSource();
         } else {
           AppUtilities.openDisplayMessageBox(
@@ -229,8 +234,7 @@ export class CreatedInvoiceListComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.invoiceListData = [];
-        this.invoiceList = this.invoiceListData;
+        this.tableData.invoiceList = [];
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
@@ -442,7 +446,10 @@ export class CreatedInvoiceListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.invoiceList, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.invoiceList,
+          element
+        );
       case 'Invoice_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]

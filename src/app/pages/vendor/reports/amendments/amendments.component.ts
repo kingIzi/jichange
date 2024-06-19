@@ -44,6 +44,7 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
@@ -87,17 +88,28 @@ export class AmendmentsComponent implements OnInit {
   public filterFormGroup!: FormGroup;
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public AmendmentReportTable: typeof AmendmentReportTable =
-    AmendmentReportTable;
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<GeneratedInvoice>;
-  public amendments: GeneratedInvoice[] = [];
-  public amendmentsData: GeneratedInvoice[] = [];
-  public companies: Company[] = [];
-  public customers: { Cus_Mas_Sno: number; Customer_Name: string }[] = [];
-  public invoices: GeneratedInvoice[] = [];
+  public tableData: {
+    amendments: GeneratedInvoice[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<GeneratedInvoice>;
+  } = {
+    amendments: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  };
+  public filterFormData: {
+    companies: Company[];
+    customers: CustomerName[];
+    invoices: GeneratedInvoice[];
+  } = {
+    companies: [],
+    customers: [],
+    invoices: [],
+  };
   public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -139,8 +151,8 @@ export class AmendmentsComponent implements OnInit {
     this.tr
       .selectTranslate(`amendmentDetails.amendmentTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0 ? false : index < TABLE_SHOWING,
@@ -161,7 +173,7 @@ export class AmendmentsComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.tableHeaders.controls
+    this.tableData.tableColumns = this.tableHeaders.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -170,7 +182,7 @@ export class AmendmentsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private customerChanged() {
     this.cust.valueChanges.subscribe((value) => {
@@ -195,19 +207,19 @@ export class AmendmentsComponent implements OnInit {
                 this.tr.translate(`defaults.failed`),
                 this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
               );
-              this.invoices = [];
+              this.filterFormData.invoices = [];
             } else if (
               typeof result.response !== 'string' &&
               typeof result.response !== 'number' &&
               result.response.length > 0
             ) {
-              this.invoices = result.response as any;
+              this.filterFormData.invoices = result.response as any;
             }
             this.startLoading = false;
             this.cdr.detectChanges();
           })
           .catch((err) => {
-            this.invoices = [];
+            this.filterFormData.invoices = [];
             AppUtilities.requestFailedCatchError(
               err,
               this.displayMessageBox,
@@ -218,7 +230,7 @@ export class AmendmentsComponent implements OnInit {
             throw err;
           });
       } else {
-        this.invoices = [];
+        this.filterFormData.invoices = [];
       }
     });
   }
@@ -240,14 +252,14 @@ export class AmendmentsComponent implements OnInit {
           typeof companies.response !== 'string' &&
           typeof companies.response !== 'number'
         ) {
-          this.companies = companies.response;
+          this.filterFormData.companies = companies.response;
         }
         if (
           customers.response &&
           typeof customers.response !== 'string' &&
           typeof customers.response !== 'number'
         ) {
-          this.customers = customers.response;
+          this.filterFormData.customers = customers.response;
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -291,7 +303,7 @@ export class AmendmentsComponent implements OnInit {
     return `${date}/${month}/${year}`;
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (
+    this.tableData.dataSource.filterPredicate = (
       data: GeneratedInvoice,
       filter: string
     ) => {
@@ -313,7 +325,10 @@ export class AmendmentsComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Due_Date':
           return new Date(item['Due_Date']);
@@ -325,9 +340,11 @@ export class AmendmentsComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<GeneratedInvoice>(this.amendments);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
+      this.tableData.amendments
+    );
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
@@ -345,8 +362,21 @@ export class AmendmentsComponent implements OnInit {
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
+          this.tableData.amendments = [];
+          this.prepareDataSource();
+        } else if (
+          results.response instanceof Array &&
+          results.response.length === 0
+        ) {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`errors.noDataFound`)
+          );
+          this.tableData.amendments = [];
+          this.prepareDataSource();
         } else {
-          this.amendments = results.response as GeneratedInvoice[];
+          this.tableData.amendments = results.response as GeneratedInvoice[];
           this.prepareDataSource();
         }
         this.tableLoading = false;
@@ -364,9 +394,9 @@ export class AmendmentsComponent implements OnInit {
       });
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   ngOnInit(): void {
@@ -399,6 +429,8 @@ export class AmendmentsComponent implements OnInit {
   tableValueStyle(element: any, key: string) {
     let style = 'text-xs lg:text-sm leading-relaxed';
     switch (key) {
+      case 'Invoice_No':
+        return `${style} text-black font-semibold`;
       case 'Payment_Type':
         return `${PerformanceUtils.getActiveStatusStyles(
           element.Payment_Type,
@@ -415,7 +447,10 @@ export class AmendmentsComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.amendments, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.amendments,
+          element
+        );
       case 'Due_Date':
       case 'Invoice_Expired_Date':
         return PerformanceUtils.convertDateStringToDate(

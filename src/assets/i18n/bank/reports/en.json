@@ -11,6 +11,7 @@
   },
   "transactionDetails": {
     "noTransactionsFound": "There are no payments yet made for this transaction.",
+    "searchBy": "Search by invoice number",
     "transaction": "Transaction(s)",
     "transactionDetails": "Transaction Details",
     "transactionNumber": "Transaction Number",
@@ -30,17 +31,66 @@
     "note": "Note(s)",
     "transactionReportForm": "Transaction Report form",
     "transactionDetailsTable": [
-      "#",
-      "Payment Date",
-      "Invoice N°",
-      "Total Amount",
-      "Paid Amount",
-      "Balance",
-      "Control N°",
-      "Payment type",
-      "Payment Method",
-      "Transaction N°",
-      "Receipt N°"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Payment Date",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Paid Amount",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Balance",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Payment Method",
+        "value": "Trans_Channel",
+        "desc": ""
+      },
+      {
+        "label": "Transaction N°",
+        "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Receipt N°",
+        "value": "Receipt_No",
+        "desc": ""
+      },
+      {
+        "label": "Action(s)",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "statusOptions": {
       "pending": "pending",
@@ -75,23 +125,88 @@
   },
   "paymentDetails": {
     "payment": "Payment(s)",
+    "searchBy": "Search by invoice, control number or payer",
     "paymentsTable": [
-      "#",
-      "Payment Date",
-      "Invoice N°",
-      "Transaction N°",
-      "Control N°",
-      "Channel",
-      "Receipt No",
-      "Amount",
-      "Balance",
-      "From",
-      "To",
-      "For"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Payment Date",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "From",
+        "value": "Payer_Name",
+        "desc": ""
+      },
+      {
+        "label": "To",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Transaction N°",
+        "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Receipt No",
+        "value": "Receipt_No",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payment Method",
+        "value": "Trans_Channel",
+        "desc": ""
+      },
+      {
+        "label": "Payment Type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Amount",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Paid",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Balance",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "For",
+        "value": "Payment_Desc",
+        "desc": ""
+      }
     ]
   },
   "amendmentDetails": {
     "amendment": "Amendment(s)",
+    "searchBy": "Search by invoice or control number",
     "form": {
       "status": "Status",
       "paymentType": "Payment Type",
@@ -101,18 +216,51 @@
       }
     },
     "amendmentTable": [
-      "#",
-      "Due date",
-      "Invoice N°",
-      "Control N°",
-      "Customer",
-      "Payment type",
-      "Reason",
-      "Expiry date"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Due date",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Reason",
+        "value": "Reason",
+        "desc": ""
+      },
+      {
+        "label": "Expiry date",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      }
     ]
   },
   "invoiceDetails": {
     "invoiceDetails": "Invoice details",
+    "searchBy": "Search by invoice or control number",
     "form": {
       "company": "Vendor",
       "customer": "Customer",
@@ -141,23 +289,72 @@
       }
     },
     "invoiceDetailsTable": [
-      "#",
-      "Created",
-      "Invoice N°",
-      "Control N°",
-      "Payment Type",
-      "TOTAL",
-      "Status",
-      "Vendor",
-      "Customer",
-      "Invoice Date",
-      "Due Date",
-      "Expiry Date"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Posted",
+        "value": "p_date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payment Type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "goods_status",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
+        "label": "Created",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
+        "label": "Due Date",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Expiry Date",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      }
     ]
   },
   "customerDetailReport": {
     "customerDetailReport": "Customer detail report",
     "noVendorsFoundInBranch": "There are no vendors found in the {} branch.",
+    "searchBy": "Search by name or email",
     "form": {
       "company": "Vendor",
       "region": "region",
@@ -179,12 +376,36 @@
       }
     },
     "customerDetailReportTable": [
-      "#",
-      "Customer name",
-      "Phone",
-      "Email",
-      "Address",
-      "Date posted"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Date posted",
+        "value": "Posted_Date",
+        "desc": ""
+      },
+      {
+        "label": "Customer name",
+        "value": "Cust_Name",
+        "desc": ""
+      },
+      {
+        "label": "Phone",
+        "value": "Phone",
+        "desc": ""
+      },
+      {
+        "label": "Email Address",
+        "value": "Email",
+        "desc": ""
+      },
+      {
+        "label": "Residential Address",
+        "value": "Address",
+        "desc": ""
+      }
     ]
   },
   "systemLogs": {
@@ -192,17 +413,47 @@
   },
   "vendorReport": {
     "vendorReport": "Vendor report",
+    "searchBy": "Search by vendor",
     "vendorReportTable": [
-      "#",
-      "Vendor name",
-      "Mobile",
-      "TIN",
-      "Account N°",
-      "Status",
-      "Checker"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Vendor name",
+        "value": "CompName",
+        "desc": ""
+      },
+      {
+        "label": "Mobile",
+        "value": "MobNo",
+        "desc": ""
+      },
+      {
+        "label": "TIN Number",
+        "value": "TinNo",
+        "desc": ""
+      },
+      {
+        "label": "Account N°",
+        "value": "AccountNo",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Checker",
+        "value": "Checker",
+        "desc": ""
+      }
     ]
   },
   "userLogReport": {
+    "searchBy": "Search by name or Ip Address",
     "userLogReport": "User log report",
     "form": {
       "startDate": "Start date",
@@ -218,16 +469,41 @@
       }
     },
     "userLogReportTable": [
-      "#",
-      "Full name",
-      "Ip Address",
-      "Description",
-      "Login Time",
-      "Logout Time"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Full name",
+        "value": "Full_Name",
+        "desc": ""
+      },
+      {
+        "label": "Ip Address",
+        "value": "Ipadd",
+        "desc": ""
+      },
+      {
+        "label": "Description",
+        "value": "Description",
+        "desc": ""
+      },
+      {
+        "label": "Login Time",
+        "value": "Login_Time",
+        "desc": ""
+      },
+      {
+        "label": "Logout Time",
+        "value": "Logout_Time",
+        "desc": ""
+      }
     ]
   },
   "auditTrails": {
     "auditTrails": "Audit Trails",
+    "searchBy": "Search by action type",
     "form": {
       "selectPage": "Select page",
       "company": "Company",
@@ -250,13 +526,41 @@
       }
     },
     "auditTrailsTable": [
-      "#",
-      "Actions",
-      "Column Name",
-      "Old value",
-      "New value",
-      "Posted by",
-      "Audit Date"
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Type",
+        "value": "atype",
+        "desc": ""
+      },
+      {
+        "label": "Column",
+        "value": "colname",
+        "desc": ""
+      },
+      {
+        "label": "Old Value",
+        "value": "ovalue",
+        "desc": ""
+      },
+      {
+        "label": "New Value",
+        "value": "nvalue",
+        "desc": ""
+      },
+      {
+        "label": "Posted by",
+        "value": "aby",
+        "desc": ""
+      },
+      {
+        "label": "Audit date",
+        "value": "adate",
+        "desc": ""
+      }
     ]
   }
 }

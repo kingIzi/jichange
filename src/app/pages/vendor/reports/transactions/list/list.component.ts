@@ -77,12 +77,19 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 export class ListComponent implements OnInit {
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
-  public transactions: TransactionDetail[] = [];
-  public transactionsData: TransactionDetail[] = [];
-  private originalTableColumns: TableColumnsData[] = [];
-  public tableColumns: TableColumnsData[] = [];
-  public tableColumns$!: Observable<TableColumnsData[]>;
-  public dataSource!: MatTableDataSource<TransactionDetail>;
+  public tableData: {
+    transactions: TransactionDetail[];
+    originalTableColumns: TableColumnsData[];
+    tableColumns: TableColumnsData[];
+    tableColumns$: Observable<TableColumnsData[]>;
+    dataSource: MatTableDataSource<TransactionDetail>;
+  } = {
+    transactions: [],
+    originalTableColumns: [],
+    tableColumns: [],
+    tableColumns$: of([]),
+    dataSource: new MatTableDataSource<TransactionDetail>([]),
+  };
   public headersFormGroup!: FormGroup;
   public filterTableFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
@@ -127,8 +134,8 @@ export class ListComponent implements OnInit {
         this.scope
       )
       .subscribe((labels: TableColumnsData[]) => {
-        this.originalTableColumns = labels;
-        this.originalTableColumns.forEach((column, index) => {
+        this.tableData.originalTableColumns = labels;
+        this.tableData.originalTableColumns.forEach((column, index) => {
           let col = this.fb.group({
             included: this.fb.control(
               index === 0
@@ -154,7 +161,7 @@ export class ListComponent implements OnInit {
     });
   }
   private resetTableColumns() {
-    this.tableColumns = this.headers.controls
+    this.tableData.tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -163,7 +170,7 @@ export class ListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableColumns$ = of(this.tableColumns);
+    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private createRequestFormGroup() {
     this.filterTableFormGroup = this.fb.group({
@@ -221,9 +228,9 @@ export class ListComponent implements OnInit {
     return this.transactionKeys(indexes);
   }
   private searchTable(searchText: string, paginator: MatPaginator) {
-    this.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+    if (this.tableData.dataSource.paginator) {
+      this.tableData.dataSource.paginator.firstPage();
     }
   }
   private buildPage() {
@@ -267,7 +274,7 @@ export class ListComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.dataSource.filterPredicate = (
+    this.tableData.dataSource.filterPredicate = (
       data: TransactionDetail,
       filter: string
     ) => {
@@ -277,7 +284,10 @@ export class ListComponent implements OnInit {
     };
   }
   private dataSourceSortingAccessor() {
-    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+    this.tableData.dataSource.sortingDataAccessor = (
+      item: any,
+      property: string
+    ) => {
       switch (property) {
         case 'Payment_Date':
           return new Date(item['Payment_Date']);
@@ -287,15 +297,16 @@ export class ListComponent implements OnInit {
     };
   }
   private prepareDataSource() {
-    this.dataSource = new MatTableDataSource<TransactionDetail>(
-      this.transactions
+    this.tableData.dataSource = new MatTableDataSource<TransactionDetail>(
+      this.tableData.transactions
     );
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.tableData.dataSource.paginator = this.paginator;
+    this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
   private requestTransactionDetailsList(form: TransactionDetailsReportForm) {
+    this.tableData.transactions = [];
     this.tableLoading = true;
     this.reportsService
       .getTransactionsReport(form)
@@ -304,9 +315,7 @@ export class ListComponent implements OnInit {
           typeof result.response !== 'number' &&
           typeof result.response !== 'string'
         ) {
-          // this.transactionsData = result.response;
-          // this.transactions = this.transactionsData;
-          this.transactions = result.response;
+          this.tableData.transactions = result.response;
           this.prepareDataSource();
         } else {
           AppUtilities.openDisplayMessageBox(
@@ -314,8 +323,8 @@ export class ListComponent implements OnInit {
             this.tr.translate(`defaults.failed`),
             this.tr.translate(`errors.noDataFound`)
           );
-          this.transactionsData = [];
-          this.transactions = this.transactionsData;
+          this.tableData.transactions = [];
+          this.prepareDataSource();
         }
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -407,7 +416,10 @@ export class ListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.transactions, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableData.transactions,
+          element
+        );
       case 'Payment_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]
@@ -434,9 +446,9 @@ export class ListComponent implements OnInit {
     );
   }
   downloadSheet() {
-    if (this.transactionsData.length > 0) {
+    if (this.tableData.transactions.length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.transactionsData,
+        this.tableData.transactions,
         this.getActiveTableKeys(),
         'transaction_details_report',
         ['Payment_Date']
