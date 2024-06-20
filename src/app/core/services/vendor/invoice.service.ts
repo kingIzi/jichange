@@ -124,4 +124,28 @@ export class InvoiceService {
     );
     return data;
   }
+  public async addDeliveryCode(body: {
+    sno: number | string;
+    user_id: number | string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { sno: number | string; user_id: number | string },
+        HttpDataResponse<string | number>
+      >(`/api/Invoice/AddDCode`, body)
+    );
+    return data;
+  }
+  public async confirmDeliveryCode(body: {
+    code: number | string;
+    mobile_no: string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { code: number | string; mobile_no: string },
+        HttpDataResponse<number | string>
+      >(`/api/Invoice/ConfirmDel`, body)
+    );
+    return data;
+  }
 }

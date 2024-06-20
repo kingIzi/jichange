@@ -80,6 +80,7 @@ export class InvoiceDetailsComponent implements OnInit {
   public userProfile!: LoginResponse;
   public tableFormGroup!: FormGroup;
   public filterFormGroup!: FormGroup;
+  private queryData: string = '';
   public tableData: {
     invoiceReports: InvoiceReport[];
     originalTableColumns: TableColumnsData[];
@@ -305,17 +306,6 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
-  private filterInvoiceDetailsByQuery(q: string) {
-    if (q.toLocaleLowerCase() == 'Due'.toLocaleLowerCase()) {
-      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
-        (i) => new Date(i.Due_Date) >= new Date()
-      );
-    } else if (q.toLocaleLowerCase() == 'Expired'.toLocaleLowerCase()) {
-      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
-        (i) => new Date(i.Invoice_Expired_Date) >= new Date()
-      );
-    }
-  }
   private dataSourceFilter() {
     this.tableData.dataSource.filterPredicate = (
       data: InvoiceReport,
@@ -372,10 +362,32 @@ export class InvoiceDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private determineDueExpiredInvoices(q: string) {
+    if (q.toLocaleLowerCase() === 'Due'.toLocaleLowerCase()) {
+      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
+        (r) => {
+          return new Date(r.Due_Date) < new Date();
+        }
+      );
+      this.headers.controls
+        .at(InvoiceDetailsReportTable.DUE_DATE)
+        ?.get('included')
+        ?.setValue(true);
+    } else if (q.toLocaleLowerCase() === 'Expired'.toLocaleLowerCase()) {
+      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
+        (r) => {
+          return new Date(r.Invoice_Expired_Date) < new Date();
+        }
+      );
+      this.headers.controls
+        .at(InvoiceDetailsReportTable.EXPIRY_DATE)
+        ?.get('included')
+        ?.setValue(true);
+    }
+  }
   private initialFormSubmission(q: string) {
     let form = { ...this.filterFormGroup.value };
     this.cusid.setValue('all');
-    form.cusid = 'all';
     form.Comp = this.userProfile.InstID;
     if (form.stdate) {
       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
@@ -405,11 +417,8 @@ export class InvoiceDetailsComponent implements OnInit {
           typeof result.response !== 'number' &&
           result.response.length > 0
         ) {
-          // this.invoiceReportsData = result.response as InvoiceReport[];
-          // this.filterInvoiceDetailsByQuery(q);
-          // this.invoiceReports = this.invoiceReportsData;
           this.tableData.invoiceReports = result.response;
-          this.filterInvoiceDetailsByQuery(q);
+          this.determineDueExpiredInvoices(q);
           this.prepareDataSource();
         }
         this.tableLoading = false;
@@ -433,7 +442,8 @@ export class InvoiceDetailsComponent implements OnInit {
     this.buildPage();
     this.activatedRoute.queryParams.subscribe((params: any) => {
       if (params && params['q']) {
-        this.initialFormSubmission(params['q']);
+        this.queryData = atob(params['q']);
+        this.initialFormSubmission(this.queryData);
       }
     });
   }
@@ -488,6 +498,11 @@ export class InvoiceDetailsComponent implements OnInit {
         )} w-fit`;
       case 'Total':
         return `${style} text-right`;
+      case 'Due_Date':
+      case 'Invoice_Expired_Date':
+        return this.queryData
+          ? `text-black font-semibold`
+          : `${style} text-black font-normal`;
       default:
         return `${style} text-black font-normal`;
     }

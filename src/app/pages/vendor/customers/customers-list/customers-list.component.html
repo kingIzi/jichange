@@ -106,7 +106,7 @@
                           '/vendor/customers/' +
                           encodeCustomerId(element.Cust_Sno)
                         "
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         [attr.data-tip]="t('view')"
                       >
                         <span class="text-warning">
@@ -116,7 +116,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         (click)="openCustomerEditDialog(element)"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         [attr.data-tip]="t('edit')"
                       >
                         <span class="text-lg text-info">
@@ -128,7 +128,7 @@
                         (click)="
                           openRemoveDialog(element.Cust_Sno, removeItemDialog)
                         "
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         [attr.data-tip]="t('delete')"
                       >
                         <span class="text-lg text-danger-600">

@@ -63,18 +63,6 @@ enum PROFILE_OPTIONS {
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('inOutAnimation', [
-      transition(':enter', [
-        style({ opacity: 0, position: 'relative' }),
-        animate('0.5s ease-out', style({ opacity: 1 })),
-      ]),
-      transition(':leave', [
-        style({ opacity: 1, position: 'absolute' }),
-        animate('0.5s ease-in', style({ opacity: 0 })),
-      ]),
-    ]),
-  ],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
@@ -99,13 +87,15 @@ export class ProfileComponent implements OnInit {
   public generalFormGroup!: FormGroup;
   public languageFormGroup!: FormGroup;
   public changePasswordFormGroup!: FormGroup;
-  public selectedTabIndex: number = 0;
-  public activeTabs: any[] = [];
+  //public activeTabs: any[] = [];
   public companyUser!: CompanyUser;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public PROFILE_OPTIONS: typeof PROFILE_OPTIONS = PROFILE_OPTIONS;
   public userProfile!: LoginResponse;
-  @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
+  @ViewChild('changeLanguageSubmit')
+  changeLanguageSubmit!: SubmitMessageBoxComponent;
+  @ViewChild('changePasswordSubmit')
+  changePasswordSubmit!: SubmitMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('messageBox') messageBox!: DisplayMessageBoxComponent;
@@ -154,10 +144,11 @@ export class ProfileComponent implements OnInit {
   }
   private createGeneralFormGroup() {
     this.generalFormGroup = this.fb.group({
-      fname: this.fb.control('', [Validators.required]),
-      mobile: this.fb.control('', [Validators.required]),
-      email: this.fb.control('', [Validators.required, Validators.email]),
-      role: this.fb.control(this.userProfile.role, [Validators.required]),
+      fname: this.fb.control('', []),
+      mobile: this.fb.control('', []),
+      email: this.fb.control('', [Validators.email]),
+      role: this.fb.control(this.userProfile.role, []),
+      username: this.fb.control('', []),
     });
   }
   private createLanguageFormGroup() {
@@ -167,19 +158,13 @@ export class ProfileComponent implements OnInit {
       ]),
     });
   }
-  private prepareActiveTabs() {
-    this.tr
-      .selectTranslate(`profile.activeTabs`, {}, this.scope)
-      .subscribe((activeTabs: string[]) => {
-        this.activeTabs = activeTabs;
-      });
-  }
   private setGeneralFormGroupData() {
     this.generalFormGroup.setValue({
       fname: this.companyUser.Fullname ?? '',
       mobile: this.companyUser.Mobile,
       email: this.companyUser.Email,
       role: this.userProfile.role,
+      username: this.companyUser.Username,
     });
     this.generalFormGroup.disable();
   }
@@ -218,15 +203,19 @@ export class ProfileComponent implements OnInit {
         if (
           result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase()
         ) {
-          let res = AppUtilities.openDisplayMessageBox(
-            this.messageBox,
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
             this.tr.translate(`defaults.success`),
             this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
           );
-          res.addEventListener('close', () => {
-            this.changePasswordFormGroup.reset();
-          });
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`auth.profile.failedToUpdatePassword`)
+          );
         }
+        this.changePasswordFormGroup.reset();
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -245,7 +234,6 @@ export class ProfileComponent implements OnInit {
     this.parseUserProfile();
     this.createGeneralFormGroup();
     this.createLanguageFormGroup();
-    this.prepareActiveTabs();
     this.createChangePasswordFormGroup();
     this.requestEmployeeDetail({ sno: this.userProfile.Usno });
   }
@@ -261,12 +249,11 @@ export class ProfileComponent implements OnInit {
       );
       if (lang) {
         let dialog = AppUtilities.openSubmitMessageBox(
-          this.submitMessageBox,
-          this.activeTabs[PROFILE_OPTIONS.LANGUAGE].changeLanguage,
-          this.activeTabs[PROFILE_OPTIONS.LANGUAGE].sureLanguage.replace(
-            '{}',
-            lang.name
-          )
+          this.changeLanguageSubmit,
+          this.tr.translate(`auth.profile.language.changeLanguage`),
+          this.tr
+            .translate(`auth.profile.language.sureLanguage`)
+            .replace('{}', lang.name)
         );
         dialog.confirm.asObservable().subscribe(() => {
           this.tr.setActiveLang(lang.code);
@@ -289,12 +276,16 @@ export class ProfileComponent implements OnInit {
       this.requestEmployeeDetail({ sno: this.userProfile.Usno });
     });
   }
-  setActiveTab(index: number) {
-    this.selectedTabIndex = index;
-  }
   changePasswordClicked() {
     if (this.changePasswordFormGroup.valid) {
-      this.requestChangePassword(this.changePasswordFormGroup.value);
+      let dialog = AppUtilities.openSubmitMessageBox(
+        this.changePasswordSubmit,
+        this.tr.translate(`auth.profile.security.changePassword`),
+        this.tr.translate(`auth.profile.security.sureChangePassword`)
+      );
+      dialog.confirm.asObservable().subscribe(() => {
+        this.requestChangePassword(this.changePasswordFormGroup.value);
+      });
     } else {
       this.changePasswordFormGroup.markAllAsTouched();
     }

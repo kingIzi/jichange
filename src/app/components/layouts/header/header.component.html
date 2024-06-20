@@ -2,9 +2,9 @@
 <app-display-message-box #timeoutWarning></app-display-message-box>
 <app-display-message-box #timeOut></app-display-message-box>
 
-<div class="navbar bg-base-100 shadow-4 relative">
+<div #header class="navbar bg-base-100 shadow-4 relative">
   <div class="navbar-start">
-    <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50">
+    <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50 h-12">
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,7 @@
       />
     </a>
   </div>
-  <div [formGroup]="formGroup" class="navbar-center hidden lg:flex">
+  <div [formGroup]="formGroup" class="navbar-center hidden lg:flex h-24">
     <ul
       *transloco="let t"
       formArrayName="headers"

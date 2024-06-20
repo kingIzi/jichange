@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   NO_ERRORS_SCHEMA,
   OnInit,
   ViewChild,
@@ -40,9 +41,11 @@ import { NgxLoadingModule } from 'ngx-loading';
     NgxLoadingModule,
   ],
 })
-export class MainComponent implements OnInit {
+export class MainComponent implements OnInit, AfterViewInit {
   public routeLoading: boolean = false;
   @ViewChild('mainHeader') mainHeader!: HeaderComponent;
+  @ViewChild('containerDoc', { static: true })
+  containerDoc!: ElementRef<HTMLDivElement>;
   constructor(
     private breadcrumbService: BreadcrumbService,
     private router: Router,
@@ -190,9 +193,27 @@ export class MainComponent implements OnInit {
     this.prepareSetupRoutes();
     this.prepareCompanyRoutes();
   }
+  private hideNavBarOnScroll() {
+    let containerDoc = this.containerDoc.nativeElement;
+    let header = this.mainHeader.header.nativeElement;
+    let prevScrollpos = header.offsetHeight;
+    let navbar = document.getElementById('navbar');
+    this.containerDoc.nativeElement.onscroll = function () {
+      let currentScrollPos = containerDoc.scrollTop;
+      if (navbar && prevScrollpos > currentScrollPos) {
+        navbar.style.top = '0px';
+      } else if (navbar && prevScrollpos < currentScrollPos) {
+        navbar.style.top = `-${header.clientHeight}px`;
+      }
+      prevScrollpos = currentScrollPos;
+    };
+  }
   ngOnInit(): void {
     this.prepareBankBreadcrumbs();
     this.routeLoaderListener();
+  }
+  ngAfterViewInit(): void {
+    this.hideNavBarOnScroll();
   }
   prepareRoute(outlet: RouterOutlet, animate: string): boolean {
     return (

@@ -303,7 +303,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('edit')"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         (click)="openEditBranchForm(element)"
                       >
                         <span>
@@ -314,7 +314,7 @@
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('delete')"
                         (click)="openRemoveDialog(element, removeItemDialog)"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                       >
                         <span>
                           <i class="bi bi-trash text-lg text-danger-600"></i>

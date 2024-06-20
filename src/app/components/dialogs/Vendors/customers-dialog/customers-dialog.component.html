@@ -10,10 +10,10 @@
       class="font-bold text-lg"
       *transloco="let t; read: 'customer.form.actions'"
     >
-      {{ t("sureToAddCustomer") }}
+      {{ data ? t("modifyCustomer") : t("addCustomer") }}
     </h3>
     <p class="py-4 text-sm" *transloco="let t; read: 'customer.form.actions'">
-      {{ t("addInvoiceAsWell") }}
+      {{ data ? t("modifyCustomerMessage") : t("addCustomerMessage") }}
     </p>
     <div class="modal-action">
       <div class="flex flex-row items">
@@ -24,19 +24,12 @@
         >
           {{ t("close") }}
         </button>
-        <!-- <button
-          (click)="addCustomer(true, addCustomerDialog)"
-          *transloco="let t; read: 'customer.form.actions'"
-          class="btn btn-ghost btn-xs btn-info text-linkBlue"
-        >
-          {{ t("attachInvoice") }}
-        </button> -->
         <button
           (click)="addCustomerDialog.close(); addCustomer()"
-          *transloco="let t; read: 'customer.form.actions'"
+          *transloco="let t; read: 'defaults'"
           class="btn btn-ghost btn-xs btn-info text-linkBlue"
         >
-          {{ t("addCustomer") }}
+          {{ t("confirm") }}
         </button>
       </div>
     </div>

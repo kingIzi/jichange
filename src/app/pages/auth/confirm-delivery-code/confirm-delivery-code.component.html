@@ -1,22 +1,24 @@
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
-<app-display-message-box #noSessionFound></app-display-message-box>
+<app-display-message-box #noMobileFound></app-display-message-box>
+<app-display-message-box #sessionFailed></app-display-message-box>
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-submit-message-box #submitCodeMessageBox></app-submit-message-box>
 
 <form
   id="forgot-password-form"
-  *transloco="let t; read: 'auth.otp'"
+  *transloco="let t; read: 'auth.deliveryCode'"
   class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-0 md:w-[30rem]"
   [formGroup]="formGroup"
 >
   <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
   <div class="w-full flex flex-col">
     <h6 class="text-center text-xl">
-      {{ t("verifyAccount") }}
+      {{ t("confirmDelivery") }}
     </h6>
     <h6 class="text-center text-sm">
-      {{ t("verifyAccountMessage").replace("{}", mobile.value) }}
+      {{ t("deliveryCodeMessage").replace("{}", mobile_no.value) }}
     </h6>
   </div>
   <div class="flex flex-col space-y-1 w-full py-8">
@@ -24,14 +26,20 @@
       {{ t("form.code") }} <span class="text-red-600">*</span>
     </h6>
     <input
-      [formControl]="otp_code"
+      [formControl]="code"
       type="email"
       [placeholder]="t('form.placeholders.code')"
       class="input input-bordered w-full max-w-lg bg-transparent text-black"
     />
-    <span *ngIf="otp_code && otp_code.invalid && otp_code.touched">
-      <p class="text-xs text-red-600">
+    <span *ngIf="code && code.invalid && code.touched">
+      <p *ngIf="code.hasError('required')" class="text-xs text-red-600">
         {{ t("form.errors.code") }}
+      </p>
+      <p
+        *ngIf="code.hasError('minlength') || code.hasError('maxlength')"
+        class="text-xs text-red-600"
+      >
+        {{ t("form.errors.minMaxLength") }}
       </p>
     </span>
   </div>

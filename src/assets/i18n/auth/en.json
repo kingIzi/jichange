@@ -169,9 +169,50 @@
     }
   },
   "profile": {
-    "settings": "Settings",
+    "settings": "My Profile",
     "saveChanges": "Save Changes",
     "passowordChangedSuccessfully": "Password changed successfully",
+    "failedToUpdatePassword": "Failed to update password.",
+    "general": {
+      "personalInformation": "Personal Information",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email Address",
+      "phone": "Phone",
+      "role": "Role",
+      "username": "User name",
+      "fullName": "Full name",
+      "branch": "Branch"
+    },
+    "security": {
+      "changePassword": "Change password",
+      "sureChangePassword": "Are you sure you want to update your password?",
+      "form": {
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password",
+        "placeholders": {
+          "currentPassword": "Enter current password",
+          "newPassword": "Enter new Password",
+          "confirmPassword": "Confirm new Password"
+        },
+        "errors": {
+          "isEmpty": "Please fill",
+          "passwordsDoNotMatch": "Passwords do not match."
+        }
+      }
+    },
+    "language": {
+      "label": "Language",
+      "changeLanguage": "Change Language",
+      "sureLanguage": "Are you sure you want to change the language to {}",
+      "form": {
+        "language": "Language(s)",
+        "placeholders": {
+          "language": "Select language"
+        }
+      }
+    },
     "activeTabs": [
       {
         "label": "General",
@@ -227,5 +268,22 @@
         }
       }
     ]
+  },
+  "deliveryCode": {
+    "confirmDelivery": "Confirm delivery",
+    "deliveryCodeMessage": "A delivery code was sent to {}, please enter the code below to continue",
+    "failedToFindDelivery": "Failed to find delivery, the session may have expired.",
+    "failedToConfirmDeliveryCode": "Failed to confirm delivery code.",
+    "confirmedSuccessfully": "Confirmed successfully!",
+    "form": {
+      "code": "Code",
+      "placeholders": {
+        "code": "Enter 6 digit code"
+      },
+      "errors": {
+        "code": "Please fill",
+        "minMaxLength": "Code must be 6 digits long"
+      }
+    }
   }
 }

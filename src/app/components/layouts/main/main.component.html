@@ -3,7 +3,7 @@
   [config]="{ backdropBorderRadius: '0.5px' }"
 ></ngx-loading>
 
-<div class="h-screen w-screen overflow-x-hidden bg-jichangeDefault">
+<!-- <div class="h-screen w-screen overflow-x-hidden bg-jichangeDefault">
   <div
     class="absolute top-0 bottom-0 left-0 right-0 w-full h-full flex flex-col"
   >
@@ -16,7 +16,6 @@
       <div class="px-6 py-2 relative">
         <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
         <ng-template #iconTemplate>
-          <!-- <span class="material-symbols-outlined"> chevron_right </span> -->
           <span>
             <i class="bi bi-chevron-right"></i>
           </span>
@@ -32,5 +31,73 @@
     <div class="flex-none">
       <app-footer></app-footer>
     </div>
+  </div>
+</div> -->
+
+<!-- <div
+  class="h-screen w-screen overflow-x-hidden bg-jichangeDefault flex flex-col"
+>
+  <div
+    #containerDoc
+    class="absolute top-0 bottom-0 left-0 right-0 w-full h-full overflow-x-hidden overflow-y-scroll"
+  >
+    <div #navBarItem id="navbar" class="z-50 fixed w-full duration-500">
+      <app-header #mainHeader></app-header>
+    </div>
+    <div
+      class="flex flex-col divide-y"
+      [style]="
+        'padding-top:' +
+        mainHeader.header.nativeElement.offsetHeight.toString() +
+        'px'
+      "
+    >
+      <div class="px-6 py-2 relative">
+        <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
+        <ng-template #iconTemplate>
+          <span>
+            <i class="bi bi-chevron-right"></i>
+          </span>
+        </ng-template>
+      </div>
+      <div
+        class="w-full h-full relative bg-jichangeDefault pb-8"
+        [@triggerName]="prepareRoute(outlet, 'animationState')"
+      >
+        <router-outlet #outlet="outlet"></router-outlet>
+      </div>
+    </div>
+  </div>
+  <div class="flex-none absolute bottom-0 left-0 right-0">
+    <app-footer></app-footer>
+  </div>
+</div> -->
+
+<div
+  class="h-screen w-screen overflow-x-hidden bg-jichangeDefault flex flex-col"
+>
+  <div #containerDoc class="w-full h-full overflow-x-hidden overflow-y-scroll">
+    <div #navBarItem id="navbar" class="z-50 fixed w-full duration-500">
+      <app-header #mainHeader></app-header>
+    </div>
+    <div class="flex flex-col divide-y pt-20 lg:pt-28 w-full">
+      <div class="px-6 py-2 relative">
+        <xng-breadcrumb [separator]="iconTemplate"></xng-breadcrumb>
+        <ng-template #iconTemplate>
+          <span>
+            <i class="bi bi-chevron-right"></i>
+          </span>
+        </ng-template>
+      </div>
+      <div
+        class="w-full h-full relative bg-jichangeDefault pb-4"
+        [@triggerName]="prepareRoute(outlet, 'animationState')"
+      >
+        <router-outlet #outlet="outlet"></router-outlet>
+      </div>
+    </div>
+  </div>
+  <div class="flex-none absolute bottom-0 left-0 right-0">
+    <app-footer></app-footer>
   </div>
 </div>

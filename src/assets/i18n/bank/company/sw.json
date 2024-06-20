@@ -152,6 +152,7 @@
   },
   "inboxApproval": {
     "name": "Idhini ya Kikasha",
+    "approve": "Kuidhinisha",
     "searchBy": "Tafuta kwa jina",
     "companyApproval": "Idhini ya Kampuni",
     "approvedSuccessfully": "Kampuni imeidhinishwa kwa mafanikio!",

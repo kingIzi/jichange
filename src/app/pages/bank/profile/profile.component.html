@@ -1,4 +1,5 @@
-<app-submit-message-box #submitMessageBox></app-submit-message-box>
+<app-submit-message-box #changeLanguageSubmit></app-submit-message-box>
+<app-submit-message-box #changePasswordSubmit></app-submit-message-box>
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
@@ -11,283 +12,263 @@
     </h2>
   </div>
   <div
-    class="flex flex-col divide-y bg-white shadow px-2 py-4 w-full h-full relative"
+    class="flex flex-col space-y-8 bg-white shadow px-2 py-4 w-full h-full relative"
   >
-    <div class="grid grid-cols-2 w-full">
-      <div class="px-0 lg:px-20">
-        <ng-container *ngIf="activeTabs.length > 0">
-          <div class="flex flex-col py-20 space-y-5">
-            <h4 class="text-lg lg:text-2xl font-bold">
-              {{ activeTabs[selectedTabIndex].label }}
-            </h4>
-            <h6 class="text-xs lg:text-lg">
-              {{ activeTabs[selectedTabIndex].description }}
-            </h6>
-          </div>
-        </ng-container>
+    <div class="flex flex-col border rounded-lg p-4 space-y-2">
+      <div class="flex flex-row items-center justify-between">
+        <h2
+          *transloco="let t; read: 'auth.profile.general'"
+          class="text-sm font-bold"
+        >
+          {{ t("personalInformation") }}
+        </h2>
+        <button (click)="openEditBankUserForm()" class="btn btn-sm">
+          <span class="material-symbols-outlined">
+            <i class="bi bi-pen text-darkPurple"></i>
+          </span>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-y-2 w-full">
+        <div class="flex flex-col">
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs text-neutral-600"
+          >
+            {{ t("firstName") }}
+          </p>
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs font-bold text-neutral-600"
+          >
+            {{ generalFormGroup.get("fname")?.value }}
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs text-neutral-600"
+          >
+            {{ t("lastName") }}
+          </p>
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs font-bold text-neutral-600"
+          >
+            {{ generalFormGroup.get("lname")?.value }}
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs text-neutral-600"
+          >
+            {{ t("email") }}
+          </p>
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs font-bold text-neutral-600"
+          >
+            {{ generalFormGroup.get("email")?.value }}
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs text-neutral-600"
+          >
+            {{ t("phone") }}
+          </p>
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs font-bold text-neutral-600"
+          >
+            {{ generalFormGroup.get("mobile")?.value }}
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs text-neutral-600"
+          >
+            {{ t("branch") }}
+          </p>
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs font-bold text-neutral-600"
+          >
+            {{ generalFormGroup.get("branch")?.value }}
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs text-neutral-600"
+          >
+            {{ t("role") }}
+          </p>
+          <p
+            *transloco="let t; read: 'auth.profile.general'"
+            class="text-xs font-bold text-neutral-600"
+          >
+            {{ generalFormGroup.get("role")?.value }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      [formGroup]="languageFormGroup"
+      class="flex flex-col border rounded-lg p-4 space-y-2"
+    >
+      <div class="flex flex-row items-center justify-between">
+        <h2
+          *transloco="let t; read: 'auth.profile.language'"
+          class="text-sm font-bold"
+        >
+          {{ t("label") }}
+        </h2>
       </div>
       <div class="flex flex-col">
-        <div role="tablist" class="tabs tabs-lifted tabs-lg bg-gray-100">
-          <button
-            role="tab"
-            class="tab"
-            [class]="selectedTabIndex === ind ? 'tab-active font-bold' : ''"
-            (click)="setActiveTab(ind)"
-            *ngFor="
-              let tab of activeTabs;
-              index as ind;
-              trackBy: PerformanceUtils.trackByIndex
-            "
+        <div class="flex flex-col space-y-1 w-full">
+          <h6
+            *transloco="let t; read: 'auth.profile.language.form'"
+            class="text-left text-sm"
           >
-            {{ tab.label }}
+            {{ t("language") }}
+            <span class="text-red-600">*</span>
+          </h6>
+          <select
+            formControlName="lang"
+            class="select select-bordered w-full max-w-lg bg-transparent text-black"
+          >
+            <option
+              *transloco="
+                let t;
+                read: 'auth.profile.language.form.placeholders'
+              "
+              disabled
+            >
+              {{ t("language") }}
+            </option>
+            <option
+              *ngFor="
+                let language of languages;
+                index as ind;
+                trackBy: PerformanceUtils.trackByIndex
+              "
+              [value]="language.code"
+            >
+              {{ language.name }}
+            </option>
+          </select>
+        </div>
+        <div
+          class="flex flex-row items-center justify-end lg:justify-start py-2"
+        >
+          <button
+            (click)="saveLanguageClicked()"
+            class="btn text-xs btn-outline font-inter btn-success w-1/2 lg:w-1/4 float-right"
+            *transloco="let t; read: 'auth.profile'"
+          >
+            {{ t("saveChanges") }}
           </button>
         </div>
-        <ng-container *ngIf="activeTabs.length > 0">
-          <div
-            [@inOutAnimation]
-            *ngIf="selectedTabIndex === 0"
-            class="flex flex-col py-4 space-y-5 relative"
-            [formGroup]="generalFormGroup"
-          >
-            <div class="flex flex-row items-center justify-between">
-              <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content rounded-full w-24">
-                  <span class="text-3xl">
-                    <i class="bi bi-person-circle"></i>
-                  </span>
-                </div>
-              </div>
-              <button (click)="openEditBankUserForm()" class="btn btn-sm">
-                <span class="material-symbols-outlined">
-                  <i class="bi bi-pen text-darkPurple"></i>
-                </span>
-              </button>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full h-full">
-              <div class="flex flex-col space-y-1 w-full">
-                <h6 class="text-left text-sm">
-                  {{ activeTabs[selectedTabIndex].form.firstName }}
-                </h6>
-                <input
-                  type="text"
-                  [placeholder]="
-                    activeTabs[selectedTabIndex].form.placeholders.firstName
-                  "
-                  formControlName="fname"
-                  class="input input-bordered w-full max-w-lg bg-transparent text-black"
-                />
-                <span
-                  *ngIf="
-                    generalFormGroup.get('fname') &&
-                    generalFormGroup.get('fname')?.invalid &&
-                    generalFormGroup.get('fname')?.touched
-                  "
-                >
-                  <p class="text-xs text-red-600">
-                    {{ activeTabs[selectedTabIndex].form.errors.firstName }}
-                  </p>
-                </span>
-              </div>
-              <div class="flex flex-col space-y-1 w-full">
-                <h6 class="text-left text-sm">
-                  {{ activeTabs[selectedTabIndex].form.lastName }}
-                </h6>
-                <input
-                  #controlNumber
-                  type="text"
-                  [placeholder]="
-                    activeTabs[selectedTabIndex].form.placeholders.lastName
-                  "
-                  formControlName="lname"
-                  class="input input-bordered w-full max-w-lg bg-transparent text-black"
-                />
-                <span
-                  *ngIf="
-                    generalFormGroup.get('lname') &&
-                    generalFormGroup.get('lname')?.invalid &&
-                    generalFormGroup.get('lname')?.touched
-                  "
-                >
-                  <p class="text-xs text-red-600">
-                    {{ activeTabs[selectedTabIndex].form.errors.lastName }}
-                  </p>
-                </span>
-              </div>
-              <div class="flex flex-col space-y-1 w-full">
-                <h6 class="text-left text-sm">
-                  {{ activeTabs[selectedTabIndex].form.branch }}
-                </h6>
-                <input
-                  *transloco="
-                    let t;
-                    read: 'setup.countryDialog.form.placeholders'
-                  "
-                  #controlNumber
-                  type="text"
-                  [placeholder]="
-                    activeTabs[selectedTabIndex].form.placeholders.branch
-                  "
-                  formControlName="email"
-                  class="input input-bordered w-full max-w-lg bg-transparent text-black"
-                />
-              </div>
-              <div class="flex flex-col space-y-1 w-full">
-                <h6 class="text-left text-sm">
-                  {{ activeTabs[selectedTabIndex].form.role }}
-                </h6>
-                <select
-                  class="select select-bordered w-full max-w-lg bg-transparent text-black"
-                  formControlName="role"
-                >
-                  <option [value]="generalFormGroup.get('role')?.value">
-                    {{ generalFormGroup.get("role")?.value }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div
-            [@inOutAnimation]
-            *ngIf="selectedTabIndex === 1"
-            class="flex flex-col py-4 space-y-5 relative w-full"
-          >
-            <div class="flex flex-col space-y-1 w-full">
-              <h6 class="text-left text-sm">
-                {{ activeTabs[selectedTabIndex].form.currentPassword }}
-                <span class="text-red-600">*</span>
-              </h6>
-              <input
-                type="password"
-                [placeholder]="
-                  activeTabs[selectedTabIndex].form.placeholders.currentPassword
-                "
-                value="My New Password here"
-                disabled
-                class="input input-bordered w-full max-w-lg bg-transparent text-black"
-              />
-            </div>
-            <div class="flex flex-col space-y-1 w-full">
-              <h6 class="text-left text-sm">
-                {{ activeTabs[selectedTabIndex].form.newPassword }}
-                <span class="text-red-600">*</span>
-              </h6>
-              <input
-                type="password"
-                [placeholder]="
-                  activeTabs[selectedTabIndex].form.placeholders.newPassword
-                "
-                [formControl]="pwd"
-                class="input input-bordered w-full max-w-lg bg-transparent text-black"
-              />
-              <span *ngIf="pwd && pwd.invalid && pwd.touched">
-                <div
-                  *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-                >
-                  <p
-                    *ngIf="pwd.hasError('required')"
-                    class="text-danger-700 text-xs"
-                  >
-                    {{ activeTabs[selectedTabIndex].form.errors.isEmpty }}
-                  </p>
-                  <p
-                    *ngIf="pwd.hasError('passwordMismatch')"
-                    class="text-danger-700 text-xs"
-                  >
-                    {{
-                      activeTabs[selectedTabIndex].form.errors
-                        .passwordsDoNotMatch
-                    }}
-                  </p>
-                </div>
-              </span>
-            </div>
-            <div class="flex flex-col space-y-1 w-full">
-              <h6 class="text-left text-sm">
-                {{ activeTabs[selectedTabIndex].form.confirmPassword }}
-                <span class="text-red-600">*</span>
-              </h6>
-              <input
-                type="password"
-                [placeholder]="
-                  activeTabs[selectedTabIndex].form.placeholders.confirmPassword
-                "
-                [formControl]="confirmPwd"
-                class="input input-bordered w-full max-w-lg bg-transparent text-black"
-              />
-              <span
-                *ngIf="confirmPwd && confirmPwd.invalid && confirmPwd.touched"
-              >
-                <div
-                  *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-                >
-                  <p
-                    *ngIf="confirmPwd.hasError('required')"
-                    class="text-danger-700 text-xs"
-                  >
-                    {{ activeTabs[selectedTabIndex].form.errors.isEmpty }}
-                  </p>
-                  <p
-                    *ngIf="confirmPwd.hasError('passwordMismatch')"
-                    class="text-danger-700 text-xs"
-                  >
-                    {{
-                      activeTabs[selectedTabIndex].form.errors
-                        .passwordsDoNotMatch
-                    }}
-                  </p>
-                </div>
-              </span>
-            </div>
-            <button
-              (click)="changePasswordClicked()"
-              class="btn text-xs btn-outline font-inter btn-success w-1/2 lg:w-1/4 float-right"
-              *transloco="let t; read: 'auth.profile'"
+      </div>
+    </div>
+    <div
+      [formGroup]="changePasswordFormGroup"
+      class="flex flex-col border rounded-lg p-4 space-y-2"
+    >
+      <div class="flex flex-row items-center justify-between">
+        <h2
+          *transloco="let t; read: 'auth.profile.security'"
+          class="text-sm font-bold"
+        >
+          {{ t("changePassword") }}
+        </h2>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'auth.profile.security.form'"
+          class="text-left text-sm"
+        >
+          {{ t("currentPassword") }}
+          <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'auth.profile.security.form.placeholders'"
+          type="password"
+          [placeholder]="t('currentPassword')"
+          value="My New Password here"
+          disabled
+          class="input input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'auth.profile.security.form'"
+          class="text-left text-sm"
+        >
+          {{ t("newPassword") }}
+          <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'auth.profile.security.form.placeholders'"
+          type="password"
+          [placeholder]="t('newPassword')"
+          [formControl]="pwd"
+          class="input input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+        <span *ngIf="pwd && pwd.invalid && pwd.touched">
+          <div *transloco="let t; read: 'auth.profile.security.form.errors'">
+            <!-- <p *ngIf="pwd.hasError('required')" class="text-danger-700 text-xs">
+              {{ t("isEmpty") }}
+            </p> -->
+            <p
+              *ngIf="pwd.hasError('passwordMismatch')"
+              class="text-danger-700 text-xs"
             >
-              {{ t("saveChanges") }}
-            </button>
+              {{ t("passwordsDoNotMatch") }}
+            </p>
           </div>
-          <div
-            [@inOutAnimation]
-            *ngIf="selectedTabIndex === PROFILE_OPTIONS.LANGUAGE"
-            [formGroup]="languageFormGroup"
-            class="flex flex-col py-4 space-y-5 relative w-full"
-          >
-            <div class="flex flex-col space-y-1 w-full">
-              <h6 class="text-left text-sm">
-                {{ activeTabs[PROFILE_OPTIONS.LANGUAGE].form.language }}
-                <span class="text-red-600">*</span>
-              </h6>
-              <select
-                formControlName="lang"
-                class="select select-bordered w-full max-w-lg bg-transparent text-black"
-              >
-                <option disabled>
-                  {{
-                    activeTabs[PROFILE_OPTIONS.LANGUAGE].form.placeholders
-                      .language
-                  }}
-                </option>
-                <option
-                  *ngFor="
-                    let language of languages;
-                    index as ind;
-                    trackBy: PerformanceUtils.trackByIndex
-                  "
-                  [value]="language.code"
-                >
-                  {{ language.name }}
-                </option>
-              </select>
-            </div>
-            <button
-              (click)="saveLanguageClicked()"
-              class="btn text-xs btn-outline font-inter btn-success w-1/2 lg:w-1/4 float-right"
-              *transloco="let t; read: 'auth.profile'"
+        </span>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'auth.profile.security.form'"
+          class="text-left text-sm"
+        >
+          {{ t("confirmPassword") }}
+          <span class="text-red-600">*</span>
+        </h6>
+        <input
+          *transloco="let t; read: 'auth.profile.security.form.placeholders'"
+          type="password"
+          [placeholder]="t('confirmPassword')"
+          [formControl]="confirmPwd"
+          class="input input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+        <span *ngIf="confirmPwd && confirmPwd.invalid && confirmPwd.touched">
+          <div *transloco="let t; read: 'auth.profile.security.form.errors'">
+            <!-- <p *ngIf="pwd.hasError('required')" class="text-danger-700 text-xs">
+              {{ t("isEmpty") }}
+            </p> -->
+            <p
+              *ngIf="confirmPwd.hasError('passwordMismatch')"
+              class="text-danger-700 text-xs"
             >
-              {{ t("saveChanges") }}
-            </button>
+              {{ t("passwordsDoNotMatch") }}
+            </p>
           </div>
-        </ng-container>
+        </span>
+      </div>
+      <div class="flex flex-row items-center justify-end lg:justify-start py-2">
+        <button
+          (click)="changePasswordClicked()"
+          class="btn text-xs btn-outline font-inter btn-success w-1/2 lg:w-1/4 float-right"
+          *transloco="let t; read: 'auth.profile'"
+        >
+          {{ t("saveChanges") }}
+        </button>
       </div>
     </div>
   </div>

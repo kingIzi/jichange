@@ -130,12 +130,16 @@
                     </p>
                   </ng-container>
                   <ng-template #actionTemplate>
-                    <button
-                      (click)="approveCompany(element)"
-                      class="bg-orange-100 hover:bg-orange-200 text-black btn btn-xs"
-                    >
-                      {{ element.Status }}
-                    </button>
+                    <div class="flex flex-row items-center justify-end">
+                      <button
+                        *transloco="let t; read: 'company.inboxApproval'"
+                        (click)="approveCompany(element)"
+                        class="bg-orange-100 hover:bg-orange-200 text-black btn btn-xs tooltip tooltip-left"
+                        [attr.data-tip]="t('approve')"
+                      >
+                        {{ element.Status }}
+                      </button>
+                    </div>
                   </ng-template>
                 </td>
               </ng-container>

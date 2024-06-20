@@ -273,7 +273,6 @@ export class InboxApprovalComponent implements OnInit {
       case 'CompName':
       case 'Email':
       case 'MobNo':
-      case 'Status':
       case 'Address':
         return column.value;
       default:
@@ -283,6 +282,8 @@ export class InboxApprovalComponent implements OnInit {
   tableHeaderStyle(key: string) {
     let style = 'flex flex-row items-center';
     switch (key) {
+      case 'Status':
+        return `${style} justify-end`;
       default:
         return `${style}`;
     }
@@ -292,6 +293,8 @@ export class InboxApprovalComponent implements OnInit {
     switch (key) {
       case 'CompName':
         return `${style} text-black font-semibold`;
+      case 'Status':
+        return `right-0 absolute`;
       default:
         return `${style} text-black font-normal`;
     }

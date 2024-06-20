@@ -71,6 +71,7 @@ export class HeaderComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('timeoutWarning') timeoutWarning!: DisplayMessageBoxComponent;
   @ViewChild('timeOut') timeOut!: DisplayMessageBoxComponent;
+  @ViewChild('header', { static: true }) header!: ElementRef<HTMLDivElement>;
   constructor(
     private tr: TranslocoService,
     private fb: FormBuilder,

@@ -13,16 +13,6 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import {
-  trigger,
-  state,
-  style,
-  animate,
-  transition,
-  query,
-  group,
-  animateChild,
-} from '@angular/animations';
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
 import {
   AbstractControl,
@@ -49,12 +39,6 @@ import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-for
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 
-enum PROFILE_OPTIONS {
-  GENERAL,
-  SECURITY,
-  LANGUAGE,
-}
-
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -76,18 +60,6 @@ enum PROFILE_OPTIONS {
       useValue: { scope: 'auth', alias: 'auth' },
     },
   ],
-  animations: [
-    trigger('inOutAnimation', [
-      transition(':enter', [
-        style({ opacity: 0, position: 'relative' }),
-        animate('0.5s ease-out', style({ opacity: 1 })),
-      ]),
-      transition(':leave', [
-        style({ opacity: 1, position: 'absolute' }),
-        animate('0.5s ease-in', style({ opacity: 0 })),
-      ]),
-    ]),
-  ],
 })
 export class ProfileComponent implements OnInit {
   public languages: { imgUrl: string; code: string; name: string }[] = [
@@ -106,14 +78,14 @@ export class ProfileComponent implements OnInit {
   public generalFormGroup!: FormGroup;
   public changePasswordFormGroup!: FormGroup;
   public languageFormGroup!: FormGroup;
-  public selectedTabIndex: number = 0;
-  public activeTabs: any[] = [];
   public employeeDetail!: EmployeeDetail;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public PROFILE_OPTIONS: typeof PROFILE_OPTIONS = PROFILE_OPTIONS;
   public userProfile!: LoginResponse;
   public filterFormData: { branches: Branch[] } = { branches: [] };
-  @ViewChild('submitMessageBox') submitMessageBox!: SubmitMessageBoxComponent;
+  @ViewChild('changePasswordSubmit')
+  changePasswordSubmit!: SubmitMessageBoxComponent;
+  @ViewChild('changeLanguageSubmit')
+  changeLanguageSubmit!: SubmitMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
@@ -162,10 +134,12 @@ export class ProfileComponent implements OnInit {
   }
   private createGeneralFormGroup() {
     this.generalFormGroup = this.fb.group({
-      fname: this.fb.control('', [Validators.required]),
-      lname: this.fb.control('', [Validators.required]),
-      email: this.fb.control('', [Validators.required, Validators.email]),
-      role: this.fb.control(this.userProfile.role, [Validators.required]),
+      fname: this.fb.control('', []),
+      lname: this.fb.control('', []),
+      email: this.fb.control('', []),
+      mobile: this.fb.control('', []),
+      role: this.fb.control(this.userProfile.role, []),
+      branch: this.fb.control('', []),
     });
   }
   private createLanguageFormGroup() {
@@ -174,13 +148,6 @@ export class ProfileComponent implements OnInit {
         Validators.required,
       ]),
     });
-  }
-  private prepareActiveTabs() {
-    this.tr
-      .selectTranslate(`profile.activeTabs`, {}, this.scope)
-      .subscribe((activeTabs: string[]) => {
-        this.activeTabs = activeTabs;
-      });
   }
   private requestBranchList() {
     this.startLoading = true;
@@ -195,7 +162,7 @@ export class ProfileComponent implements OnInit {
           let branch = this.filterFormData.branches.find(
             (b) => b.Sno === Number(this.userProfile.braid)
           );
-          this.generalFormGroup.get('email')?.setValue(branch?.Name);
+          this.generalFormGroup.get('branch')?.setValue(branch?.Name ?? '-');
         }
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -211,18 +178,17 @@ export class ProfileComponent implements OnInit {
         throw err;
       });
   }
-  private disableGeneralFormGroupData() {
-    this.generalFormGroup.get(`fname`)?.disable();
-    this.generalFormGroup.get(`lname`)?.disable();
-    this.generalFormGroup.get(`email`)?.disable();
-    this.generalFormGroup.get(`role`)?.disable();
-  }
   private setGeneralFormGroupData() {
     this.generalFormGroup
       .get('fname')
       ?.setValue(this.employeeDetail.First_Name);
     this.generalFormGroup.get('lname')?.setValue(this.employeeDetail.Last_name);
-    this.disableGeneralFormGroupData();
+    this.generalFormGroup
+      .get('email')
+      ?.setValue(this.employeeDetail.Email_Address);
+    this.generalFormGroup
+      .get('mobile')
+      ?.setValue(this.employeeDetail.Mobile_No);
   }
   private requestEmployeeDetail(body: { sno: string | number }) {
     this.startLoading = true;
@@ -262,7 +228,14 @@ export class ProfileComponent implements OnInit {
             this.tr.translate(`defaults.success`),
             this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
           );
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`auth.profile.failedToUpdatePassword`)
+          );
         }
+        this.changePasswordFormGroup.reset();
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -282,7 +255,6 @@ export class ProfileComponent implements OnInit {
     this.createGeneralFormGroup();
     this.createChangePasswordFormGroup();
     this.createLanguageFormGroup();
-    this.prepareActiveTabs();
     this.requestEmployeeDetail({ sno: this.userProfile.Usno });
     this.requestBranchList();
   }
@@ -298,12 +270,11 @@ export class ProfileComponent implements OnInit {
       );
       if (lang) {
         let dialog = AppUtilities.openSubmitMessageBox(
-          this.submitMessageBox,
-          this.activeTabs[PROFILE_OPTIONS.LANGUAGE].changeLanguage,
-          this.activeTabs[PROFILE_OPTIONS.LANGUAGE].sureLanguage.replace(
-            '{}',
-            lang.name
-          )
+          this.changeLanguageSubmit,
+          this.tr.translate(`auth.profile.language.changeLanguage`),
+          this.tr
+            .translate(`auth.profile.language.sureLanguage`)
+            .replace('{}', lang.name)
         );
         dialog.confirm.asObservable().subscribe(() => {
           this.tr.setActiveLang(lang.code);
@@ -326,12 +297,16 @@ export class ProfileComponent implements OnInit {
       dialogRef.close();
     });
   }
-  setActiveTab(index: number) {
-    this.selectedTabIndex = index;
-  }
   changePasswordClicked() {
     if (this.changePasswordFormGroup.valid) {
-      this.requestChangePassword(this.changePasswordFormGroup.value);
+      let dialog = AppUtilities.openSubmitMessageBox(
+        this.changePasswordSubmit,
+        this.tr.translate(`auth.profile.security.changePassword`),
+        this.tr.translate(`auth.profile.security.sureChangePassword`)
+      );
+      dialog.confirm.asObservable().subscribe(() => {
+        this.requestChangePassword(this.changePasswordFormGroup.value);
+      });
     } else {
       this.changePasswordFormGroup.markAllAsTouched();
     }

@@ -52,6 +52,13 @@
   ],
   "failedToRetrieveAmendedInvoice": "Imeshindwa kurekebisha ankara.",
   "amend": "Amend",
+  "deliver": {
+    "deliver": "Kutoa",
+    "markDeliver": "Fanya utoaji",
+    "sureDeliver": "Una hakika unataka kutoa vipengee vya ankara {}?",
+    "deliveryCodeSentSuccessfully": "Nambari ya uwasilishaji imetumwa kwa mteja.",
+    "failedToSendDeliveryCode": "Imeshindwa kutuma msimbo wa uwasilishaji."
+  },
   "amendInvoice": "Rekebisha ankara",
   "invoiceAmendedSuccessfully": "Ankara iliyorekebishwa kwa mafanikio!",
   "failedToRetrieveInvoice": "Imeshindwa kurejesha ankara iliyozalishwa.",

@@ -23,7 +23,7 @@ export class AppUtilities {
     return dialog.openDialog();
   }
 
-  static sweetAlertSuccessMessage(message: string) {
+  static sweetAlertSuccessMessage(message: string, timeout: number = 3000) {
     let toastMixin = Swal.mixin({
       toast: true,
       icon: 'success',
@@ -31,7 +31,7 @@ export class AppUtilities {
       animation: false,
       position: 'top-right',
       showConfirmButton: false,
-      timer: 3000,
+      timer: timeout,
       didOpen: (toast) => {
         toast.addEventListener('mouseenter', Swal.stopTimer);
         toast.addEventListener('mouseleave', Swal.resumeTimer);

@@ -50,6 +50,13 @@ const routes: Routes = [
           animationState: 'isRight',
         },
       },
+      {
+        path: 'confirm-code/:id', //MjU1NzQyMDM2NjA5
+        loadComponent: () =>
+          import(
+            './confirm-delivery-code/confirm-delivery-code.component'
+          ).then((c) => c.ConfirmDeliveryCodeComponent),
+      },
     ],
   },
 ];

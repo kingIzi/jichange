@@ -166,11 +166,50 @@
     }
   },
   "profile": {
-    "settings": "Mipangilio",
+    "settings": "Wasifu wangu",
     "saveChanges": "Hifadhi Mabadiliko",
     "passowordChangedSuccessfully": "Nywila imebadilishwa kwa mafanikio",
-    "isEmpty": "Please fill",
-    "passwordsDoNotMatch": "Passwords do not match.",
+    "failedToUpdatePassword": "Imeshindwa kusasisha nywila.",
+    "general": {
+      "personalInformation": "Taarifa Binafsi",
+      "firstName": "Jina la Kwanza",
+      "lastName": "Jina la Mwisho",
+      "email": "Anuani ya Barua Pepe",
+      "phone": "Simu",
+      "role": "Nafasi",
+      "username": "Jina la Mtumiaji",
+      "fullName": "Jina Kamili",
+      "branch": "Tawi"
+    },
+    "security": {
+      "changePassword": "Badilisha Nenosiri",
+      "sureChangePassword": "Una uhakika unataka kusasisha nywila yako?",
+      "form": {
+        "currentPassword": "Nenosiri la Sasa",
+        "newPassword": "Nenosiri Jipya",
+        "confirmPassword": "Thibitisha Nenosiri",
+        "placeholders": {
+          "currentPassword": "Ingiza nenosiri la sasa",
+          "newPassword": "Ingiza nenosiri jipya",
+          "confirmPassword": "Thibitisha nenosiri jipya"
+        },
+        "errors": {
+          "isEmpty": "Tafadhali jaza",
+          "passwordsDoNotMatch": "Manenosiri hayalingani."
+        }
+      }
+    },
+    "language": {
+      "label": "Lugha",
+      "changeLanguage": "Badilisha Lugha",
+      "sureLanguage": "Una uhakika unataka kubadilisha lugha kuwa {}",
+      "form": {
+        "language": "Lugha",
+        "placeholders": {
+          "language": "Chagua lugha"
+        }
+      }
+    },
     "activeTabs": [
       {
         "label": "Jumla",
@@ -224,5 +263,22 @@
         }
       }
     ]
+  },
+  "deliveryCode": {
+    "confirmDelivery": "Thibitisha utoaji",
+    "deliveryCodeMessage": "Msimbo wa utoaji umetumwa kwa {}, tafadhali ingiza msimbo hapa chini ili kuendelea",
+    "failedToFindDelivery": "Imeshindwa kupata utoaji, kikao kinaweza kuwa kimeisha.",
+    "failedToConfirmDeliveryCode": "Imeshindwa kuthibitisha msimbo wa utoaji.",
+    "confirmedSuccessfully": "Imethibitishwa kwa mafanikio!",
+    "form": {
+      "code": "Msimbo",
+      "placeholders": {
+        "code": "Ingiza msimbo wa tarakimu 6"
+      },
+      "errors": {
+        "code": "Tafadhali jaza",
+        "minMaxLength": "Msimbo lazima uwe na tarakimu 6 kwa muda mrefu"
+      }
+    }
   }
 }

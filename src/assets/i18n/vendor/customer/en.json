@@ -37,8 +37,9 @@
     "emailId": "Email Id",
     "addNewCustomer": "Add new customer",
     "actions": {
-      "sureToAddCustomer": "Are you sure you want to add this customer?",
-      "addInvoiceAsWell": "Would you also like to attach an invoice to this customer?",
+      "modifyCustomer": "Modify customer",
+      "addCustomerMessage": "Are you sure you want to add this customer?",
+      "modifyCustomerMessage": "Are you sure you want to modify this customer?",
       "confirm": "Confirm",
       "areYouSureYouWantToAddANewCustomer": "Are you sure you want to add a new customer?",
       "attachInvoice": "Yes, attach invoice",

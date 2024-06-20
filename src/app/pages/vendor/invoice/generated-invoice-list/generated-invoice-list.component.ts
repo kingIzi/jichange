@@ -55,6 +55,7 @@ import { Observable, map, of } from 'rxjs';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import * as json from 'src/assets/temp/data.json';
+import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -84,6 +85,7 @@ import * as json from 'src/assets/temp/data.json';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    SubmitMessageBoxComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -241,6 +243,44 @@ export class GeneratedInvoiceListComponent implements OnInit {
           this.tr
         );
         this.tableLoading = false;
+        this.cdr.detectChanges();
+      });
+  }
+  //send delivery code to customer
+  private requestSendAddDeliveryCode(body: {
+    sno: number | string;
+    user_id: number | string;
+  }) {
+    this.startLoading = true;
+    this.invoiceService
+      .addDeliveryCode(body)
+      .then((result) => {
+        if (
+          typeof result.response === 'string' &&
+          result.response.toLocaleLowerCase() ===
+            'Delivery Code created Successful & sent to customer'.toLocaleLowerCase()
+        ) {
+          let sal = AppUtilities.sweetAlertSuccessMessage(
+            this.tr.translate(`generated.deliver.deliveryCodeSentSuccessfully`),
+            5000
+          );
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`generated.deliver.failedToSendDeliveryCode`)
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
         this.cdr.detectChanges();
       });
   }
@@ -412,6 +452,23 @@ export class GeneratedInvoiceListComponent implements OnInit {
     dialogRef.componentInstance.amended.asObservable().subscribe(() => {
       dialogRef.close();
       this.requestGeneratedInvoice();
+    });
+  }
+  makeInvoiceDelivery(
+    messageBox: SubmitMessageBoxComponent,
+    invoice: GeneratedInvoice
+  ) {
+    messageBox.title = this.tr.translate(`generated.deliver.markDeliver`);
+    messageBox.message = this.tr
+      .translate(`generated.deliver.sureDeliver`)
+      .replace('{}', invoice.Invoice_No);
+    messageBox.openDialog();
+    messageBox.confirm.asObservable().subscribe(() => {
+      let body = {
+        sno: invoice.Inv_Mas_Sno,
+        user_id: this.userProfile.Usno,
+      };
+      this.requestSendAddDeliveryCode(body);
     });
   }
   openRefundInvoiceDialog(invoice: GeneratedInvoice) {

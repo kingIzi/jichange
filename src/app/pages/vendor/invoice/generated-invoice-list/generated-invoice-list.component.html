@@ -143,11 +143,14 @@
                     </ng-template>
                   </ng-container>
                   <ng-template #actionTemplate>
+                    <app-submit-message-box
+                      #deliverInvoiceMessageBox
+                    ></app-submit-message-box>
                     <div class="flex flex-row items-center justify-end">
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('view')"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         (click)="openGeneratedInvoiceView(element)"
                       >
                         <span class="text-warning">
@@ -158,16 +161,28 @@
                         *transloco="let t; read: 'generated'"
                         [attr.data-tip]="t('amend')"
                         (click)="openAmmendInvoiceDialog(element)"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                       >
                         <span class="material-symbols-outlined">
                           <i class="bi bi-arrow-repeat text-lg"></i>
                         </span>
                       </button>
                       <button
+                        *transloco="let t; read: 'generated.deliver'"
+                        [attr.data-tip]="t('deliver')"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
+                        (click)="
+                          makeInvoiceDelivery(deliverInvoiceMessageBox, element)
+                        "
+                      >
+                        <span class="text-green-600">
+                          <i class="bi bi-truck text-lg"></i>
+                        </span>
+                      </button>
+                      <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('download')"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         (click)="downloadInvoice(element)"
                       >
                         <span class="material-symbols-outlined text-linkBlue">

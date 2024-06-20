@@ -152,6 +152,7 @@
   },
   "inboxApproval": {
     "name": "Inbox Approval",
+    "approve": "Approve",
     "companyApproval": "Company Approval",
     "approvedSuccessfully": "Company approved successfully!",
     "searchBy": "Search by name",

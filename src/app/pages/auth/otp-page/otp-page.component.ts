@@ -77,7 +77,6 @@ export class OtpPageComponent implements OnInit {
     }
   }
   private createFormGroup() {
-    console.log(this.otpData);
     this.formGroup = this.fb.group({
       mobile: this.fb.control(this.otpData.mobile_no, [Validators.required]),
       otp_code: this.fb.control('', [Validators.required]),

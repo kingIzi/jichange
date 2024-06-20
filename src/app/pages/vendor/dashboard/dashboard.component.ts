@@ -437,12 +437,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         break;
       case 'Due'.toLocaleLowerCase():
         this.router.navigate(['/vendor/reports/invoice'], {
-          queryParams: { q: name },
+          queryParams: { q: btoa(name) },
         });
         break;
       case 'Expired'.toLocaleLowerCase():
         this.router.navigate(['/vendor/reports/invoice'], {
-          queryParams: { q: name },
+          queryParams: { q: btoa(name) },
         });
         break;
       default:

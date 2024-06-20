@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -39,9 +40,11 @@ import { NgxLoadingModule } from 'ngx-loading';
   animations: [vendorAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VendorComponent implements OnInit {
+export class VendorComponent implements OnInit, AfterViewInit {
   public routeLoading: boolean = false;
   @ViewChild('vendorHeader') vendorHeader!: VendorHeaderComponent;
+  @ViewChild('containerDoc', { static: true })
+  containerDoc!: ElementRef<HTMLDivElement>;
   constructor(
     private breadcrumbService: BreadcrumbService,
     private router: Router,
@@ -139,9 +142,27 @@ export class VendorComponent implements OnInit {
       }
     });
   }
+  private hideNavBarOnScroll() {
+    let containerDoc = this.containerDoc.nativeElement;
+    let header = this.vendorHeader.header.nativeElement;
+    let prevScrollpos = header.offsetHeight;
+    let navbar = document.getElementById('navbar');
+    this.containerDoc.nativeElement.onscroll = function () {
+      let currentScrollPos = containerDoc.scrollTop;
+      if (navbar && prevScrollpos > currentScrollPos) {
+        navbar.style.top = '0px';
+      } else if (navbar && prevScrollpos < currentScrollPos) {
+        navbar.style.top = `-${header.clientHeight}px`;
+      }
+      prevScrollpos = currentScrollPos;
+    };
+  }
   ngOnInit(): void {
     this.routeLoaderListener();
     this.prepareVendorRoutes();
+  }
+  ngAfterViewInit(): void {
+    this.hideNavBarOnScroll();
   }
   prepareRoute(outlet: RouterOutlet, animate: string): boolean {
     return (

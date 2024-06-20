@@ -204,7 +204,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('view')"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         (click)="openInvoiceReportView(element)"
                       >
                         <span class="text-warning">
@@ -214,7 +214,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('edit')"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         (click)="openEditInvoiceDialog(element)"
                       >
                         <span class="text-info">
@@ -224,7 +224,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('download')"
-                        class="btn btn-sm btn-ghost tooltip"
+                        class="btn btn-sm btn-ghost tooltip tooltip-left"
                         (click)="downloadInvoice(element)"
                       >
                         <span class="material-symbols-outlined text-linkBlue">
