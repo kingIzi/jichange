@@ -6,50 +6,54 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-submit-message-box #submitCodeMessageBox></app-submit-message-box>
 
-<form
-  id="forgot-password-form"
-  *transloco="let t; read: 'auth.deliveryCode'"
-  class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-0 md:w-[30rem]"
-  [formGroup]="formGroup"
->
-  <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
-  <div class="w-full flex flex-col">
-    <h6 class="text-center text-xl">
-      {{ t("confirmDelivery") }}
-    </h6>
-    <h6 class="text-center text-sm">
-      {{ t("deliveryCodeMessage").replace("{}", mobile_no.value) }}
-    </h6>
-  </div>
-  <div class="flex flex-col space-y-1 w-full py-8">
-    <h6 class="text-left text-sm">
-      {{ t("form.code") }} <span class="text-red-600">*</span>
-    </h6>
-    <input
-      [formControl]="code"
-      type="email"
-      [placeholder]="t('form.placeholders.code')"
-      class="input input-bordered w-full max-w-lg bg-transparent text-black"
-    />
-    <span *ngIf="code && code.invalid && code.touched">
-      <p *ngIf="code.hasError('required')" class="text-xs text-red-600">
-        {{ t("form.errors.code") }}
-      </p>
-      <p
-        *ngIf="code.hasError('minlength') || code.hasError('maxlength')"
-        class="text-xs text-red-600"
+<div class="w-full h-full">
+  <div class="absolute top-0 left-0 right-0 bottom-0 grid place-items-center">
+    <form
+      id="forgot-password-form"
+      *transloco="let t; read: 'auth.deliveryCode'"
+      class="bg-white grid place-items-center shadow-2 rounded-md space-y-0 p-4 w-11/12 lg:w-[30rem]"
+      [formGroup]="formGroup"
+    >
+      <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
+      <div class="w-full flex flex-col">
+        <h6 class="text-center text-xl">
+          {{ t("confirmDelivery") }}
+        </h6>
+        <h6 class="text-center text-sm">
+          {{ t("deliveryCodeMessage").replace("{}", mobile_no.value) }}
+        </h6>
+      </div>
+      <div class="flex flex-col space-y-1 w-full py-8">
+        <h6 class="text-left text-sm">
+          {{ t("form.code") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          [formControl]="code"
+          type="email"
+          [placeholder]="t('form.placeholders.code')"
+          class="input input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+        <span *ngIf="code && code.invalid && code.touched">
+          <p *ngIf="code.hasError('required')" class="text-xs text-red-600">
+            {{ t("form.errors.code") }}
+          </p>
+          <p
+            *ngIf="code.hasError('minlength') || code.hasError('maxlength')"
+            class="text-xs text-red-600"
+          >
+            {{ t("form.errors.minMaxLength") }}
+          </p>
+        </span>
+      </div>
+      <button
+        form="forgot-password-form"
+        (click)="submitForm()"
+        type="submit"
+        *transloco="let y; read: 'actions'"
+        class="btn w-full btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
       >
-        {{ t("form.errors.minMaxLength") }}
-      </p>
-    </span>
+        {{ y("submit") }}
+      </button>
+    </form>
   </div>
-  <button
-    form="forgot-password-form"
-    (click)="submitForm()"
-    type="submit"
-    *transloco="let y; read: 'actions'"
-    class="btn w-full btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
-  >
-    {{ y("submit") }}
-  </button>
-</form>
+</div>

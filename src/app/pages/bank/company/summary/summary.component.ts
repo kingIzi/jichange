@@ -54,6 +54,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
   selector: 'app-summary',
@@ -74,6 +75,7 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
     DisplayMessageBoxComponent,
     MatTableModule,
     MatSortModule,
+    MatListModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [

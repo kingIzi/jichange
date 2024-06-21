@@ -47,7 +47,98 @@
         </div>
       </div>
     </div>
-    <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+    <div id="list-view" class="py-4 md:hidden">
+      <ul class="flex flex-col space-y-4">
+        <li
+          *ngFor="
+            let element of tableData.dataSource.filteredData
+              | slice
+                : 1 + paginator.pageSize * paginator.pageIndex - 1
+                : 1 +
+                    paginator.pageSize * paginator.pageIndex +
+                    paginator.pageSize -
+                    1;
+            index as i
+          "
+        >
+          <div
+            class="flex flex-col space-y-1 rounded"
+            [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+          >
+            <div *ngFor="let header of headers.controls; index as i">
+              <div
+                *ngIf="i < headers.controls.length - 1; else actionButtons"
+                class="flex flex-row items-center justify-between border-b p-1"
+              >
+                <p class="text-xs font-semibold">
+                  {{ header.get("label")?.value }}
+                </p>
+                <p
+                  [class]="tableValueStyle(element, header.get('value')?.value)"
+                >
+                  {{ tableValue(element, header.get("value")?.value) }}
+                </p>
+              </div>
+              <ng-template #actionButtons>
+                <app-remove-item-dialog
+                  #removeItemDialog
+                ></app-remove-item-dialog>
+                <div
+                  class="flex flex-row items-center justify-between space-x-2 p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <div class="flex flex-row items-center space-x-2">
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('edit')"
+                      (click)="openEditDistrictDialog(element)"
+                      class="btn btn-sm btn-ghost border-info tooltip tooltip-bottom"
+                    >
+                      <span>
+                        <i class="bi bi-pen text-lg text-info"></i>
+                      </span>
+                    </button>
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('delete')"
+                      (click)="openRemoveDialog(element, removeItemDialog)"
+                      class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-bottom"
+                    >
+                      <span>
+                        <i class="bi bi-trash text-lg text-danger-600"></i>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <ng-container *ngIf="!tableLoading">
+        <div
+          class="border-t border-b grid place-items-center"
+          *transloco="let t; read: 'errors'"
+        >
+          <p
+            *ngIf="tableData.districts.length <= 0"
+            class="text-center text-sm tracking-wide p-3"
+          >
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="tableLoading">
+        <div class="w-full grid place-items-center mt-6">
+          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+        </div>
+      </ng-container>
+    </div>
+    <div
+      class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+    >
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
         <div class="overflow-y-auto shadow">
           <ng-container
@@ -111,7 +202,7 @@
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('edit')"
                         (click)="openEditDistrictDialog(element)"
-                        class="btn btn-sm btn-ghost tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-info tooltip tooltip-left"
                       >
                         <span>
                           <i class="bi bi-pen text-lg text-info"></i>
@@ -121,7 +212,7 @@
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('delete')"
                         (click)="openRemoveDialog(element, removeItemDialog)"
-                        class="btn btn-sm btn-ghost tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-left"
                       >
                         <span>
                           <i class="bi bi-trash text-lg text-danger-600"></i>

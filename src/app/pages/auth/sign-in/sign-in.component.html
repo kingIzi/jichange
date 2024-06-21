@@ -5,7 +5,7 @@
   [show]="startLoading"
 ></app-loader-infinite-spinner>
 
-<form
+<!-- <form
   id="sign-in-form"
   [formGroup]="formGroup"
   class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-4 md:w-[30rem]"
@@ -127,4 +127,151 @@
       </button>
     </div>
   </div>
-</form>
+</form> -->
+
+<div class="w-full h-full">
+  <div class="absolute top-0 bottom-0 left-0 right-0 flex flex-row">
+    <div class="basis-full lg:basis-8/12 grid place-items-center">
+      <form
+        id="sign-in-form"
+        [formGroup]="formGroup"
+        class="bg-white grid place-items-center shadow-2 rounded-md space-y-0 p-4 w-11/12 lg:w-[30rem]"
+        action=""
+      >
+        <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
+        <div class="w-full flex flex-col">
+          <h6
+            class="text-center text-xl"
+            *transloco="let t; read: 'auth.loginForm'"
+          >
+            {{ t("welcomeMessage") }}
+          </h6>
+          <p
+            *transloco="let t; read: 'auth.loginForm'"
+            class="text-center text-sm"
+          >
+            {{ t("signInMessage") }}
+          </p>
+        </div>
+        <div class="flex flex-col w-full py-4 space-y-4">
+          <div class="flex flex-col space-y-1 w-full">
+            <h6
+              class="text-left text-sm"
+              *transloco="let t; read: 'auth.loginForm'"
+            >
+              {{ t("username") }}
+            </h6>
+            <span class="relative">
+              <input
+                *transloco="let t; read: 'auth.loginForm.placeholders'"
+                type="email"
+                [formControl]="userName"
+                [placeholder]="t('username')"
+                class="input input-sm lg:input-md font-inter input-bordered w-full max-w-lg bg-transparent text-black"
+              />
+            </span>
+            <span *ngIf="userName && userName.invalid && userName.touched">
+              <p
+                *transloco="let t; read: 'auth.loginForm.errors'"
+                class="text-xs text-red-600"
+              >
+                {{ t("usernameError") }}
+              </p>
+            </span>
+          </div>
+          <div class="flex flex-col space-y-1">
+            <h6
+              class="text-left text-sm"
+              *transloco="let t; read: 'auth.loginForm'"
+            >
+              {{ t("password") }}
+            </h6>
+            <span class="relative">
+              <input
+                *transloco="let t; read: 'auth.loginForm.placeholders'"
+                type="password"
+                [formControl]="password"
+                [placeholder]="t('password')"
+                class="input input-sm lg:input-md input-bordered w-full max-w-lg bg-transparent text-black font-inter"
+              />
+            </span>
+            <span *ngIf="password && password.invalid && password.touched">
+              <p
+                *transloco="let t; read: 'auth.loginForm.errors'"
+                class="text-xs text-red-600"
+              >
+                {{ t("passwordError") }}
+              </p>
+            </span>
+          </div>
+        </div>
+        <div class="flex flex-row justify-between items-center w-full">
+          <a
+            [routerLink]="'/auth/reset'"
+            *transloco="let t; read: 'auth.loginForm'"
+            class="text-linkBlue cursor-pointer text-sm hover:underline"
+          >
+            {{ t("forgotPassword") }}
+          </a>
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <input
+                id="remember-me-checkbox"
+                type="checkbox"
+                checked
+                disabled
+                class="checkbox-xs"
+              />
+              <label
+                *transloco="let t; read: 'auth.loginForm'"
+                for="remember-me-checkbox"
+                class="label-text font-inter text-black"
+              >
+                {{ t("rememberMe") }}
+              </label>
+            </label>
+          </div>
+        </div>
+        <div class="flex flex-col w-full space-y-2 py-4">
+          <button
+            (click)="submitSignInForm()"
+            type="submit"
+            form="sign-in-form"
+            *transloco="let t; read: 'auth.loginForm.actions'"
+            class="btn btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
+          >
+            {{ t("signIn") }}
+          </button>
+          <div
+            class="flex flex-row items-center justify-between w-full space-x-2"
+          >
+            <button
+              type="button"
+              *transloco="let t; read: 'auth.loginForm.actions'"
+              (click)="openControlNumberDetailsDialog()"
+              class="btn text-xs btn-outline font-inter border-contactDetails hover:bg-contactDetails basis-1/2 text-contactDetails hover:text-white"
+            >
+              {{ t("controlNumberDetails") }}
+            </button>
+            <button
+              *transloco="let t; read: 'auth.loginForm.actions'"
+              type="button"
+              (click)="openVendorRegistrationDialog()"
+              class="btn text-xs btn-outline font-inter border-loginRegister hover:bg-loginRegister text-loginRegister basis-1/2 hover:text-white"
+            >
+              {{ t("register") }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="basis-full hidden lg:block">
+      <img
+        src="assets/img/LB-featured-image-template.png"
+        class="object-cover w-full h-full"
+        alt=""
+        srcset=""
+      />
+    </div>
+  </div>
+</div>

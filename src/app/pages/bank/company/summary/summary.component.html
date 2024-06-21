@@ -38,7 +38,7 @@
   >
     <div class="flex flex-row items-center justify-end">
       <div class="flex flex-row items-center space-x-2">
-        <div class="dropdown">
+        <div class="hidden md:dropdown">
           <button
             tabindex="0"
             role="button"
@@ -47,11 +47,11 @@
             <span>
               <i class="bi bi-layout-three-columns text-sm"></i>
             </span>
-            <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+            <p *transloco="let t; read: 'defaults'" class="text-xs">
               {{ t("columns") }}
             </p>
             <span>
-              <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
+              <i class="bi bi-chevron-down text-sm"></i>
             </span>
           </button>
           <ul
@@ -89,7 +89,84 @@
         </div>
       </div>
     </div>
-    <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+    <div id="list-view" class="py-4 md:hidden">
+      <ul class="flex flex-col space-y-4">
+        <li
+          *ngFor="
+            let company of tableData.dataSource.filteredData
+              | slice
+                : 1 + paginator.pageSize * paginator.pageIndex - 1
+                : 1 +
+                    paginator.pageSize * paginator.pageIndex +
+                    paginator.pageSize -
+                    1;
+            index as i
+          "
+        >
+          <div
+            class="flex flex-col space-y-1 rounded"
+            [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+          >
+            <div *ngFor="let header of headers.controls; index as i">
+              <div
+                *ngIf="i < headers.controls.length - 1; else actionButtons"
+                class="flex flex-row items-center justify-between border-b p-1"
+              >
+                <p class="text-xs font-semibold">
+                  {{ header.get("label")?.value }}
+                </p>
+                <p
+                  [class]="tableValueStyle(company, header.get('value')?.value)"
+                >
+                  {{ tableValue(company, header.get("value")?.value) }}
+                </p>
+              </div>
+              <ng-template #actionButtons>
+                <div
+                  class="flex flex-row items-center justify-between space-x-2 p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <button
+                    *transloco="let t; read: 'actions'"
+                    (click)="openEditCompanySummaryDialog(company)"
+                    class="btn btn-sm border-info bg-transparent tooltip tooltip-bottom"
+                    [attr.data-tip]="t('edit')"
+                  >
+                    <span>
+                      <i class="bi bi-pen text-lg text-info"></i>
+                    </span>
+                  </button>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <ng-container *ngIf="!tableLoading">
+        <div
+          class="border-t border-b grid place-items-center"
+          *transloco="let t; read: 'errors'"
+        >
+          <p
+            *ngIf="tableData.companies.length <= 0"
+            class="text-center text-sm tracking-wide p-3"
+          >
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="tableLoading">
+        <div class="w-full grid place-items-center mt-6">
+          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+        </div>
+      </ng-container>
+    </div>
+    <div
+      id="table-view"
+      class="hidden md:flex overflow-x-auto flex-col sm:-mx-6 lg:-mx-8 relative"
+    >
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
         <div class="overflow-y-auto shadow">
           <ng-container

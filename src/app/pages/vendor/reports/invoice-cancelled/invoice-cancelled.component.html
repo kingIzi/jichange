@@ -185,7 +185,7 @@
     >
       <div class="flex flex-row items-center justify-end mt-4">
         <div class="flex flex-row items-center space-x-2">
-          <div class="dropdown">
+          <div class="hidden md:dropdown">
             <button
               tabindex="0"
               role="button"
@@ -194,11 +194,11 @@
               <span>
                 <i class="bi bi-layout-three-columns text-sm"></i>
               </span>
-              <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+              <p *transloco="let t; read: 'defaults'" class="text-sm">
                 {{ t("columns") }}
               </p>
               <span>
-                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
+                <i class="bi bi-chevron-down text-sm"></i>
               </span>
             </button>
             <ul
@@ -236,7 +236,67 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+      <div id="list-view" class="py-4 md:hidden">
+        <ul class="flex flex-col space-y-4">
+          <li
+            *ngFor="
+              let element of tableData.dataSource.filteredData
+                | slice
+                  : 1 + paginator.pageSize * paginator.pageIndex - 1
+                  : 1 +
+                      paginator.pageSize * paginator.pageIndex +
+                      paginator.pageSize -
+                      1;
+              index as i
+            "
+          >
+            <div
+              class="flex flex-col space-y-1 rounded"
+              [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+            >
+              <div *ngFor="let header of headers.controls; index as i">
+                <div
+                  class="flex flex-row items-center justify-between border-b p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <p
+                    [class]="
+                      tableValueStyle(element, header.get('value')?.value)
+                    "
+                  >
+                    {{ tableValue(element, header.get("value")?.value) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <ng-container *ngIf="!tableLoading">
+          <div
+            class="border-t border-b grid place-items-center"
+            *transloco="let t; read: 'errors'"
+          >
+            <p
+              *ngIf="tableData.invoicesList.length <= 0"
+              class="text-center text-sm tracking-wide p-3"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="tableLoading">
+          <div class="w-full grid place-items-center mt-6">
+            <span
+              class="loading loading-spinner loading-lg bg-darkPurple"
+            ></span>
+          </div>
+        </ng-container>
+      </div>
+      <div
+        class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+      >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <ng-container

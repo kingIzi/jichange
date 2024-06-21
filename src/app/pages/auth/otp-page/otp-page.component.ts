@@ -48,7 +48,8 @@ export class OtpPageComponent implements OnInit {
   private counterValue: number = 0;
   private intervalId: number | undefined;
   private duration: number = 2 * 60 * 1000;
-  public resendCodeCounter: number = 300; //2 minutes
+  private RESEND_CODE_TIMER = 300;
+  public resendCodeCounter: number = this.RESEND_CODE_TIMER; //2 minutes
   private phoneNumber: string = '';
   private otpData!: ForgotPasswordResponse;
   @ViewChild('noSessionFound') noSessionFound!: DisplayMessageBoxComponent;
@@ -143,7 +144,7 @@ export class OtpPageComponent implements OnInit {
           typeof result.response !== 'number'
         ) {
           sessionStorage.setItem('otp', JSON.stringify(result.response));
-          this.resendCodeCounter = 300;
+          this.resendCodeCounter = this.RESEND_CODE_TIMER;
           this.startCounter();
         } else {
           AppUtilities.openDisplayMessageBox(

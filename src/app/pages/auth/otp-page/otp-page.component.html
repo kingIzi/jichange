@@ -4,44 +4,64 @@
 <app-display-message-box #noSessionFound></app-display-message-box>
 <app-display-message-box #displayMessageBox></app-display-message-box>
 
-<form
-  id="forgot-password-form"
-  *transloco="let t; read: 'auth.otp'"
-  class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-0 md:w-[30rem]"
-  [formGroup]="formGroup"
->
-  <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
-  <div class="w-full flex flex-col">
-    <h6 class="text-center text-xl">
-      {{ t("verifyAccount") }}
-    </h6>
-    <h6 class="text-center text-sm">
-      {{ t("verifyAccountMessage").replace("{}", mobile.value) }}
-    </h6>
+<div class="w-full h-full">
+  <div class="absolute top-0 left-0 right-0 bottom-0 grid place-items-center">
+    <form
+      id="forgot-password-form"
+      *transloco="let t; read: 'auth.otp'"
+      class="bg-white grid place-items-center px-8 py-8 shadow-2 rounded-md space-y-0 w-11/12 lg:w-[30rem]"
+      [formGroup]="formGroup"
+    >
+      <img src="assets/img/jichangelogo.png" class="w-40" alt="" srcset="" />
+      <div class="w-full flex flex-col">
+        <h6 class="text-center text-xl">
+          {{ t("verifyAccount") }}
+        </h6>
+        <h6 class="text-center text-sm">
+          {{ t("verifyAccountMessage").replace("{}", mobile.value) }}
+        </h6>
+      </div>
+      <div class="flex flex-col space-y-1 w-full py-8">
+        <h6 class="text-left text-sm">
+          {{ t("form.code") }} <span class="text-red-600">*</span>
+        </h6>
+        <input
+          [formControl]="otp_code"
+          type="email"
+          [placeholder]="t('form.placeholders.code')"
+          class="input input-bordered w-full max-w-lg bg-transparent text-black"
+        />
+        <span *ngIf="otp_code && otp_code.invalid && otp_code.touched">
+          <p class="text-xs text-red-600">
+            {{ t("form.errors.code") }}
+          </p>
+        </span>
+      </div>
+      <div class="w-full pb-4">
+        <a
+          *ngIf="resendCodeCounter > 0; else resendCodeLink"
+          class="text-black text-xs lg:text-sm"
+        >
+          {{ t("resendCodeIn").replace("{}", resendCodeCounter) }}
+        </a>
+        <ng-template #resendCodeLink>
+          <a
+            (click)="resendCode()"
+            class="text-linkBlue cursor-pointer text-sm hover:underline"
+          >
+            {{ t("resendCode") }}
+          </a>
+        </ng-template>
+      </div>
+      <button
+        form="forgot-password-form"
+        (click)="submitForm()"
+        type="submit"
+        *transloco="let y; read: 'actions'"
+        class="btn w-full btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
+      >
+        {{ y("submit") }}
+      </button>
+    </form>
   </div>
-  <div class="flex flex-col space-y-1 w-full py-8">
-    <h6 class="text-left text-sm">
-      {{ t("form.code") }} <span class="text-red-600">*</span>
-    </h6>
-    <input
-      [formControl]="otp_code"
-      type="email"
-      [placeholder]="t('form.placeholders.code')"
-      class="input input-bordered w-full max-w-lg bg-transparent text-black"
-    />
-    <span *ngIf="otp_code && otp_code.invalid && otp_code.touched">
-      <p class="text-xs text-red-600">
-        {{ t("form.errors.code") }}
-      </p>
-    </span>
-  </div>
-  <button
-    form="forgot-password-form"
-    (click)="submitForm()"
-    type="submit"
-    *transloco="let y; read: 'actions'"
-    class="btn w-full btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
-  >
-    {{ y("submit") }}
-  </button>
-</form>
+</div>

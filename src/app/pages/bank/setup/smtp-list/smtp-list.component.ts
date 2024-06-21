@@ -276,80 +276,6 @@ export class SmtpListComponent implements OnInit {
       });
     this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case SmtpTable.FROM_ADDRESS:
-  //       this.smtps.sort((a, b) =>
-  //         a?.From_Address.toLocaleLowerCase() >
-  //         b?.From_Address.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case SmtpTable.ADDRESS:
-  //       this.smtps.sort((a, b) =>
-  //         a?.SMTP_Address.toLocaleLowerCase() >
-  //         b?.SMTP_Address.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case SmtpTable.USERNAME:
-  //       this.smtps.sort((a, b) =>
-  //         a?.SMTP_UName.toLocaleLowerCase() > b?.SMTP_UName.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case SmtpTable.CREATED:
-  //       this.smtps.sort((a, b) =>
-  //         new Date(a?.Effective_Date).toLocaleDateString() >
-  //         new Date(b?.Effective_Date).toLocaleDateString()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case SmtpTable.FROM_ADDRESS:
-  //       this.smtps.sort((a, b) =>
-  //         a?.From_Address.toLocaleLowerCase() <
-  //         b?.From_Address.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case SmtpTable.ADDRESS:
-  //       this.smtps.sort((a, b) =>
-  //         a?.SMTP_Address.toLocaleLowerCase() <
-  //         b?.SMTP_Address.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case SmtpTable.USERNAME:
-  //       this.smtps.sort((a, b) =>
-  //         a?.SMTP_UName.toLocaleLowerCase() < b?.SMTP_UName.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case SmtpTable.CREATED:
-  //       this.smtps.sort((a, b) =>
-  //         new Date(a?.Effective_Date).toLocaleDateString() <
-  //         new Date(b?.Effective_Date).toLocaleDateString()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   private searchTable(searchText: string, paginator: MatPaginator) {
     this.tableData.dataSource.filter = searchText.trim().toLowerCase();
     if (this.tableData.dataSource.paginator) {
@@ -395,7 +321,7 @@ export class SmtpListComponent implements OnInit {
     };
     let style = 'text-xs lg:text-sm leading-relaxed';
     switch (key) {
-      case 'Name':
+      case 'From_Address':
         return `${style} text-black font-semibold`;
       case 'SSL_Enable':
         return SslEnable(element[key]);

@@ -6,9 +6,6 @@
 ></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
-  <!-- <h2 *transloco="let t; read: 'reports.auditTrails'" class="text-lg font-bold">
-    {{ t("auditTrails") }}
-  </h2> -->
   <div class="flex flex-row items-center justify-between">
     <h2
       *transloco="let t; read: 'reports.auditTrails'"
@@ -177,7 +174,7 @@
     <div [formGroup]="headersFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-end">
         <div class="flex flex-row items-center space-x-2">
-          <div class="dropdown">
+          <div class="hidden md:dropdown">
             <button
               tabindex="0"
               role="button"
@@ -186,11 +183,11 @@
               <span>
                 <i class="bi bi-layout-three-columns text-sm"></i>
               </span>
-              <p *transloco="let t; read: 'defaults'" class="lg:block hidden">
+              <p *transloco="let t; read: 'defaults'" class="text-xs">
                 {{ t("columns") }}
               </p>
               <span>
-                <i class="bi bi-chevron-down text-sm lg:block hidden"></i>
+                <i class="bi bi-chevron-down text-sm"></i>
               </span>
             </button>
             <ul
@@ -228,223 +225,69 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+      <div id="list-view" class="py-4 md:hidden">
+        <ul class="flex flex-col space-y-4">
+          <li
+            *ngFor="
+              let element of tableData.dataSource.filteredData
+                | slice
+                  : 1 + paginator.pageSize * paginator.pageIndex - 1
+                  : 1 +
+                      paginator.pageSize * paginator.pageIndex +
+                      paginator.pageSize -
+                      1;
+              index as i
+            "
+          >
+            <div
+              class="flex flex-col space-y-1 rounded"
+              [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+            >
+              <div *ngFor="let header of headers.controls; index as i">
+                <div
+                  class="flex flex-row items-center justify-between border-b p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <p
+                    [class]="
+                      tableValueStyle(element, header.get('value')?.value)
+                    "
+                  >
+                    {{ tableValue(element, header.get("value")?.value) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <ng-container *ngIf="!tableLoading">
+          <div
+            class="border-t border-b grid place-items-center"
+            *transloco="let t; read: 'errors'"
+          >
+            <p
+              *ngIf="tableData.auditTrails.length <= 0"
+              class="text-center text-sm tracking-wide p-3"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="tableLoading">
+          <div class="w-full grid place-items-center mt-6">
+            <span
+              class="loading loading-spinner loading-lg bg-darkPurple"
+            ></span>
+          </div>
+        </ng-container>
+      </div>
+      <div
+        class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+      >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
-            <!-- <table class="min-w-full text-left text-sm font-light">
-              <thead formArrayName="headers" class="border-b font-medium">
-                <tr
-                  *transloco="let t; read: 'tableData.vendor'"
-                  class="bg-lightPurple rounded-tl-lg w-full"
-                >
-                  <ng-container
-                    *ngFor="let header of headers.controls; index as ind"
-                  >
-                    <th
-                      *ngIf="header.get('included')?.value"
-                      scope="col"
-                      class="px-6 py-2 font-inter text-sm"
-                      [id]="'generated-invoice-id-' + ind"
-                      formGroupName="{{ ind }}"
-                    >
-                      <div class="flex items-center">
-                        <p>
-                          {{ header?.get("label")?.value }}
-                        </p>
-                        <button
-                          [class]="
-                            header.get('label')?.value === '#' ? 'hidden' : ''
-                          "
-                          (click)="
-                            PerformanceUtils.sortColumnClicked(ind, headers)
-                          "
-                          class="flex flex-row items-center m-1"
-                        >
-                          <span>
-                            <i
-                              [class]="
-                                header.get('sortAsc')?.value
-                                  ? 'text-darkPurple'
-                                  : ''
-                              "
-                              class="bi bi-arrow-up"
-                            ></i>
-                          </span>
-                          <span>
-                            <i
-                              [class]="
-                                header.get('sortAsc')?.value
-                                  ? ''
-                                  : 'text-darkPurple'
-                              "
-                              class="bi bi-arrow-down"
-                            ></i>
-                          </span>
-                        </button>
-                      </div>
-                    </th>
-                  </ng-container>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  *ngFor="
-                    let auditTrail of auditTrails
-                      | slice
-                        : 1 + paginator.pageSize * paginator.pageIndex - 1
-                        : 1 +
-                            paginator.pageSize * paginator.pageIndex +
-                            paginator.pageSize -
-                            1;
-                    index as i;
-                    trackBy: PerformanceUtils.trackByIndex
-                  "
-                  class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                  [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-                >
-                  <td
-                    *ngIf="
-                      headers.controls.at(AuditTrailsTable.ID)?.get('included')
-                        ?.value
-                    "
-                    [class]="
-                      headers.controls.at(AuditTrailsTable.ID)?.get('included')
-                        ?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{
-                      PerformanceUtils.getIndexOfItem(auditTrails, auditTrail)
-                    }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
-                        .at(AuditTrailsTable.ACTIONS)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(AuditTrailsTable.ACTIONS)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{ auditTrail.atype }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
-                        .at(AuditTrailsTable.COLUMN_NAME)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(AuditTrailsTable.COLUMN_NAME)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{ auditTrail.colname }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
-                        .at(AuditTrailsTable.OLD_VALUE)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(AuditTrailsTable.OLD_VALUE)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{ auditTrail.ovalue ? auditTrail.ovalue : "-" }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
-                        .at(AuditTrailsTable.NEW_VALUE)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(AuditTrailsTable.NEW_VALUE)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{ auditTrail.nvalue ? auditTrail.nvalue : "-" }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
-                        .at(AuditTrailsTable.POSTED)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(AuditTrailsTable.POSTED)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{ auditTrail.aby }}
-                  </td>
-                  <td
-                    *ngIf="
-                      headers.controls
-                        .at(AuditTrailsTable.AUDIT_DATE)
-                        ?.get('included')?.value
-                    "
-                    [class]="
-                      headers.controls
-                        .at(AuditTrailsTable.AUDIT_DATE)
-                        ?.get('included')?.value
-                        ? ''
-                        : 'hidden'
-                    "
-                    class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                  >
-                    {{
-                      PerformanceUtils.convertDateStringToDate(
-                        auditTrail.adate
-                      ).toDateString()
-                    }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <ng-container *ngIf="!tableLoading">
-              <div *transloco="let t; read: 'errors'">
-                <p
-                  *ngIf="auditTrails.length <= 0"
-                  class="text-center text-sm tracking-wide pt-3 pb-1"
-                >
-                  {{ t("noDataFound") }}
-                </p>
-              </div>
-            </ng-container>
-            <ng-container *ngIf="tableLoading">
-              <div class="w-full grid place-items-center mt-6">
-                <span
-                  class="loading loading-spinner loading-sm bg-darkPurple"
-                ></span>
-              </div>
-            </ng-container> -->
             <ng-container
               *ngIf="tableData.tableColumns$ | async as displayedColumns"
             >

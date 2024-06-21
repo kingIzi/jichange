@@ -46,166 +46,54 @@
         </div>
       </div>
     </div>
-    <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
-      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-        <div class="overflow-y-auto shadow">
-          <!-- <table
-            #customersTable
-            class="min-w-full text-left text-sm font-light"
+    <div id="list-view" class="py-4 md:hidden">
+      <ul class="flex flex-col space-y-4">
+        <li
+          *ngFor="
+            let element of tableData.dataSource.filteredData
+              | slice
+                : 1 + paginator.pageSize * paginator.pageIndex - 1
+                : 1 +
+                    paginator.pageSize * paginator.pageIndex +
+                    paginator.pageSize -
+                    1;
+            index as i
+          "
+        >
+          <div
+            class="flex flex-col space-y-1 rounded"
+            [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
           >
-            <thead formArrayName="headers" class="border-b font-medium">
-              <tr
-                *transloco="let t; read: 'tableData.vendor'"
-                class="bg-lightPurple"
+            <div *ngFor="let header of headers.controls; index as i">
+              <div
+                *ngIf="i < headers.controls.length - 1; else actionButtons"
+                class="flex flex-row items-center justify-between border-b p-1"
               >
-                <ng-container
-                  *ngFor="let header of headers.controls; index as ind"
+                <p class="text-xs font-semibold">
+                  {{ header.get("label")?.value }}
+                </p>
+                <p
+                  [class]="tableValueStyle(element, header.get('value')?.value)"
                 >
-                  <th
-                    *ngIf="header.get('included')?.value"
-                    scope="col"
-                    class="px-6 py-2 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
-                    formGroupName="{{ ind }}"
-                  >
-                    <div class="flex items-center">
-                      <p>
-                        {{ header?.get("label")?.value }}
-                      </p>
-                      <button
-                        [class]="
-                          header.get('label')?.value === '#' ? 'hidden' : ''
-                        "
-                        (click)="
-                          PerformanceUtils.sortColumnClicked(ind, headers)
-                        "
-                        class="flex flex-row items-center m-1"
-                      >
-                        <span>
-                          <i
-                            [class]="
-                              header.get('sortAsc')?.value
-                                ? 'text-darkPurple'
-                                : ''
-                            "
-                            class="bi bi-arrow-up"
-                          ></i>
-                        </span>
-                        <span>
-                          <i
-                            [class]="
-                              header.get('sortAsc')?.value
-                                ? ''
-                                : 'text-darkPurple'
-                            "
-                            class="bi bi-arrow-down"
-                          ></i>
-                        </span>
-                      </button>
-                    </div>
-                  </th>
-                </ng-container>
-                <th
-                  *transloco="let t; read: 'defaults'"
-                  class="px-6 font-inter text-sm text-right"
+                  {{ tableValue(element, header.get("value")?.value) }}
+                </p>
+              </div>
+              <ng-template #actionButtons>
+                <app-remove-item-dialog
+                  #removeItemDialog
+                ></app-remove-item-dialog>
+                <div
+                  class="flex flex-row items-center justify-between space-x-2 p-1"
                 >
-                  {{ t("action") }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                *ngFor="
-                  let branch of branches
-                    | slice
-                      : 1 + paginator.pageSize * paginator.pageIndex - 1
-                      : 1 +
-                          paginator.pageSize * paginator.pageIndex +
-                          paginator.pageSize -
-                          1;
-                  index as i;
-                  trackBy: PerformanceUtils.trackByIndex
-                "
-                class="border-b transition duration-300 ease-in-out hover:bg-neutral-100"
-                [class]="i % 2 !== 0 ? 'bg-neutral-50' : ''"
-              >
-                <td
-                  *ngIf="
-                    headers.controls.at(BranchTable.ID)?.get('included')?.value
-                  "
-                  [class]="
-                    headers.controls.at(BranchTable.ID)?.get('included')?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="text-sm font-inter whitespace-nowrap px-6 py-4"
-                >
-                  {{ PerformanceUtils.getIndexOfItem(branches, branch) }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls.at(BranchTable.NAME)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(BranchTable.NAME)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal capitalize"
-                >
-                  {{ branch.Name }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls.at(BranchTable.LOCATION)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(BranchTable.LOCATION)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal capitalize"
-                >
-                  {{ branch.Location }}
-                </td>
-                <td
-                  *ngIf="
-                    headers.controls.at(BranchTable.STATUS)?.get('included')
-                      ?.value
-                  "
-                  [class]="
-                    headers.controls.at(BranchTable.STATUS)?.get('included')
-                      ?.value
-                      ? ''
-                      : 'hidden'
-                  "
-                  class="tracking-wide text-sm font-inter whitespace-nowrap px-6 py-4 text-black font-normal"
-                >
-                  <button
-                    [class]="
-                      PerformanceUtils.getActiveStatusStyles(
-                        branch.Status,
-                        'Active'
-                      )
-                    "
-                  >
-                    {{ branch.Status }}
-                  </button>
-                </td>
-                <td class="text-sm font-inter whitespace-nowrap px-6 py-3">
-                  <app-remove-item-dialog
-                    #removeItemDialog
-                  ></app-remove-item-dialog>
-                  <div class="flex flex-row items-center justify-end space-x-2">
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <div class="flex flex-row items-center space-x-2">
                     <button
                       *transloco="let t; read: 'actions'"
                       [attr.data-tip]="t('edit')"
-                      class="btn btn-sm btn-ghost tooltip"
-                      (click)="openEditBranchForm(branch)"
+                      class="btn btn-sm btn-ghost border-info tooltip tooltip-bottom"
+                      (click)="openEditBranchForm(element)"
                     >
                       <span>
                         <i class="bi bi-pen text-lg text-info"></i>
@@ -214,35 +102,44 @@
                     <button
                       *transloco="let t; read: 'actions'"
                       [attr.data-tip]="t('delete')"
-                      (click)="openRemoveDialog(branch, removeItemDialog)"
-                      class="btn btn-sm btn-ghost tooltip"
+                      (click)="openRemoveDialog(element, removeItemDialog)"
+                      class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-bottom"
                     >
                       <span>
                         <i class="bi bi-trash text-lg text-danger-600"></i>
                       </span>
                     </button>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <ng-container *ngIf="!tableLoading">
-            <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="branches.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
+                </div>
+              </ng-template>
             </div>
-          </ng-container>
-          <ng-container *ngIf="tableLoading">
-            <div class="w-full grid place-items-center mt-6">
-              <span
-                class="loading loading-spinner loading-sm bg-darkPurple"
-              ></span>
-            </div>
-          </ng-container> -->
+          </div>
+        </li>
+      </ul>
+      <ng-container *ngIf="!tableLoading">
+        <div
+          class="border-t border-b grid place-items-center"
+          *transloco="let t; read: 'errors'"
+        >
+          <p
+            *ngIf="tableData.branches.length <= 0"
+            class="text-center text-sm tracking-wide p-3"
+          >
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="tableLoading">
+        <div class="w-full grid place-items-center mt-6">
+          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+        </div>
+      </ng-container>
+    </div>
+    <div
+      class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+    >
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="overflow-y-auto shadow">
           <ng-container
             *ngIf="tableData.tableColumns$ | async as displayedColumns"
           >
@@ -303,7 +200,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('edit')"
-                        class="btn btn-sm btn-ghost tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-info tooltip tooltip-left"
                         (click)="openEditBranchForm(element)"
                       >
                         <span>
@@ -314,7 +211,7 @@
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('delete')"
                         (click)="openRemoveDialog(element, removeItemDialog)"
-                        class="btn btn-sm btn-ghost tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-left"
                       >
                         <span>
                           <i class="bi bi-trash text-lg text-danger-600"></i>

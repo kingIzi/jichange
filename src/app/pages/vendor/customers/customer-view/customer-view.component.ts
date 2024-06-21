@@ -78,6 +78,7 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 })
 export class CustomerViewComponent implements OnInit {
   public startLoading: boolean = false;
+  public tableLoading: boolean = false;
   public customer!: Customer;
   public tableData: {
     invoiceReports: InvoiceReport[];

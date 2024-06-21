@@ -1,4 +1,4 @@
-<div class="h-screen w-screen overflow-hiden bg-jichangeDefault relative">
+<!-- <div class="h-screen w-screen overflow-hiden bg-jichangeDefault relative">
   <div class="absolute right-4">
     <app-language-selector></app-language-selector>
   </div>
@@ -9,6 +9,21 @@
     <router-outlet #outlet="outlet"></router-outlet>
   </div>
   <div class="absolute bottom-0 left-0 right-0">
+    <app-footer></app-footer>
+  </div>
+</div> -->
+
+<div class="h-screen w-screen overflow-hidden bg-jichangeDefault flex flex-col">
+  <!-- <div class="flex-none flex flex-row items-center justify-end">
+    <app-language-selector></app-language-selector>
+  </div> -->
+  <div
+    [@triggerName]="prepareRoute(outlet, 'animationState')"
+    class="h-full w-full relative flex-1"
+  >
+    <router-outlet #outlet="outlet"></router-outlet>
+  </div>
+  <div class="flex-none">
     <app-footer></app-footer>
   </div>
 </div>

@@ -451,7 +451,6 @@ export class TransactionDetailsComponent implements OnInit {
   }
   private initialSubmission() {
     this.activatedRoute.queryParams.subscribe((params) => {
-      console.log(params['q']);
       if (
         params['q'] &&
         atob(params['q']).toLocaleLowerCase() ===

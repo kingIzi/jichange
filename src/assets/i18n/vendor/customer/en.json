@@ -65,6 +65,7 @@
     }
   },
   "customerView": {
+    "searchBy": "Invoice No.",
     "customerProfileTransaction": "Customer Profile & Transactions",
     "customerDetails": {
       "customerDetails": "Customer details",

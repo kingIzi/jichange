@@ -65,6 +65,7 @@
     }
   },
   "customerView": {
+    "searchBy": "Nambari ya Ankara",
     "customerProfileTransaction": "Maelezo ya Mteja na Miamala",
     "customerDetails": {
       "customerDetails": "Maelezo ya Mteja",
