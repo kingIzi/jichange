@@ -279,7 +279,7 @@ export class InvoiceDetailsComponent implements OnInit {
         ) {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`defaults.warning`),
             this.tr.translate(`errors.noDataFound`)
           );
           this.tableData.invoiceReports = [];
@@ -407,7 +407,7 @@ export class InvoiceDetailsComponent implements OnInit {
         ) {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`defaults.warning`),
             this.tr.translate(`errors.noDataFound`)
           );
           this.tableData.invoiceReports = [];
@@ -544,7 +544,7 @@ export class InvoiceDetailsComponent implements OnInit {
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`defaults.warning`),
         this.tr.translate(`errors.noDataFound`)
       );
     }

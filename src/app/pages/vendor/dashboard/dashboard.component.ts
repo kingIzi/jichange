@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (typeof results.response === 'string') {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`defaults.warning`),
         this.tr.translate(`errors.noDataFound`)
       );
     } else {

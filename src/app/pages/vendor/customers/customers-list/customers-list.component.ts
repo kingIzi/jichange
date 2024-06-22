@@ -160,7 +160,7 @@ export class CustomersListComponent implements OnInit {
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`defaults.warning`),
             this.tr.translate(`errors.noDataFound`)
           );
         }

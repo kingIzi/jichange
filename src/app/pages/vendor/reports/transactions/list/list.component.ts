@@ -320,7 +320,7 @@ export class ListComponent implements OnInit {
         } else {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
+            this.tr.translate(`defaults.warning`),
             this.tr.translate(`errors.noDataFound`)
           );
           this.tableData.transactions = [];
