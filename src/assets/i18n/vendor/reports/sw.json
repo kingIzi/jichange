@@ -14,7 +14,15 @@
     ],
     "invoiceChart": "Muhtasari wa Invoice(s)",
     "statistics": "Takwimu",
-    "salesSummary": "Muhtasari wa Uuzaji(s)"
+    "salesSummary": "Muhtasari wa Uuzaji(s)",
+    "statisticsData": {
+      "transaction": "Muamala/Miamala",
+      "customer": "Mteja/Wateja",
+      "users": "Mtumiaji/Watumiaji",
+      "pendings": "Inayosubiri/Inazosubiri",
+      "due": "Inayostahili",
+      "expired": "Imeisha Muda"
+    }
   },
   "transactionDetails": {
     "transactionDetails": "Maelezo ya Shughuli",

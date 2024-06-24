@@ -227,34 +227,6 @@ export class DashboardComponent implements OnInit {
         throw err;
       });
   }
-  private requestBankerInvoiceStats() {
-    this.overviewLoading = true;
-    this.reportsService
-      .getBankerInvoiceStats({ sessB: this.userProfile.sessb })
-      .then((result) => {
-        if (typeof result === 'string' && typeof result === 'number') {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`dashboard.dashboard.invoiceData.message`)
-          );
-        } else {
-          this.invoiceStatistics =
-            result.response as DashboardOverviewStatistic[];
-        }
-        this.overviewLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.overviewLoading = false;
-        this.cdr.detectChanges();
-      });
-  }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
     if (indexes.includes(DashboardCompanySummaryTable.NAME)) {

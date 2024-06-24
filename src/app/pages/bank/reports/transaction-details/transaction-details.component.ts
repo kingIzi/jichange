@@ -587,7 +587,9 @@ export class TransactionDetailsComponent implements OnInit {
   }
   submitForm() {
     if (this.filterTableFormGroup.valid) {
-      let form = { ...this.filterTableFormGroup.value };
+      let form = {
+        ...this.filterTableFormGroup.value,
+      } as TransactionDetailsReportForm;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }

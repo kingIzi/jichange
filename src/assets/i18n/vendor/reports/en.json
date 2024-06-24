@@ -7,7 +7,15 @@
     "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"],
     "invoiceChart": "Invoice(s) summary",
     "statistics": "Statistics",
-    "salesSummary": "Sale(s) Summary"
+    "salesSummary": "Sale(s) Summary",
+    "statisticsData": {
+      "transaction": "Transactions",
+      "customer": "Customers",
+      "users": "Users",
+      "pendings": "Pendings",
+      "due": "Due",
+      "expired": "Expired"
+    }
   },
   "transactionDetails": {
     "transactionDetails": "Transaction Details",

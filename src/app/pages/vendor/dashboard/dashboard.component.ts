@@ -99,10 +99,23 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     tableColumns$: of([]),
     dataSource: new MatTableDataSource<GeneratedInvoice>([]),
   };
+  public graphData: {
+    invoicePieChartData: number[];
+    invoicePieChartLabels: string[];
+    invoiceStatisticsPieChartData: number[];
+    invoiceStatisticsPieChartLabels: string[];
+  } = {
+    invoicePieChartData: [],
+    invoicePieChartLabels: [],
+    invoiceStatisticsPieChartData: [],
+    invoiceStatisticsPieChartLabels: [],
+  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
-  @ViewChild('transactionChart') transactionChart!: ElementRef;
-  @ViewChild('operationsChart') operationsChart!: ElementRef;
+  @ViewChild('transactionChart', { static: true })
+  transactionChart!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('operationsChart', { static: true })
+  operationsChart!: ElementRef<HTMLCanvasElement>;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -165,16 +178,50 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       });
     this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private createTransactionChart() {
-    let canvas = this.transactionChart.nativeElement as HTMLCanvasElement;
-    new Chart(canvas, {
-      type: 'bar',
+  private invoicePieChartDataset(invoices: GeneratedInvoice[]) {
+    let aggregatedData = invoices.reduce((acc, item) => {
+      let paymentType = item.Payment_Type;
+      if (!acc[paymentType]) {
+        acc[paymentType] = 0;
+      }
+      acc[paymentType] += 1;
+      return acc;
+    }, {} as any);
+    this.graphData.invoicePieChartLabels = Object.keys(aggregatedData);
+    this.graphData.invoicePieChartData = Object.values(aggregatedData);
+  }
+  private transactionsPieChartDataset(
+    statistics: DashboardOverviewStatistic[]
+  ) {
+    let filteredData = statistics.filter((item) =>
+      ['Pendings', 'Due', 'Expired'].includes(item.Name)
+    );
+    let aggregatedData = filteredData.reduce((acc, item) => {
+      let name = item.Name;
+      if (!acc[name]) {
+        acc[name] = 0;
+      }
+      acc[name] += item.Statistic ? item.Statistic : 0;
+      return acc;
+    }, {} as any);
+    this.graphData.invoiceStatisticsPieChartLabels =
+      Object.keys(aggregatedData);
+    this.graphData.invoiceStatisticsPieChartData =
+      Object.values(aggregatedData);
+  }
+  private createInvoiceTypePieChart(invoices: GeneratedInvoice[]) {
+    this.invoicePieChartDataset(invoices);
+    let canvas = this.operationsChart.nativeElement;
+    let invoiceSummary = new Chart(canvas, {
+      type: 'doughnut',
       data: {
-        labels: ['Pending', 'Due', 'Expired'],
+        labels: this.graphData.invoicePieChartLabels,
         datasets: [
           {
-            label: 'Invoice report',
-            data: [300, 209, 438, 653],
+            label: 'Total',
+            data: this.graphData.invoicePieChartData,
+            hoverOffset: 4,
+            backgroundColor: ['#7E22CE', '#0F766E'],
           },
         ],
       },
@@ -185,24 +232,18 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       },
     });
   }
-  private createOperationsChart() {
-    let canvas = this.operationsChart.nativeElement as HTMLCanvasElement;
-    new Chart(canvas, {
-      type: 'line',
+  private createTransactionsPieChart(statistics: DashboardOverviewStatistic[]) {
+    this.transactionsPieChartDataset(statistics);
+    let canvas = this.transactionChart.nativeElement;
+    let barChart = new Chart(canvas, {
+      type: 'bar',
       data: {
-        labels: [
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-          'Sunday ',
-        ],
+        labels: this.graphData.invoiceStatisticsPieChartLabels,
         datasets: [
           {
-            label: 'ABC Company',
-            data: [2112, 2343, -2545, 3423, 2365, 1985, 987],
+            label: 'Invoice(s)',
+            data: this.graphData.invoiceStatisticsPieChartData,
+            backgroundColor: ['#A21CAF'],
           },
         ],
       },
@@ -211,24 +252,22 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         aspectRatio: 2.5,
         maintainAspectRatio: false,
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value: any, index: any, ticks: any) {
-                return value + ' TZS';
-              },
-              autoSkip: true,
-              maxTicksLimit: 1000,
+          x: {
+            title: {
+              text: 'Status',
+              display: true,
             },
           },
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function (context: any) {
-                return context.formattedValue + ' /TZS';
-              },
+          y: {
+            title: {
+              display: true,
+              text: 'Total',
             },
+            max: Math.ceil(
+              Math.max(
+                ...(this.graphData.invoiceStatisticsPieChartData as any)
+              ) * 1.1
+            ),
           },
         },
       },
@@ -244,14 +283,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
   ) {
     if (typeof result === 'string' && typeof result === 'number') {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.failed`),
-        this.tr.translate(`dashboard.dashboard.invoiceData.message`)
-      );
+      this.invoiceStatistics = [];
     } else {
       this.invoiceStatistics = result.response as DashboardOverviewStatistic[];
     }
+    this.createTransactionsPieChart(this.invoiceStatistics);
   }
   private dataSourceFilter() {
     this.tableData.dataSource.filterPredicate = (
@@ -301,21 +337,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     results: HttpDataResponse<string | GeneratedInvoice[]>
   ) {
     if (typeof results.response === 'string') {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`errors.noDataFound`)
-      );
+      this.tableData.generatedInvoices = [];
     } else {
       this.tableData.generatedInvoices = results.response;
-      this.prepareDataSource();
     }
+    this.prepareDataSource();
+    this.createInvoiceTypePieChart(this.tableData.generatedInvoices);
     this.tableLoading = false;
     this.cdr.detectChanges();
   }
   private buildPage() {
-    this.overviewLoading = true;
-    this.tableLoading = true;
+    // this.overviewLoading = true;
+    // this.tableLoading = true;
+    this.startLoading = true;
     let generatedInvoiceObs = from(
       this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
     );
@@ -331,8 +365,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         let [generatedInvoices, invoiceStatistics] = results;
         this.assignGeneratedInvoice(generatedInvoices);
         this.assignInvoiceStatistics(invoiceStatistics);
-        this.overviewLoading = false;
-        this.tableLoading = false;
+        // this.overviewLoading = false;
+        // this.tableLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -341,15 +376,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           this.displayMessageBox,
           this.tr
         );
-        this.overviewLoading = false;
-        this.tableLoading = false;
+        // this.overviewLoading = false;
+        // this.tableLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
   ngAfterViewInit(): void {
-    this.createTransactionChart();
-    this.createOperationsChart();
+    //this.createTransactionChart();
+    //this.createOperationsChart();
   }
   ngOnInit(): void {
     this.parseUserProfile();

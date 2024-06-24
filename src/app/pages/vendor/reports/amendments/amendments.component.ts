@@ -45,7 +45,7 @@ import { Customer } from 'src/app/core/models/bank/customer';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
@@ -192,7 +192,7 @@ export class AmendmentsComponent implements OnInit {
           cusid: value,
           stdate: '',
           enddate: '',
-        } as InvoiceReportForm;
+        } as InvoiceReportFormVendor;
         this.startLoading = true;
         this.invoiceReportService
           .getInvoiceReport(form)

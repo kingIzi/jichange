@@ -37,7 +37,7 @@ import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
@@ -240,11 +240,12 @@ export class AmendmentComponent implements OnInit {
     this.filterForm.valueChanges.subscribe((value) => {
       if (value.compid && value.cusid) {
         let form = {
+          branch: this.userProfile.braid,
           Comp: value.compid,
           cusid: value.cusid,
           stdate: '',
           enddate: '',
-        } as InvoiceReportForm;
+        } as InvoiceReportFormBanker;
         this.invoiceReportService
           .getInvoiceReport(form)
           .then((result) => {

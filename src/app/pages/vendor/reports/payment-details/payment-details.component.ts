@@ -44,7 +44,7 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
@@ -224,7 +224,7 @@ export class PaymentDetailsComponent implements OnInit {
           cusid: value,
           stdate: '',
           enddate: '',
-        } as InvoiceReportForm;
+        } as InvoiceReportFormVendor;
         this.startLoading = true;
         this.invoiceReportService
           .getInvoiceReport(form)

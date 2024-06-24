@@ -41,7 +41,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { PaymentDetailsTable } from 'src/app/core/enums/bank/reports/payment-details-table';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
@@ -277,11 +277,12 @@ export class PaymentDetailsComponent implements OnInit {
     this.filterForm.valueChanges.subscribe((value) => {
       if (value.compid && value.cusid) {
         let form = {
+          branch: this.userProfile.braid,
           Comp: value.compid,
           cusid: value.cusid,
           stdate: '',
           enddate: '',
-        } as InvoiceReportForm;
+        } as InvoiceReportFormBanker;
         this.invoiceReportService
           .getInvoiceReport(form)
           .then((result) => {

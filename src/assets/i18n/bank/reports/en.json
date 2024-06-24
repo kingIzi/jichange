@@ -2,12 +2,71 @@
   "overview": {
     "overview": "Overview",
     "summary": "Summary",
-    "vendorsTableTitle": "Latest added Vendors",
+    "vendorsTableTitle": "Latest transactions",
     "transactions": "Transactions",
-    "vendorsTable": ["Sno", "Name", "Address", "Email", "Mobile No", "Status"],
+    "vendorsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Payment Date",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Payer Name",
+        "value": "Payer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Paid Amount",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Remaining Balance",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Action(s)",
+        "value": "Action",
+        "desc": ""
+      }
+    ],
     "invoiceChart": "Invoice(s) summary",
     "statistics": "Statistics",
-    "salesSummary": "Sale(s) Summary"
+    "salesSummary": "Transactions Summary",
+    "transactionsByDate": "Payment Amount - Payment Date",
+    "statisticsData": {
+      "transaction": "Transaction",
+      "vendor": "Vendor",
+      "users": "Users",
+      "pendings": "Pendings",
+      "customers": "Customers"
+    }
   },
   "transactionDetails": {
     "noTransactionsFound": "There are no payments yet made for this transaction.",

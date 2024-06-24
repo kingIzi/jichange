@@ -1,6 +1,164 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full grid grid-cols-12 gap-3 lg:gap-x-3 lg:gap-y-6">
+  <div
+    id="over-view"
+    class="w-full col-span-full lg:col-span-8 flex flex-col space-y-2"
+  >
+    <div class="flex flex-row items-center justify-between">
+      <p
+        *transloco="let t; read: 'reports.overview'"
+        class="text-black font-bold tracking-wide text-lg"
+      >
+        {{ t("salesSummary") }}
+      </p>
+    </div>
+    <div
+      class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
+    >
+      <canvas #overviewChart></canvas>
+    </div>
+  </div>
+  <div class="col-span-full lg:col-span-4 lg:row-span-12">
+    <div class="flex flex-col space-y-4 h-full">
+      <div class="flex flex-col space-y-1">
+        <div class="flex flex-row justify-between w-full">
+          <p
+            *transloco="let t; read: 'reports.overview'"
+            class="text-black font-bold tracking-wide text-lg"
+          >
+            {{ t("invoiceChart") }}
+          </p>
+        </div>
+        <div
+          class="py-2 w-full flex flex-col relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
+        >
+          <div class="w-full h-full flex-1 p-2">
+            <canvas #invoiceSummary></canvas>
+          </div>
+          <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
+            <div class="grid place-items-center">
+              <p class="text-sm font-bold text-purple-700">
+                {{ graphData.transactionsLineChartLabels[0] }}
+              </p>
+              <p class="text-lg lg:text-xl font-normal text-purple-700">
+                {{
+                  graphData.transactionsLineChartData[0]
+                    ? graphData.transactionsLineChartData[0]
+                    : 0
+                }}
+              </p>
+            </div>
+            <div class="grid place-items-center">
+              <p class="text-sm font-semibold text-teal-700">
+                {{ graphData.transactionsLineChartLabels[1] }}
+              </p>
+              <p class="text-lg lg:text-xl font-normal text-teal-700">
+                {{
+                  graphData.transactionsLineChartData[1]
+                    ? graphData.transactionsLineChartData[1]
+                    : 0
+                }}
+              </p>
+            </div>
+            <div class="grid place-items-center">
+              <p class="text-sm text-fuchsia-700 font-semibold">
+                {{ graphData.transactionsLineChartLabels[2] }}
+              </p>
+              <p class="text-lg lg:text-xl text-fuchsia-700 font-normal">
+                {{
+                  graphData.transactionsLineChartData[2]
+                    ? graphData.transactionsLineChartData[2]
+                    : 0
+                }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col space-y-1 relative w-full h-full">
+        <div class="flex flex-row justify-between w-full">
+          <p
+            *transloco="let t; read: 'reports.overview'"
+            class="text-black font-bold tracking-wide text-lg"
+          >
+            {{ t("statistics") }}
+          </p>
+        </div>
+        <div
+          class="grid grid-cols-2 bg-white shadow w-full h-full min-h-40 py-6 px-3 gap-2"
+        >
+          <ng-container
+            *ngFor="
+              let statistic of invoiceStatisticsData;
+              trackBy: PerformanceUtils.trackByIndex;
+              index as i
+            "
+          >
+            <a
+              (click)="dashboardStatisticRouterLink(statistic.Name)"
+              class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
+            >
+              <p
+                class="text-normal text-sm capitalize group-hover:underline"
+                *transloco="let t; read: 'reports.overview.statisticsData'"
+              >
+                {{ t(statistic.Name.toLocaleLowerCase()) }}
+              </p>
+              <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
+            </a>
+          </ng-container>
+        </div>
+        <div
+          *ngIf="buildPageLoading"
+          class="loading loading-spinner loading-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-darkPurple"
+        ></div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="col-span-full lg:col-span-8 lg:row-span-12 flex flex-col space-y-2"
+  >
+    <div class="flex flex-row items-center justify-between">
+      <p
+        *transloco="let t; read: 'reports.overview'"
+        class="text-black font-bold tracking-wide text-lg"
+      >
+        {{ t("vendorsTableTitle") }}
+      </p>
+    </div>
+    <div
+      [formGroup]="headersFormGroup"
+      class="flex flex-row shadow bg-white items-center justify-between px-8 py-8 h-full"
+    >
+      <div
+        class="flex flex-col justify-center p-6 border border-purple-700 rounded-2xl w-64 h-56"
+      >
+        <p class="text-sm text-center font-normal">Customer(s)</p>
+        <p class="text-2xl text-center font-semibold">{{ customers.length }}</p>
+      </div>
+      <div
+        class="flex flex-col justify-center p-6 border border-teal-700 rounded-2xl w-64 h-56"
+      >
+        <p class="text-sm text-center font-normal">Total Created Invoices</p>
+        <p class="text-2xl text-center font-semibold">{{ invoices.length }}</p>
+      </div>
+      <div
+        class="flex flex-col justify-center p-6 border border-fuchsia-700 rounded-2xl w-64 h-56"
+      >
+        <p class="text-sm text-center font-normal">Total Invoice Amount</p>
+        <p class="text-2xl text-center font-semibold">
+          {{ getTotalInvoiceAmountThousandFormatted() }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="px-6 py-2 w-full grid grid-cols-12 gap-3 lg:gap-x-3 lg:gap-y-6">
   <div
     id="over-view"
     class="w-full col-span-full lg:col-span-8 flex flex-col space-y-2"
@@ -31,9 +189,49 @@
           </p>
         </div>
         <div
-          class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
+          class="py-2 w-full relative bg-white shadow max-h-64 flex flex-col min-h-64 h-64 chart-container"
         >
-          <canvas #invoiceSummary></canvas>
+          <div class="w-full h-full flex-1 p-2">
+            <canvas #invoiceSummary></canvas>
+          </div>
+          <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
+            <div class="grid place-items-center">
+              <p class="text-sm font-bold text-purple-700">
+                {{ graphData.transactionsLineChartLabels[0] }}
+              </p>
+              <p class="text-lg lg:text-xl font-normal text-purple-700">
+                {{
+                  graphData.transactionsLineChartData[0]
+                    ? graphData.transactionsLineChartData[0]
+                    : 0
+                }}
+              </p>
+            </div>
+            <div class="grid place-items-center">
+              <p class="text-sm font-semibold text-teal-700">
+                {{ graphData.transactionsLineChartLabels[1] }}
+              </p>
+              <p class="text-lg lg:text-xl font-normal text-teal-700">
+                {{
+                  graphData.transactionsLineChartData[1]
+                    ? graphData.transactionsLineChartData[1]
+                    : 0
+                }}
+              </p>
+            </div>
+            <div class="grid place-items-center">
+              <p class="text-sm text-fuchsia-700 font-semibold">
+                {{ graphData.transactionsLineChartLabels[2] }}
+              </p>
+              <p class="text-lg lg:text-xl text-fuchsia-700 font-normal">
+                {{
+                  graphData.transactionsLineChartData[2]
+                    ? graphData.transactionsLineChartData[2]
+                    : 0
+                }}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="flex flex-col space-y-1 relative w-full">
@@ -46,19 +244,27 @@
           </p>
         </div>
         <div
-          class="grid grid-cols-2 bg-white shadow w-full h-full py-6 space-y-3"
+          class="grid grid-cols-2 bg-white shadow w-full h-full min-h-40 py-6 px-3 gap-2"
         >
           <ng-container
-            *ngFor="let invoiceStat of invoiceStatisticsData; index as ind"
+            *ngFor="
+              let statistic of invoiceStatisticsData;
+              trackBy: PerformanceUtils.trackByIndex;
+              index as i
+            "
           >
-            <div
-              class="flex flex-row items-center justify-between px-3 space-x-3"
+            <a
+              (click)="dashboardStatisticRouterLink(statistic.Name)"
+              class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
             >
-              <div class="flex flex-col bg-lightPurple p-2 rounded w-full">
-                <p class="text-normal text-sm">{{ invoiceStat.Name }}</p>
-                <p class="font-bold text-lg">{{ invoiceStat.Statistic }}</p>
-              </div>
-            </div>
+              <p
+                class="text-normal text-sm capitalize group-hover:underline"
+                *transloco="let t; read: 'reports.overview.statisticsData'"
+              >
+                {{ t(statistic.Name.toLocaleLowerCase()) }}
+              </p>
+              <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
+            </a>
           </ng-container>
         </div>
       </div>
@@ -158,4 +364,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

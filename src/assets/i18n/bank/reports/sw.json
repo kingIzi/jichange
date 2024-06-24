@@ -2,19 +2,71 @@
   "overview": {
     "overview": "Muhtasari",
     "summary": "Muhtasari",
-    "vendorsTableTitle": "Wauzaji Wapya Walioongezwa",
+    "vendorsTableTitle": "Miamala ya hivi karibuni",
     "transactions": "Miamala",
     "vendorsTable": [
-      "Nambari",
-      "Jina",
-      "Anwani",
-      "Barua pepe",
-      "Nambari ya Simu",
-      "Hali"
+      {
+        "label": "Namba",
+        "value": "Namba",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Malipo",
+        "value": "Payment_Date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_Sno",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Mlipaji",
+        "value": "Payer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Jumla ya Kiasi",
+        "value": "Requested_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi Kilicholipwa",
+        "value": "PaidAmount",
+        "desc": ""
+      },
+      {
+        "label": "Salio Lililobaki",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Kitendo/Vitendo",
+        "value": "Action",
+        "desc": ""
+      }
     ],
     "invoiceChart": "Muhtasari wa Invoice(s)",
     "statistics": "Takwimu",
-    "salesSummary": "Muhtasari wa Uuzaji(s)"
+    "salesSummary": "Muhtasari wa Miamala",
+    "transactionsByDate": "Kiasi cha Malipo - Tarehe ya Malipo",
+    "statisticsData": {
+      "transaction": "Mkataba",
+      "vendor": "Muuzaji",
+      "users": "Watumiaji",
+      "pendings": "Inasubiri",
+      "customers": "Wateja"
+    }
   },
   "transactionDetails": {
     "noTransactionsFound": "Hakuna malipo bado yaliyotolewa kwa shughuli hii.",

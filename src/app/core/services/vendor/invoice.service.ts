@@ -92,7 +92,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: string | number },
-        HttpDataResponse<GeneratedInvoice[] | string>
+        HttpDataResponse<GeneratedInvoice[] | string | number>
       >(`/api/Invoice/GetchDetails`, body)
     );
     return data;

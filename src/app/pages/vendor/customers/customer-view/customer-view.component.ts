@@ -206,6 +206,7 @@ export class CustomerViewComponent implements OnInit {
     );
     let invoiceReportObs = from(
       this.invoiceReportService.getInvoiceReport({
+        branch: '',
         Comp: this.userProfile.InstID,
         cusid: customerId,
         stdate: '',

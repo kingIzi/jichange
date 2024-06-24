@@ -19,13 +19,14 @@
       }
     },
     "transaction": {
-      "transaction": "Transaction"
+      "transaction": "Invoice summary"
     },
     "allOperations": {
       "allOperations": "All operations"
     },
     "viewAllInvoices": "View All",
-    "latestTransactionsTitle": "Generated invoice(s)",
+    "paymentTypeChartTitle": "Generated invoice summary",
+    "generatedInvoices": "Generated invoice(s)",
     "latestTransactionsTable": [
       {
         "label": "No.",

@@ -34,7 +34,7 @@ import { InvoiceDetailsReportTable } from 'src/app/core/enums/vendor/reports/inv
 import { Customer } from 'src/app/core/models/bank/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { LoginResponse } from 'src/app/core/models/login-response';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
@@ -266,7 +266,7 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
-  private requestInvoiceDetails(body: InvoiceReportForm) {
+  private requestInvoiceDetails(body: InvoiceReportFormVendor) {
     this.tableData.invoiceReports = [];
     this.tableLoading = true;
     this.invoiceReportService
@@ -554,7 +554,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
-      let form = { ...this.filterFormGroup.value };
+      let form = { ...this.filterFormGroup.value } as InvoiceReportFormVendor;
       form.Comp = this.userProfile.InstID;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));

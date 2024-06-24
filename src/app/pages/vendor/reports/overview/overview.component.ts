@@ -8,6 +8,14 @@ import {
   ViewChild,
 } from '@angular/core';
 import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Router } from '@angular/router';
+import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
   TranslocoService,
@@ -16,11 +24,19 @@ import Chart from 'chart.js/auto';
 import { from, zip } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
+import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import { Customer } from 'src/app/core/models/vendors/customer';
+import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
+import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-overview',
@@ -30,6 +46,8 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     CommonModule,
     TranslocoModule,
     DisplayMessageBoxComponent,
+    LoaderInfiniteSpinnerComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.scss',
@@ -43,22 +61,40 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
   ],
 })
 export class OverviewComponent {
-  public overviewLoading: boolean = false;
-  public tableLoading: boolean = false;
-  public customers: any[] = [];
+  // public overviewLoading: boolean = false;
+  // public tableLoading: boolean = false;
+  public buildPageLoading: boolean = false;
+  public startLoading: boolean = false;
+  public customers: Customer[] = [];
+  public invoices: GeneratedInvoice[] = [];
   public overviewChartData: any;
   public invoiceSummaryData: any;
-  public transactionsChartData: any;
+  public transactions: TransactionDetail[] = [];
+  public headersFormGroup!: FormGroup;
+  public graphData: {
+    transactionsLineChartLabels: string[];
+    transactionsLineChartData: number[];
+  } = {
+    transactionsLineChartLabels: [],
+    transactionsLineChartData: [],
+  };
   private userProfile!: LoginResponse;
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   public invoiceStatisticsData: DashboardOverviewStatistic[] = [];
-  @ViewChild('overviewChart') overviewChart!: ElementRef;
-  @ViewChild('invoiceSummary') invoiceSummary!: ElementRef;
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  @ViewChild('overviewChart', { static: true })
+  overviewChart!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('invoiceSummary', { static: true })
+  invoiceSummary!: ElementRef<HTMLCanvasElement>;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
+    private router: Router,
     private invoiceService: InvoiceService,
+    private fb: FormBuilder,
     private tr: TranslocoService,
+    private customerService: CustomerService,
+    private reportsService: ReportsService,
     private cdr: ChangeDetectorRef
   ) {}
   private parseUserProfile() {
@@ -67,64 +103,78 @@ export class OverviewComponent {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
-  private createOverviewChart() {
-    let canvas = this.overviewChart.nativeElement as HTMLCanvasElement;
-    this.overviewChartData = new Chart(canvas, {
-      type: 'line',
+  private createHeadersFormGroup() {
+    this.headersFormGroup = this.fb.group({
+      headers: this.fb.array([], []),
+      tableSearch: this.fb.control('', []),
+    });
+  }
+  private transactionsLineChartDataset(transactions: TransactionDetail[]) {
+    let groupedData = transactions.reduce((acc, curr) => {
+      let date = new Date(curr.Payment_Date).toLocaleDateString();
+      if (!acc[curr.Customer_Name]) {
+        acc[curr.Customer_Name] = {};
+      }
+      if (!acc[curr.Customer_Name][date]) {
+        acc[curr.Customer_Name][date] = 0;
+      }
+      acc[curr.Customer_Name][date] += curr.Requested_Amount;
+      return acc;
+    }, {} as any);
+    let uniqueDates = [
+      ...new Set(
+        transactions.map((item) =>
+          new Date(item.Payment_Date).toLocaleDateString()
+        )
+      ),
+    ].sort();
+    let datasets = Object.keys(groupedData).map((customer) => ({
+      label: customer,
+      data: uniqueDates.map((date) => groupedData[customer][date] || 0),
+    }));
+    return [uniqueDates, datasets];
+  }
+  private createTransactionsLineChart(transactions: TransactionDetail[]) {
+    let [uniqueDates, datasets] =
+      this.transactionsLineChartDataset(transactions);
+    let canvas = this.overviewChart.nativeElement;
+    let chart = new Chart(canvas, {
+      type: 'bar',
       data: {
-        labels: [
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-          'Sunday ',
-        ],
-        datasets: [
-          {
-            label: 'ABC Company',
-            data: [2112, 2343, 2545, 3423, 2365, 1985, 987],
-          },
-          {
-            label: 'XYZ Entreprises',
-            data: [4321, 2343, 5432, 2312, 2483, 1223, 2334],
-          },
-          {
-            label: 'DEF Technologies',
-            data: [4325, 2132, 5430, 1987, 2678, 1432, 2789],
-          },
-          {
-            label: 'GHI Solutions',
-            data: [3123, 1654, 4332, 2789, 3210, 1876, 2567],
-          },
-          {
-            label: 'JKL Innovations',
-            data: [4323, 2543, 5645, 2198, 2897, 1678, 2890],
-          },
-        ],
+        labels: uniqueDates as string[],
+        datasets: datasets as { label: string; data: number[] }[],
       },
       options: {
         responsive: true,
         aspectRatio: 2.5,
         maintainAspectRatio: false,
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value, index, ticks) {
-                return value + ' TZS';
-              },
-              autoSkip: true,
-              maxTicksLimit: 1000,
+          x: {
+            title: {
+              display: true,
+              text: 'Date',
             },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Amount (TZS)',
+            },
+            ticks: {
+              stepSize: 7000000,
+              callback: function (value) {
+                return value.toLocaleString();
+              },
+            },
+            //min: 1, // Set minimum value for y-axis to avoid log(0)
+            //max: Math.max(...(paymentAmounts as any)) * 1.1,
           },
         },
         plugins: {
           tooltip: {
             callbacks: {
               label: function (context: any) {
-                return context.formattedValue + ' /TZS';
+                return context.formattedValue + ' TZS';
               },
             },
           },
@@ -132,17 +182,32 @@ export class OverviewComponent {
       },
     });
   }
-  private createSummaryChart() {
-    let canvas = this.invoiceSummary.nativeElement as HTMLCanvasElement;
-    this.invoiceSummaryData = new Chart(canvas, {
-      type: 'doughnut',
+  private sumarryPieChartData(statistics: DashboardOverviewStatistic[]) {
+    let aggregatedData = statistics.reduce((acc, item) => {
+      let name = item.Name;
+      if (!acc[name]) {
+        acc[name] = 0;
+      }
+      acc[name] += item.Statistic ? item.Statistic : 0;
+      acc[name] = Number(acc[name]);
+      return acc;
+    }, {} as any);
+    this.graphData.transactionsLineChartLabels = Object.keys(aggregatedData);
+    this.graphData.transactionsLineChartData = Object.values(aggregatedData);
+  }
+  private createSummaryChart(statistics: DashboardOverviewStatistic[]) {
+    this.sumarryPieChartData(statistics);
+    let canvas = this.invoiceSummary.nativeElement;
+    let chart = new Chart(canvas, {
+      type: 'pie',
       data: {
-        labels: this.invoiceStatistics.map((i) => i.Name),
+        labels: this.graphData.transactionsLineChartLabels,
         datasets: [
           {
-            label: 'Invoices',
-            data: this.invoiceStatistics.map((i) => i.Statistic),
+            label: 'Invoice(s)',
+            data: this.graphData.transactionsLineChartData,
             hoverOffset: 4,
+            backgroundColor: ['#7E22CE', '#0F766E', '#A21CAF'],
           },
         ],
       },
@@ -157,11 +222,11 @@ export class OverviewComponent {
     result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
   ) {
     if (typeof result === 'string' && typeof result === 'number') {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.failed`),
-        this.tr.translate(`dashboard.dashboard.invoiceData.message`)
-      );
+      // AppUtilities.openDisplayMessageBox(
+      //   this.displayMessageBox,
+      //   this.tr.translate(`defaults.failed`),
+      //   this.tr.translate(`dashboard.dashboard.invoiceData.message`)
+      // );
     } else {
       this.invoiceStatisticsData =
         result.response as DashboardOverviewStatistic[];
@@ -172,23 +237,83 @@ export class OverviewComponent {
           i.Name !== 'Customer' &&
           i.Name !== 'Users'
       );
-      this.createSummaryChart();
+      this.createSummaryChart(this.invoiceStatistics);
+    }
+  }
+  private assignTransactionsReport(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    if (
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number'
+    ) {
+      this.transactions = result.response;
+    }
+    this.createTransactionsLineChart(this.transactions);
+  }
+  private assignCustomersList(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    if (
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number'
+    ) {
+      this.customers = result.response;
+    }
+  }
+  private assignCreatedInvoiceList(
+    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+  ) {
+    if (
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number'
+    ) {
+      this.invoices = result.response;
     }
   }
   private buildPage() {
-    this.overviewLoading = true;
+    this.buildPageLoading = true;
+    this.startLoading = true;
     let invoiceStatisticsObs = from(
       this.invoiceService.getCompanysInvoiceStats({
         compid: this.userProfile.InstID,
       })
     );
-    let mergedObs = zip(invoiceStatisticsObs);
-    let res = AppUtilities.pipedObservables(mergedObs);
-    res
+    let form = {
+      compid: 'all',
+      cusid: 'all',
+      stdate: '',
+      enddate: '',
+    } as TransactionDetailsReportForm;
+    let transactionsObs = from(this.reportsService.getTransactionsReport(form));
+    let customersObs = from(
+      this.customerService.getCustomersList({
+        Comp: this.userProfile.InstID.toString(),
+        reg: '0',
+        dist: '0',
+      })
+    );
+    let createdInvoicesObs = from(
+      this.invoiceService.getCreatedInvoiceList({
+        compid: this.userProfile.InstID,
+      })
+    );
+    let mergedObs = zip(
+      invoiceStatisticsObs,
+      transactionsObs,
+      customersObs,
+      createdInvoicesObs
+    );
+    let res = AppUtilities.pipedObservables(mergedObs)
       .then((results) => {
-        let [invoiceStatistics] = results;
+        let [invoiceStatistics, transactionsList, customersList, invoiceList] =
+          results;
         this.assignInvoiceStatistics(invoiceStatistics);
-        this.overviewLoading = true;
+        this.assignTransactionsReport(transactionsList);
+        this.assignCustomersList(customersList);
+        this.assignCreatedInvoiceList(invoiceList);
+        this.buildPageLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -197,17 +322,67 @@ export class OverviewComponent {
           this.displayMessageBox,
           this.tr
         );
-        this.overviewLoading = false;
+        this.buildPageLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
   ngOnInit(): void {
     this.parseUserProfile();
-    this.buildPage();
+    this.createHeadersFormGroup();
   }
   ngAfterViewInit(): void {
-    this.createOverviewChart();
-    // this.createSummaryChart();
+    this.buildPage();
+  }
+  dashboardStatisticRouterLink(name: string) {
+    switch (name.toLocaleLowerCase()) {
+      case 'Transaction'.toLocaleLowerCase():
+        this.router.navigate(['/vendor/reports/transactions']);
+        break;
+      case 'Customer'.toLocaleLowerCase():
+        this.router.navigate(['/vendor/customers']);
+        break;
+      case 'Users'.toLocaleLowerCase():
+        this.router.navigate(['/vendor/company']);
+        break;
+      case 'Pendings'.toLocaleLowerCase():
+        this.router.navigate(['/vendor/invoice/list']);
+        break;
+      case 'Due'.toLocaleLowerCase():
+        this.router.navigate(['/vendor/reports/invoice'], {
+          queryParams: { q: btoa(name) },
+        });
+        break;
+      case 'Expired'.toLocaleLowerCase():
+        this.router.navigate(['/vendor/reports/invoice'], {
+          queryParams: { q: btoa(name) },
+        });
+        break;
+      default:
+        this.router.navigate(['/vendor']);
+        break;
+    }
+  }
+  getTotalInvoiceAmountThousandFormatted() {
+    let total = this.invoices.reduce((acc, curr) => {
+      acc += curr.Total;
+      return acc;
+    }, 0);
+    if (total >= 1000) {
+      // Divide the number by 1000 and round to the nearest integer
+      let thousands = Math.round(total / 1000);
+      // Format the number with commas
+      let formatted = thousands.toLocaleString();
+      return formatted + 'K';
+    }
+    // If the number is less than 1000, just return it as is
+    return total.toString();
+  }
+  get headers() {
+    return this.headersFormGroup.get('headers') as FormArray;
+  }
+  get tableSearch() {
+    return this.headersFormGroup.get('tableSearch') as FormControl;
   }
 }

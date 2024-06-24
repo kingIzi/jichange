@@ -19,12 +19,13 @@
       }
     },
     "transaction": {
-      "transaction": "Miamala"
+      "transaction": "Muhtasari wa ankara"
     },
     "allOperations": {
       "allOperations": "Operesheni Zote"
     },
-    "latestTransactionsTitle": "Ankara iliyotengenezwa",
+    "paymentTypeChartTitle": "Muhtasari wa ankara uliotengenezwa",
+    "generatedInvoices": "Ankara (s) zilizotengenezwa",
     "latestTransactionsTable": [
       {
         "label": "Nambari",

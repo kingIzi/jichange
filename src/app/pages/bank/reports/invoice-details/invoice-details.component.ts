@@ -45,7 +45,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-details-table';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
@@ -442,7 +442,7 @@ export class InvoiceDetailsComponent implements OnInit {
     }
     return keys;
   }
-  private requestInvoiceDetails(body: InvoiceReportForm) {
+  private requestInvoiceDetails(body: InvoiceReportFormBanker) {
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)
@@ -496,7 +496,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   submitForm() {
     if (this.formGroup.valid) {
-      let form = { ...this.formGroup.value };
+      let form = { ...this.formGroup.value } as InvoiceReportFormBanker;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }

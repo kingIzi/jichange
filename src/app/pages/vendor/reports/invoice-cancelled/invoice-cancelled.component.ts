@@ -56,7 +56,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { CancelledInvoice } from 'src/app/core/models/vendors/cancelled-invoice';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { CancelledInvoiceTable } from 'src/app/core/enums/vendor/reports/cancelled-invoice-table';
-import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -202,7 +202,7 @@ export class InvoiceCancelledComponent implements OnInit {
           cusid: value,
           stdate: '',
           enddate: '',
-        } as InvoiceReportForm;
+        } as InvoiceReportFormVendor;
         this.startLoading = true;
         this.invoiceReportService
           .getInvoiceReport(form)
