@@ -358,6 +358,7 @@ export class PaymentDetailsComponent implements OnInit {
   }
   private requestPaymentReport(value: PaymentDetailReportForm) {
     this.tableData.payments = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)

@@ -268,6 +268,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private requestInvoiceDetails(body: InvoiceReportFormVendor) {
     this.tableData.invoiceReports = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)

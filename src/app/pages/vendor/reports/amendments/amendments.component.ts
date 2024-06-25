@@ -349,6 +349,8 @@ export class AmendmentsComponent implements OnInit {
     this.dataSourceSortingAccessor();
   }
   private requestAmendmentsReport(value: any) {
+    this.tableData.amendments = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.amendmentService
       .getAmendmentsReport(value)

@@ -389,6 +389,8 @@ export class AmendmentComponent implements OnInit {
     this.dataSourceSortingAccessor();
   }
   private requestAmendmentsReport(value: any) {
+    this.tableData.amendments = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.amendmentService
       .getAmendmentsReport(value)
@@ -456,9 +458,6 @@ export class AmendmentComponent implements OnInit {
           this.filterFormData.branches = branchList.response as Branch[];
           this.startLoading = false;
         }
-        // else {
-        //   this.filterFormData.companies = [];
-        // }
         this.startLoading = false;
         this.cdr.detectChanges();
       })

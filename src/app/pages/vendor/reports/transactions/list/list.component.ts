@@ -307,6 +307,7 @@ export class ListComponent implements OnInit {
   }
   private requestTransactionDetailsList(form: TransactionDetailsReportForm) {
     this.tableData.transactions = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .getTransactionsReport(form)

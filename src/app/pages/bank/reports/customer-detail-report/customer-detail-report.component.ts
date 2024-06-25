@@ -398,6 +398,7 @@ export class CustomerDetailReportComponent implements OnInit {
   }
   private requestCustomerDetails(form: any) {
     this.tableData.customers = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)

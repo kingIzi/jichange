@@ -23,7 +23,7 @@ export class PerformanceUtils {
     excludedBg: string = 'bg-orange-100',
     excludedText: string = 'text-orange-600'
   ) {
-    return status?.toLocaleLowerCase() === target.toLocaleLowerCase()
+    return status?.toLocaleLowerCase() === target?.toLocaleLowerCase()
       ? `${includedBg} ${includedText} px-4 py-1 rounded-lg shadow`
       : `${excludedBg} ${excludedText} px-4 py-1 rounded-lg shadow`;
   }

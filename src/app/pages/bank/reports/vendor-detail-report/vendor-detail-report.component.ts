@@ -202,6 +202,7 @@ export class VendorDetailReportComponent implements OnInit {
   }
   private requestCompaniesList(body: { branch: number | string }) {
     this.tableData.companies = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .getBranchedCompanyList(body)

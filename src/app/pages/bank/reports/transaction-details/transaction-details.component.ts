@@ -366,6 +366,8 @@ export class TransactionDetailsComponent implements OnInit {
     this.dataSourceSortingAccessor();
   }
   private requestTransactionDetailsList(form: TransactionDetailsReportForm) {
+    this.tableData.transactions = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .getTransactionsReport(form)

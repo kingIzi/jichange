@@ -495,11 +495,12 @@ export class PaymentDetailsComponent implements OnInit {
     this.dataSourceSortingAccessor();
   }
   private requestPaymentReport(value: PaymentDetailReportForm) {
+    this.tableData.payments = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
       .then((results) => {
-        console.log(results);
         if (
           typeof results.response === 'string' &&
           typeof results.response === 'number'

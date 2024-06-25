@@ -443,6 +443,8 @@ export class InvoiceDetailsComponent implements OnInit {
     return keys;
   }
   private requestInvoiceDetails(body: InvoiceReportFormBanker) {
+    this.tableData.invoiceReports = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)

@@ -271,6 +271,8 @@ export class AuditTrailsComponent implements OnInit {
     this.dataSourceSortingAccessor();
   }
   private filterAuditTrailsRequest(value: AuditTrailsReportForm) {
+    this.tableData.auditTrails = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.auditTrailsService
       .getDetails(value)

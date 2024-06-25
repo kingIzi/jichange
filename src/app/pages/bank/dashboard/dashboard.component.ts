@@ -416,7 +416,7 @@ export class DashboardComponent implements OnInit {
         return `${style} text-black font-semibold`;
       case 'Status':
         return `${PerformanceUtils.getActiveStatusStyles(
-          element[key],
+          element.Status,
           'Approved'
         )} text-center w-fit`;
       default:

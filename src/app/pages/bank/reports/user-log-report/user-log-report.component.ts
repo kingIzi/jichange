@@ -233,6 +233,8 @@ export class UserLogReportComponent implements OnInit {
     this.dataSourceSortingAccessor();
   }
   private requestUserLog(value: any) {
+    this.tableData.userReportLogs = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .getUserLogTimes(value)

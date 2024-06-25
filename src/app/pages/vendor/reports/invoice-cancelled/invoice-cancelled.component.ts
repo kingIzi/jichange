@@ -386,6 +386,7 @@ export class InvoiceCancelledComponent implements OnInit {
   }
   private requestCancelledInvoice(value: any) {
     this.tableData.invoicesList = [];
+    this.prepareDataSource();
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(value)
