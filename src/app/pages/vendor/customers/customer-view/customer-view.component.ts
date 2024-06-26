@@ -48,6 +48,7 @@ import { CustomerViewTable } from 'src/app/core/enums/vendor/customers/customer-
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-customer-view',
@@ -196,6 +197,34 @@ export class CustomerViewComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignViewingCustomer(
+    result: HttpDataResponse<string | number | Customer>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number'
+    ) {
+      this.customer = result.response;
+    } else {
+      this.customer = new Customer();
+    }
+  }
+  private assignInvoiceReportDataList(
+    result: HttpDataResponse<string | number | InvoiceReport[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.invoiceReports = result.response;
+    } else {
+      this.tableData.invoiceReports = [];
+    }
+    this.prepareDataSource();
+  }
   private buildPage(customerId: string) {
     this.startLoading = true;
     let customerObs = from(
@@ -218,19 +247,8 @@ export class CustomerViewComponent implements OnInit {
     res
       .then((results) => {
         let [customer, invoices] = results;
-        if (
-          typeof customer.response !== 'string' &&
-          typeof customer.response !== 'number'
-        ) {
-          this.customer = customer.response;
-        }
-        if (
-          typeof invoices.response !== 'string' &&
-          typeof invoices.response !== 'number'
-        ) {
-          this.tableData.invoiceReports = invoices.response;
-          this.prepareDataSource();
-        }
+        this.assignViewingCustomer(customer);
+        this.assignInvoiceReportDataList(invoices);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

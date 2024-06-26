@@ -7,11 +7,12 @@
 
 <div class="w-full h-full">
   <div class="absolute top-0 bottom-0 left-0 right-0 flex flex-row">
-    <div class="basis-full lg:basis-8/12 grid place-items-center relative">
+    <div
+      class="basis-full lg:basis-8/12 flex flex-col items-center justify-center relative"
+    >
       <app-loader-infinite-spinner
         [show]="startLoading"
       ></app-loader-infinite-spinner>
-
       <form
         id="sign-in-form"
         [formGroup]="formGroup"
@@ -41,13 +42,13 @@
             >
               {{ t("username") }}
             </h6>
-            <span class="relative">
+            <span class="relative w-full">
               <input
                 *transloco="let t; read: 'auth.loginForm.placeholders'"
                 type="email"
                 [formControl]="userName"
                 [placeholder]="t('username')"
-                class="input input-sm lg:input-md font-inter input-bordered w-full max-w-lg bg-transparent text-black"
+                class="input input-sm lg:input-md font-inter input-bordered w-full bg-transparent text-black"
               />
             </span>
             <span *ngIf="userName && userName.invalid && userName.touched">
@@ -72,7 +73,7 @@
                 type="password"
                 [formControl]="password"
                 [placeholder]="t('password')"
-                class="input input-sm lg:input-md input-bordered w-full max-w-lg bg-transparent text-black font-inter"
+                class="input input-sm lg:input-md input-bordered w-full bg-transparent text-black font-inter"
               />
             </span>
             <span *ngIf="password && password.invalid && password.touched">

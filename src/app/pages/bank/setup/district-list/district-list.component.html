@@ -73,11 +73,15 @@
                 <p class="text-xs font-semibold">
                   {{ header.get("label")?.value }}
                 </p>
-                <p
-                  [class]="tableValueStyle(element, header.get('value')?.value)"
-                >
-                  {{ tableValue(element, header.get("value")?.value) }}
-                </p>
+                <ng-container>
+                  <p
+                    [class]="
+                      tableValueStyle(element, header.get('value')?.value)
+                    "
+                  >
+                    {{ tableValue(element, header.get("value")?.value) }}
+                  </p>
+                </ng-container>
               </div>
               <ng-template #actionButtons>
                 <app-remove-item-dialog

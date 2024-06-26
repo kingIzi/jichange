@@ -2,7 +2,7 @@
 <app-display-message-box #timeoutWarning></app-display-message-box>
 <app-display-message-box #timeOut></app-display-message-box>
 
-<!-- <div #header class="navbar bg-base-100 shadow-4 relative">
+<div #header class="navbar bg-indigo-900 shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50 h-12">
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -58,210 +58,10 @@
         </li>
       </ul>
     </div>
-    <a [routerLink]="'/main'" class="flex flex-row items-center">
-      <img
-        class="w-20 lg:w-32"
-        src="assets/img/jichangelogo.png"
-        alt="TE Logo"
-        loading="lazy"
-      />
-    </a>
-  </div>
-  <div [formGroup]="formGroup" class="navbar-center hidden lg:flex h-24">
-    <ul
-      *transloco="let t"
-      formArrayName="headers"
-      class="menu menu-horizontal px-1"
+    <a
+      [routerLink]="'/main'"
+      class="btn btn-ghost bg-white w-32 h-full hover:bg-darkPurple"
     >
-      <li
-        formGroupName="{{ ind }}"
-        *ngFor="let header of headers.controls; index as ind"
-        class="dropdown dropdown-bottom dropdown-end"
-      >
-        <button
-          tabindex="0"
-          role="button"
-          class="flex flex-row items-center m-1"
-          [class]="
-            verifyCurrentRoute(header.get('rootLink')?.value)
-              ? 'text-darkPurple bg-lightPurple'
-              : 'text-black bg-transparent'
-          "
-        >
-          <p class="font-extrabold capitalize">
-            {{ header.get("label")?.value }}
-          </p>
-          <span>
-            <i class="bi bi-chevron-down"></i>
-          </span>
-        </button>
-        <ul
-          tabindex="0"
-          class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-        >
-          <li
-            *ngFor="
-              let dropdown of getHeaderDropdownArray(ind).controls;
-              index as i
-            "
-          >
-            <a
-              #ahref
-              [routerLink]="dropdown.get('routerLink')?.value"
-              [routerLinkActive]="'text-darkPurple'"
-              (click)="routerClicked(ahref)"
-              class="capitalize"
-              >{{ dropdown.get("label")?.value }}</a
-            >
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-  <div class="navbar-end">
-    <div class="flex flex-row items-center space-x-4">
-      <div class="flex flex-col">
-        <p class="text-sm">{{ userProfile.Uname }}</p>
-        <p class="text-sm">{{ userProfile.role }}</p>
-      </div>
-      <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-          <div class="avatar placeholder">
-            <div
-              class="bg-neutral text-neutral-content rounded-full w-8 md:w-10"
-            >
-              <span>
-                <i class="bi bi-person-circle"></i>
-              </span>
-            </div>
-          </div>
-        </div>
-        <ul
-          *transloco="let t; read: 'roles'"
-          tabindex="0"
-          class="menu flex flex-col space-y-1 menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-        >
-          <li>
-            <a
-              #profileAhref
-              [routerLink]="'/main/profile/' + userProfile.Usno.toString()"
-              (click)="routerClicked(profileAhref)"
-              class="flex flex-row items-center"
-            >
-              <span>
-                <i class="bi bi-person-circle text-lg"></i>
-              </span>
-              <p>
-                {{ t("profile") }}
-              </p>
-            </a>
-          </li>
-          <li>
-            <button
-              (click)="logout()"
-              class="flex flex-row items-center text-red-600"
-            >
-              <span>
-                <i class="bi bi-box-arrow-right text-lg"></i>
-              </span>
-              <p>{{ t("logout") }}</p>
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div> -->
-
-<div #header class="navbar bg-base-100 shadow-4 relative">
-  <div class="navbar-start">
-    <!-- <div class="dropdown">
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h8m-8 6h16"
-          />
-        </svg>
-      </div>
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-      >
-        <li><a>Item 1</a></li>
-        <li>
-          <a>Parent</a>
-          <ul class="p-2">
-            <li><a>Submenu 1</a></li>
-            <li><a>Submenu 2</a></li>
-          </ul>
-        </li>
-        <li><a>Item 3</a></li>
-      </ul>
-    </div> -->
-    <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50 h-12">
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h8m-8 6h16"
-          />
-        </svg>
-      </div>
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-72"
-        *transloco="let t"
-        formArrayName="headers"
-      >
-        <li *ngFor="let header of headers.controls; index as ind">
-          <a
-            [class]="
-              verifyCurrentRoute(header.get('rootLink')?.value)
-                ? 'text-darkPurple bg-lightPurple'
-                : 'text-black bg-transparent'
-            "
-            class="capitalize"
-            formGroupName="{{ ind }}"
-            >{{ header.get("label")?.value }}</a
-          >
-          <ul class="p-2 grid grid-cols-2">
-            <li
-              *ngFor="
-                let dropdown of getHeaderDropdownArray(ind).controls;
-                index as i
-              "
-            >
-              <a
-                #ahref
-                [routerLink]="dropdown.get('routerLink')?.value"
-                [routerLinkActive]="'text-darkPurple'"
-                (click)="routerClicked(ahref)"
-                class="capitalize"
-                >{{ dropdown.get("label")?.value }}</a
-              >
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    <a [routerLink]="'/main'" class="btn btn-ghost w-32 h-full">
       <img
         class="object-contain"
         src="assets/img/jichangelogo.png"
@@ -270,7 +70,11 @@
       />
     </a>
   </div>
-  <div [formGroup]="formGroup" class="navbar-center hidden lg:flex">
+  <div
+    id="desktop-nav"
+    [formGroup]="formGroup"
+    class="navbar-center hidden lg:flex"
+  >
     <ul
       *transloco="let t"
       formArrayName="headers"
@@ -284,17 +88,17 @@
         <button
           tabindex="0"
           role="button"
-          class="flex flex-row items-center m-1"
+          class="flex flex-row items-center m-1 tracking-widest"
           [class]="
             verifyCurrentRoute(header.get('rootLink')?.value)
-              ? 'text-darkPurple bg-lightPurple'
-              : 'text-black bg-transparent'
+              ? 'text-black bg-darkPurple'
+              : 'text-neutral-50 bg-transparent'
           "
         >
           <p class="font-extrabold capitalize">
             {{ header.get("label")?.value }}
           </p>
-          <span>
+          <span class="">
             <i class="bi bi-chevron-down"></i>
           </span>
         </button>
@@ -323,18 +127,12 @@
   </div>
   <div class="navbar-end">
     <div class="flex flex-row items-center space-x-4">
-      <div class="flex flex-col">
-        <p class="text-sm">{{ userProfile.Uname }}</p>
-        <p class="text-sm">{{ userProfile.role }}</p>
-      </div>
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="avatar placeholder">
-            <div
-              class="bg-neutral text-neutral-content rounded-full w-8 md:w-10"
-            >
+            <div class="bg-white rounded-full w-8 md:w-10">
               <span>
-                <i class="bi bi-person-circle"></i>
+                <i class="bi bi-person-circle text-lg text-black"></i>
               </span>
             </div>
           </div>
@@ -354,9 +152,13 @@
               <span>
                 <i class="bi bi-person-circle text-lg"></i>
               </span>
-              <p>
-                {{ t("profile") }}
-              </p>
+              <div class="flex flex-row items-center justify-between w-full">
+                <p class="text-sm">{{ userProfile.Uname }}</p>
+                <span
+                  class="badge badge-accent badge-sm text-white uppercase"
+                  >{{ userProfile.role }}</span
+                >
+              </div>
             </a>
           </li>
           <li>

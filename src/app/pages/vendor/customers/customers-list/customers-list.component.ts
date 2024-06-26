@@ -50,6 +50,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { Observable, of } from 'rxjs';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-customers-list',
@@ -142,6 +143,26 @@ export class CustomersListComponent implements OnInit {
     this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
   }
+  private assignCustomersDataList(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.customers = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`customer.noCustomersFound`)
+      );
+      this.tableData.customers = [];
+    }
+    this.prepareDataSource();
+  }
   private requestCustomerNames() {
     this.tableLoading = true;
     this.customerService
@@ -151,19 +172,7 @@ export class CustomersListComponent implements OnInit {
         dist: '0',
       })
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.tableData.customers = result.response;
-          this.prepareDataSource();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        }
+        this.assignCustomersDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

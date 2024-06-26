@@ -28,6 +28,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { VendorReportTable } from 'src/app/core/enums/bank/reports/vendor-report-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
@@ -200,6 +201,26 @@ export class VendorDetailReportComponent implements OnInit {
     this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
   }
+  private assignVendorsDataList(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.companies = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.vendorReport.noVendorsFound`)
+      );
+      this.tableData.companies = [];
+    }
+    this.prepareDataSource();
+  }
   private requestCompaniesList(body: { branch: number | string }) {
     this.tableData.companies = [];
     this.prepareDataSource();
@@ -207,32 +228,7 @@ export class VendorDetailReportComponent implements OnInit {
     this.reportsService
       .getBranchedCompanyList(body)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          typeof result.response === 'number'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.companies = [];
-          this.prepareDataSource();
-        } else if (
-          result.response instanceof Array &&
-          result.response.length === 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.companies = [];
-          this.prepareDataSource();
-        } else {
-          this.tableData.companies = result.response as Company[];
-          this.prepareDataSource();
-        }
+        this.assignVendorsDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

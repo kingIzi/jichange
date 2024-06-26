@@ -9,7 +9,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -55,6 +55,8 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatListModule } from '@angular/material/list';
+import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
+import { LoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-summary',
@@ -89,6 +91,7 @@ export class SummaryComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
+  public userProfile!: LoginResponse;
   public tableData: {
     companies: Company[];
     originalTableColumns: TableColumnsData[];
@@ -111,14 +114,20 @@ export class SummaryComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private dialog: MatDialog,
-    private client: RequestClientService,
-    private companyService: CompanyService,
+    private router: Router,
+    private reportsService: ReportsService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+  private parseUserProfile() {
+    let userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+    }
+  }
   private createHeadersFormGroup() {
     let TABLE_SHOWING = 7;
     this.headersFormGroup = this.fb.group({
@@ -222,25 +231,34 @@ export class SummaryComponent implements OnInit {
     this.tableData.dataSource.sort = this.sort;
     this.dataSourceFilter();
   }
+  private assignVendorsDataList(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.companies = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`company.summary.noVendorsFoundInBranch`)
+      );
+      this.tableData.companies = [];
+    }
+    this.prepareDataSource();
+  }
   private requestList() {
     this.tableData.companies = [];
+    this.prepareDataSource();
     this.tableLoading = true;
-    this.companyService
-      .getCustomersList({})
+    this.reportsService
+      .getBranchedCompanyList({ branch: this.userProfile.braid })
       .then((result) => {
-        if (
-          typeof result.response === 'number' ||
-          typeof result.response === 'string'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        } else {
-          this.tableData.companies = result.response;
-          this.prepareDataSource();
-        }
+        this.assignVendorsDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -254,7 +272,6 @@ export class SummaryComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-    this.cdr.detectChanges();
   }
   private getTableActiveKeys() {
     let indexes = this.headers.controls
@@ -271,6 +288,7 @@ export class SummaryComponent implements OnInit {
     }
   }
   ngOnInit() {
+    this.parseUserProfile();
     this.createHeadersFormGroup();
     this.requestList();
   }
@@ -355,20 +373,28 @@ export class SummaryComponent implements OnInit {
       });
   }
   openEditCompanySummaryDialog(company: Company) {
-    let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
-      width: '800px',
-      height: '600px',
-      disableClose: true,
-      data: {
-        companyData: company,
-      },
+    // let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {
+    //   width: '800px',
+    //   height: '600px',
+    //   disableClose: true,
+    //   data: {
+    //     companyData: company,
+    //   },
+    // });
+    // dialogRef.componentInstance.companyAddedSuccessfully
+    //   .asObservable()
+    //   .subscribe(() => {
+    //     dialogRef.close();
+    //     this.requestList();
+    //   });
+    // dialogRef.componentInstance.openDialogFailed
+    //   .asObservable()
+    //   .subscribe((err) => {
+    //     dialogRef.close();
+    //   });
+    this.router.navigate(['/main/company/summary/add'], {
+      queryParams: { Comp: btoa(company.CompSno.toString()) },
     });
-    dialogRef.componentInstance.companyAddedSuccessfully
-      .asObservable()
-      .subscribe(() => {
-        dialogRef.close();
-        this.requestList();
-      });
   }
   downloadSheet() {
     this.fileHandler.downloadExcelTable(

@@ -41,6 +41,8 @@ import {
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { PaymentDetailsTable } from 'src/app/core/enums/vendor/reports/payment-details-table';
 import { Company } from 'src/app/core/models/bank/company/company';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
@@ -91,7 +93,7 @@ export class PaymentDetailsComponent implements OnInit {
   public formData: {
     companies: Company[];
     customers: CustomerName[];
-    invoices: GeneratedInvoice[];
+    invoices: InvoiceReport[];
   } = {
     companies: [],
     customers: [],
@@ -225,46 +227,63 @@ export class PaymentDetailsComponent implements OnInit {
           stdate: '',
           enddate: '',
         } as InvoiceReportFormVendor;
-        this.startLoading = true;
-        this.invoiceReportService
-          .getInvoiceReport(form)
-          .then((result) => {
-            if (
-              typeof result.response !== 'string' &&
-              typeof result.response !== 'number' &&
-              result.response.length == 0
-            ) {
-              AppUtilities.openDisplayMessageBox(
-                this.displayMessageBox,
-                this.tr.translate(`defaults.warning`),
-                this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
-              );
-              this.formData.invoices = [];
-            } else if (
-              typeof result.response !== 'string' &&
-              typeof result.response !== 'number' &&
-              result.response.length > 0
-            ) {
-              this.formData.invoices = result.response as any;
-            }
-            this.startLoading = false;
-            this.cdr.detectChanges();
-          })
-          .catch((err) => {
-            this.formData.invoices = [];
-            AppUtilities.requestFailedCatchError(
-              err,
-              this.displayMessageBox,
-              this.tr
-            );
-            this.startLoading = false;
-            this.cdr.detectChanges();
-            throw err;
-          });
+        this.requestInvoicesList(form);
       } else {
         this.formData.invoices = [];
+        this.invno.setValue('all');
       }
     });
+  }
+  private noInvoiceFoundWarningMessage() {
+    let customer = this.formData.customers.find(
+      (elem) => elem.Cus_Mas_Sno === Number(this.cust.value)
+    );
+    if (customer) {
+      let message = this.tr
+        .translate(`reports.invoiceDetails.noInvoicesFound`)
+        .replace('{}', customer.Customer_Name);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    }
+  }
+  private assignInvoiceListFilterData(
+    result: HttpDataResponse<string | number | InvoiceReport[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.formData.invoices = result.response;
+    } else {
+      this.noInvoiceFoundWarningMessage();
+      this.formData.invoices = [];
+    }
+    this.invno.setValue('all');
+  }
+  private requestInvoicesList(body: InvoiceReportFormVendor) {
+    this.startLoading = true;
+    this.invoiceReportService
+      .getInvoiceReport(body)
+      .then((result) => {
+        this.assignInvoiceListFilterData(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private buildPage() {
     this.startLoading = true;
@@ -356,33 +375,34 @@ export class PaymentDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignPaymentsDataList(
+    result: HttpDataResponse<string | number | PaymentDetail[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.payments = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.paymentDetails.noPaymentsFound`)
+      );
+      this.tableData.payments = [];
+    }
+    this.prepareDataSource();
+  }
   private requestPaymentReport(value: PaymentDetailReportForm) {
     this.tableData.payments = [];
     this.prepareDataSource();
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
-      .then((results) => {
-        if (
-          typeof results.response !== 'string' &&
-          typeof results.response !== 'number' &&
-          results.response.length == 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.payments = [];
-          this.prepareDataSource();
-        } else if (
-          typeof results.response !== 'string' &&
-          typeof results.response !== 'number' &&
-          results.response.length > 0
-        ) {
-          this.tableData.payments = results.response;
-          this.prepareDataSource();
-        }
+      .then((result) => {
+        this.assignPaymentsDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

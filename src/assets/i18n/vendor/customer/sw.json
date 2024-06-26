@@ -1,6 +1,7 @@
 {
   "customer": "Mteja(s)",
   "addCustomer": "Ongeza Mteja",
+  "noCustomersFound": "Hakuna wateja waliopatikana.",
   "searchBy": "Tafuta kwa jina au barua pepe",
   "customersTable": [
     {
@@ -66,6 +67,7 @@
   },
   "customerView": {
     "searchBy": "Nambari ya Ankara",
+    "noInvoicesFound": "Hakukuwa na ankara iliyopatikana kwa {}.",
     "customerProfileTransaction": "Maelezo ya Mteja na Miamala",
     "customerDetails": {
       "customerDetails": "Maelezo ya Mteja",

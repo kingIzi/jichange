@@ -171,7 +171,7 @@ function generateModuleRoutes(inputStr: string, arr: string[], delim: string) {
 }
 
 let COMPANY_MODULES = 2;
-let REPORTS_MODULES = 9;
+let REPORTS_MODULES = 11;
 let SETUP_MODULES = 14;
 let LEFT_MODULES = 2;
 let RIGHT_MODULES = 2;
@@ -242,6 +242,8 @@ export const fader = trigger('triggerName', [
   transition(companyRoutes.join(','), fadeEase()),
   transition(setupRoutes.join(','), fadeEase()),
   transition(reportsRoutes.join(','), fadeEase()),
+  transition('company-module-1 => sub-summary-module', slideTo('right')),
+  transition('sub-summary-module => company-module-1', slideTo('left')),
   transition('isLeft => isRight', slideTo('right')),
   transition('isRight => isLeft', slideTo('left')),
   transition('dashboard => *', slideTo('right')),

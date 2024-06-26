@@ -93,6 +93,7 @@ export class CompanySummaryDialogComponent implements OnInit {
   @ViewChild('confirmAddCompany', { static: true })
   confirmAddCompany!: ElementRef<HTMLDialogElement>;
   public companyAddedSuccessfully = new EventEmitter<void>();
+  public openDialogFailed = new EventEmitter<any>();
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor(
     private fb: FormBuilder,

@@ -79,7 +79,9 @@
       "payments": "Malipo",
       "amendment": "Mabadiliko",
       "transaction": "Miamala",
-      "vendorReport": "Ripoti ya Vendor"
+      "vendorReport": "Ripoti ya Vendor",
+      "invoiceConsolidated": "Ankara iliyojumuishwa",
+      "paymentConsolidated": "Malipo ya Kuunganishwa"
     }
   },
   "vendorRoutes": {
@@ -166,6 +168,7 @@
         "Maelezo ya Marekebisho",
         "Ripoti ya Muteja",
         "Ripoti ya Vendor",
+        "Ripoti ya Kuunganishwa kwa Ankara",
         "Ripoti ya Kumbukumbu za Mtumiaji",
         "Kufuatilia Ukaguzi"
       ]

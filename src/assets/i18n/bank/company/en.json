@@ -2,6 +2,8 @@
   "summary": {
     "name": "Vendors",
     "searchBy": "Search by name or TIN number",
+    "noVendorsFoundInBranch": "There are no vendors found in the {} branch.",
+    "noVendorFound": "Vendor not found.",
     "actions": {
       "addCompany": "Add Vendor",
       "addedCompanySuccessfully": "Added Company successfully!",
@@ -65,10 +67,11 @@
       }
     ],
     "companyForm": {
-      "details": "Details",
+      "details": "Vendor Details",
       "addressInformation": "Address information",
       "company": "Company",
       "addVendor": "Add vendor",
+      "editVendor": "Modify vendor",
       "customer": "Vendor name",
       "mobileNo": "Mobile N°",
       "branch": "Branch",
@@ -82,7 +85,7 @@
       "tinNo": "TIN N°",
       "vatNo": "VAT N°",
       "directorName": "Director name",
-      "emailId": "Email ID",
+      "emailId": "Email Address",
       "telephoneNo": "Telephone N°",
       "bankDetails": "Bank Details",
       "accountNo": "Account Number",
@@ -103,13 +106,13 @@
         "tinNo": "Enter TIN Number",
         "vatNo": "Enter VAT number",
         "directorName": "Enter director name",
-        "emailId": "Enter email ID"
+        "emailId": "Enter email address"
       },
       "errors": {
         "customer": "Please enter company name",
         "mobileNo": "Please enter a valid phone number",
         "branch": "Please select a branch name",
-        "makerChecker": "Specify a need for a Maker/Checker",
+        "makerChecker": "Please specify",
         "faxNo": "Please enter a FAX number",
         "postBoxNo": "Please enter post box number",
         "address": "Please enter a address",
@@ -124,29 +127,10 @@
         "telephoneNo": "Please enter a valid phone number"
       },
       "dialogs": {
-        "invalidForm": "Invalid form",
-        "customer": "Please provide the company name",
-        "mobileNo": "Please provide a valid mobile number",
-        "branch": "",
-        "makerChecker": "Please specify a Maker/Checker value",
-        "faxNo": "Please provide a fax number",
-        "postBoxNo": "Please provide the PoBox number",
-        "vatNo": "Please provide the VAT number",
-        "address": "Please provide the residential address",
-        "region": "Please select a region",
-        "district": "Please select a district",
-        "ward": "Please select a ward",
-        "tinNo": "Please provide a TIN number",
-        "directorName": "Please provide the director name",
-        "telephoneNo": "Please provide the telephone number",
-        "emailId": "Please provide a valid email address",
-        "noDistrictForRegion": "There are no districts found for this region.",
-        "noWardForDistrict": "There are no wards found this district.",
-        "failedToAddCompany": "Failed to add company, please try again or contact support.",
-        "failedToApproveCompany": "Failed to approve company.",
-        "emailAddressExists": "Email Address already Exist.",
-        "mobileNumberAlreadyExists": "Mobile number already Exist.",
-        "noBranch": "No branches found."
+        "noBranchesFound": "There were no branch found.",
+        "noRegionsFound": "There were no regions found.",
+        "noDistrictsFound": "There are no saved districts in {}.",
+        "noWardsFound": "There are no saved wards in {}."
       }
     }
   },

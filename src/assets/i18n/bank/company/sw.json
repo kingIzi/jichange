@@ -2,6 +2,8 @@
   "summary": {
     "name": "Wachuuzi",
     "searchBy": "Tafuta kwa jina au nambari ya TIN",
+    "noVendorsFoundInBranch": "Hakuna wachuuzi wanaopatikana katika tawi la {}.",
+    "noVendorFound": "Vendor haipatikani.",
     "actions": {
       "addCompany": "Ongeza muuzaji",
       "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
@@ -69,6 +71,7 @@
       "addressInformation": "Address information",
       "company": "Kampuni",
       "addVendor": "Ongeza muuzaji",
+      "editVendor": "Rekebisha muuzaji",
       "customer": "Jina la Vendor",
       "mobileNo": "Nambari ya Simu",
       "branch": "Tawi",
@@ -109,7 +112,7 @@
         "customer": "Tafadhali ingiza jina la kampuni",
         "mobileNo": "Tafadhali ingiza nambari ya simu yenye sahihi",
         "branch": "Tafadhali chagua jina la tawi",
-        "makerChecker": "Taja mahitaji ya Muumba/Chunguzi",
+        "makerChecker": "Tafadhali bainisha",
         "faxNo": "Tafadhali ingiza nambari ya FAX",
         "postBoxNo": "Tafadhali ingiza nambari ya sanduku la posta",
         "address": "Tafadhali ingiza anwani",
@@ -124,29 +127,10 @@
         "telephoneNo": "Tafadhali ingiza nambari ya simu yenye sahihi"
       },
       "dialogs": {
-        "invalidForm": "Fomu Batili",
-        "customer": "Tafadhali toa jina la kampuni",
-        "mobileNo": "Tafadhali toa nambari ya simu yenye sahihi",
-        "branch": "Tafadhali eleza tawi",
-        "makerChecker": "Tafadhali eleza thamani ya Muumba/Chunguzi",
-        "faxNo": "Tafadhali toa nambari ya FAX",
-        "postBoxNo": "Tafadhali toa nambari ya Sanduku la Posta",
-        "vatNo": "Tafadhali toa nambari ya VAT",
-        "address": "Tafadhali toa anwani ya makazi",
-        "region": "Tafadhali chagua mkoa",
-        "district": "Tafadhali chagua wilaya",
-        "ward": "Tafadhali chagua kata",
-        "tinNo": "Tafadhali toa nambari ya TIN",
-        "directorName": "Tafadhali toa jina la mkurugenzi",
-        "telephoneNo": "Tafadhali toa nambari ya simu",
-        "emailId": "Tafadhali toa anwani ya barua pepe sahihi",
-        "noDistrictForRegion": "Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu. Hakukuwa na wilaya zilizotengwa kwa ajili ya mkoa huu.",
-        "noWardForDistrict": "Hakuna kata zilizogunduliwa katika wilaya hii.",
-        "failedToAddCompany": "Imeshindwa kuongeza kampuni, tafadhali jaribu tena au msaada wa mawasiliano.",
-        "failedToApproveCompany": "Imeshindwa kuikubali kampuni.",
-        "emailAddressExists": "Anwani ya Barua Pepe tayari ipo.",
-        "mobileNumberAlreadyExists": "Namba ya Simu tayari ipo.",
-        "noBranch": "Hakuna matawi yaliyopatikana."
+        "noBranchesFound": "Hakukuwa na tawi lililopatikana.",
+        "noRegionsFound": "Hakukuwa na maeneo yaliyopatikana.",
+        "noDistrictsFound": "Hakuna wilaya zilizohifadhiwa katika {}.",
+        "noWardsFound": "Hakuna kata zilizohifadhiwa katika {}."
       }
     }
   },

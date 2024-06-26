@@ -62,6 +62,8 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -112,7 +114,7 @@ export class InvoiceCancelledComponent implements OnInit {
   public filterFormData: {
     companies: Company[];
     customers: CustomerName[];
-    invoices: GeneratedInvoice[];
+    invoices: InvoiceReport[];
   } = {
     companies: [],
     customers: [],
@@ -203,46 +205,63 @@ export class InvoiceCancelledComponent implements OnInit {
           stdate: '',
           enddate: '',
         } as InvoiceReportFormVendor;
-        this.startLoading = true;
-        this.invoiceReportService
-          .getInvoiceReport(form)
-          .then((result) => {
-            if (
-              typeof result.response !== 'string' &&
-              typeof result.response !== 'number' &&
-              result.response.length == 0
-            ) {
-              AppUtilities.openDisplayMessageBox(
-                this.displayMessageBox,
-                this.tr.translate(`defaults.failed`),
-                this.tr.translate(`invoice.invoiceDetailsForm.noInvoicesFound`)
-              );
-              this.filterFormData.invoices = [];
-            } else if (
-              typeof result.response !== 'string' &&
-              typeof result.response !== 'number' &&
-              result.response.length > 0
-            ) {
-              this.filterFormData.invoices = result.response as any;
-            }
-            this.startLoading = false;
-            this.cdr.detectChanges();
-          })
-          .catch((err) => {
-            this.filterFormData.invoices = [];
-            AppUtilities.requestFailedCatchError(
-              err,
-              this.displayMessageBox,
-              this.tr
-            );
-            this.startLoading = false;
-            this.cdr.detectChanges();
-            throw err;
-          });
+        this.requestInvoicesList(form);
       } else {
         this.filterFormData.invoices = [];
+        this.invno.setValue('');
       }
     });
+  }
+  private noInvoiceFoundWarningMessage() {
+    let customer = this.filterFormData.customers.find(
+      (elem) => elem.Cus_Mas_Sno === Number(this.cust.value)
+    );
+    if (customer) {
+      let message = this.tr
+        .translate(`invoice.noInvoicesFound`)
+        .replace('{}', customer.Customer_Name);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    }
+  }
+  private assignInvoiceListFilterData(
+    result: HttpDataResponse<string | number | InvoiceReport[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.filterFormData.invoices = result.response;
+    } else {
+      this.noInvoiceFoundWarningMessage();
+      this.filterFormData.invoices = [];
+    }
+    this.invno.setValue('');
+  }
+  private requestInvoicesList(body: InvoiceReportFormVendor) {
+    this.startLoading = true;
+    this.invoiceReportService
+      .getInvoiceReport(body)
+      .then((result) => {
+        this.assignInvoiceListFilterData(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private buildPage() {
     this.startLoading = true;

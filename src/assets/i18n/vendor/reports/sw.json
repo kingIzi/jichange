@@ -26,7 +26,7 @@
   },
   "transactionDetails": {
     "transactionDetails": "Maelezo ya Shughuli",
-    "noTransactionsFound": "Hakuna malipo bado yaliyotolewa kwa shughuli hii.",
+    "noTransactionsFound": "Hakukuwa na shughuli zozote zilizofanyika.",
     "searchBy": "Tafuta kwa nambari ya ankara",
     "transactionDetailsTable": [
       {
@@ -147,7 +147,7 @@
   },
   "invoiceDetails": {
     "invoiceDetails": "Maelezo ya Bili",
-    "noInvoicesFound": "Hakuna ankara.",
+    "noInvoicesFound": "Hakuna ankara inayopatikana kwa {}",
     "searchBy": "Search by Invoice number, control number, vendor or customer",
     "form": {
       "company": "Kampuni",

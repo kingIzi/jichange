@@ -42,6 +42,8 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { AmendmentReportTable } from 'src/app/core/enums/vendor/reports/amendment-report-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
@@ -104,7 +106,7 @@ export class AmendmentsComponent implements OnInit {
   public filterFormData: {
     companies: Company[];
     customers: CustomerName[];
-    invoices: GeneratedInvoice[];
+    invoices: InvoiceReport[];
   } = {
     companies: [],
     customers: [],
@@ -184,6 +186,57 @@ export class AmendmentsComponent implements OnInit {
       });
     this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
+  private noInvoiceFoundWarningMessage() {
+    let customer = this.filterFormData.customers.find(
+      (elem) => elem.Cus_Mas_Sno === Number(this.cust.value)
+    );
+    if (customer) {
+      let message = this.tr
+        .translate(`reports.invoiceDetails.noInvoicesFound`)
+        .replace('{}', customer.Customer_Name);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    }
+  }
+  private assignInvoiceListFilterData(
+    result: HttpDataResponse<string | number | InvoiceReport[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.filterFormData.invoices = result.response;
+    } else {
+      this.noInvoiceFoundWarningMessage();
+      this.filterFormData.invoices = [];
+    }
+    this.invno.setValue('');
+  }
+  private requestInvoicesList(body: InvoiceReportFormVendor) {
+    this.startLoading = true;
+    this.invoiceReportService
+      .getInvoiceReport(body)
+      .then((result) => {
+        this.assignInvoiceListFilterData(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   private customerChanged() {
     this.cust.valueChanges.subscribe((value) => {
       if (value !== 'all') {
@@ -193,44 +246,10 @@ export class AmendmentsComponent implements OnInit {
           stdate: '',
           enddate: '',
         } as InvoiceReportFormVendor;
-        this.startLoading = true;
-        this.invoiceReportService
-          .getInvoiceReport(form)
-          .then((result) => {
-            if (
-              typeof result.response !== 'string' &&
-              typeof result.response !== 'number' &&
-              result.response.length == 0
-            ) {
-              AppUtilities.openDisplayMessageBox(
-                this.displayMessageBox,
-                this.tr.translate(`defaults.warning`),
-                this.tr.translate(`reports.invoiceDetails.noInvoicesFound`)
-              );
-              this.filterFormData.invoices = [];
-            } else if (
-              typeof result.response !== 'string' &&
-              typeof result.response !== 'number' &&
-              result.response.length > 0
-            ) {
-              this.filterFormData.invoices = result.response as any;
-            }
-            this.startLoading = false;
-            this.cdr.detectChanges();
-          })
-          .catch((err) => {
-            this.filterFormData.invoices = [];
-            AppUtilities.requestFailedCatchError(
-              err,
-              this.displayMessageBox,
-              this.tr
-            );
-            this.startLoading = false;
-            this.cdr.detectChanges();
-            throw err;
-          });
+        this.requestInvoicesList(form);
       } else {
         this.filterFormData.invoices = [];
+        this.invno.setValue('');
       }
     });
   }

@@ -56,6 +56,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import * as json from 'src/assets/temp/data.json';
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -214,25 +215,46 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignGeneratedInvoiceDataList(
+    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.generatedInvoices = result.response;
+    } else {
+      this.tableData.generatedInvoices = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`invoice.noGeneratedInvoicesFound`)
+      );
+    }
+    this.prepareDataSource();
+  }
   private requestGeneratedInvoice() {
     this.tableData.generatedInvoices = [];
     this.tableLoading = true;
     this.invoiceService
       .postSignedDetails({ compid: this.userProfile.InstID })
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.tableData.generatedInvoices = result.response;
-          this.prepareDataSource();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        }
+        // if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number'
+        // ) {
+        //   this.tableData.generatedInvoices = result.response;
+        //   this.prepareDataSource();
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.warning`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        // }
+        this.assignGeneratedInvoiceDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

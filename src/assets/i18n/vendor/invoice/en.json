@@ -1,5 +1,8 @@
 {
   "invoiceDetails": "Invoice cancelled",
+  "noInvoices": "You have not yet created an invoice.",
+  "noGeneratedInvoicesFound": "There were no invoices found.",
+  "noInvoicesFound": "No invoice found for {}",
   "addInvoice": "Add Invoice",
   "createInvoice": "Create Invoice",
   "editInvoice": "Edit invoice",

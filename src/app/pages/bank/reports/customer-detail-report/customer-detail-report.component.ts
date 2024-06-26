@@ -396,6 +396,28 @@ export class CustomerDetailReportComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignCustomersDataList(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.customers = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(
+          `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+        )
+      );
+      this.tableData.customers = [];
+    }
+    this.prepareDataSource();
+  }
   private requestCustomerDetails(form: any) {
     this.tableData.customers = [];
     this.prepareDataSource();
@@ -403,32 +425,7 @@ export class CustomerDetailReportComponent implements OnInit {
     this.reportsService
       .postCustomerDetailsReport(form)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          typeof result.response === 'number'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.customers = [];
-          this.prepareDataSource();
-        } else if (
-          result.response instanceof Array &&
-          result.response.length === 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.customers = [];
-          this.prepareDataSource();
-        } else {
-          this.tableData.customers = result.response as Customer[];
-          this.prepareDataSource();
-        }
+        this.assignCustomersDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

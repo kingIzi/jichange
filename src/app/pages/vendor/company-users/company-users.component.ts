@@ -31,6 +31,7 @@ import { Observable, TimeoutError, of } from 'rxjs';
 import { CompanyUsersDialogComponent } from 'src/app/components/dialogs/Vendors/company-users-dialog/company-users-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { CompanyUsersTable } from 'src/app/core/enums/vendor/company/company-users-table';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
@@ -130,24 +131,32 @@ export class CompanyUsersComponent implements OnInit {
         : false;
     };
   }
+  private assignCompanyUsersDataList(
+    result: HttpDataResponse<string | number | CompanyUser[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.companUsers = result.response;
+    } else {
+      this.tableData.companUsers = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`company.noUsersFound`)
+      );
+    }
+    this.prepareDataSource();
+  }
   private requestCompanyUsers() {
     this.tableLoading = true;
     this.companyService
       .postCompanyUsersList({ compid: this.userProfile.InstID })
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.tableData.companUsers = result.response;
-          this.prepareDataSource();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        }
+        this.assignCompanyUsersDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

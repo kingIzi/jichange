@@ -74,11 +74,15 @@
                 <p class="text-xs font-semibold">
                   {{ header.get("label")?.value }}
                 </p>
-                <p
-                  [class]="tableValueStyle(element, header.get('value')?.value)"
-                >
-                  {{ tableValue(element, header.get("value")?.value) }}
-                </p>
+                <ng-container>
+                  <p
+                    [class]="
+                      tableValueStyle(element, header.get('value')?.value)
+                    "
+                  >
+                    {{ tableValue(element, header.get("value")?.value) }}
+                  </p>
+                </ng-container>
               </div>
               <ng-template #actionButtons>
                 <div
@@ -98,15 +102,6 @@
                         <i class="bi bi-pen text-lg text-info"></i>
                       </span>
                     </button>
-                    <!-- <button
-                      *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('delete')"
-                      class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-left"
-                    >
-                      <span>
-                        <i class="bi bi-trash text-lg text-danger-600"></i>
-                      </span>
-                    </button> -->
                   </div>
                 </div>
               </ng-template>

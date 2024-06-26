@@ -69,7 +69,7 @@
     }
   },
   "transactionDetails": {
-    "noTransactionsFound": "There are no payments yet made for this transaction.",
+    "noTransactionsFound": "There were no transactions found.",
     "searchBy": "Search by invoice number",
     "transaction": "Transaction(s)",
     "transactionDetails": "Transaction Details",
@@ -185,6 +185,7 @@
   "paymentDetails": {
     "payment": "Payment(s)",
     "searchBy": "Search by invoice, control number or payer",
+    "noPaymentsFound": "No payment reports found.",
     "paymentsTable": [
       {
         "label": "No.",
@@ -266,6 +267,8 @@
   "amendmentDetails": {
     "amendment": "Amendment(s)",
     "searchBy": "Search by invoice or control number",
+    "noReportsFound": "There were no amendment reports found.",
+    "noInvoicesFound": "No invoice found for {}",
     "form": {
       "status": "Status",
       "paymentType": "Payment Type",
@@ -320,6 +323,7 @@
   "invoiceDetails": {
     "invoiceDetails": "Invoice details",
     "searchBy": "Search by invoice or control number",
+    "noInvoiceFound": "There were no invoice reports found.",
     "form": {
       "company": "Vendor",
       "customer": "Customer",
@@ -473,6 +477,7 @@
   "vendorReport": {
     "vendorReport": "Vendor report",
     "searchBy": "Search by vendor",
+    "noVendorsFound": "No vendor report found.",
     "vendorReportTable": [
       {
         "label": "No.",
@@ -514,6 +519,7 @@
   "userLogReport": {
     "searchBy": "Search by name or Ip Address",
     "userLogReport": "User log report",
+    "noUserLogReportFound": "There were no user logs found for dates specified.",
     "form": {
       "startDate": "Start date",
       "endDate": "End date",
@@ -562,6 +568,7 @@
   },
   "auditTrails": {
     "auditTrails": "Audit Trails",
+    "noAuditTrailsFound": "There were no audit trails found for dates specified.",
     "searchBy": "Search by action type",
     "form": {
       "selectPage": "Select page",
@@ -618,6 +625,68 @@
       {
         "label": "Audit date",
         "value": "adate",
+        "desc": ""
+      }
+    ]
+  },
+  "invoiceConsolidated": {
+    "label": "Consolidated Invoice Report",
+    "searchBy": "Branch or vendor",
+    "invoiceConsolidatedTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Branch",
+        "value": "branch",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "vendor",
+        "desc": ""
+      },
+      {
+        "label": "N° of invoices",
+        "value": "no_of_invoices",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "invoice_amount",
+        "desc": ""
+      }
+    ]
+  },
+  "invoicePayments": {
+    "label": "Consolidated Payment Report",
+    "searchBy": "Branch or vendor",
+    "invoicePaymentsTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Branch",
+        "value": "branch",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "vendor",
+        "desc": ""
+      },
+      {
+        "label": "N° of invoices",
+        "value": "no_of_invoices",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "invoice_amount",
         "desc": ""
       }
     ]

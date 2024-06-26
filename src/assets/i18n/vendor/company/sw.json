@@ -1,5 +1,6 @@
 {
   "companyUsers": "Watumiaji wa muuzaji",
+  "noUsersFound": "Hakuna watumiaji waliopatikana.",
   "addCompanyButton": "Ongeza watumiaji wa muuzaji",
   "failedToRetrieveCompanyUser": "Imeshindwa kupata mtumiaji wa muuzaji.",
   "searchBy": "Tafuta kwa jina la mtumiaji, jina kamili au barua pepe",

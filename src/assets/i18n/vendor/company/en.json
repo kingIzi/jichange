@@ -1,5 +1,6 @@
 {
   "companyUsers": "Vendor users",
+  "noUsersFound": "There were no users found.",
   "addCompanyButton": "Add vendor users",
   "failedToRetrieveCompanyUser": "Failed to retrieve vendor user.",
   "searchBy": "Search by username, full name or email",

@@ -191,32 +191,38 @@ export class InvoiceDetailsComponent implements OnInit {
       this.requestCompaniesList({ branch: value });
     });
   }
+  private assignCompaniesFilterData(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.companies = result.response;
+    } else {
+      this.filterFormData.companies = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr
+          .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+          .replace(
+            '{}',
+            this.filterFormData.branches.find(
+              (b) => b.Branch_Sno.toString() === this.branch.value
+            )?.Name as string
+          )
+      );
+    }
+    this.Comp.setValue('all');
+  }
   private requestCompaniesList(body: { branch: number | string }) {
     this.startLoading = true;
     this.reportsService
       .getBranchedCompanyList(body)
       .then((result) => {
-        if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.filterFormData.companies = result.response;
-        } else {
-          this.filterFormData.companies = [];
-          this.Comp.setValue('all');
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr
-              .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
-              .replace(
-                '{}',
-                this.filterFormData.branches.find(
-                  (b) => b.Branch_Sno.toString() === this.branch.value
-                )?.Name as string
-              )
-          );
-        }
+        this.assignCompaniesFilterData(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -249,7 +255,7 @@ export class InvoiceDetailsComponent implements OnInit {
             if (this.Comp.value !== 'all') {
               AppUtilities.openDisplayMessageBox(
                 this.displayMessageBox,
-                this.tr.translate(`defaults.failed`),
+                this.tr.translate(`defaults.warning`),
                 this.tr.translate(
                   `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
                 )
@@ -442,6 +448,26 @@ export class InvoiceDetailsComponent implements OnInit {
     }
     return keys;
   }
+  private assignInvoiceReportDataList(
+    result: HttpDataResponse<string | number | InvoiceReport[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.invoiceReports = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.invoiceDetails.noInvoiceFound`)
+      );
+      this.tableData.invoiceReports = [];
+    }
+    this.prepareDataSource();
+  }
   private requestInvoiceDetails(body: InvoiceReportFormBanker) {
     this.tableData.invoiceReports = [];
     this.prepareDataSource();
@@ -449,32 +475,7 @@ export class InvoiceDetailsComponent implements OnInit {
     this.invoiceReportService
       .getInvoiceReport(body)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          typeof result.response === 'number'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.invoiceReports = [];
-          this.prepareDataSource();
-        } else if (
-          result.response instanceof Array &&
-          result.response.length === 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.invoiceReports = [];
-          this.prepareDataSource();
-        } else {
-          this.tableData.invoiceReports = result.response as InvoiceReport[];
-          this.prepareDataSource();
-        }
+        this.assignInvoiceReportDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

@@ -9,6 +9,7 @@ import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/das
 import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { UserLog } from 'src/app/core/models/bank/reports/user-log';
+import { InvoiceConsolidatedReport } from 'src/app/core/models/bank/reports/invoice-consolidated-report';
 
 @Injectable({
   providedIn: 'root',
@@ -104,6 +105,33 @@ export class ReportsService {
         {},
         HttpDataResponse<string | number | TransactionDetail[]>
       >(`/api/Setup/LatTransList`, body)
+    );
+    return data;
+  }
+  public async getInvoiceConsolidatedReports(body: {
+    stdate: string;
+    enddate: string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { stdate: string; enddate: string },
+        HttpDataResponse<number | string | InvoiceConsolidatedReport[]>
+      >(`/api/Invoice/GetConsoReport`, body)
+    );
+    return data;
+  }
+  public async getPaymentConsolidatedReport(body: {
+    stdate: string;
+    enddate: string;
+  }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        {
+          stdate: string;
+          enddate: string;
+        },
+        HttpDataResponse<number | string | InvoiceConsolidatedReport[]>
+      >(`/api/Invoice/GetConsoPayment`, body)
     );
     return data;
   }

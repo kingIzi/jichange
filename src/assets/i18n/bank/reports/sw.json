@@ -69,7 +69,7 @@
     }
   },
   "transactionDetails": {
-    "noTransactionsFound": "Hakuna malipo bado yaliyotolewa kwa shughuli hii.",
+    "noTransactionsFound": "Hakukuwa na shughuli zozote zilizofanyika.",
     "searchBy": "Tafuta kwa nambari ya ankara",
     "transaction": "Shughuli",
     "transactionDetails": "Maelezo ya Shughuli",
@@ -170,6 +170,7 @@
   "paymentDetails": {
     "payment": "Malipo",
     "searchBy": "Tafuta kwa ankara, nambari ya kudhibiti au mlipaji",
+    "noPaymentsFound": "Hakuna ripoti ya malipo iliyopatikana.",
     "paymentsTable": [
       {
         "label": "Nambari",
@@ -251,6 +252,8 @@
   "amendmentDetails": {
     "amendment": "Marekebisho",
     "searchBy": "Tafuta kwa ankara au nambari ya kudhibiti",
+    "noReportsFound": "Hakukuwa na ripoti ya marekebisho yaliyopatikana.",
+    "noInvoicesFound": "Hakuna ankara inayopatikana kwa {}",
     "form": {
       "status": "Hali",
       "paymentType": "Aina ya Malipo",
@@ -305,6 +308,7 @@
   "invoiceDetails": {
     "invoiceDetails": "Maelezo ya Bili",
     "searchBy": "Search by invoice or control number",
+    "noInvoiceFound": "Hakukuwa na ripoti za ankara zilizopatikana.",
     "form": {
       "company": "Muuzaji",
       "customer": "Muteja",
@@ -458,6 +462,7 @@
   "vendorReport": {
     "vendorReport": "Ripoti ya Vendor",
     "searchBy": "Tafuta kwa muuzaji",
+    "noVendorsFound": "Hakuna ripoti ya muuzaji iliyopatikana.",
     "vendorReportTable": [
       {
         "label": "Nambari",
@@ -498,6 +503,7 @@
   },
   "userLogReport": {
     "userLogReport": "Ripoti ya Kumbukumbu za Mtumiaji",
+    "noUserLogReportFound": "Hakukuwa na kumbukumbu za mtumiaji zilizopatikana kwa tarehe zilizobainishwa.",
     "searchBy": "Tafuta kwa jina au anwani ya Ip",
     "form": {
       "startDate": "Tarehe ya Kuanzia",
@@ -547,6 +553,7 @@
   },
   "auditTrails": {
     "auditTrails": "Kufuatilia Ukaguzi",
+    "noAuditTrailsFound": "Hakukuwa na njia za ukaguzi zilizopatikana kwa tarehe zilizobainishwa.",
     "searchBy": "Tafuta kwa aina ya kitendo",
     "form": {
       "selectPage": "Chagua ukarasa",
@@ -603,6 +610,68 @@
       {
         "label": "Tarehe ya Ukaguzi",
         "value": "adate",
+        "desc": ""
+      }
+    ]
+  },
+  "invoiceConsolidated": {
+    "label": "Ripoti ya Ankara Iliyounganishwa",
+    "searchBy": "Tawi au muuzaji",
+    "invoiceConsolidatedTable": [
+      {
+        "label": "Na.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Tawi",
+        "value": "branch",
+        "desc": ""
+      },
+      {
+        "label": "Muuzaji",
+        "value": "vendor",
+        "desc": ""
+      },
+      {
+        "label": "Idadi ya ankara",
+        "value": "no_of_invoices",
+        "desc": ""
+      },
+      {
+        "label": "Jumla ya Kiasi",
+        "value": "invoice_amount",
+        "desc": ""
+      }
+    ]
+  },
+  "invoicePayments": {
+    "label": "Ripoti ya Malipo ya Kuunganishwa",
+    "searchBy": "Tawi au muuzaji",
+    "invoicePaymentsTable": [
+      {
+        "label": "Na.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Tawi",
+        "value": "branch",
+        "desc": ""
+      },
+      {
+        "label": "Muuzaji",
+        "value": "vendor",
+        "desc": ""
+      },
+      {
+        "label": "Idadi ya ankara",
+        "value": "no_of_invoices",
+        "desc": ""
+      },
+      {
+        "label": "Jumla ya Kiasi",
+        "value": "invoice_amount",
         "desc": ""
       }
     ]

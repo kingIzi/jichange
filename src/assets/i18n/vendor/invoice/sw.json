@@ -1,5 +1,8 @@
 {
   "invoiceDetails": "Maelezo ya Bili",
+  "noInvoices": "Bado hujatengeneza ankara.",
+  "noGeneratedInvoicesFound": "Hakukuwa na ankara zilizopatikana.",
+  "noInvoicesFound": "Hakuna ankara inayopatikana kwa {}",
   "addInvoice": "Ongeza Bili",
   "createInvoice": "Unda Bili",
   "editInvoice": "Hariri ankara",

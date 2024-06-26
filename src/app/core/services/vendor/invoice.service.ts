@@ -19,7 +19,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: number },
-        HttpDataResponse<GeneratedInvoice[] | string>
+        HttpDataResponse<GeneratedInvoice[] | string | number>
       >(`/api/Invoice/GetSignedDetails`, body)
     );
     return data;

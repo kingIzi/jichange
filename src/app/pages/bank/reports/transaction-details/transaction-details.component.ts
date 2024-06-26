@@ -56,6 +56,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-transaction-details',
@@ -159,32 +160,66 @@ export class TransactionDetailsComponent implements OnInit {
       this.requestCompaniesList({ branch: value });
     });
   }
+  private companyChangedEventHandler() {
+    this.compid.valueChanges.subscribe((value) => {
+      this.requestCustomersList({ Sno: value });
+    });
+  }
+  private assignCompaniesFilterData(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.companies = result.response;
+    } else {
+      this.filterFormData.companies = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr
+          .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+          .replace(
+            '{}',
+            this.filterFormData.branches.find(
+              (b) => b.Branch_Sno.toString() === this.branch.value
+            )?.Name as string
+          )
+      );
+    }
+    this.compid.setValue('all');
+  }
+  private assignCustomersFilterData(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.customers = result.response;
+    } else {
+      if (this.compid.value !== 'all') {
+        AppUtilities.openDisplayMessageBox(
+          this.displayMessageBox,
+          this.tr.translate(`defaults.warning`),
+          this.tr.translate(
+            `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+          )
+        );
+      }
+      this.filterFormData.customers = [];
+    }
+    this.cusid.setValue('all');
+  }
   private requestCompaniesList(body: { branch: number | string }) {
     this.startLoading = true;
     this.reportsService
       .getBranchedCompanyList(body)
       .then((result) => {
-        if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.filterFormData.companies = result.response;
-        } else {
-          this.filterFormData.companies = [];
-          this.compid.setValue('all');
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr
-              .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
-              .replace(
-                '{}',
-                this.filterFormData.branches.find(
-                  (b) => b.Branch_Sno.toString() === this.branch.value
-                )?.Name as string
-              )
-          );
-        }
+        this.assignCompaniesFilterData(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -199,49 +234,26 @@ export class TransactionDetailsComponent implements OnInit {
         throw err;
       });
   }
-  private companyChangedEventHandler() {
+  private requestCustomersList(body: { Sno: number | string }) {
     this.startLoading = true;
-    this.compid.valueChanges.subscribe((value) => {
-      this.startLoading = true;
-      let companyList = this.reportsService.getCustomerDetailsList({
-        Sno: value,
+    this.reportsService
+      .getCustomerDetailsList(body)
+      .then((result) => {
+        this.assignCustomersFilterData(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.filterFormData.customers = [];
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
       });
-      companyList
-        .then((result) => {
-          if (
-            typeof result.response !== 'number' &&
-            typeof result.response !== 'string'
-          ) {
-            this.filterFormData.customers = result.response;
-          } else {
-            if (this.compid.value !== 'all') {
-              AppUtilities.openDisplayMessageBox(
-                this.displayMessageBox,
-                this.tr.translate(`defaults.failed`),
-                this.tr.translate(
-                  `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-                )
-              );
-            }
-            this.filterFormData.customers = [];
-            this.cusid.setValue('all');
-          }
-          this.startLoading = false;
-          this.cdr.detectChanges();
-        })
-        .catch((err) => {
-          AppUtilities.requestFailedCatchError(
-            err,
-            this.displayMessageBox,
-            this.tr
-          );
-          this.filterFormData.customers = [];
-          this.cusid.setValue('all');
-          this.startLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        });
-    });
   }
   private createHeadersFormGroup() {
     let TABLE_SHOWING = 7;
@@ -365,6 +377,24 @@ export class TransactionDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignTransactionsDataList(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    if (
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.tableData.transactions = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.transactionDetails.noTransactionsFound`)
+      );
+      this.tableData.transactions = [];
+    }
+    this.prepareDataSource();
+  }
   private requestTransactionDetailsList(form: TransactionDetailsReportForm) {
     this.tableData.transactions = [];
     this.prepareDataSource();
@@ -372,21 +402,7 @@ export class TransactionDetailsComponent implements OnInit {
     this.reportsService
       .getTransactionsReport(form)
       .then((result) => {
-        if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.tableData.transactions = result.response;
-          this.prepareDataSource();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.transactions = [];
-          this.prepareDataSource();
-        }
+        this.assignTransactionsDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

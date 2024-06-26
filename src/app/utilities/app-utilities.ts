@@ -186,8 +186,10 @@ export class AppUtilities {
   ) {
     if (err instanceof TimeoutError) {
       AppUtilities.openTimeoutError(dialog, tr);
-    } else if (err.status === 500 || err.status === 0) {
+    } else if (err.status === 500) {
       AppUtilities.unexpectedErrorOccured(dialog, tr);
+    } else if (err.status === 0) {
+      AppUtilities.noInternetError(dialog, tr);
     } else {
       AppUtilities.noInternetError(dialog, tr);
     }

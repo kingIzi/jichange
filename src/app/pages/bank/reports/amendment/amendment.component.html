@@ -115,7 +115,7 @@
           {{ t("customer") }}
         </p>
         <select
-          [formControl]="cusid"
+          [formControl]="cust"
           class="select select-sm select-bordered w-full"
         >
           <option
@@ -138,7 +138,7 @@
             </option>
           </ng-container>
         </select>
-        <span *ngIf="cusid && cusid.invalid && cusid.touched">
+        <span *ngIf="cust && cust.invalid && cust.touched">
           <p
             *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
             class="text-danger-700 text-xs"

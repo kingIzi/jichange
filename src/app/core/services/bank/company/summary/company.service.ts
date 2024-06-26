@@ -61,7 +61,7 @@ export class CompanyService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: number },
-        HttpDataResponse<CompanyUser[] | string>
+        HttpDataResponse<CompanyUser[] | string | number>
       >(`/api/CompanyUsers/GetCompanyUserss`, body)
     );
     return data;
@@ -72,6 +72,15 @@ export class CompanyService {
         {},
         HttpDataResponse<string | number | Company[]>
       >(`/api/Setup/LatestComp`, body)
+    );
+    return data;
+  }
+  public async getCompanyById(body: { Sno: number | string }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { Sno: number | string },
+        HttpDataResponse<string | number | Company>
+      >(`/api/company/GetDetailsindivi`, body)
     );
     return data;
   }

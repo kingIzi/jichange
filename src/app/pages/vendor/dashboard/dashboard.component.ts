@@ -334,21 +334,27 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.dataSourceSortingAccessor();
   }
   private assignGeneratedInvoice(
-    results: HttpDataResponse<string | GeneratedInvoice[]>
+    result: HttpDataResponse<string | number | GeneratedInvoice[]>
   ) {
-    if (typeof results.response === 'string') {
-      this.tableData.generatedInvoices = [];
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.generatedInvoices = result.response;
     } else {
-      this.tableData.generatedInvoices = results.response;
+      this.tableData.generatedInvoices = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`invoice.noGeneratedInvoicesFound`)
+      );
     }
     this.prepareDataSource();
     this.createInvoiceTypePieChart(this.tableData.generatedInvoices);
-    this.tableLoading = false;
-    this.cdr.detectChanges();
   }
   private buildPage() {
-    // this.overviewLoading = true;
-    // this.tableLoading = true;
     this.startLoading = true;
     let generatedInvoiceObs = from(
       this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
@@ -365,8 +371,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         let [generatedInvoices, invoiceStatistics] = results;
         this.assignGeneratedInvoice(generatedInvoices);
         this.assignInvoiceStatistics(invoiceStatistics);
-        // this.overviewLoading = false;
-        // this.tableLoading = false;
         this.startLoading = false;
         this.cdr.detectChanges();
       })

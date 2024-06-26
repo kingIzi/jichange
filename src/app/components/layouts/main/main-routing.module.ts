@@ -56,16 +56,43 @@ const routes: Routes = [
             redirectTo: 'summary',
             pathMatch: 'full',
           },
+          // {
+          //   path: 'summary',
+          //   loadComponent: () =>
+          //     import(
+          //       '../../../pages/bank/company/summary/summary.component'
+          //     ).then((c) => c.SummaryComponent),
+          //   data: {
+          //     breadcrumb: { alias: 'summary', skip: false },
+          //     animationState: 'company-module-1',
+          //   },
+          // },
           {
             path: 'summary',
-            loadComponent: () =>
-              import(
-                '../../../pages/bank/company/summary/summary.component'
-              ).then((c) => c.SummaryComponent),
-            data: {
-              breadcrumb: { alias: 'summary', skip: false },
-              animationState: 'company-module-1',
-            },
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import(
+                    '../../../pages/bank/company/summary/summary.component'
+                  ).then((c) => c.SummaryComponent),
+                data: {
+                  breadcrumb: { alias: 'summary', skip: false },
+                  animationState: 'company-module-1',
+                },
+              },
+              {
+                path: 'add',
+                loadComponent: () =>
+                  import(
+                    '../../../pages/bank/company/summary/add-vendor/add-vendor.component'
+                  ).then((s) => s.AddVendorComponent),
+                data: {
+                  breadcrumb: { alias: 'summary', skip: false },
+                  animationState: 'sub-summary-module',
+                },
+              },
+            ],
           },
           {
             path: 'inbox',
@@ -357,6 +384,28 @@ const routes: Routes = [
             },
           },
           {
+            path: 'invoice-consolidated',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/consolidated-report/consolidated-report.component'
+              ).then((c) => c.ConsolidatedReportComponent),
+            data: {
+              breadcrumb: { alias: 'invoice-consolidated', skip: false },
+              animationState: 'reports-module-8',
+            },
+          },
+          {
+            path: 'payment-consolidated',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/payment-consolidated/payment-consolidated.component'
+              ).then((p) => p.PaymentConsolidatedComponent),
+            data: {
+              breadcrumb: { alias: 'payment-consolidated', skip: false },
+              animationState: 'reports-module-9',
+            },
+          },
+          {
             path: 'userlog',
             loadComponent: () =>
               import(
@@ -364,8 +413,7 @@ const routes: Routes = [
               ).then((m) => m.UserLogReportComponent),
             data: {
               breadcrumb: { alias: 'userLog', skip: false },
-              animationState: 'reports-module-8',
-              reuseRoute: true,
+              animationState: 'reports-module-10',
             },
           },
           {
@@ -376,7 +424,7 @@ const routes: Routes = [
               ).then((m) => m.AuditTrailsComponent),
             data: {
               breadcrumb: { alias: 'audit', skip: false },
-              animationState: 'reports-module-9',
+              animationState: 'reports-module-11',
               reuseRoute: true,
             },
           },

@@ -1,6 +1,7 @@
 {
   "customer": "Customer(s)",
   "addCustomer": "Add Customer",
+  "noCustomersFound": "There were no customers found.",
   "searchBy": "Search by name or email",
   "customersTable": [
     {
@@ -66,6 +67,7 @@
   },
   "customerView": {
     "searchBy": "Invoice No.",
+    "noInvoicesFound": "There were no invoice found for {}.",
     "customerProfileTransaction": "Customer Profile & Transactions",
     "customerDetails": {
       "customerDetails": "Customer details",

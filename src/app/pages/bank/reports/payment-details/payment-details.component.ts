@@ -54,6 +54,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-payment-details',
@@ -188,32 +189,111 @@ export class PaymentDetailsComponent implements OnInit {
       this.requestCompaniesList({ branch: value });
     });
   }
+  private companyChangedEventHandler() {
+    this.compid.valueChanges.subscribe((value) => {
+      this.requestCustomersList({ Sno: value });
+    });
+  }
+  private filterFormChanged() {
+    this.filterForm.valueChanges.subscribe((value) => {
+      if (value.compid && value.cusid) {
+        let form = {
+          branch: this.userProfile.braid,
+          Comp: value.compid,
+          cusid: value.cusid,
+          stdate: '',
+          enddate: '',
+        } as InvoiceReportFormBanker;
+        this.requestInvoicesList(form);
+      }
+    });
+  }
+  private assignCompaniesFilterData(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.companies = result.response;
+    } else {
+      this.filterFormData.companies = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr
+          .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+          .replace(
+            '{}',
+            this.filterFormData.branches.find(
+              (b) => b.Branch_Sno.toString() === this.branch.value
+            )?.Name as string
+          )
+      );
+    }
+    this.compid.setValue('all');
+  }
+  private assignCustomersFilterData(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.customers = result.response;
+    } else {
+      if (this.compid.value !== 'all') {
+        AppUtilities.openDisplayMessageBox(
+          this.displayMessageBox,
+          this.tr.translate(`defaults.warning`),
+          this.tr.translate(
+            `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+          )
+        );
+      }
+      this.filterFormData.customers = [];
+    }
+    this.cusid.setValue('all');
+  }
+  private noInvoiceFoundWarningMessage() {
+    let customer = this.filterFormData.customers.find(
+      (elem) => elem.Cust_Sno === Number(this.cusid.value)
+    );
+    if (customer) {
+      let message = this.tr
+        .translate(`reports.amendmentDetails.noInvoicesFound`)
+        .replace('{}', customer.Cust_Name);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    }
+  }
+  private assignInvoiceListFilterData(
+    result: HttpDataResponse<string | number | InvoiceReport[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.filterFormData.invoiceReports = result.response;
+    } else {
+      this.noInvoiceFoundWarningMessage();
+      this.filterFormData.invoiceReports = [];
+    }
+    //this.invno.setValue('all');
+  }
   private requestCompaniesList(body: { branch: number | string }) {
     this.startLoading = true;
     this.reportsService
       .getBranchedCompanyList(body)
       .then((result) => {
-        if (
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.filterFormData.companies = result.response;
-        } else {
-          this.filterFormData.companies = [];
-          this.compid.setValue('all');
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr
-              .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
-              .replace(
-                '{}',
-                this.filterFormData.branches.find(
-                  (b) => b.Branch_Sno.toString() === this.branch.value
-                )?.Name as string
-              )
-          );
-        }
+        this.assignCompaniesFilterData(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -228,90 +308,46 @@ export class PaymentDetailsComponent implements OnInit {
         throw err;
       });
   }
-  private companyChangedEventHandler() {
+  private requestCustomersList(body: { Sno: number | string }) {
     this.startLoading = true;
-    this.compid.valueChanges.subscribe((value) => {
-      this.startLoading = true;
-      let companyList = this.reportsService.getCustomerDetailsList({
-        Sno: value,
+    this.reportsService
+      .getCustomerDetailsList(body)
+      .then((result) => {
+        this.assignCustomersFilterData(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.filterFormData.customers = [];
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
       });
-      companyList
-        .then((result) => {
-          if (
-            typeof result.response !== 'number' &&
-            typeof result.response !== 'string'
-          ) {
-            this.filterFormData.customers = result.response;
-          } else {
-            if (this.compid.value !== 'all') {
-              AppUtilities.openDisplayMessageBox(
-                this.displayMessageBox,
-                this.tr.translate(`defaults.failed`),
-                this.tr.translate(
-                  `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-                )
-              );
-            }
-            this.filterFormData.customers = [];
-            this.cusid.setValue('all');
-          }
-          this.startLoading = false;
-          this.cdr.detectChanges();
-        })
-        .catch((err) => {
-          AppUtilities.requestFailedCatchError(
-            err,
-            this.displayMessageBox,
-            this.tr
-          );
-          this.filterFormData.customers = [];
-          this.cusid.setValue('all');
-          this.startLoading = false;
-          this.cdr.detectChanges();
-          throw err;
-        });
-    });
   }
-  private filterFormChanged() {
+  private requestInvoicesList(body: InvoiceReportFormBanker) {
     this.startLoading = true;
-    this.filterForm.valueChanges.subscribe((value) => {
-      if (value.compid && value.cusid) {
-        let form = {
-          branch: this.userProfile.braid,
-          Comp: value.compid,
-          cusid: value.cusid,
-          stdate: '',
-          enddate: '',
-        } as InvoiceReportFormBanker;
-        this.invoiceReportService
-          .getInvoiceReport(form)
-          .then((result) => {
-            if (
-              result.response &&
-              typeof result.response !== 'number' &&
-              result.response !== 'string'
-            ) {
-              this.filterFormData.invoiceReports =
-                result.response as InvoiceReport[];
-            } else {
-              this.filterFormData.invoiceReports = [];
-            }
-            this.tableLoading = false;
-            this.cdr.detectChanges();
-          })
-          .catch((err) => {
-            this.filterFormData.invoiceReports = [];
-            AppUtilities.requestFailedCatchError(
-              err,
-              this.displayMessageBox,
-              this.tr
-            );
-            this.startLoading = false;
-            this.cdr.detectChanges();
-            throw err;
-          });
-      }
-    });
+    this.invoiceReportService
+      .getInvoiceReport(body)
+      .then((result) => {
+        this.assignInvoiceListFilterData(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   private async createHeaderGroup() {
     let TABLE_SHOWING = 7;
@@ -406,6 +442,28 @@ export class PaymentDetailsComponent implements OnInit {
       this.tableData.dataSource.paginator.firstPage();
     }
   }
+  private assignBranchList(
+    result: HttpDataResponse<string | number | Branch[]>
+  ) {
+    if (
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.branches = result.response;
+      this.startLoading = false;
+    }
+  }
+  private assignTableDataCompanies(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    if (
+      typeof result.response !== 'number' &&
+      typeof result.response !== 'string'
+    ) {
+      this.filterFormData.companies = result.response as Company[];
+      this.startLoading = false;
+    }
+  }
   private buildPage() {
     this.startLoading = true;
     let companiesObs = from(
@@ -418,23 +476,8 @@ export class PaymentDetailsComponent implements OnInit {
     res
       .then((results) => {
         let [companies, branchList] = results;
-        if (
-          typeof companies.response !== 'number' &&
-          typeof companies.response !== 'string'
-        ) {
-          this.filterFormData.companies = companies.response as Company[];
-          this.startLoading = false;
-        }
-        if (
-          typeof branchList.response !== 'number' &&
-          typeof branchList.response !== 'string'
-        ) {
-          this.filterFormData.branches = branchList.response as Branch[];
-          this.startLoading = false;
-        }
-        // else {
-        //   this.filterFormData.companies = [];
-        // }
+        this.assignTableDataCompanies(companies);
+        this.assignBranchList(branchList);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -494,39 +537,34 @@ export class PaymentDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignPaymentsDataList(
+    result: HttpDataResponse<string | number | PaymentDetail[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.payments = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.paymentDetails.noPaymentsFound`)
+      );
+      this.tableData.payments = [];
+    }
+    this.prepareDataSource();
+  }
   private requestPaymentReport(value: PaymentDetailReportForm) {
     this.tableData.payments = [];
     this.prepareDataSource();
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
-      .then((results) => {
-        if (
-          typeof results.response === 'string' &&
-          typeof results.response === 'number'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.payments = [];
-          this.prepareDataSource();
-        } else if (
-          results.response instanceof Array &&
-          results.response.length === 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.payments = [];
-          this.prepareDataSource();
-        } else {
-          this.tableData.payments = results.response as PaymentDetail[];
-          this.prepareDataSource();
-        }
+      .then((result) => {
+        this.assignPaymentsDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

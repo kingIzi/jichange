@@ -105,6 +105,14 @@ export class MainComponent implements OnInit, AfterViewInit {
       this.tr.translate(`bankRoutes.reports.amendment`)
     );
     this.breadcrumbService.set(
+      '@invoice-consolidated',
+      this.tr.translate(`bankRoutes.reports.invoiceConsolidated`)
+    );
+    this.breadcrumbService.set(
+      '@payment-consolidated',
+      this.tr.translate(`bankRoutes.reports.paymentConsolidated`)
+    );
+    this.breadcrumbService.set(
       '@vendors',
       this.tr.translate(`bankRoutes.reports.vendorReport`)
     );

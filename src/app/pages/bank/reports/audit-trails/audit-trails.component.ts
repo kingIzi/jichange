@@ -34,7 +34,6 @@ import {
   MatPaginator,
 } from '@angular/material/paginator';
 import { formatDate } from '@angular/common';
-import { DateFormatDirective } from 'src/app/utilities/date-format.directive';
 import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails/audit-trails.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { Observable, TimeoutError, from, of, zip } from 'rxjs';
@@ -49,6 +48,7 @@ import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.se
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-audit-trails',
@@ -96,8 +96,6 @@ export class AuditTrailsComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public branches: Branch[] = [];
-  // public auditTrails: AuditTrail[] = [];
-  // public auditTrailsData: AuditTrail[] = [];
   public tableData: {
     auditTrails: AuditTrail[];
     originalTableColumns: TableColumnsData[];
@@ -114,7 +112,6 @@ export class AuditTrailsComponent implements OnInit {
   public headersFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  //public AuditTrailsTable: typeof AuditTrailsTable = AuditTrailsTable;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -177,24 +174,10 @@ export class AuditTrailsComponent implements OnInit {
     this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private createForm() {
-    const currentDate = new Date();
     this.formGroup = this.fb.group({
       tbname: this.fb.control(this.selectPageOptions[0], [Validators.required]),
-      Startdate: this.fb.control(
-        AppUtilities.dateToFormat(
-          new Date(
-            currentDate.getFullYear() - 4,
-            currentDate.getMonth(),
-            currentDate.getDate()
-          ),
-          'yyyy-MM-dd'
-        ),
-        [Validators.required]
-      ),
-      Enddate: this.fb.control(
-        AppUtilities.dateToFormat(currentDate, 'yyyy-MM-dd'),
-        [Validators.required]
-      ),
+      Startdate: this.fb.control('', [Validators.required]),
+      Enddate: this.fb.control('', [Validators.required]),
       act: this.fb.control(this.actions[0], [Validators.required]),
       branch: this.fb.control(this.userProfile.braid, []),
     });
@@ -270,6 +253,26 @@ export class AuditTrailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignAuditTrailsDataList(
+    result: HttpDataResponse<string | number | AuditTrail[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.auditTrails = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.auditTrails.noAuditTrailsFound`)
+      );
+      this.tableData.auditTrails = [];
+    }
+    this.prepareDataSource();
+  }
   private filterAuditTrailsRequest(value: AuditTrailsReportForm) {
     this.tableData.auditTrails = [];
     this.prepareDataSource();
@@ -277,32 +280,7 @@ export class AuditTrailsComponent implements OnInit {
     this.auditTrailsService
       .getDetails(value)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          typeof result.response === 'number'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.auditTrails = [];
-          this.prepareDataSource();
-        } else if (
-          result.response instanceof Array &&
-          result.response.length === 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.auditTrails = [];
-          this.prepareDataSource();
-        } else {
-          this.tableData.auditTrails = result.response as AuditTrail[];
-          this.prepareDataSource();
-        }
+        this.assignAuditTrailsDataList(result);
         this.tableLoading = false;
         this.cdf.detectChanges();
       })

@@ -44,6 +44,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
@@ -211,25 +212,33 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignCreatedInvoiceDataList(
+    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.invoiceList = result.response;
+    } else {
+      this.tableData.invoiceList = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`invoice.noInvoices`)
+      );
+    }
+    this.prepareDataSource();
+  }
   private requestCreatedInvoiceList() {
     this.tableData.invoiceList = [];
     this.tableLoading = true;
     this.invoiceService
       .getCreatedInvoiceList({ compid: this.userProfile.InstID })
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.tableData.invoiceList = result.response;
-          this.prepareDataSource();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        }
+        this.assignCreatedInvoiceDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

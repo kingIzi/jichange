@@ -16,8 +16,22 @@
           <i class="bi bi-download text-success text-lg"></i>
         </span>
       </a>
-      <button
+      <!-- <button
         (click)="openCompanySummaryDialog()"
+        class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
+      >
+        <span>
+          <i class="bi bi-plus-circle text-darkPurple text-lg"></i>
+        </span>
+        <p
+          *transloco="let t; read: 'company.summary.actions'"
+          class="text-sm text-darkPurple"
+        >
+          {{ t("addCompany") }}
+        </p>
+      </button> -->
+      <button
+        [routerLink]="'/main/company/summary/add'"
         class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
       >
         <span>
@@ -115,11 +129,15 @@
                 <p class="text-xs font-semibold">
                   {{ header.get("label")?.value }}
                 </p>
-                <p
-                  [class]="tableValueStyle(company, header.get('value')?.value)"
-                >
-                  {{ tableValue(company, header.get("value")?.value) }}
-                </p>
+                <ng-container>
+                  <p
+                    [class]="
+                      tableValueStyle(company, header.get('value')?.value)
+                    "
+                  >
+                    {{ tableValue(company, header.get("value")?.value) }}
+                  </p>
+                </ng-container>
               </div>
               <ng-template #actionButtons>
                 <div
@@ -215,9 +233,11 @@
                       else actionTemplate
                     "
                   >
-                    <p [class]="tableValueStyle(element, column.value)">
-                      {{ tableValue(element, column.value) }}
-                    </p>
+                    <ng-container>
+                      <p [class]="tableValueStyle(element, column.value)">
+                        {{ tableValue(element, column.value) }}
+                      </p>
+                    </ng-container>
                   </ng-container>
                   <ng-template #actionTemplate>
                     <div

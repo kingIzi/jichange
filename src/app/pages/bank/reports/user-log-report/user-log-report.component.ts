@@ -44,6 +44,7 @@ import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.se
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-user-log-report',
@@ -232,6 +233,26 @@ export class UserLogReportComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private assignUserLogDataList(
+    result: HttpDataResponse<string | number | UserLog[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number' &&
+      result.response.length > 0
+    ) {
+      this.tableData.userReportLogs = result.response;
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`reports.userLogReport.noUserLogReportFound`)
+      );
+      this.tableData.userReportLogs = [];
+    }
+    this.prepareDataSource();
+  }
   private requestUserLog(value: any) {
     this.tableData.userReportLogs = [];
     this.prepareDataSource();
@@ -239,32 +260,7 @@ export class UserLogReportComponent implements OnInit {
     this.reportsService
       .getUserLogTimes(value)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          typeof result.response === 'number'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.userReportLogs = [];
-          this.prepareDataSource();
-        } else if (
-          result.response instanceof Array &&
-          result.response.length === 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.userReportLogs = [];
-          this.prepareDataSource();
-        } else {
-          this.tableData.userReportLogs = result.response as UserLog[];
-          this.prepareDataSource();
-        }
+        this.assignUserLogDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

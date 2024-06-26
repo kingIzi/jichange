@@ -263,13 +263,15 @@
                   <p class="text-xs font-semibold">
                     {{ header.get("label")?.value }}
                   </p>
-                  <p
-                    [ngClass]="
-                      tableValueStyle(company, header.get('value')?.value)
-                    "
-                  >
-                    {{ tableValue(company, header.get("value")?.value) }}
-                  </p>
+                  <ng-container>
+                    <p
+                      [class]="
+                        tableValueStyle(company, header.get('value')?.value)
+                      "
+                    >
+                      {{ tableValue(company, header.get("value")?.value) }}
+                    </p>
+                  </ng-container>
                 </div>
               </div>
             </div>
@@ -341,9 +343,11 @@
                     </div>
                   </th>
                   <td mat-cell *matCellDef="let element">
-                    <p [ngClass]="tableValueStyle(element, column.value)">
-                      {{ tableValue(element, column.value) }}
-                    </p>
+                    <ng-container>
+                      <p [class]="tableValueStyle(element, column.value)">
+                        {{ tableValue(element, column.value) }}
+                      </p>
+                    </ng-container>
                   </td>
                 </ng-container>
                 <tr
