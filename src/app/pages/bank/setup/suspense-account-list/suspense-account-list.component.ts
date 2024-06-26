@@ -284,7 +284,11 @@ export class SuspenseAccountListComponent implements OnInit {
       case 'Status':
         return `${PerformanceUtils.getActiveStatusStyles(
           element[key],
-          'Active'
+          'Active',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
         )} text-center w-fit`;
       default:
         return `${style} text-black font-normal`;

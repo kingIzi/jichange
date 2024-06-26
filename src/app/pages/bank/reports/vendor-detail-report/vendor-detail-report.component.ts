@@ -328,7 +328,11 @@ export class VendorDetailReportComponent implements OnInit {
       case 'Status':
         return `${PerformanceUtils.getActiveStatusStyles(
           element.Status,
-          'Approved'
+          'Approved',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
         )} w-fit`;
       case 'Checker':
         return Checker(element[key]);

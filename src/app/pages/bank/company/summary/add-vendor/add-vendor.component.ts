@@ -356,6 +356,7 @@ export class AddVendorComponent implements OnInit {
       );
     } else if (result.message.toLocaleLowerCase() === 'success') {
       let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      this.resetForm();
     }
   }
   private assignCompanyInfo(

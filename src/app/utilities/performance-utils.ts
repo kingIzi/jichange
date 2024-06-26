@@ -18,10 +18,14 @@ export class PerformanceUtils {
   static getActiveStatusStyles(
     status: string,
     target: string,
-    includedBg: string = 'bg-green-100',
-    includedText: string = 'text-green-600',
-    excludedBg: string = 'bg-orange-100',
-    excludedText: string = 'text-orange-600'
+    // includedBg: string = 'bg-green-100',
+    // includedText: string = 'text-green-600',
+    // excludedBg: string = 'bg-orange-100',
+    // excludedText: string = 'text-orange-600'
+    includedBg: string,
+    includedText: string,
+    excludedBg: string,
+    excludedText: string
   ) {
     return status?.toLocaleLowerCase() === target?.toLocaleLowerCase()
       ? `${includedBg} ${includedText} px-4 py-1 rounded-lg shadow`

@@ -74,7 +74,7 @@ const routes: Routes = [
                 path: '',
                 loadComponent: () =>
                   import(
-                    '../../../pages/bank/company/summary/summary.component'
+                    '../../../pages/bank/company/summary/list/summary.component'
                   ).then((c) => c.SummaryComponent),
                 data: {
                   breadcrumb: { alias: 'summary', skip: false },

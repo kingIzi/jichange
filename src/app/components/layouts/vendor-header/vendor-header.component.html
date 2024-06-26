@@ -208,13 +208,13 @@
   </div>
 </div> -->
 
-<div #header class="navbar bg-base-100 shadow-4 relative">
+<div #header class="navbar bg-indigo-900 shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" class="dropdown">
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
+          class="h-5 w-5 text-white"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -272,7 +272,7 @@
     </div>
     <a
       [routerLink]="'/vendor'"
-      class="flex items-center btn btn-ghost w-fit space-x-2"
+      class="flex items-center btn btn-ghost bg-white hover:bg-darkPurple w-fit space-x-2"
     >
       <div class="w-12 h-12">
         <img
@@ -314,8 +314,8 @@
             class="flex flex-row items-center m-1"
             [class]="
               verifyCurrentRoute(header.get('rootLink')?.value)
-                ? 'text-darkPurple bg-lightPurple'
-                : 'text-black bg-transparent'
+                ? 'text-neutral-900 bg-darkPurple'
+                : 'text-neutral-50 bg-transparent'
             "
           >
             <p class="font-extrabold capitalize">
@@ -329,8 +329,8 @@
             class="flex flex-row items-center m-1"
             [class]="
               verifyCurrentRoute(header.get('rootLink')?.value)
-                ? 'text-darkPurple bg-lightPurple'
-                : 'text-black bg-transparent'
+                ? 'text-neutral-900 bg-darkPurple'
+                : 'text-neutral-50 bg-transparent'
             "
           >
             <p class="font-extrabold capitalize">
@@ -367,20 +367,16 @@
   </div>
   <div class="navbar-end">
     <div class="flex flex-row items-center">
-      <div class="flex flex-col">
+      <!-- <div class="flex flex-col">
         <p class="text-sm">{{ userProfile.Uname }}</p>
         <p class="text-sm">{{ userProfile.role }}</p>
-      </div>
+      </div> -->
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="avatar placeholder">
-            <div
-              class="bg-neutral text-neutral-content rounded-full w-8 md:w-10"
-            >
-              <span class="text-xs">
-                <span>
-                  <i class="bi bi-person-circle text-lg"></i>
-                </span>
+            <div class="bg-white text-black rounded-full w-8 md:w-10">
+              <span>
+                <i class="bi bi-person-circle text-lg"></i>
               </span>
             </div>
           </div>
@@ -397,9 +393,13 @@
               <span>
                 <i class="bi bi-person-circle text-lg"></i>
               </span>
-              <p *transloco="let t; read: 'vendorRoutes'">
-                <span>{{ t("profile") }}</span>
-              </p>
+              <div class="flex flex-row items-center justify-between w-full">
+                <p class="text-sm">{{ userProfile.Uname }}</p>
+                <span
+                  class="badge badge-accent badge-sm text-white uppercase"
+                  >{{ userProfile.role }}</span
+                >
+              </div>
             </a>
           </li>
           <li>

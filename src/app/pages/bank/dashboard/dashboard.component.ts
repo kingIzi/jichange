@@ -289,7 +289,11 @@ export class DashboardComponent implements OnInit {
         sessB: this.userProfile.sessb,
       })
     );
-    let compListObs = from(this.companyService.getLatestCompanies({}));
+    let compListObs = from(
+      this.reportsService.getBranchedCompanyList({
+        branch: this.userProfile.braid,
+      })
+    );
     let latestTransactionsObs = from(
       this.reportsService.getLatestTransactionsList({})
     );
@@ -417,7 +421,11 @@ export class DashboardComponent implements OnInit {
       case 'Status':
         return `${PerformanceUtils.getActiveStatusStyles(
           element.Status,
-          'Approved'
+          'Approved',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
         )} text-center w-fit`;
       default:
         return `${style} text-black font-normal`;

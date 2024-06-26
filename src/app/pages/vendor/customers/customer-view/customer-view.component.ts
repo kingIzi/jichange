@@ -334,7 +334,11 @@ export class CustomerViewComponent implements OnInit {
       case 'goods_status':
         return `${PerformanceUtils.getActiveStatusStyles(
           element.goods_status,
-          'Approved'
+          'Approved',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
         )} w-fit`;
       default:
         return `${style} text-black font-normal`;
