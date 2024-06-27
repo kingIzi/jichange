@@ -41,6 +41,11 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-deposit-account-list',
@@ -67,12 +72,11 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DepositAccountListComponent implements OnInit {
   public tableHeadersFormGroup!: FormGroup;
   public tableLoading: boolean = false;
-  // public depositAccountsData: DepositAccount[] = [];
-  // public depositAccounts: DepositAccount[] = [];
   public tableData: {
     depositAccounts: DepositAccount[];
     originalTableColumns: TableColumnsData[];
@@ -130,21 +134,6 @@ export class DepositAccountListComponent implements OnInit {
     this.depositAccountService
       .getDepositAccountList({})
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'number' &&
-        //   typeof result.response !== 'string'
-        // ) {
-        //   this.depositAccountsData = result.response;
-        //   this.depositAccounts = this.depositAccountsData;
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
         if (result.response instanceof Array) {
           this.tableData.depositAccounts = result.response;
         } else {
@@ -176,14 +165,6 @@ export class DepositAccountListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `depositAccount.depositAccountTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`depositAccount.depositAccountTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
@@ -220,62 +201,6 @@ export class DepositAccountListComponent implements OnInit {
       });
     this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case DepositAccountTable.VENDOR:
-  //       this.depositAccounts.sort((a, b) =>
-  //         a?.Company.toLocaleLowerCase() > b?.Company.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DepositAccountTable.ACCOUNT:
-  //       this.depositAccounts.sort((a, b) =>
-  //         a?.Deposit_Acc_No.toLocaleLowerCase() >
-  //         b?.Deposit_Acc_No.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DepositAccountTable.REASON:
-  //       this.depositAccounts.sort((a: any, b: any) =>
-  //         a?.Reason?.toLocaleLowerCase() > b?.Reason?.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case DepositAccountTable.VENDOR:
-  //       this.depositAccounts.sort((a, b) =>
-  //         a?.Company.toLocaleLowerCase() < b?.Company.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DepositAccountTable.ACCOUNT:
-  //       this.depositAccounts.sort((a, b) =>
-  //         a?.Deposit_Acc_No.toLocaleLowerCase() <
-  //         b?.Deposit_Acc_No.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DepositAccountTable.REASON:
-  //       this.depositAccounts.sort((a: any, b: any) =>
-  //         a?.Reason?.toLocaleLowerCase() < b?.Reason?.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   private searchTable(searchText: string, paginator: MatPaginator) {
     this.tableData.dataSource.filter = searchText.trim().toLowerCase();
     if (this.tableData.dataSource.paginator) {

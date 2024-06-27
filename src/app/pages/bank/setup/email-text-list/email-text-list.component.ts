@@ -29,6 +29,11 @@ import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-f
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { EmailTextDialogComponent } from 'src/app/components/dialogs/bank/setup/email-text-dialog/email-text-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { EmailTextTable } from 'src/app/core/enums/bank/setup/email-text-table';
 import { RemoveEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/remove-email-text-form';
 import { EmailText } from 'src/app/core/models/bank/setup/email-text';
@@ -66,6 +71,7 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class EmailTextListComponent implements OnInit {
   public startLoading: boolean = false;

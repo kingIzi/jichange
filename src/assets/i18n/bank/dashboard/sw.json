@@ -18,6 +18,7 @@
     },
     "inboxApproval": {
       "name": "Kuidhinishwa kwa kikasha pokezi",
+      "approve": "Kuidhinisha",
       "allOperations": "Uendeshaji wote",
       "pending": "Inasubiri",
       "errors": {

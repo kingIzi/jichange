@@ -1,6 +1,7 @@
 {
   "overview": {
     "overview": "Muhtasari",
+    "exportToExcel": "Pakua Excel",
     "summary": "Muhtasari",
     "vendorsTableTitle": "Miamala ya hivi karibuni",
     "transactions": "Miamala",
@@ -665,13 +666,13 @@
         "desc": ""
       },
       {
-        "label": "Idadi ya ankara",
-        "value": "no_of_invoices",
+        "label": "N° ya malipo",
+        "value": "no_of_payments",
         "desc": ""
       },
       {
-        "label": "Jumla ya Kiasi",
-        "value": "invoice_amount",
+        "label": "Total Receipt Amount",
+        "value": "receipt_amount",
         "desc": ""
       }
     ]

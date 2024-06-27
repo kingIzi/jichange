@@ -72,6 +72,11 @@ import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-dashboard',
@@ -102,13 +107,17 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/dashboard', alias: 'dashboard' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DashboardComponent implements OnInit {
   private userProfile!: LoginResponse;
+
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
+  public transactionsLoading: boolean = false;
   public inboxApprovalLoading: boolean = false;
   public overviewLoading: boolean = false;
+  public buildPageLoading: boolean = false;
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   public inboxApprovals: Company[] = [];
   public latestTransactions: TransactionDetail[] = [];
@@ -275,6 +284,7 @@ export class DashboardComponent implements OnInit {
     }
   }
   public buildPage() {
+    this.transactionsLoading = true;
     this.inboxApprovalLoading = true;
     this.overviewLoading = true;
     this.tableLoading = true;
@@ -335,6 +345,7 @@ export class DashboardComponent implements OnInit {
         this.inboxApprovalLoading = false;
         this.overviewLoading = false;
         this.tableLoading = false;
+        this.transactionsLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -346,6 +357,7 @@ export class DashboardComponent implements OnInit {
         this.inboxApprovalLoading = false;
         this.overviewLoading = false;
         this.tableLoading = false;
+        this.transactionsLoading = false;
         this.cdr.detectChanges();
         throw err;
       });

@@ -12,7 +12,8 @@
       "noSuspenseAccountsAvailable": "No suspense accounts available. Would you like to create one?",
       "noDepositAccountAvailable": "No deposit accounts available. Would you like to create one?",
       "createSuspenseAccount": "Add Suspense account",
-      "createDepositAccount": "Add deposit account"
+      "createDepositAccount": "Add deposit account",
+      "exportToExcel": "Export to excel"
     },
     "companySummary": [
       {

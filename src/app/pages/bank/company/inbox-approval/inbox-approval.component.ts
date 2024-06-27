@@ -56,6 +56,11 @@ import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -84,6 +89,7 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/company', alias: 'company' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class InboxApprovalComponent implements OnInit {
   public startLoading: boolean = false;

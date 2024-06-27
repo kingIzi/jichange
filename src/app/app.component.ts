@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import { LoginService } from './core/services/login.service';
 import { AppUtilities } from './utilities/app-utilities';
 import { DisplayMessageBoxComponent } from './components/dialogs/display-message-box/display-message-box.component';
+import { mainAnimations } from './components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +33,7 @@ import { DisplayMessageBoxComponent } from './components/dialogs/display-message
     DisplayMessageBoxComponent,
   ],
   providers: [{ provide: TRANSLOCO_SCOPE, useValue: { scope: 'auth' } }],
+  animations: [mainAnimations],
 })
 export class AppComponent implements OnInit {
   private idleState = 'Not started.';
@@ -57,5 +59,10 @@ export class AppComponent implements OnInit {
   }
   ngOnInit(): void {
     this.verifyInternet();
+  }
+  prepareRoute(outlet: RouterOutlet, animate: string): boolean {
+    return (
+      outlet && outlet.activatedRouteData && outlet.activatedRouteData[animate]
+    );
   }
 }

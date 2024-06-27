@@ -57,6 +57,11 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatListModule } from '@angular/material/list';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { LoginResponse } from 'src/app/core/models/login-response';
+import {
+  listAnimationDesktop,
+  listAnimationMobile,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-summary',
@@ -86,6 +91,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
       useValue: { scope: 'bank/company', alias: 'company' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class SummaryComponent implements OnInit {
   public startLoading: boolean = false;
@@ -315,6 +321,8 @@ export class SummaryComponent implements OnInit {
     switch (key) {
       case 'AccountNo':
         return `${style} justify-end`;
+      case 'Action':
+        return `${style} justify-end`;
       default:
         return `${style}`;
     }
@@ -356,9 +364,6 @@ export class SummaryComponent implements OnInit {
   }
   getValueArray(ind: number) {
     return this.headers.controls.at(ind)?.get('values') as FormArray;
-  }
-  getFormControl(control: AbstractControl, name: string) {
-    return control.get(name) as FormControl;
   }
   openCompanySummaryDialog() {
     let dialogRef = this.dialog.open(CompanySummaryDialogComponent, {

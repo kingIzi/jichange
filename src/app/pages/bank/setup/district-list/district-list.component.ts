@@ -29,6 +29,11 @@ import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-f
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { DistrictDialogComponent } from 'src/app/components/dialogs/bank/setup/district-dialog/district-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { DistrictTable } from 'src/app/core/enums/bank/setup/district-table';
 import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/district/remove-district-form';
 import { District } from 'src/app/core/models/bank/setup/district';
@@ -66,13 +71,12 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DistrictListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  // public districts: District[] = [];
-  // public districtsData: District[] = [];
   public tableData: {
     districts: District[];
     originalTableColumns: TableColumnsData[];
@@ -113,14 +117,6 @@ export class DistrictListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `districtDialog.districtsTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`districtDialog.districtsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
@@ -190,16 +186,6 @@ export class DistrictListComponent implements OnInit {
     this.districtService
       .getAllDistrictList({})
       .then((result) => {
-        // if (
-        //   result.response &&
-        //   typeof result.response !== 'number' &&
-        //   typeof result.response !== 'string'
-        // ) {
-        //   this.districtsData = result.response;
-        //   this.districts = this.districtsData;
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
         if (result.response instanceof Array) {
           this.tableData.districts = result.response as District[];
         } else {
@@ -255,64 +241,6 @@ export class DistrictListComponent implements OnInit {
         throw err;
       });
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case DistrictTable.REGION:
-  //       this.districts.sort((a, b) =>
-  //         a.Region_Name.toLocaleLowerCase() > b.Region_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DistrictTable.DISTRICT:
-  //       this.districts.sort((a, b) =>
-  //         a.District_Name.toLocaleLowerCase() >
-  //         b.District_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DistrictTable.STATUS:
-  //       this.districts.sort((a, b) =>
-  //         a.District_Status.toLocaleLowerCase() >
-  //         b.District_Status.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case DistrictTable.REGION:
-  //       this.districts.sort((a, b) =>
-  //         a.Region_Name.toLocaleLowerCase() < b.Region_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DistrictTable.DISTRICT:
-  //       this.districts.sort((a, b) =>
-  //         a.District_Name.toLocaleLowerCase() <
-  //         b.District_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case DistrictTable.STATUS:
-  //       this.districts.sort((a, b) =>
-  //         a.District_Status.toLocaleLowerCase() <
-  //         b.District_Status.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   private searchTable(searchText: string, paginator: MatPaginator) {
     this.tableData.dataSource.filter = searchText.trim().toLowerCase();
     if (this.tableData.dataSource.paginator) {

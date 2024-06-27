@@ -53,6 +53,11 @@ import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.se
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  inOutAnimation,
+  listAnimationDesktop,
+  listAnimationMobile,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-invoice-details',
@@ -79,6 +84,7 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class InvoiceDetailsComponent implements OnInit {
   public tableData: {

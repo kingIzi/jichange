@@ -1,6 +1,7 @@
 {
   "overview": {
     "overview": "Overview",
+    "exportToExcel": "Export to excel",
     "summary": "Summary",
     "vendorsTableTitle": "Latest transactions",
     "transactions": "Transactions",
@@ -680,13 +681,13 @@
         "desc": ""
       },
       {
-        "label": "N° of invoices",
-        "value": "no_of_invoices",
+        "label": "N° of payments",
+        "value": "no_of_payments",
         "desc": ""
       },
       {
-        "label": "Total Amount",
-        "value": "invoice_amount",
+        "label": "Total Receipt Amount",
+        "value": "receipt_amount",
         "desc": ""
       }
     ]

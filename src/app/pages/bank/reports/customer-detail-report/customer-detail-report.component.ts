@@ -60,6 +60,11 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -85,6 +90,7 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CustomerDetailReportComponent implements OnInit {
   public startLoading: boolean = false;

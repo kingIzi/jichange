@@ -18,6 +18,7 @@
     },
     "inboxApproval": {
       "name": "Inbox Approval",
+      "approve": "Approve",
       "allOperations": "All Operations",
       "pending": "Pending",
       "errors": {

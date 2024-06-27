@@ -50,6 +50,11 @@ import { DesignationTable } from 'src/app/core/enums/bank/setup/designation-tabl
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-designation-list',
@@ -77,6 +82,7 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DesignationListComponent implements OnInit {
   public userProfile!: LoginResponse;

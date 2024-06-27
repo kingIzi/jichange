@@ -4,6 +4,8 @@ import {
   group,
   keyframes,
   query,
+  sequence,
+  stagger,
   style,
   transition,
   trigger,
@@ -104,8 +106,68 @@ function slideTo(direction: string) {
   ];
 }
 
+function dashboardSlideToRight() {
+  let optional = { optional: true };
+  return [
+    style({ position: 'relative' }),
+    query(
+      ':enter, :leave',
+      [
+        style({
+          position: 'absolute',
+          top: 0,
+          right: '0%',
+          width: '100%',
+        }),
+      ],
+      optional
+    ),
+    query(':enter', [style({ right: '-100%' })]),
+    group([
+      query(
+        ':leave',
+        [animate('600ms ease', style({ right: '100%' }))],
+        optional
+      ),
+      query(
+        ':enter',
+        [animate('600ms ease', style({ right: '0%' }))],
+        optional
+      ),
+    ]),
+  ];
+}
+
+function dashboardSlideToLeft() {
+  let optional = { optional: true };
+  return [
+    style({ position: 'relative' }),
+    query(
+      ':enter, :leave',
+      [
+        style({
+          position: 'absolute',
+          top: 0,
+          left: '0%',
+          width: '100%',
+        }),
+      ],
+      optional
+    ),
+    query(':enter', [style({ left: '-100%' })]),
+    group([
+      query(
+        ':leave',
+        [animate('600ms ease', style({ left: '100%' }))],
+        optional
+      ),
+      query(':enter', [animate('600ms ease', style({ left: '0%' }))], optional),
+    ]),
+  ];
+}
+
 function transformTo({ x = 100, y = 0, rotate = 0 }) {
-  const optional = { optional: true };
+  let optional = { optional: true };
   return [
     query(
       ':enter, :leave',
@@ -142,16 +204,6 @@ function transformTo({ x = 100, y = 0, rotate = 0 }) {
     ]),
   ];
 }
-
-// transition('* => isLeft', slideTo('left')),
-//   transition('* => isRight', slideTo('right')),
-//   transition('isRight => *', slideTo('left')),
-//   transition('isLeft => *', slideTo('right')),
-
-// transition('* => isLeft', transformTo({ x: -100, y: -100, rotate: -720 }) ),
-//     transition('* => isRight', transformTo({ x: 100, y: -100, rotate: 90 }) ),
-//     transition('isRight => *', transformTo({ x: -100, y: -100, rotate: 360 }) ),
-//     transition('isLeft => *', transformTo({ x: 100, y: -100, rotate: -360 }) )
 
 function generateFactorialStrings(arr: string[], delim: string) {
   const factorialStrings = arr
@@ -238,7 +290,7 @@ function nestedRouteStates(inputStr: string, arr: string[]) {
   return results.flat();
 }
 
-export const fader = trigger('triggerName', [
+export const mainModuleAnimations = trigger('mainModuleAnimations', [
   transition(companyRoutes.join(','), fadeEase()),
   transition(setupRoutes.join(','), fadeEase()),
   transition(reportsRoutes.join(','), fadeEase()),
@@ -246,9 +298,9 @@ export const fader = trigger('triggerName', [
   transition('sub-summary-module => company-module-1', slideTo('left')),
   transition('isLeft => isRight', slideTo('right')),
   transition('isRight => isLeft', slideTo('left')),
-  transition('dashboard => *', slideTo('right')),
   transition('* => dashboard', slideTo('left')),
-  transition('profile <=> *', stepper()),
+  transition('dashboard => *', slideTo('right')),
+  transition('* <=> profile', stepper()),
   transition(routesStates(companyModules, setupModules).join(','), stepper()),
   transition(routesStates(companyModules, reportsModules).join(','), stepper()),
   transition(routesStates(setupModules, reportsModules).join(','), stepper()),
@@ -266,7 +318,7 @@ export const fader = trigger('triggerName', [
 export const vendorAnimations = trigger('vendorAnimate', [
   transition('dashboard => *', slideTo('right')),
   transition('* => dashboard', slideTo('left')),
-  transition('profile <=> *', stepper()),
+  transition('* <=> profile', stepper()),
   transition(
     routesStates(vendorInvoiceModules, vendorReportsModules).join(','),
     stepper()
@@ -336,4 +388,77 @@ export const vendorAnimations = trigger('vendorAnimate', [
   transition('isRight-2 <=> company-module-1', stepper()),
   transition('isLeft-1 <=> isLeft-2', stepper()),
   transition('isRight-1 <=> isLeft-2', stepper()),
+]);
+
+export const mainAnimations = trigger('mainAnimation', [
+  transition('auth-module <=> *', transformTo({ x: 0, y: -100, rotate: 0 })),
+]);
+
+export const listAnimationMobile = trigger('listAnimationMobile', [
+  transition('* => *', [
+    query(
+      ':leave',
+      [
+        style({
+          position: 'absolute',
+        }),
+        stagger(100, [
+          animate(
+            '0.2s ease-in',
+            style({
+              opacity: 0,
+            })
+          ),
+        ]),
+      ],
+      {
+        optional: true,
+      }
+    ),
+    query(
+      ':enter',
+      [
+        style({ opacity: 0 }),
+        stagger(100, [animate('0.2s ease-in', style({ opacity: 1 }))]),
+      ],
+      { optional: true }
+    ),
+  ]),
+]);
+
+export const listAnimationDesktop = trigger('listAnimationDesktop', [
+  transition('void => *', [
+    style({
+      height: '*',
+      opacity: '0',
+      transform: 'translateX(-550px)',
+      'box-shadow': 'none',
+    }),
+    sequence([
+      animate(
+        '.35s ease',
+        style({
+          height: '*',
+          opacity: '.2',
+          transform: 'translateX(0)',
+          'box-shadow': 'none',
+        })
+      ),
+      animate(
+        '.35s ease',
+        style({ height: '*', opacity: 1, transform: 'translateX(0)' })
+      ),
+    ]),
+  ]),
+]);
+
+export const inOutAnimation = trigger('inOutAnimation', [
+  transition(':enter', [
+    style({ opacity: 0 }),
+    animate('0.5s ease-out', style({ opacity: 1 })),
+  ]),
+  transition(':leave', [
+    style({ opacity: 1 }),
+    animate('0.2s ease-in', style({ opacity: 0 })),
+  ]),
 ]);

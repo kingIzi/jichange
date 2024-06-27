@@ -311,7 +311,7 @@
             [routerLinkActive]="'text-darkPurple'"
             tabindex="0"
             role="button"
-            class="flex flex-row items-center m-1"
+            class="flex flex-row items-center m-1 tracking-widest text-sm"
             [class]="
               verifyCurrentRoute(header.get('rootLink')?.value)
                 ? 'text-neutral-900 bg-darkPurple'
@@ -326,7 +326,7 @@
             *ngIf="ind === 3 || ind === 2"
             tabindex="0"
             role="button"
-            class="flex flex-row items-center m-1"
+            class="flex flex-row items-center m-1 tracking-widest text-sm"
             [class]="
               verifyCurrentRoute(header.get('rootLink')?.value)
                 ? 'text-neutral-900 bg-darkPurple'
@@ -367,10 +367,6 @@
   </div>
   <div class="navbar-end">
     <div class="flex flex-row items-center">
-      <!-- <div class="flex flex-col">
-        <p class="text-sm">{{ userProfile.Uname }}</p>
-        <p class="text-sm">{{ userProfile.role }}</p>
-      </div> -->
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="avatar placeholder">

@@ -18,3 +18,13 @@ table tr:nth-child(even) {
 table tr:hover {
   background-color: rgba(250, 250, 250, 0.8);
 }
+
+table td {
+  animation: my-animation 300ms ease-out;
+
+  @for $i from 1 through 50 {
+    &:nth-child(#{$i}) {
+      animation-delay: 100ms * $i;
+    }
+  }
+}

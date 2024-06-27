@@ -20,7 +20,7 @@ import {
 import { FooterComponent } from '../footer/footer.component';
 import { CommonModule } from '@angular/common';
 import { BreadcrumbService, BreadcrumbModule } from 'xng-breadcrumb';
-import { fader } from './router-transition-animations';
+import { mainModuleAnimations } from './router-transition-animations';
 import { TranslocoService } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
 
@@ -30,7 +30,7 @@ import { NgxLoadingModule } from 'ngx-loading';
   styleUrls: ['./main.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fader],
+  animations: [mainModuleAnimations],
   schemas: [NO_ERRORS_SCHEMA],
   imports: [
     HeaderComponent,

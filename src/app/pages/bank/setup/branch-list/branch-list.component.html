@@ -12,15 +12,12 @@
     </h2>
     <button
       (click)="openBranchForm()"
-      class="flex flex-row items-center btn btn-sm border border-darkPurple btn-ghost"
+      class="flex flex-row items-center btn btn-sm bg-darkPurple hover:bg-indigo-900 hover:text-neutral-50 btn-ghost text-black shadow"
     >
       <span>
-        <i class="bi bi-plus-circle text-darkPurple text-lg"></i>
+        <i class="bi bi-plus-circle text-xl"></i>
       </span>
-      <p
-        *transloco="let t; read: 'setup.branch'"
-        class="text-sm text-darkPurple"
-      >
+      <p *transloco="let t; read: 'setup.branch'" class="text-sm">
         {{ t("addBranch") }}
       </p>
     </button>
@@ -59,6 +56,7 @@
                     1;
             index as i
           "
+          [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
         >
           <div
             class="flex flex-col space-y-1 rounded"
@@ -133,11 +131,11 @@
           </p>
         </div>
       </ng-container>
-      <ng-container *ngIf="tableLoading">
+      <div [@inOutAnimation] *ngIf="tableLoading">
         <div class="w-full grid place-items-center mt-6">
           <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
         </div>
-      </ng-container>
+      </div>
     </div>
     <div
       class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
@@ -231,6 +229,9 @@
               ></tr>
               <tr
                 mat-row
+                [@listAnimationDesktop]="
+                  tableData.dataSource.filteredData.length
+                "
                 *matRowDef="
                   let row;
                   columns: tableHeader(displayedColumns);
@@ -263,6 +264,7 @@
                   </p>
                   <div
                     *ngIf="tableLoading"
+                    [@inOutAnimation]
                     class="w-full grid place-items-center mt-6"
                   >
                     <span

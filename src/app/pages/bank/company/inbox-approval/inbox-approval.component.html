@@ -5,33 +5,34 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
-  <!-- <h2 class="text-lg font-bold">
-    {{ "company.inboxApproval.name" | transloco }}
-  </h2> -->
   <div class="flex flex-row items-center justify-between w-full">
     <h2 class="text-lg font-bold">
       {{ "company.inboxApproval.name" | transloco }}
     </h2>
-    <a
-      (click)="downloadSheet()"
-      class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
-    >
-      <span>
-        <i class="bi bi-download text-success text-lg"></i>
-      </span>
-    </a>
   </div>
   <div
     [formGroup]="tableHeadersFormGroup"
     class="flex flex-col bg-white shadow px-2 py-4"
   >
-    <div class="flex flex-row items-center justify-end">
+    <div class="flex flex-row items-center justify-between">
+      <div>
+        <button
+          (click)="downloadSheet()"
+          *transloco="let t; read: 'company.summary.actions'"
+          class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+        >
+          <p class="text-xs">{{ t("exportToExcel") }}</p>
+          <span>
+            <i class="bi bi-file-earmark-spreadsheet"></i>
+          </span>
+        </button>
+      </div>
       <div class="flex flex-row items-center space-x-2">
         <div class="hidden md:dropdown">
           <button
             tabindex="0"
             role="button"
-            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+            class="btn btn-sm tracking-wide bg-white shadow rounded-lg m-1"
           >
             <span>
               <i class="bi bi-layout-three-columns text-sm"></i>
@@ -39,9 +40,6 @@
             <p *transloco="let t; read: 'defaults'" class="text-xs">
               {{ t("columns") }}
             </p>
-            <span>
-              <i class="bi bi-chevron-down text-sm"></i>
-            </span>
           </button>
           <ul
             tabindex="0"
@@ -89,6 +87,7 @@
                     1;
             index as i
           "
+          [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
         >
           <div
             class="flex flex-col space-y-1 rounded"
@@ -144,11 +143,11 @@
           </p>
         </div>
       </ng-container>
-      <ng-container *ngIf="tableLoading">
+      <div [@inOutAnimation] *ngIf="tableLoading">
         <div class="w-full grid place-items-center mt-6">
           <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
         </div>
-      </ng-container>
+      </div>
     </div>
     <div
       class="hidden md:flex overflow-x-auto flex-col sm:-mx-6 lg:-mx-8 relative"
@@ -229,6 +228,9 @@
               ></tr>
               <tr
                 mat-row
+                [@listAnimationDesktop]="
+                  tableData.dataSource.filteredData.length
+                "
                 *matRowDef="
                   let row;
                   columns: tableHeader(displayedColumns);
@@ -262,6 +264,7 @@
                   <div
                     *ngIf="tableLoading"
                     class="w-full grid place-items-center mt-6"
+                    [@inOutAnimation]
                   >
                     <span
                       class="loading loading-spinner loading-lg bg-darkPurple"

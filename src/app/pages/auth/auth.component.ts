@@ -3,8 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { LanguageSelectorComponent } from 'src/app/components/language-selector/language-selector.component';
 import { FooterComponent } from 'src/app/components/layouts/footer/footer.component';
-import { fader } from 'src/app/components/layouts/main/router-transition-animations';
-import { inOutAnimation } from './auth-animations';
+import { opacityFadeTrigger } from './auth-animations';
 
 @Component({
   selector: 'app-auth',
@@ -17,7 +16,7 @@ import { inOutAnimation } from './auth-animations';
     LanguageSelectorComponent,
     FooterComponent,
   ],
-  animations: [inOutAnimation],
+  animations: [opacityFadeTrigger],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthComponent {

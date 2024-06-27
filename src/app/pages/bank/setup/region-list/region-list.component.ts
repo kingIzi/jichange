@@ -42,6 +42,11 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { Observable, of } from 'rxjs';
 import { Country } from 'src/app/core/models/bank/setup/country';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-region-list',
@@ -69,6 +74,7 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class RegionListComponent implements OnInit {
   public tableLoading: boolean = false;

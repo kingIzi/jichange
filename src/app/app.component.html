@@ -32,4 +32,10 @@
     <button>close</button>
   </form>
 </dialog>
-<router-outlet></router-outlet>
+<!-- <router-outlet></router-outlet> -->
+<div
+  [@mainAnimation]="prepareRoute(outlet, 'animationState')"
+  class="h-full w-full relative flex-1"
+>
+  <router-outlet #outlet="outlet"></router-outlet>
+</div>

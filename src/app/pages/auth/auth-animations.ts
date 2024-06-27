@@ -29,7 +29,7 @@ export const divToggle = trigger('divToggle', [
   ]),
 ]);
 
-export const inOutAnimation = trigger('triggerName', [
+export const opacityFadeTrigger = trigger('opacityFadeTrigger', [
   transition('isLeft <=> isRight', [
     style({ opacity: 0, position: 'relative' }),
     animate('0.5s ease-out', style({ opacity: 1 })),

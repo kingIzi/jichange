@@ -24,6 +24,11 @@ import {
 } from '@ngneat/transloco';
 import { Observable, of } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { InvoiceConsolidatedReport } from 'src/app/core/models/bank/reports/invoice-consolidated-report';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
@@ -54,6 +59,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class PaymentConsolidatedComponent implements OnInit {
   public tableData: {

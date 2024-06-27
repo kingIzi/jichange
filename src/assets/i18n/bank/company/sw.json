@@ -12,7 +12,8 @@
       "noSuspenseAccountsAvailable": "Hakuna akaunti za mashaka zinazopatikana. Je, ungependa kuunda moja?",
       "noDepositAccountAvailable": "Hakuna akaunti za amana zinazopatikana. Je! Ungependa kuunda moja?",
       "createSuspenseAccount": "Ongeza Akaunti ya Suspense",
-      "createDepositAccount": "Ongeza akaunti ya amana"
+      "createDepositAccount": "Ongeza akaunti ya amana",
+      "exportToExcel": "Pakua Excel"
     },
     "companySummary": [
       {

@@ -14,11 +14,8 @@
 </div> -->
 
 <div class="h-screen w-screen overflow-hidden bg-jichangeDefault flex flex-col">
-  <!-- <div class="flex-none flex flex-row items-center justify-end">
-    <app-language-selector></app-language-selector>
-  </div> -->
   <div
-    [@triggerName]="prepareRoute(outlet, 'animationState')"
+    [@opacityFadeTrigger]="prepareRoute(outlet, 'animationState')"
     class="h-full w-full relative flex-1"
   >
     <router-outlet #outlet="outlet"></router-outlet>

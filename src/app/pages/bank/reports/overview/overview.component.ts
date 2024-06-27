@@ -47,6 +47,11 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-overview',
@@ -72,6 +77,7 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class OverviewComponent implements OnInit, AfterViewInit {
   @ViewChild('transactionsChart', { static: true })

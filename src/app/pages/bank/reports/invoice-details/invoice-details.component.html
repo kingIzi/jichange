@@ -11,7 +11,7 @@
     >
       {{ t("invoiceDetails") }}
     </h2>
-    <div class="flex flex-row items-center space-x-2">
+    <!-- <div class="flex flex-row items-center space-x-2">
       <a
         (click)="downloadSheet()"
         class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
@@ -20,9 +20,9 @@
           <i class="bi bi-download text-success text-lg"></i>
         </span>
       </a>
-    </div>
+    </div> -->
   </div>
-  <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
+  <div class="flex flex-col space-y-4 w-full bg-white shadow p-2 divide-y">
     <form
       [formGroup]="formGroup"
       class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3"
@@ -190,20 +190,32 @@
         <button
           (click)="submitForm()"
           *transloco="let t; read: 'actions'"
-          class="btn btn-sm text-darkPurple bg-lightPurple"
+          class="flex flex-row items-center btn btn-sm bg-darkPurple hover:bg-indigo-900 hover:text-neutral-50 btn-ghost text-black shadow"
         >
           {{ t("submit") }}
         </button>
       </div>
     </form>
     <div [formGroup]="headerFormGroup" class="flex flex-col px-2 py-4">
-      <div class="flex flex-row items-center justify-end">
+      <div class="flex flex-row items-center justify-between">
+        <div>
+          <button
+            (click)="downloadSheet()"
+            *transloco="let t; read: 'reports.overview'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
+            <span>
+              <i class="bi bi-file-earmark-spreadsheet"></i>
+            </span>
+          </button>
+        </div>
         <div class="flex flex-row items-center space-x-2">
           <div class="hidden md:dropdown">
             <button
               tabindex="0"
               role="button"
-              class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+              class="btn btn-sm tracking-wide bg-white shadow rounded-lg m-1"
             >
               <span>
                 <i class="bi bi-layout-three-columns text-sm"></i>
@@ -211,9 +223,6 @@
               <p *transloco="let t; read: 'defaults'" class="text-xs">
                 {{ t("columns") }}
               </p>
-              <span>
-                <i class="bi bi-chevron-down text-sm"></i>
-              </span>
             </button>
             <ul
               tabindex="0"

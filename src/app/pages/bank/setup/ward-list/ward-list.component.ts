@@ -30,6 +30,11 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 import { WardDialogComponent } from 'src/app/components/dialogs/bank/setup/ward-dialog/ward-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { WardTable } from 'src/app/core/enums/bank/setup/ward-table';
 import { RemoveWardForm } from 'src/app/core/models/bank/forms/setup/ward/RemoveWard';
 import { District } from 'src/app/core/models/bank/setup/district';
@@ -69,14 +74,13 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class WardListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  // public wards: Ward[] = [];
-  // public wardsData: Ward[] = [];
   public tableData: {
     wards: Ward[];
     originalTableColumns: TableColumnsData[];
@@ -116,14 +120,6 @@ export class WardListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `wardDialog.wardsTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`wardDialog.wardsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
@@ -191,16 +187,6 @@ export class WardListComponent implements OnInit {
     this.wardService
       .getAllWardsList({})
       .then((result) => {
-        // if (
-        //   result.response &&
-        //   typeof result.response !== 'number' &&
-        //   typeof result.response !== 'string'
-        // ) {
-        //   this.wardsData = result.response;
-        //   this.wards = this.wardsData;
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
         if (result.response instanceof Array) {
           this.tableData.wards = result.response;
         } else {
@@ -255,64 +241,6 @@ export class WardListComponent implements OnInit {
         throw err;
       });
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case WardTable.DISTRICT:
-  //       this.wards.sort((a, b) =>
-  //         a?.District_Name.toLocaleLowerCase() >
-  //         b?.District_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case WardTable.WARD:
-  //       this.wards.sort((a, b) =>
-  //         a?.Ward_Name.toLocaleLowerCase() > b?.Ward_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case WardTable.STATUS:
-  //       this.wards.sort((a, b) =>
-  //         a?.Ward_Status.toLocaleLowerCase() >
-  //         b?.Ward_Status.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case WardTable.DISTRICT:
-  //       this.wards.sort((a, b) =>
-  //         a?.District_Name.toLocaleLowerCase() <
-  //         b?.District_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case WardTable.WARD:
-  //       this.wards.sort((a, b) =>
-  //         a?.Ward_Name.toLocaleLowerCase() < b?.Ward_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case WardTable.STATUS:
-  //       this.wards.sort((a, b) =>
-  //         a?.Ward_Status.toLocaleLowerCase() <
-  //         b?.Ward_Status.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   private searchTable(searchText: string, paginator: MatPaginator) {
     this.tableData.dataSource.filter = searchText.trim().toLowerCase();
     if (this.tableData.dataSource.paginator) {

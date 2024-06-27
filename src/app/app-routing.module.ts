@@ -13,17 +13,26 @@ const routes: Routes = [
     path: 'auth',
     loadChildren: () =>
       import('./pages/auth/auth.module').then((m) => m.AuthModule),
+    data: {
+      animationState: 'auth-module',
+    },
   },
   {
     path: 'main',
-    data: { breadcrumb: { alias: 'home', skip: false } },
+    data: {
+      breadcrumb: { alias: 'home', skip: false },
+      animationState: 'main-module',
+    },
     loadChildren: () =>
       import('./components/layouts/main/main.module').then((m) => m.MainModule),
     canActivate: [loggedInGuard],
   },
   {
     path: 'vendor',
-    data: { breadcrumb: { alias: 'vendor', skip: false } },
+    data: {
+      breadcrumb: { alias: 'vendor', skip: false },
+      animationState: 'vendor-module',
+    },
     loadChildren: () =>
       import('./components/layouts/vendor/vendor.module').then(
         (m) => m.VendorModule

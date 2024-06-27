@@ -29,6 +29,11 @@ import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/re
 import { CurrencyDialogComponent } from 'src/app/components/dialogs/bank/setup/currency-dialog/currency-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { CurrencyTable } from 'src/app/core/enums/bank/setup/currency-table';
 import { RemoveCurrencyForm } from 'src/app/core/models/bank/forms/setup/currency/remove-currency-form';
 import { Currency } from 'src/app/core/models/bank/setup/currency';
@@ -66,6 +71,7 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CurrencyListComponent implements OnInit {
   public startLoading: boolean = false;

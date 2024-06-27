@@ -303,7 +303,7 @@ const routes: Routes = [
                 path: '',
                 loadComponent: () =>
                   import(
-                    '../../../pages/bank/reports/transaction-details/transaction-details.component'
+                    '../../../pages/bank/reports/transaction-details/list/transaction-details.component'
                   ).then((c) => c.TransactionDetailsComponent),
                 data: {
                   breadcrumb: { alias: 'transactions', skip: false },

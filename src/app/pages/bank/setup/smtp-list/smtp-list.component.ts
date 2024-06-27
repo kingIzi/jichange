@@ -28,6 +28,11 @@ import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-f
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { SmtpDialogComponent } from 'src/app/components/dialogs/bank/setup/smtp-dialog/smtp-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { SmtpTable } from 'src/app/core/enums/bank/setup/smtp-table';
 import { RemoveSmtpForm } from 'src/app/core/models/bank/forms/setup/smtp/remove-smtp';
 import { SMTP } from 'src/app/core/models/bank/setup/smtp';
@@ -64,6 +69,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class SmtpListComponent implements OnInit {
   public userProfile!: LoginResponse;

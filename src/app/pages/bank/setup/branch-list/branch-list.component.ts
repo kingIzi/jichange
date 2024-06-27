@@ -18,7 +18,7 @@ import {
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { BranchDialogComponent } from 'src/app/components/dialogs/bank/setup/branch-dialog/branch-dialog.component';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { inOutAnimation, toggle } from 'src/app/pages/auth/auth-animations';
+import { toggle } from 'src/app/pages/auth/auth-animations';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -47,6 +47,11 @@ import { BranchTable } from 'src/app/core/enums/bank/setup/branch-table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-branch-list',
@@ -74,7 +79,12 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
-  animations: [toggle, inOutAnimation],
+  animations: [
+    toggle,
+    listAnimationMobile,
+    listAnimationDesktop,
+    inOutAnimation,
+  ],
 })
 export class BranchListComponent implements OnInit {
   public startLoading: boolean = false;

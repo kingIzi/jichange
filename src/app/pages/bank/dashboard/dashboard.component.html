@@ -16,13 +16,16 @@
     >
       {{ t("name") }}
     </h4>
-    <ng-container *ngIf="invoiceStatistics.length > 0">
+    <ng-container
+      *ngIf="invoiceStatistics.length > 0; else statisticsLoadingTemplate"
+    >
       <div
         *ngFor="
           let statistic of invoiceStatistics;
           trackBy: PerformanceUtils.trackByIndex;
           index as i
         "
+        [@listAnimationMobile]="tableData.dataSource.filteredData.length"
         class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
       >
         <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
@@ -46,13 +49,19 @@
         </a>
       </div>
     </ng-container>
-    <ng-container *ngIf="overviewLoading">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <span class="loading loading-spinner loading-sm bg-darkPurple"></span>
+    <ng-template #statisticsLoadingTemplate>
+      <div
+        *ngIf="overviewLoading"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      >
+        <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
       </div>
-    </ng-container>
-    <ng-container *ngIf="!overviewLoading && !invoiceStatistics">
-      <div *transloco="let t; read: 'errors'">
+    </ng-template>
+    <ng-container *ngIf="!overviewLoading && invoiceStatistics.length === 0">
+      <div
+        class="w-full h-full col-span-full row-span-12 bg-white grid place-items-center shadow"
+        *transloco="let t; read: 'errors'"
+      >
         <p class="text-center text-sm tracking-wide pt-3 pb-1">
           {{ t("noDataFound") }}
         </p>
@@ -74,13 +83,13 @@
       <a
         [routerLink]="'/main/company/inbox'"
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple shadow"
       >
         {{ t("viewAll") }}
       </a>
     </div>
     <div
-      *ngIf="inboxApprovals.length === 0"
+      *ngIf="inboxApprovals.length === 0; else inboxApprovalTemplate"
       class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
     >
       <p
@@ -92,35 +101,44 @@
       </p>
       <ng-container *ngIf="inboxApprovalLoading">
         <div class="w-full grid place-items-center mt-6">
-          <span class="loading loading-spinner loading-sm bg-darkPurple"></span>
+          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
         </div>
       </ng-container>
     </div>
-    <ul
-      *ngIf="inboxApprovals.length > 0"
-      id="inbox-approval"
-      class="bg-white p-2 shadow rounded flex flex-col space-y-4 divide-y overflow-y-auto h-full w-full lg:max-h-72"
-    >
-      <li class="py-2" *ngFor="let info of inboxApprovals; index as i">
-        <a class="flex flex-row items-center justify-between">
-          <div class="flex flex-col">
-            <p class="text-xs">
-              {{ info.CompName }}
-            </p>
-            <p class="text-xs font-bold">
-              {{ info.MobNo }}
-            </p>
-          </div>
-          <button
-            (click)="approveCompany(info)"
-            *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
-            class="btn btn-xs bg-lightYellow tracking-wide px-4"
-          >
-            {{ info.Status }}
-          </button>
-        </a>
-      </li>
-    </ul>
+    <ng-template #inboxApprovalTemplate>
+      <ul
+        *ngIf="inboxApprovals.length > 0"
+        id="inbox-approval"
+        class="bg-white p-2 shadow rounded flex flex-col space-y-4 divide-y overflow-y-auto h-full w-full lg:max-h-72"
+      >
+        <li
+          class="py-2"
+          [@listAnimationMobile]="tableData.dataSource.filteredData.length"
+          *ngFor="let info of inboxApprovals; index as i"
+        >
+          <a class="flex flex-row items-center justify-between">
+            <div class="flex flex-col">
+              <p class="text-xs">
+                {{ info.CompName }}
+              </p>
+              <p class="text-xs font-bold">
+                {{ info.MobNo }}
+              </p>
+            </div>
+            <button
+              *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
+              (click)="approveCompany(info)"
+              class="btn btn-sm border-success bg-transparent tooltip tooltip-left"
+              [attr.data-tip]="t('approve')"
+            >
+              <span>
+                <i class="bi bi-check2-circle text-lg text-success"></i>
+              </span>
+            </button>
+          </a>
+        </li>
+      </ul>
+    </ng-template>
   </div>
   <div
     class="flex flex-col space-y-1 relative w-full h-full col-span-full lg:col-span-4 lg:col-start-9"
@@ -135,19 +153,31 @@
         </p>
       </div>
     </div>
-    <div
-      *ngIf="latestTransactions.length === 0"
-      class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
-    >
-      <p
-        class="text-lg text-center"
-        *transloco="let t; read: 'dashboard.dashboard.transaction.errors'"
+    <ng-template #latestTransactionsNotFound>
+      <div
+        *ngIf="transactionsLoading; else notFoundTransactionsMessage"
+        class="w-full h-full shadow bg-white grid place-items-center"
       >
-        {{ t("noDataFound") }}
-      </p>
-    </div>
+        <div class="w-full grid place-items-center mt-6">
+          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+        </div>
+      </div>
+      <ng-template #notFoundTransactionsMessage>
+        <div
+          *ngIf="latestTransactions.length === 0 && !transactionsLoading"
+          class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+        >
+          <p
+            class="text-lg text-center"
+            *transloco="let t; read: 'dashboard.dashboard.transaction.errors'"
+          >
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </ng-template>
+    </ng-template>
     <div
-      *ngIf="latestTransactions.length > 0"
+      *ngIf="latestTransactions.length > 0; else latestTransactionsNotFound"
       class="w-full max-h-96 overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
     >
       <ul
@@ -217,7 +247,7 @@
       <a
         [routerLink]="'/main/company/summary'"
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple shadow"
       >
         {{ t("viewAll") }}
       </a>
@@ -251,6 +281,7 @@
                       1;
               index as i
             "
+            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -290,13 +321,13 @@
             </p>
           </div>
         </ng-container>
-        <ng-container *ngIf="tableLoading">
+        <div [@inOutAnimation] *ngIf="tableLoading">
           <div class="w-full grid place-items-center mt-6">
             <span
               class="loading loading-spinner loading-lg bg-darkPurple"
             ></span>
           </div>
-        </ng-container>
+        </div>
       </div>
       <div
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
@@ -356,6 +387,9 @@
                 ></tr>
                 <tr
                   mat-row
+                  [@listAnimationDesktop]="
+                    tableData.dataSource.filteredData.length
+                  "
                   *matRowDef="
                     let row;
                     columns: tableHeader(displayedColumns);
@@ -371,28 +405,33 @@
                     <p
                       *ngIf="
                         tableSearch.value &&
-                        tableData.dataSource.data.length > 0
+                        tableData.dataSource.data.length > 0 &&
+                        !tableLoading
                       "
                       class="text-xs lg:text-sm py-2 px-4"
                     >
                       {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                     </p>
                     <p
-                      *ngIf="tableData.dataSource.data.length <= 0"
+                      *ngIf="
+                        tableData.dataSource.data.length <= 0 && !tableLoading
+                      "
                       class="text-center text-sm tracking-wide pt-3 pb-1"
                     >
                       {{ t("noDataFound") }}
                     </p>
+                    <div
+                      *ngIf="tableLoading"
+                      [@inOutAnimation]
+                      class="w-full grid place-items-center mt-6"
+                    >
+                      <span
+                        class="loading loading-spinner loading-lg bg-darkPurple"
+                      ></span>
+                    </div>
                   </td>
                 </tr>
               </table>
-            </ng-container>
-            <ng-container *ngIf="tableLoading">
-              <div class="w-full grid place-items-center mt-6">
-                <span
-                  class="loading loading-spinner loading-sm bg-darkPurple"
-                ></span>
-              </div>
             </ng-container>
           </div>
         </div>

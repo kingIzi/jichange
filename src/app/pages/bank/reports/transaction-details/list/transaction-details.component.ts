@@ -57,6 +57,11 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-transaction-details',
@@ -85,6 +90,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class TransactionDetailsComponent implements OnInit {
   public headersFormGroup!: FormGroup;

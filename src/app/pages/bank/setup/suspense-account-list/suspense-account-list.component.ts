@@ -39,6 +39,11 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -64,13 +69,12 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class SuspenseAccountListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  // public suspenseAccounts: SuspenseAccount[] = [];
-  // public suspenseAccountsData: SuspenseAccount[] = [];
   public tableData: {
     suspenseAccounts: SuspenseAccount[];
     originalTableColumns: TableColumnsData[];
@@ -105,14 +109,6 @@ export class SuspenseAccountListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `suspenseAccount.suspenseAccountsTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`suspenseAccount.suspenseAccountsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
@@ -149,38 +145,6 @@ export class SuspenseAccountListComponent implements OnInit {
       });
     this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
-  //       this.suspenseAccounts.sort((a, b) =>
-  //         (a.Sus_Acc_No || '') > (b.Sus_Acc_No || '') ? 1 : -1
-  //       );
-  //       break;
-  //     case SuspenseAccountTable.STATUS:
-  //       this.suspenseAccounts.sort((a, b) =>
-  //         (a.Status || '') > (b.Status || '') ? 1 : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case SuspenseAccountTable.SUSPENSE_ACCOUNT_NUMBER:
-  //       this.suspenseAccounts.sort((a, b) =>
-  //         (a.Sus_Acc_No || '') < (b.Sus_Acc_No || '') ? 1 : -1
-  //       );
-  //       break;
-  //     case SuspenseAccountTable.STATUS:
-  //       this.suspenseAccounts.sort((a, b) =>
-  //         (a.Status || '') < (b.Status || '') ? 1 : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   private dataSourceFilter() {
     this.tableData.dataSource.filterPredicate = (
       data: SuspenseAccount,
@@ -205,21 +169,6 @@ export class SuspenseAccountListComponent implements OnInit {
     this.suspenseAccountService
       .getSuspenseAccountList({})
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'number' &&
-        //   typeof result.response !== 'string'
-        // ) {
-        //   this.suspenseAccountsData = result.response;
-        //   this.suspenseAccounts = this.suspenseAccountsData;
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
         if (result.response instanceof Array) {
           this.tableData.suspenseAccounts = result.response;
         } else {

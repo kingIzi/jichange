@@ -62,26 +62,24 @@
         <div
           class="grid grid-cols-2 bg-white shadow w-full h-full min-h-40 py-6 px-3 gap-2"
         >
-          <ng-container
+          <a
             *ngFor="
               let statistic of graphData.invoiceStatistics;
               trackBy: PerformanceUtils.trackByIndex;
               index as i
             "
+            [@inOutAnimation]
+            (click)="dashboardStatisticRouterLink(statistic.Name)"
+            class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
           >
-            <a
-              (click)="dashboardStatisticRouterLink(statistic.Name)"
-              class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
+            <p
+              class="text-normal text-sm capitalize group-hover:underline"
+              *transloco="let t; read: 'reports.overview.statisticsData'"
             >
-              <p
-                class="text-normal text-sm capitalize group-hover:underline"
-                *transloco="let t; read: 'reports.overview.statisticsData'"
-              >
-                {{ t(statistic.Name.toLocaleLowerCase()) }}
-              </p>
-              <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
-            </a>
-          </ng-container>
+              {{ t(statistic.Name.toLocaleLowerCase()) }}
+            </p>
+            <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
+          </a>
         </div>
         <div
           *ngIf="buildPageLoading"
@@ -171,6 +169,7 @@
                       1;
               index as i
             "
+            [@listAnimationMobile]="tableData.dataSource.filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -233,13 +232,13 @@
             </p>
           </div>
         </ng-container>
-        <ng-container *ngIf="buildPageLoading">
+        <div [@inOutAnimation] *ngIf="buildPageLoading">
           <div class="w-full grid place-items-center mt-6">
             <span
               class="loading loading-spinner loading-lg bg-darkPurple"
             ></span>
           </div>
-        </ng-container>
+        </div>
       </div>
       <div
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
@@ -323,6 +322,9 @@
                 ></tr>
                 <tr
                   mat-row
+                  [@listAnimationDesktop]="
+                    tableData.dataSource.filteredData.length
+                  "
                   *matRowDef="
                     let row;
                     columns: tableHeader(displayedColumns);
@@ -356,6 +358,7 @@
                     </p>
                     <div
                       *ngIf="buildPageLoading"
+                      [@inOutAnimation]
                       class="w-full grid place-items-center mt-6"
                     >
                       <span

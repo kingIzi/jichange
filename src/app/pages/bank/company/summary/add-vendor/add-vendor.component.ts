@@ -51,6 +51,11 @@ import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { Location } from '@angular/common';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-add-vendor',
@@ -72,18 +77,7 @@ import { Location } from '@angular/common';
       useValue: { scope: 'bank/company', alias: 'company' },
     },
   ],
-  animations: [
-    trigger('inOutAnimation', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('0.5s ease-out', style({ opacity: 1 })),
-      ]),
-      transition(':leave', [
-        style({ opacity: 1 }),
-        animate('0.2s ease-in', style({ opacity: 0 })),
-      ]),
-    ]),
-  ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class AddVendorComponent implements OnInit {
   public startLoading: boolean = false;

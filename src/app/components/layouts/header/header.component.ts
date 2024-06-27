@@ -159,25 +159,6 @@ export class HeaderComponent implements OnInit {
     this.tr.selectTranslation(activeLang).subscribe((headers) => {
       let bankHeaders: Header[] = headers['bankHeaders'];
       bankHeaders.forEach((bankHeader, bankHeaderIndex) => {
-        // let header = this.fb.group({
-        //   label: this.fb.control(bankHeader.name, []),
-        //   dropdowns: this.fb.array([], []),
-        //   rootLink: this.fb.control(
-        //     this.switchHeaderRootLink(bankHeaderIndex),
-        //     []
-        //   ),
-        // });
-        // bankHeader.dropdowns.forEach((dropdown, dropdownIndex) => {
-        //   if (dropdown.access.includes(this.userProfile.desig)) {
-        //     let dropdownGroup = this.fb.group({
-        //       label: this.fb.control(dropdown.label, []),
-        //       routerLink: this.fb.control(dropdown.routerLink, []),
-        //       isActive: this.fb.control(false, []),
-        //     });
-        //     (header.get('dropdowns') as FormArray).push(dropdownGroup);
-        //   }
-        // });
-        // this.headers.push(header);
         if (bankHeader.access.includes(this.userProfile.desig)) {
           let header = this.fb.group({
             label: this.fb.control(bankHeader.name, []),

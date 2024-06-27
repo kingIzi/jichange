@@ -11,7 +11,7 @@
     >
       {{ t("customerDetailReport") }}
     </h2>
-    <div class="flex flex-row items-center space-x-2">
+    <!-- <div class="flex flex-row items-center space-x-2">
       <a
         (click)="downloadSheet()"
         class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
@@ -20,9 +20,9 @@
           <i class="bi bi-download text-success text-lg"></i>
         </span>
       </a>
-    </div>
+    </div> -->
   </div>
-  <div class="flex flex-col space-y-4 w-full bg-white shadow p-2">
+  <div class="flex flex-col space-y-4 divide-y w-full bg-white shadow p-2">
     <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
       <div class="flex flex-col space-y-1">
         <p
@@ -188,20 +188,32 @@
           *transloco="let t; read: 'actions'"
           type="button"
           (click)="submitTableFilterForm()"
-          class="btn btn-sm text-darkPurple bg-lightPurple"
+          class="flex flex-row items-center btn btn-sm bg-darkPurple hover:bg-indigo-900 hover:text-neutral-50 btn-ghost text-black shadow"
         >
           {{ t("submit") }}
         </button>
       </div>
     </form>
     <div class="flex flex-col px-2 py-4">
-      <div class="flex flex-row items-center justify-end">
+      <div class="flex flex-row items-center justify-between">
+        <div>
+          <button
+            (click)="downloadSheet()"
+            *transloco="let t; read: 'reports.overview'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
+            <span>
+              <i class="bi bi-file-earmark-spreadsheet"></i>
+            </span>
+          </button>
+        </div>
         <div class="flex flex-row items-center space-x-2">
           <div class="hidden md:dropdown">
             <button
               tabindex="0"
               role="button"
-              class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+              class="btn btn-sm tracking-wide bg-white shadow rounded-lg m-1"
             >
               <span>
                 <i class="bi bi-layout-three-columns text-sm"></i>
@@ -209,9 +221,6 @@
               <p *transloco="let t; read: 'defaults'" class="text-xs">
                 {{ t("columns") }}
               </p>
-              <span>
-                <i class="bi bi-chevron-down text-sm"></i>
-              </span>
             </button>
             <ul
               tabindex="0"
@@ -259,6 +268,7 @@
                       1;
               index as i
             "
+            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -296,13 +306,13 @@
             </p>
           </div>
         </ng-container>
-        <ng-container *ngIf="tableLoading">
+        <div [@inOutAnimation] *ngIf="tableLoading">
           <div class="w-full grid place-items-center mt-6">
             <span
               class="loading loading-spinner loading-lg bg-darkPurple"
             ></span>
           </div>
-        </ng-container>
+        </div>
       </div>
       <div
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
@@ -360,6 +370,9 @@
                 ></tr>
                 <tr
                   mat-row
+                  [@listAnimationDesktop]="
+                    tableData.dataSource.filteredData.length
+                  "
                   *matRowDef="
                     let row;
                     columns: tableHeader(displayedColumns);
@@ -392,6 +405,7 @@
                     </p>
                     <div
                       *ngIf="tableLoading"
+                      [@inOutAnimation]
                       class="w-full grid place-items-center mt-6"
                     >
                       <span

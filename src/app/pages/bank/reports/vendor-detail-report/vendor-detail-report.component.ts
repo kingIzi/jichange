@@ -25,6 +25,11 @@ import {
 } from '@ngneat/transloco';
 import { Observable, from, of, zip } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { VendorReportTable } from 'src/app/core/enums/bank/reports/vendor-report-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
@@ -33,6 +38,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
+import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -60,6 +66,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class VendorDetailReportComponent implements OnInit {
   public startLoading: boolean = false;
@@ -92,6 +99,7 @@ export class VendorDetailReportComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private fb: FormBuilder,
+    private fileHandler: FileHandlerService,
     private tr: TranslocoService,
     private branchService: BranchService,
     private reportsService: ReportsService,
@@ -355,6 +363,22 @@ export class VendorDetailReportComponent implements OnInit {
     let form = {} as any;
     form.branch = this.branch.value;
     this.requestCompaniesList(form);
+  }
+  downloadSheet() {
+    if (this.tableData.companies.length > 0) {
+      this.fileHandler.downloadExcelTable(
+        this.tableData.companies,
+        this.getTableActiveKeys(),
+        'vendors_summary',
+        ['Posteddate']
+      );
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   get branch() {
     return this.tableFilterFormGroup.get(`branch`) as FormControl;

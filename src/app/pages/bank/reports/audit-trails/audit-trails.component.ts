@@ -49,6 +49,11 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-audit-trails',
@@ -74,6 +79,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuditTrailsComponent implements OnInit {
