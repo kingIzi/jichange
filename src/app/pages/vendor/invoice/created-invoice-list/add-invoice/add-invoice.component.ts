@@ -389,9 +389,10 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   addInvoice() {
     if (this.generatedInvoice) {
       let form = { ...this.invoiceDetailsForm.value };
-      form.date = this.datePipe.transform(form.date, 'MM/dd/yyyy');
-      form.edate = this.datePipe.transform(form.edate, 'MM/dd/yyyy');
-      form.iedate = this.datePipe.transform(form.iedate, 'MM/dd/yyyy');
+      form.invno = this.invno.value;
+      form.date = this.datePipe.transform(this.date.value, 'MM/dd/yyyy');
+      form.edate = this.datePipe.transform(this.edate.value, 'MM/dd/yyyy');
+      form.iedate = this.datePipe.transform(this.iedate.value, 'MM/dd/yyyy');
       this.requestAddInvoiceForm(form);
     } else {
       this.requestAddInvoiceForm(this.invoiceDetailsForm.value);
@@ -451,9 +452,6 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   }
   resetForm() {
     if (this.generatedInvoice) {
-      // this.company.subscribe((company) => {
-      //   this.createEditForm(company);
-      // });
       this.createEditForm();
     } else {
       this.createForm();

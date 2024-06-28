@@ -362,6 +362,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   private buildPage() {
     this.startLoading = true;
+    this.overviewLoading = true;
     let generatedInvoiceObs = from(
       this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
     );
@@ -377,6 +378,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         let [generatedInvoices, invoiceStatistics] = results;
         this.assignGeneratedInvoice(generatedInvoices);
         this.assignInvoiceStatistics(invoiceStatistics);
+        this.overviewLoading = false;
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -386,7 +388,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           this.displayMessageBox,
           this.tr
         );
-        // this.overviewLoading = false;
+        this.overviewLoading = false;
         // this.tableLoading = false;
         this.startLoading = false;
         this.cdr.detectChanges();

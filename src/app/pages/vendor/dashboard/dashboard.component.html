@@ -15,13 +15,16 @@
     >
       {{ t("overview") }}
     </h4>
-    <ng-container *ngIf="invoiceStatistics.length > 0">
+    <ng-container
+      *ngIf="invoiceStatistics.length > 0; else noInvoiceStatisticsFound"
+    >
       <div
         *ngFor="
           let statistic of invoiceStatistics;
           trackBy: PerformanceUtils.trackByIndex;
           index as i
         "
+        [@listAnimationMobile]="invoiceStatistics.length"
         class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
       >
         <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
@@ -42,18 +45,33 @@
         </a>
       </div>
     </ng-container>
-    <ng-container *ngIf="overviewLoading">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <span class="loading loading-spinner loading-sm bg-darkPurple"></span>
+    <ng-template #noInvoiceStatisticsFound>
+      <div
+        class="w-full col-span-full h-full row-span-12 bg-white shadow rounded flex flex-col items-center justify-center"
+      >
+        <ng-template #loadingStatistics>
+          <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          >
+            <span
+              class="loading loading-spinner loading-sm bg-darkPurple"
+            ></span>
+          </div>
+        </ng-template>
+        <ng-container
+          *ngIf="
+            !overviewLoading && invoiceStatistics.length === 0;
+            else loadingStatistics
+          "
+        >
+          <div *transloco="let t; read: 'errors'">
+            <p class="text-center text-sm tracking-wide pt-3 pb-1">
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </ng-container>
       </div>
-    </ng-container>
-    <ng-container *ngIf="!overviewLoading && !invoiceStatistics">
-      <div *transloco="let t; read: 'errors'">
-        <p class="text-center text-sm tracking-wide pt-3 pb-1">
-          {{ t("noDataFound") }}
-        </p>
-      </div>
-    </ng-container>
+    </ng-template>
   </div>
   <div
     class="flex flex-col space-y-2 relative w-full max-h-min col-span-full lg:col-span-4 lg:col-start-9"
@@ -79,6 +97,16 @@
     </div>
     <div class="w-full h-full relative bg-white shadow">
       <canvas #transactionChart></canvas>
+      <div
+        *ngIf="invoiceStatistics.length === 0"
+        class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      >
+        <div *transloco="let t; read: 'errors'">
+          <p class="text-center text-sm tracking-wide pt-3 pb-1">
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
   <div
@@ -105,38 +133,55 @@
       <div class="w-full h-full flex-1 p-2">
         <canvas #operationsChart></canvas>
       </div>
-      <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
-        <div class="grid place-items-center">
-          <p class="text-sm font-bold text-purple-700">
-            {{ graphData.invoicePieChartLabels[0] }}
-          </p>
-          <p class="text-lg lg:text-xl font-normal text-purple-700">
-            {{
-              graphData.invoicePieChartData[0]
-                ? graphData.invoicePieChartData[0]
-                : 0
-            }}
+      <ng-container
+        *ngIf="
+          tableData.generatedInvoices.length > 0;
+          else noInvoiceDataTemplate
+        "
+      >
+        <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
+          <div class="grid place-items-center">
+            <p class="text-sm font-bold text-purple-700">
+              {{ graphData.invoicePieChartLabels[0] }}
+            </p>
+            <p class="text-lg lg:text-xl font-normal text-purple-700">
+              {{
+                graphData.invoicePieChartData[0]
+                  ? graphData.invoicePieChartData[0]
+                  : 0
+              }}
+            </p>
+          </div>
+          <div class="grid place-items-center">
+            <p class="text-sm font-semibold text-teal-700">
+              {{ graphData.invoicePieChartLabels[1] }}
+            </p>
+            <p class="text-lg lg:text-xl font-normal text-teal-700">
+              {{
+                graphData.invoicePieChartData[1]
+                  ? graphData.invoicePieChartData[1]
+                  : 0
+              }}
+            </p>
+          </div>
+          <div class="grid place-items-center">
+            <p class="text-sm text-black font-semibold">Invoices</p>
+            <p class="text-lg lg:text-xl text-black font-normal">
+              {{ tableData.generatedInvoices.length }}
+            </p>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #noInvoiceDataTemplate>
+        <div
+          *transloco="let t; read: 'errors'"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
+          <p class="text-center text-sm tracking-wide pt-3 pb-1">
+            {{ t("noDataFound") }}
           </p>
         </div>
-        <div class="grid place-items-center">
-          <p class="text-sm font-semibold text-teal-700">
-            {{ graphData.invoicePieChartLabels[1] }}
-          </p>
-          <p class="text-lg lg:text-xl font-normal text-teal-700">
-            {{
-              graphData.invoicePieChartData[1]
-                ? graphData.invoicePieChartData[1]
-                : 0
-            }}
-          </p>
-        </div>
-        <div class="grid place-items-center">
-          <p class="text-sm text-black font-semibold">Invoices</p>
-          <p class="text-lg lg:text-xl text-black font-normal">
-            {{ tableData.generatedInvoices.length }}
-          </p>
-        </div>
-      </div>
+      </ng-template>
     </div>
   </div>
   <div

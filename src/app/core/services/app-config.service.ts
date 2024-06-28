@@ -21,10 +21,11 @@ export class AppConfigService {
     this.parseUserProfile();
     return this.userProfile;
   }
-  openMessageDialog(title: string, message: string) {
+  openDisabledCloseMessageDialog(title: string, message: string) {
     let dialogRef = this.dialog.open(ErrorMessageDialogComponent, {
       width: '400px',
       backdropClass: 'custom-dialog-overlay',
+      disableClose: true,
       data: {
         title: title,
         message: message,

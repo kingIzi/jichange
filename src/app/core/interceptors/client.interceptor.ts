@@ -30,6 +30,24 @@ import { TranslocoService } from '@ngneat/transloco';
 //   );
 // };
 
+function handleUnauthorizedUser(
+  appConfig: AppConfigService,
+  router: Router,
+  tr: TranslocoService
+) {
+  let title = tr.translate('errors.accessDenied');
+  let message = tr.translate('errors.unAuthorizedUser');
+  let dialogRef = appConfig.openDisabledCloseMessageDialog(title, message);
+  dialogRef.componentInstance.ok.asObservable().subscribe(() => {
+    dialogRef.close();
+  });
+  dialogRef.afterClosed().subscribe(() => {
+    router.navigate(['/auth']).then((e) => {
+      location.reload();
+    });
+  });
+}
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let appConfig = inject(AppConfigService);
   if (req.url.includes('AddLogins') || req.url.includes('/assets/i18n/')) {
@@ -56,14 +74,18 @@ export const timeoutInterceptor: HttpInterceptorFn = (req, next) => {
           login
             .logout({ userid: appConfig.getUserIdFromLocalStorage() })
             .then((result) => {
-              let title = tr.translate('errors.accessDenied');
-              let message = tr.translate('errors.unAuthorizedUser');
-              let dialogRef = appConfig.openMessageDialog(title, message);
-              dialogRef.afterClosed().subscribe(() => {
-                router.navigate(['/auth']).then((e) => {
-                  location.reload();
-                });
-              });
+              // let title = tr.translate('errors.accessDenied');
+              // let message = tr.translate('errors.unAuthorizedUser');
+              // let dialogRef = appConfig.openMessageDialog(title, message);
+              // dialogRef.componentInstance.ok.asObservable().subscribe(() => {
+              //   dialogRef.close();
+              // });
+              // dialogRef.afterClosed().subscribe(() => {
+              //   router.navigate(['/auth']).then((e) => {
+              //     location.reload();
+              //   });
+              // });
+              handleUnauthorizedUser(appConfig, router, tr);
             })
             .catch((err) => {
               throw err;

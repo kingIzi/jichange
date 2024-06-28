@@ -56,6 +56,7 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 
 @Component({
   selector: 'app-customers-list',
@@ -92,7 +93,7 @@ export class CustomersListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
+  //public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public tableData: {
     customers: Customer[];
@@ -120,15 +121,16 @@ export class CustomersListComponent implements OnInit {
     private fb: FormBuilder,
     private customerService: CustomerService,
     private cdr: ChangeDetectorRef,
+    private appConfigService: AppConfigService,
     //private reportService: ReportsService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
+  // private parseUserProfile() {
+  //   let userProfile = localStorage.getItem('userProfile');
+  //   if (userProfile) {
+  //     this.userProfile = JSON.parse(userProfile) as LoginResponse;
+  //   }
+  // }
   private dataSourceFilter() {
     this.tableData.dataSource.filterPredicate = (
       data: Customer,
@@ -173,7 +175,7 @@ export class CustomersListComponent implements OnInit {
     this.tableLoading = true;
     this.customerService
       .getCustomersList({
-        Comp: this.userProfile.InstID.toString(),
+        Comp: this.appConfigService.getLoginResponse().InstID.toString(),
         reg: '0',
         dist: '0',
       })
@@ -280,7 +282,7 @@ export class CustomersListComponent implements OnInit {
       data: {
         invid: null,
         customerId: customerId,
-        userProfile: this.userProfile,
+        userProfile: this.appConfigService.getLoginResponse(),
       },
     });
     dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
@@ -289,7 +291,7 @@ export class CustomersListComponent implements OnInit {
     });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
+    //this.parseUserProfile();
     this.buildHeadersForm();
     this.requestCustomerNames();
     this.activatedRoute.params.subscribe((params) => {
