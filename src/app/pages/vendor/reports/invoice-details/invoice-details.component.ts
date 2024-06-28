@@ -48,6 +48,12 @@ import { ActivatedRoute } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 
 @Component({
   selector: 'app-invoice-details',
@@ -73,11 +79,12 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
       useValue: { scope: 'vendor/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class InvoiceDetailsComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public userProfile!: LoginResponse;
+  //public userProfile!: LoginResponse;
   public tableFormGroup!: FormGroup;
   public filterFormGroup!: FormGroup;
   private queryData: string = '';
@@ -115,14 +122,15 @@ export class InvoiceDetailsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private invoiceReportService: InvoiceReportServiceService,
     private activatedRoute: ActivatedRoute,
+    private appConfig: AppConfigService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
+  // private parseUserProfile() {
+  //   let userProfile = localStorage.getItem('userProfile');
+  //   if (userProfile) {
+  //     this.userProfile = JSON.parse(userProfile) as LoginResponse;
+  //   }
+  // }
   private createHeaderGroup() {
     let TABLE_SHOWING = 9;
     this.tableFormGroup = this.fb.group({
@@ -218,7 +226,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private createFilterFormGroup() {
     this.filterFormGroup = this.fb.group({
-      Comp: this.fb.control(this.userProfile.InstID, []),
+      Comp: this.fb.control(this.appConfig.getLoginResponse().InstID, []),
       cusid: this.fb.control('', [Validators.required]),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
@@ -229,7 +237,7 @@ export class InvoiceDetailsComponent implements OnInit {
     this.startLoading = true;
     let getInvoiceReport = from(
       this.reportService.getCustomerDetailsList({
-        Sno: this.userProfile.InstID,
+        Sno: this.appConfig.getLoginResponse().InstID,
       })
     );
     let companiesObs = from(this.reportService.getCompaniesList({}));
@@ -389,7 +397,7 @@ export class InvoiceDetailsComponent implements OnInit {
   private initialFormSubmission(q: string) {
     let form = { ...this.filterFormGroup.value };
     this.cusid.setValue('all');
-    form.Comp = this.userProfile.InstID;
+    form.Comp = this.appConfig.getLoginResponse().InstID;
     if (form.stdate) {
       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
     }
@@ -437,7 +445,7 @@ export class InvoiceDetailsComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
+    //this.parseUserProfile();
     this.createHeaderGroup();
     this.createFilterFormGroup();
     this.buildPage();
@@ -560,7 +568,7 @@ export class InvoiceDetailsComponent implements OnInit {
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value } as InvoiceReportFormVendor;
-      form.Comp = this.userProfile.InstID;
+      form.Comp = this.appConfig.getLoginResponse().InstID;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }

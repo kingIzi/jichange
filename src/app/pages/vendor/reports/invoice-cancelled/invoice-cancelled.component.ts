@@ -64,6 +64,11 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -92,6 +97,7 @@ import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
       useValue: { scope: 'vendor/invoice', alias: 'invoice' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class InvoiceCancelledComponent implements OnInit {
   public startLoading: boolean = false;

@@ -179,6 +179,17 @@ export class AppUtilities {
     return `${date}/${month}/${year}`;
   }
 
+  static unAuthorizedUserError(
+    dialog: DisplayMessageBoxComponent,
+    tr: TranslocoService
+  ) {
+    AppUtilities.openDisplayMessageBox(
+      dialog,
+      tr.translate(`errors.accessDenied`),
+      tr.translate(`errors.unAuthorizedUser`)
+    );
+  }
+
   static requestFailedCatchError(
     err: any,
     dialog: DisplayMessageBoxComponent,
@@ -188,10 +199,6 @@ export class AppUtilities {
       AppUtilities.openTimeoutError(dialog, tr);
     } else if (err.status === 500) {
       AppUtilities.unexpectedErrorOccured(dialog, tr);
-    } else if (err.status === 0) {
-      AppUtilities.noInternetError(dialog, tr);
-    } else {
-      AppUtilities.noInternetError(dialog, tr);
     }
   }
 

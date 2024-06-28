@@ -44,7 +44,9 @@
     "contactSupport": "An unexpected error occurred, please try again or contact support.",
     "timeoutError": "Request timed out. Please verify your connection or try again.",
     "invalidForm": "Invalid form",
-    "noFilterItemFound": "No data found matching the filter."
+    "noFilterItemFound": "No data found matching the filter.",
+    "unAuthorizedUser": "You need to log in to continue.",
+    "accessDenied": "Access Denied"
   },
   "dialogs": {
     "sureSaveChanges": "Are you sure you want to save changes?"

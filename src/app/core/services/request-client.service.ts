@@ -7,7 +7,6 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { clientInterceptor } from '../interceptors/client.interceptor';
 
 @Injectable({
   providedIn: 'root',

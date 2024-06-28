@@ -1,6 +1,7 @@
 {
   "overview": {
     "overview": "Overview",
+    "exportToExcel": "Export to excel",
     "summary": "Summary",
     "vendorsTableTitle": "Latest added Vendors",
     "transactions": "Transactions",

@@ -112,14 +112,30 @@ const routes: Routes = [
               },
               {
                 path: 'list',
-                loadComponent: () =>
-                  import(
-                    '../../../pages/vendor/invoice/created-invoice-list/created-invoice-list.component'
-                  ).then((l) => l.CreatedInvoiceListComponent),
-                data: {
-                  breadcrumb: { alias: 'invoice-created', skip: false },
-                  animationState: 'invoice-module-1',
-                },
+                children: [
+                  {
+                    path: '',
+                    loadComponent: () =>
+                      import(
+                        '../../../pages/vendor/invoice/created-invoice-list/list/created-invoice-list.component'
+                      ).then((l) => l.CreatedInvoiceListComponent),
+                    data: {
+                      breadcrumb: { alias: 'invoice-created', skip: false },
+                      animationState: 'invoice-module-1',
+                    },
+                  },
+                  {
+                    path: 'add',
+                    loadComponent: () =>
+                      import(
+                        '../../../pages/vendor/invoice/created-invoice-list/add-invoice/add-invoice.component'
+                      ).then((a) => a.AddInvoiceComponent),
+                    data: {
+                      breadcrumb: { alias: 'add', skip: false },
+                      animationState: 'invoice-module-2',
+                    },
+                  },
+                ],
               },
               {
                 path: 'generated',
@@ -129,7 +145,7 @@ const routes: Routes = [
                   ).then((c) => c.GeneratedInvoiceListComponent),
                 data: {
                   breadcrumb: { alias: 'invoice-generated', skip: false },
-                  animationState: 'invoice-module-2',
+                  animationState: 'invoice-module-3',
                 },
               },
             ],

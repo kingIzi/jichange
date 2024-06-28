@@ -1,6 +1,7 @@
 {
   "invoiceDetails": "Maelezo ya Bili",
   "noInvoices": "Bado hujatengeneza ankara.",
+  "exportToExcel": "Pakua Excel",
   "noGeneratedInvoicesFound": "Hakukuwa na ankara zilizopatikana.",
   "noInvoicesFound": "Hakuna ankara inayopatikana kwa {}",
   "addInvoice": "Ongeza Bili",
@@ -8,6 +9,12 @@
   "editInvoice": "Hariri ankara",
   "form": {
     "details": "Maelezo ya ankara",
+    "itemDetailsTableHeaders": [
+      "Maelezo",
+      "Kiasi",
+      "Bei ya Kitengo",
+      "Jumla ya Bei"
+    ],
     "invoiceNo": "Nambari ya Bili",
     "invoiceDate": "Tarehe ya Bili",
     "dueDate": "Tarehe ya Kulipwa",
@@ -52,9 +59,9 @@
       "itemDetails": {
         "missingDescription": "Tafadhali jaza",
         "missingQuantity": "Eleza kiasi",
-        "noQuantity": "Zaidi ya 0",
+        "noQuantity": "Haizewi kuwa 0",
         "missingUnitPrice": "Eleza bei ya kitengo",
-        "noUnitPrice": "Zaidi ya 0"
+        "noUnitPrice": "Haizewi kuwa 0"
       }
     },
     "dialog": {

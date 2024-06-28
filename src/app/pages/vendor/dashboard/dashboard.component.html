@@ -71,7 +71,7 @@
         <a
           [routerLink]="'/vendor/reports/overview'"
           *transloco="let t; read: 'defaults'"
-          class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+          class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple"
         >
           {{ t("viewAll") }}
         </a>
@@ -95,7 +95,7 @@
         <a
           [routerLink]="'/vendor/invoice/generated'"
           *transloco="let t; read: 'defaults'"
-          class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+          class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple"
         >
           {{ t("viewAll") }}
         </a>
@@ -153,7 +153,7 @@
       <a
         [routerLink]="'/vendor/invoice/generated'"
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple"
+        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple"
       >
         {{ t("viewAll") }}
       </a>
@@ -174,7 +174,70 @@
           </span>
         </div>
       </div>
-      <div class="overflow-x-auto flex flex-col sm:-mx-6 lg:-mx-8 relative">
+      <div id="list-view" class="py-4 md:hidden">
+        <ul class="flex flex-col space-y-4">
+          <li
+            *ngFor="
+              let company of tableData.dataSource.filteredData
+                | slice
+                  : 1 + paginator.pageSize * paginator.pageIndex - 1
+                  : 1 +
+                      paginator.pageSize * paginator.pageIndex +
+                      paginator.pageSize -
+                      1;
+              index as i
+            "
+            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
+          >
+            <div
+              class="flex flex-col space-y-1 rounded"
+              [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+            >
+              <div *ngFor="let header of headers.controls; index as i">
+                <div
+                  class="flex flex-row items-center justify-between border-b p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <ng-container>
+                    <p
+                      [class]="
+                        tableValueStyle(company, header.get('value')?.value)
+                      "
+                    >
+                      {{ tableValue(company, header.get("value")?.value) }}
+                    </p>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <ng-container *ngIf="!tableLoading">
+          <div
+            class="border-t border-b grid place-items-center"
+            *transloco="let t; read: 'errors'"
+          >
+            <p
+              *ngIf="tableData.generatedInvoices.length <= 0"
+              class="text-center text-sm tracking-wide p-3"
+            >
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </ng-container>
+        <div [@inOutAnimation] *ngIf="tableLoading">
+          <div class="w-full grid place-items-center mt-6">
+            <span
+              class="loading loading-spinner loading-lg bg-darkPurple"
+            ></span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+      >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <ng-container
@@ -228,6 +291,9 @@
                 ></tr>
                 <tr
                   mat-row
+                  [@listAnimationDesktop]="
+                    tableData.dataSource.filteredData.length
+                  "
                   *matRowDef="
                     let row;
                     columns: tableHeader(displayedColumns);
@@ -260,6 +326,7 @@
                     </p>
                     <div
                       *ngIf="tableLoading"
+                      [@inOutAnimation]
                       class="w-full grid place-items-center mt-6"
                     >
                       <span

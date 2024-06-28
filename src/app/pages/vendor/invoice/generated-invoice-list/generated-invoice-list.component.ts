@@ -57,6 +57,11 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import * as json from 'src/assets/temp/data.json';
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -89,6 +94,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     SubmitMessageBoxComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class GeneratedInvoiceListComponent implements OnInit {
   public userProfile!: LoginResponse;
@@ -241,19 +247,6 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.invoiceService
       .postSignedDetails({ compid: this.userProfile.InstID })
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number'
-        // ) {
-        //   this.tableData.generatedInvoices = result.response;
-        //   this.prepareDataSource();
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.warning`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
         this.assignGeneratedInvoiceDataList(result);
         this.tableLoading = false;
         this.cdr.detectChanges();

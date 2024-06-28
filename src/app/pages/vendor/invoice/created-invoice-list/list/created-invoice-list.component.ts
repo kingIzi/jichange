@@ -20,7 +20,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -43,6 +43,11 @@ import { InvoiceDetailsViewComponent } from 'src/app/components/dialogs/Vendors/
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
@@ -72,6 +77,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     SubmitMessageBoxComponent,
     MatTableModule,
     MatSortModule,
+    RouterLink,
   ],
   templateUrl: './created-invoice-list.component.html',
   styleUrl: './created-invoice-list.component.scss',
@@ -82,6 +88,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CreatedInvoiceListComponent implements OnInit {
   public userProfile!: LoginResponse;
@@ -109,6 +116,7 @@ export class CreatedInvoiceListComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private router: Router,
     private fb: FormBuilder,
     private dialog: MatDialog,
     private fileHandler: FileHandlerService,
@@ -557,18 +565,21 @@ export class CreatedInvoiceListComponent implements OnInit {
   }
   //opens invoice details for editing
   openEditInvoiceDialog(generatedInvoice: GeneratedInvoice) {
-    let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
-      width: '800px',
-      disableClose: true,
-      data: {
-        invid: generatedInvoice.Inv_Mas_Sno,
-        userProfile: this.userProfile,
-        customerId: null,
-      },
-    });
-    dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestCreatedInvoiceList();
+    // let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
+    //   width: '800px',
+    //   disableClose: true,
+    //   data: {
+    //     invid: generatedInvoice.Inv_Mas_Sno,
+    //     userProfile: this.userProfile,
+    //     customerId: null,
+    //   },
+    // });
+    // dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
+    //   dialogRef.close();
+    //   this.requestCreatedInvoiceList();
+    // });
+    this.router.navigate(['/vendor/invoice/list/add'], {
+      queryParams: { invno: btoa(generatedInvoice.Inv_Mas_Sno.toString()) },
     });
   }
   //saves a copy of an invoice to the local machine

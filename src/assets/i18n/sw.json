@@ -43,7 +43,9 @@
     "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano.",
     "timeoutError": "Ombi limepitwa na wakati. Tafadhali thibitisha muunganisho wako au jaribu tena.",
     "invalidForm": "Fomu batili",
-    "noFilterItemFound": "Hakuna data iliyopatikana inayolingana na kichujio."
+    "noFilterItemFound": "Hakuna data iliyopatikana inayolingana na kichujio.",
+    "unAuthorizedUser": "Unahitaji kuingia ndani ili kuendelea.",
+    "accessDenied": "Ufikiaji Umekataliwa"
   },
   "dialogs": {
     "sureSaveChanges": "Je, una uhakika unataka kuokoa mabadiliko?"
@@ -137,40 +139,410 @@
   "bankHeaders": [
     {
       "name": "Muuzaji",
-      "dropdowns": ["Muhtasari", "Idhini"]
+      "access": [
+        "Administrator",
+        "Sales Expertise",
+        "Digital Marketing",
+        "Mobile Banking",
+        "Customer Service",
+        "Cashier Support",
+        "Support Service",
+        "Cashier",
+        "Customer Support"
+      ],
+      "dropdowns": [
+        {
+          "label": "Muhtasari",
+          "routerLink": "/main/company/summary",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Idhini",
+          "routerLink": "/main/company/inbox",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        }
+      ]
     },
     {
-      "name": "Usanidi",
+      "name": "Mazingira",
+      "access": ["Administrator"],
       "dropdowns": [
-        "nchi",
-        "mkoa",
-        "wilaya",
-        "kata",
-        "sarafu",
-        "kutambua",
-        "tawi",
-        "jina la swali",
-        "smtp",
-        "maandishi ya barua pepe",
-        "mtumiaji wa benki",
-        "lugha",
-        "Akaunti ya Kutupilia Mbali",
-        "akaunti ya muuzaji"
+        {
+          "label": "Nchi",
+          "routerLink": "/main/setup/country",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Mkoa",
+          "routerLink": "/main/setup/region",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Wilaya",
+          "routerLink": "/main/setup/district",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Kata",
+          "routerLink": "/main/setup/ward",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Sarafu",
+          "routerLink": "/main/setup/currency",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Cheo",
+          "routerLink": "/main/setup/designation",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Tawi",
+          "routerLink": "/main/setup/branch",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "SMTP",
+          "routerLink": "/main/setup/smtp",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Barua Pepe",
+          "routerLink": "/main/setup/email",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Mtumiaji wa Benki",
+          "routerLink": "/main/setup/user",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Akaunti ya Kusubiri",
+          "routerLink": "/main/setup/suspense",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Akaunti ya Muuzaji",
+          "routerLink": "/main/setup/deposit",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        }
       ]
     },
     {
       "name": "Ripoti",
+      "access": [
+        "Administrator",
+        "Sales Expertise",
+        "Digital Marketing",
+        "Mobile Banking",
+        "Customer Service",
+        "Cashier Support",
+        "Support Service",
+        "Cashier",
+        "Customer Support"
+      ],
       "dropdowns": [
-        "Muhtasari",
-        "Maelezo ya Shughuli",
-        "Maelezo ya Malipo",
-        "Maelezo ya Bili",
-        "Maelezo ya Marekebisho",
-        "Ripoti ya Muteja",
-        "Ripoti ya Vendor",
-        "Ripoti ya Kuunganishwa kwa Ankara",
-        "Ripoti ya Kumbukumbu za Mtumiaji",
-        "Kufuatilia Ukaguzi"
+        {
+          "label": "Muhtasari",
+          "routerLink": "/main/reports/overview",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Maelezo ya Muamala",
+          "routerLink": "/main/reports/transactions",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Maelezo ya Malipo",
+          "routerLink": "/main/reports/payment",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Maelezo ya Anuani",
+          "routerLink": "/main/reports/invoice",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Maelezo ya Marekebisho",
+          "routerLink": "/main/reports/amendment",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Ripoti ya Wateja",
+          "routerLink": "/main/reports/customer",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Ripoti ya Wauzaji",
+          "routerLink": "/main/reports/vendors",
+          "access": [
+            "Administrator",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Anuani Zilizojumuishwa",
+          "routerLink": "/main/reports/invoice-consolidated",
+          "access": [
+            "Administrator",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Malipo Yaliyojumuishwa",
+          "routerLink": "/main/reports/payment-consolidated",
+          "access": [
+            "Administrator",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Ripoti ya Matumizi ya Mtumiaji",
+          "routerLink": "/main/reports/userlog",
+          "access": [
+            "Administrator",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Mafunzo ya Ukaguzi",
+          "routerLink": "/main/reports/audit",
+          "access": [
+            "Administrator",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        }
       ]
     }
   ],

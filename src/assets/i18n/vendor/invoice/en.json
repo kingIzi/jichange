@@ -6,7 +6,14 @@
   "addInvoice": "Add Invoice",
   "createInvoice": "Create Invoice",
   "editInvoice": "Edit invoice",
+  "exportToExcel": "Export to excel",
   "form": {
+    "itemDetailsTableHeaders": [
+      "Description",
+      "Quantity",
+      "Unit price",
+      "Total price"
+    ],
     "details": "Invoice details",
     "invoiceNo": "Invoice number",
     "invoiceDate": "Invoice date",
@@ -57,9 +64,9 @@
       "itemDetails": {
         "missingDescription": "Please fill",
         "missingQuantity": "Specify",
-        "noQuantity": "Cannot be greater than 0",
+        "noQuantity": "Cannot be 0",
         "missingUnitPrice": "Specify",
-        "noUnitPrice": "Cannot be greater than 0"
+        "noUnitPrice": "Cannot be 0"
       }
     },
     "dialog": {

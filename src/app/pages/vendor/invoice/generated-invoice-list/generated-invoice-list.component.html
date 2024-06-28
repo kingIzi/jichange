@@ -22,17 +22,14 @@
           <button
             tabindex="0"
             role="button"
-            class="btn btn-sm tracking-wide bg-white shadow rounded-sm m-1"
+            class="btn btn-sm tracking-wide bg-white shadow rounded-lg m-1"
           >
             <span>
               <i class="bi bi-layout-three-columns text-sm"></i>
             </span>
-            <p *transloco="let t; read: 'defaults'" class="text-sm">
+            <p *transloco="let t; read: 'defaults'" class="text-xs">
               {{ t("columns") }}
             </p>
-            <span>
-              <i class="bi bi-chevron-down text-sm"></i>
-            </span>
           </button>
           <ul
             tabindex="0"
@@ -82,6 +79,7 @@
                     1;
             index as i
           "
+          [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
         >
           <div
             class="flex flex-col space-y-1 rounded"
@@ -122,36 +120,6 @@
                   >
                     {{ t("cancel") }}
                   </button>
-                  <!-- <ng-template #approveInvoiceTemplate>
-                    <ng-container
-                      *ngIf="
-                        userProfile.Usno.toString().toLocaleLowerCase() !==
-                        element?.AuditBy?.trim()
-                          ?.toString()
-                          ?.toLocaleLowerCase()
-                      "
-                    >
-                      <app-submit-message-box
-                        #submitMessageBox
-                      ></app-submit-message-box>
-                      <button
-                        (click)="approveInvoice(element, submitMessageBox)"
-                        class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
-                      >
-                        {{ determineApprovalStatus(element.approval_status) }}
-                      </button>
-                    </ng-container>
-                    <ng-container
-                      *ngIf="
-                        userProfile.Usno.toString().toLocaleLowerCase() ===
-                        element?.AuditBy?.trim()
-                          ?.toString()
-                          ?.toLocaleLowerCase()
-                      "
-                    >
-                      <mark class="p-1">No Access</mark>
-                    </ng-container>
-                  </ng-template> -->
                 </ng-template>
               </ng-container>
               <ng-template #actionButtons>
@@ -227,11 +195,11 @@
           </p>
         </div>
       </ng-container>
-      <ng-container *ngIf="tableLoading">
+      <div [@inOutAnimation] *ngIf="tableLoading">
         <div class="w-full grid place-items-center mt-6">
           <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
         </div>
-      </ng-container>
+      </div>
     </div>
     <div
       class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
@@ -367,6 +335,9 @@
               ></tr>
               <tr
                 mat-row
+                [@listAnimationDesktop]="
+                  tableData.dataSource.filteredData.length
+                "
                 *matRowDef="
                   let row;
                   columns: tableHeader(displayedColumns);
@@ -399,6 +370,7 @@
                   </p>
                   <div
                     *ngIf="tableLoading"
+                    [@inOutAnimation]
                     class="w-full grid place-items-center mt-6"
                   >
                     <span

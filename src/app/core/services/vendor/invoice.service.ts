@@ -65,7 +65,7 @@ export class InvoiceService {
   }
   public async getCurrencyCodes() {
     let data = await lastValueFrom(
-      this.client.performGet<HttpDataResponse<Currency[] | number>>(
+      this.client.performGet<HttpDataResponse<Currency[] | number | string>>(
         `/api/Invoice/GetCurrency`
       )
     );
@@ -84,7 +84,10 @@ export class InvoiceService {
   }
   public async addInvoice(body: AddInvoiceForm) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Invoice/AddInvoice`, body)
+      this.client.performPost<
+        AddInvoiceForm,
+        HttpDataResponse<string | number>
+      >(`/api/Invoice/AddInvoice`, body)
     );
     return data;
   }

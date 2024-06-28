@@ -3,7 +3,7 @@ import { RouteReuseStrategy, RouterModule, Routes } from '@angular/router';
 import { loggedInGuard } from './core/guards/logged-in.guard';
 import { DefaultRouteReuseStrategy } from './utilities/default-route-reuse-strategy';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     redirectTo: 'auth',

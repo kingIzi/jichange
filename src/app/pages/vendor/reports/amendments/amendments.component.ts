@@ -39,6 +39,11 @@ import {
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { AmendmentReportTable } from 'src/app/core/enums/vendor/reports/amendment-report-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
@@ -83,6 +88,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class AmendmentsComponent implements OnInit {
   public startLoading: boolean = false;

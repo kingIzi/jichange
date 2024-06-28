@@ -91,6 +91,7 @@ export class SignInComponent implements OnInit {
   }
   private toRoute(response: LoginResponse, route: string) {
     localStorage.setItem('userProfile', JSON.stringify(response));
+    this.cdr.detectChanges();
     this.router.navigate([route]);
   }
   private switchUserLogin(response: LoginResponse) {

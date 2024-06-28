@@ -291,107 +291,107 @@ function nestedRouteStates(inputStr: string, arr: string[]) {
 }
 
 export const mainModuleAnimations = trigger('mainModuleAnimations', [
-  transition(companyRoutes.join(','), fadeEase()),
-  transition(setupRoutes.join(','), fadeEase()),
-  transition(reportsRoutes.join(','), fadeEase()),
-  transition('company-module-1 => sub-summary-module', slideTo('right')),
-  transition('sub-summary-module => company-module-1', slideTo('left')),
-  transition('isLeft => isRight', slideTo('right')),
-  transition('isRight => isLeft', slideTo('left')),
-  transition('* => dashboard', slideTo('left')),
-  transition('dashboard => *', slideTo('right')),
-  transition('* <=> profile', stepper()),
-  transition(routesStates(companyModules, setupModules).join(','), stepper()),
-  transition(routesStates(companyModules, reportsModules).join(','), stepper()),
-  transition(routesStates(setupModules, reportsModules).join(','), stepper()),
-  transition(nestedRouteStates('isLeft', companyModules).join(','), stepper()),
-  transition(nestedRouteStates('isLeft', setupModules).join(','), stepper()),
-  transition(nestedRouteStates('isLeft', reportsModules).join(','), fadeEase()),
-  transition(nestedRouteStates('isRight', companyModules).join(','), stepper()),
-  transition(nestedRouteStates('isRight', setupModules).join(','), stepper()),
-  transition(
-    nestedRouteStates('isRight', reportsModules).join(','),
-    fadeEase()
-  ),
+  // transition(companyRoutes.join(','), fadeEase()),
+  // transition(setupRoutes.join(','), fadeEase()),
+  // transition(reportsRoutes.join(','), fadeEase()),
+  // transition('company-module-1 => sub-summary-module', slideTo('right')),
+  // transition('sub-summary-module => company-module-1', slideTo('left')),
+  // transition('isLeft => isRight', slideTo('right')),
+  // transition('isRight => isLeft', slideTo('left')),
+  // transition('* => dashboard', slideTo('left')),
+  // transition('dashboard => *', slideTo('right')),
+  // transition('* <=> profile', stepper()),
+  // transition(routesStates(companyModules, setupModules).join(','), stepper()),
+  // transition(routesStates(companyModules, reportsModules).join(','), stepper()),
+  // transition(routesStates(setupModules, reportsModules).join(','), stepper()),
+  // transition(nestedRouteStates('isLeft', companyModules).join(','), stepper()),
+  // transition(nestedRouteStates('isLeft', setupModules).join(','), stepper()),
+  // transition(nestedRouteStates('isLeft', reportsModules).join(','), fadeEase()),
+  // transition(nestedRouteStates('isRight', companyModules).join(','), stepper()),
+  // transition(nestedRouteStates('isRight', setupModules).join(','), stepper()),
+  // transition(
+  //   nestedRouteStates('isRight', reportsModules).join(','),
+  //   fadeEase()
+  // ),
 ]);
 
 export const vendorAnimations = trigger('vendorAnimate', [
-  transition('dashboard => *', slideTo('right')),
-  transition('* => dashboard', slideTo('left')),
-  transition('* <=> profile', stepper()),
-  transition(
-    routesStates(vendorInvoiceModules, vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition(
-    routesStates(vendorCompanyModules, vendorInvoiceModules).join(','),
-    stepper()
-  ),
-  transition(
-    routesStates(vendorCompanyModules, vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition(vendorInvoiceRoutes.join(','), fadeEase()),
-  transition(vendorReportRoutes.join(','), fadeEase()),
-  transition('isLeft-1 => isRight-1', slideTo('right')),
-  transition('isRight-1 => isLeft-1', slideTo('left')),
-  transition('isRight-1 => isRight-3', slideTo('right')),
-  transition('isRight-3 => isRight-1', slideTo('left')),
-  transition('isRight-3 => isLeft-1', slideTo('left')),
-  transition(
-    nestedRouteStates('isLeft-1', vendorInvoiceModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isLeft-1', vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isRight-1', vendorInvoiceModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isRight-1', vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isRight-3', vendorInvoiceModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isRight-3', vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition('isRight-3 => company-module-1', stepper()),
-  transition('isLeft-1 <=> company-module-1', stepper()),
-  transition('isRight-1 <=> company-module-1', stepper()),
-  transition('isRight-2 <=> isLeft-1', stepper()),
-  transition('isLeft-2 => isRight-2', slideTo('right')),
-  transition('isRight-2 => isLeft-2', slideTo('left')),
-  transition(
-    nestedRouteStates('isLeft-2', vendorInvoiceModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isLeft-2', vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isRight-2', vendorInvoiceModules).join(','),
-    stepper()
-  ),
-  transition(
-    nestedRouteStates('isRight-2', vendorReportsModules).join(','),
-    stepper()
-  ),
-  transition('isLeft-2 <=> company-module-1', stepper()),
-  transition('isRight-2 <=> company-module-1', stepper()),
-  transition('isLeft-1 <=> isLeft-2', stepper()),
-  transition('isRight-1 <=> isLeft-2', stepper()),
+  // transition('dashboard => *', slideTo('right')),
+  // transition('* => dashboard', slideTo('left')),
+  // transition('* <=> profile', stepper()),
+  // transition(
+  //   routesStates(vendorInvoiceModules, vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   routesStates(vendorCompanyModules, vendorInvoiceModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   routesStates(vendorCompanyModules, vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition(vendorInvoiceRoutes.join(','), fadeEase()),
+  // transition(vendorReportRoutes.join(','), fadeEase()),
+  // transition('isLeft-1 => isRight-1', slideTo('right')),
+  // transition('isRight-1 => isLeft-1', slideTo('left')),
+  // transition('isRight-1 => isRight-3', slideTo('right')),
+  // transition('isRight-3 => isRight-1', slideTo('left')),
+  // transition('isRight-3 => isLeft-1', slideTo('left')),
+  // transition(
+  //   nestedRouteStates('isLeft-1', vendorInvoiceModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isLeft-1', vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isRight-1', vendorInvoiceModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isRight-1', vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isRight-3', vendorInvoiceModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isRight-3', vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition('isRight-3 => company-module-1', stepper()),
+  // transition('isLeft-1 <=> company-module-1', stepper()),
+  // transition('isRight-1 <=> company-module-1', stepper()),
+  // transition('isRight-2 <=> isLeft-1', stepper()),
+  // transition('isLeft-2 => isRight-2', slideTo('right')),
+  // transition('isRight-2 => isLeft-2', slideTo('left')),
+  // transition(
+  //   nestedRouteStates('isLeft-2', vendorInvoiceModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isLeft-2', vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isRight-2', vendorInvoiceModules).join(','),
+  //   stepper()
+  // ),
+  // transition(
+  //   nestedRouteStates('isRight-2', vendorReportsModules).join(','),
+  //   stepper()
+  // ),
+  // transition('isLeft-2 <=> company-module-1', stepper()),
+  // transition('isRight-2 <=> company-module-1', stepper()),
+  // transition('isLeft-1 <=> isLeft-2', stepper()),
+  // transition('isRight-1 <=> isLeft-2', stepper()),
 ]);
 
 export const mainAnimations = trigger('mainAnimation', [
-  transition('auth-module <=> *', transformTo({ x: 0, y: -100, rotate: 0 })),
+  //transition('auth-module <=> *', transformTo({ x: 0, y: -100, rotate: 0 })),
 ]);
 
 export const listAnimationMobile = trigger('listAnimationMobile', [

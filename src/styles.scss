@@ -64,17 +64,7 @@ option {
   background-color: "#8196FE";
 }
 
-// .progress-accent::-moz-progress-bar {
-//   background-color: "#8196FE";
-// }
-// .progress-accent:indeterminate {
-//   --progress-color: "#8196FE";
-// }
-// .progress-accent::-webkit-progress-value {
-//   background-color: "#8196FE";
-// }
-
-// .custom-swal-popup {
-//   width: 300px !important; /* Adjust the width as needed */
-//   height: 100px !important; /* Adjust the height as needed */
-// }
+.custom-dialog-overlay {
+  // filter: blur(10px);
+  // opacity: 0.9 !important;
+}

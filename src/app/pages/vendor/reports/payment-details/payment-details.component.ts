@@ -39,6 +39,11 @@ import {
   zip,
 } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  inOutAnimation,
+  listAnimationDesktop,
+  listAnimationMobile,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { PaymentDetailsTable } from 'src/app/core/enums/vendor/reports/payment-details-table';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
@@ -84,6 +89,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       useValue: { scope: 'vendor/reports', alias: 'reports' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class PaymentDetailsComponent implements OnInit {
   public tableFormGroup!: FormGroup;

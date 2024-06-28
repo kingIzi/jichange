@@ -10,4 +10,5 @@ export class LoginResponse {
   Uname!: string;
   fulname!: string;
   InstID!: number;
+  Token!: string;
 }

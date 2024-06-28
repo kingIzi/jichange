@@ -41,7 +41,6 @@ import {
 } from '@angular/material/dialog';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { clientInterceptor } from 'src/app/core/interceptors/client.interceptor';
 import { Observable, TimeoutError, of, throwError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';

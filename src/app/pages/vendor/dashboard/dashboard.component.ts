@@ -50,6 +50,11 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-dashboard',
@@ -77,6 +82,7 @@ import { MatSortModule, MatSort } from '@angular/material/sort';
       useValue: { scope: 'vendor/dashboard', alias: 'panel' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;

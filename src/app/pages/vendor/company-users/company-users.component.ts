@@ -30,6 +30,11 @@ import {
 import { Observable, TimeoutError, of } from 'rxjs';
 import { CompanyUsersDialogComponent } from 'src/app/components/dialogs/Vendors/company-users-dialog/company-users-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 import { CompanyUsersTable } from 'src/app/core/enums/vendor/company/company-users-table';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
@@ -65,6 +70,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       useValue: { scope: 'vendor/company', alias: 'company' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CompanyUsersComponent implements OnInit {
   public startLoading: boolean = false;

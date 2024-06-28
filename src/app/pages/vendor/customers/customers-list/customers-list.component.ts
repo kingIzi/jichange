@@ -51,6 +51,11 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { Observable, of } from 'rxjs';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import {
+  listAnimationMobile,
+  listAnimationDesktop,
+  inOutAnimation,
+} from 'src/app/components/layouts/main/router-transition-animations';
 
 @Component({
   selector: 'app-customers-list',
@@ -81,6 +86,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
       useValue: { scope: 'vendor/customer', alias: 'customer' },
     },
   ],
+  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CustomersListComponent implements OnInit {
   public startLoading: boolean = false;
