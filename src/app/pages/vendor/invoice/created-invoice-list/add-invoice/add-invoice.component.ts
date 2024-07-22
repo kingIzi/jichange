@@ -97,7 +97,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   ) {}
   private createForm() {
     this.invoiceDetailsForm = this.fb.group({
-      user_id: this.fb.control(this.appConfigService.getLoginResponse().Usno, [
+      userid: this.fb.control(this.appConfigService.getLoginResponse().Usno, [
         Validators.required,
       ]),
       compid: this.fb.control(
