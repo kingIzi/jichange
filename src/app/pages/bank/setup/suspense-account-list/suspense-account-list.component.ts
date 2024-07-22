@@ -47,6 +47,9 @@ import {
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { DeleteSuspenseAccountForm } from 'src/app/core/models/bank/forms/setup/suspense-account/delete-suspense-account-form';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -72,6 +75,10 @@ import { DeleteSuspenseAccountForm } from 'src/app/core/models/bank/forms/setup/
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -79,19 +86,6 @@ export class SuspenseAccountListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  public tableData: {
-    suspenseAccounts: SuspenseAccount[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<SuspenseAccount>;
-  } = {
-    suspenseAccounts: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<SuspenseAccount>([]),
-  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public SuspenseAccountTable: typeof SuspenseAccountTable =
     SuspenseAccountTable;
@@ -106,6 +100,8 @@ export class SuspenseAccountListComponent implements OnInit {
     private tr: TranslocoService,
     private suspenseAccountService: SuspenseAccountService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<SuspenseAccount>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersFormGroup() {
@@ -117,29 +113,32 @@ export class SuspenseAccountListComponent implements OnInit {
     this.tr
       .selectTranslate(`suspenseAccount.suspenseAccountsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -148,43 +147,36 @@ export class SuspenseAccountListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: SuspenseAccount,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: SuspenseAccount, filter: string) => {
       return data.Sus_Acc_No &&
         data.Sus_Acc_No.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<SuspenseAccount>(
-      this.tableData.suspenseAccounts
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseSuspenseAccountResponse(
+    result: HttpDataResponse<number | SuspenseAccount[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as SuspenseAccount[]);
+    }
   }
   private requestSuspenseAccountList() {
     this.tableLoading = true;
     this.suspenseAccountService
       .getSuspenseAccountList({})
       .then((result) => {
-        if (result.response instanceof Array) {
-          this.tableData.suspenseAccounts = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.suspenseAccounts = [];
-        }
-        this.prepareDataSource();
+        this.parseSuspenseAccountResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -199,10 +191,36 @@ export class SuspenseAccountListComponent implements OnInit {
         throw err;
       });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
+  private switchDeleteSuspenseAccountErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(
+          `setup.suspenseAccount.failedToDeleteSuspenseAccount`
+        );
+    }
+  }
+  private parseDeleteSuspenseAccountResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteSuspenseAccountErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let message = this.tr.translate(
+        `setup.suspenseAccount.deletedAccountSuccessully`
+      );
+      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Sus_Acc_Sno === result.response);
+      this.tableDataService.removedData(index);
     }
   }
   private requestDeleteSuspenseAccount(body: DeleteSuspenseAccountForm) {
@@ -210,21 +228,7 @@ export class SuspenseAccountListComponent implements OnInit {
     this.suspenseAccountService
       .DeleteSuspenseAccountForm(body)
       .then((result) => {
-        if (result.response === body.sno) {
-          let message = this.tr.translate(
-            `setup.suspenseAccount.deletedAccountSuccessully`
-          );
-          let sal = AppUtilities.sweetAlertSuccessMessage(message);
-          this.requestSuspenseAccountList();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate('defaults.failed'),
-            this.tr.translate(
-              `setup.suspenseAccount.failedToDeleteSuspenseAccount`
-            )
-          );
-        }
+        this.parseDeleteSuspenseAccountResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -286,7 +290,7 @@ export class SuspenseAccountListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.suspenseAccounts,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -303,9 +307,9 @@ export class SuspenseAccountListComponent implements OnInit {
     });
     dialogRef.componentInstance.addedSuspenseAccount
       .asObservable()
-      .subscribe(() => {
+      .subscribe((suspenseAccount) => {
         dialogRef.close();
-        this.requestSuspenseAccountList();
+        this.tableDataService.addedData(suspenseAccount);
       });
   }
   openEditSuspenseAccountDialog(suspenseAccount: SuspenseAccount) {
@@ -318,9 +322,14 @@ export class SuspenseAccountListComponent implements OnInit {
     });
     dialogRef.componentInstance.addedSuspenseAccount
       .asObservable()
-      .subscribe(() => {
+      .subscribe((suspenseAccount) => {
         dialogRef.close();
-        this.requestSuspenseAccountList();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex(
+            (item) => item.Sus_Acc_Sno === suspenseAccount.Sus_Acc_Sno
+          );
+        this.tableDataService.editedData(suspenseAccount, index);
       });
   }
   openRemoveDialog(
@@ -337,6 +346,18 @@ export class SuspenseAccountListComponent implements OnInit {
       };
       this.requestDeleteSuspenseAccount(body);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

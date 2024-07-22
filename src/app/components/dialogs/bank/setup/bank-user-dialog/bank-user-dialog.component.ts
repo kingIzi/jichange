@@ -262,30 +262,6 @@ export class BankUserDialogComponent implements OnInit {
       this.createForm();
     }
   }
-  private switchBankUserErrorMessage(message: string) {
-    switch (message.toLocaleLowerCase()) {
-      case 'Missing employee number'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.employeeId`);
-      case 'Missing first name'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.firstName`);
-      case 'Missing last name'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.lastName`);
-      case 'Missing designation'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.designation`);
-      case 'Missing email'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.emailId`);
-      case 'Missing mobile number'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.mobileNo`);
-      case 'Missing username'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.username`);
-      case 'Missing status'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.status`);
-      case 'Missing branch'.toLocaleLowerCase():
-        return this.tr.translate(`setup.bankUser.form.dialog.branch`);
-      default:
-        return this.tr.translate(`setup.bankUser.failedToAddUser`);
-    }
-  }
   private switchAddBankUserErrorMessage(message: string) {
     let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
       message,
@@ -293,7 +269,7 @@ export class BankUserDialogComponent implements OnInit {
       'User'
     );
     if (errorMessage.length > 0) return errorMessage;
-    switch (message.toString()) {
+    switch (message.toLocaleLowerCase()) {
       case 'Missing employee number'.toLocaleLowerCase():
         return this.tr.translate(`setup.bankUser.form.dialog.employeeId`);
       case 'Missing first name'.toLocaleLowerCase():

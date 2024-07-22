@@ -10,6 +10,7 @@ import { Designation } from '../models/bank/setup/designation';
 import { SMTP } from '../models/bank/setup/smtp';
 import { EmailText } from '../models/bank/setup/email-text';
 import { EmployeeDetail } from '../models/bank/setup/employee-detail';
+import { SuspenseAccount } from '../models/bank/setup/suspense-account';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -23,5 +24,6 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | SMTP
     | EmailText
     | EmployeeDetail
+    | SuspenseAccount
   >
 >('TABLE_DATA_SERVICE');

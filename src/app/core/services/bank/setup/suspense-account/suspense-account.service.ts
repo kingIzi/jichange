@@ -15,17 +15,17 @@ export class SuspenseAccountService {
     let data = await lastValueFrom(
       this.client.performPost<
         any,
-        HttpDataResponse<SuspenseAccount[] | number | string>
+        HttpDataResponse<SuspenseAccount[] | number>
       >(`/api/SuspenseA/GetAccount`, body)
     );
     return data;
   }
   public async addSuspenseAccount(form: AddSuspenseAccountForm) {
     let data = await lastValueFrom(
-      this.client.performPost<AddSuspenseAccountForm, HttpDataResponse<number>>(
-        `/api/SuspenseA/AddAccount`,
-        form
-      )
+      this.client.performPost<
+        AddSuspenseAccountForm,
+        HttpDataResponse<number | SuspenseAccount>
+      >(`/api/SuspenseA/AddAccount`, form)
     );
     return data;
   }
