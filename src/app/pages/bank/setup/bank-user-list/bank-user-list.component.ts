@@ -158,29 +158,6 @@ export class BankUserListComponent implements OnInit {
     this.tableDataService.setTableColumns(tableColumns);
     this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private requestBranchDetailsList() {
-    this.startLoading = true;
-    this.branchService
-      .postBranchList({})
-      .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number'
-        ) {
-          this.branches = result.response;
-        }
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.startLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
-  }
   private dataSourceFilterPredicate() {
     let filterPredicate = (data: EmployeeDetail, filter: string) => {
       return data.Full_Name &&
@@ -281,7 +258,7 @@ export class BankUserListComponent implements OnInit {
     this.bankService
       .deleteEmployeeDetail(body)
       .then((result) => {
-        this.parseBankDetailsResponse(result);
+        this.parseDeleteBankUserResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

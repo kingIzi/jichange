@@ -33,11 +33,11 @@ export class AppUtilities {
       position: 'top-right',
       showConfirmButton: false,
       timer: timeout,
-      didOpen: (toast) => {
+      didOpen: (toast: any) => {
         toast.addEventListener('mouseenter', Swal.stopTimer);
         toast.addEventListener('mouseleave', Swal.resumeTimer);
       },
-    });
+    } as any) as any;
     return toastMixin.fire({
       animation: true,
       title: message,

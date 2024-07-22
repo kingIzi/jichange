@@ -511,6 +511,11 @@
         "desc": ""
       },
       {
+        "label": "Id ya Mtiririko",
+        "value": "Flow_Id",
+        "desc": ""
+      },
+      {
         "label": "Imeundwa",
         "value": "Effective_Date",
         "desc": ""

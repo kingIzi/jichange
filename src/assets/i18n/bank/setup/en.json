@@ -514,6 +514,11 @@
         "desc": ""
       },
       {
+        "label": "Flow Id",
+        "value": "Flow_Id",
+        "desc": ""
+      },
+      {
         "label": "Created",
         "value": "Effective_Date",
         "desc": ""
