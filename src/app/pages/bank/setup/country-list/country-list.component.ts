@@ -57,6 +57,9 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-country-list',
@@ -84,26 +87,15 @@ import {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CountryListComponent implements OnInit {
   public startLoading: boolean = false;
-  // public countries: Country[] = [];
-  // public countriesData: Country[] = [];
-  public tableData: {
-    countries: Country[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Country>;
-  } = {
-    countries: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Country>([]),
-  };
   public countryForm!: FormGroup;
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -121,6 +113,8 @@ export class CountryListComponent implements OnInit {
     private tr: TranslocoService,
     private countryService: CountryService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Country>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -138,29 +132,32 @@ export class CountryListComponent implements OnInit {
     this.tr
       .selectTranslate(`countryDialog.countriesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -169,13 +166,11 @@ export class CountryListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Country,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Country, filter: string) => {
       return data.Country_Name &&
         data.Country_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -183,32 +178,26 @@ export class CountryListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Country>(
-      this.tableData.countries
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseCountryListResponse(
+    result: HttpDataResponse<string | number | Country[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Country[]);
+    }
   }
   private getCountryList() {
-    this.tableData.countries = [];
     this.tableLoading = true;
     this.countryService
       .getCountryList({})
-      .then((results) => {
-        if (results.response instanceof Array) {
-          this.tableData.countries = results.response as Country[];
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.countries = [];
-        }
-        this.prepareDataSource();
+      .then((result) => {
+        this.parseCountryListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -223,6 +212,33 @@ export class CountryListComponent implements OnInit {
         throw err;
       });
   }
+  private switchDeleteBranchErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.countryDialog.failedToDeleteCountry`);
+    }
+  }
+  private parseDeleteCountryResponse(result: HttpDataResponse<number>) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      let errorMessage = this.switchDeleteBranchErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.countryDialog.form.dialog.removedSuccessfully`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.SNO === result.response);
+      this.tableDataService.removedData(index);
+    }
+  }
   private async requestRemoveCountry(body: {
     sno: number | string;
     userid: number | string;
@@ -231,32 +247,21 @@ export class CountryListComponent implements OnInit {
     this.countryService
       .deleteCountry(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response > 0
-        ) {
-          let d = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(
-              `setup.countryDialog.form.dialog.removedSuccessfully`
-            )
-          );
-          this.getCountryList();
-        }
+        console.log(result);
+        this.parseDeleteCountryResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
   }
   ngOnInit(): void {
     this.parseUserProfile();
@@ -296,7 +301,7 @@ export class CountryListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.countries,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -311,8 +316,8 @@ export class CountryListComponent implements OnInit {
     dialogRef.componentInstance.addedCountry
       .asObservable()
       .subscribe((country) => {
-        this.getCountryList();
         dialogRef.close();
+        this.tableDataService.addedData(country);
       });
   }
   openEditCountryDialog(country: Country) {
@@ -326,8 +331,11 @@ export class CountryListComponent implements OnInit {
     dialogRef.componentInstance.addedCountry
       .asObservable()
       .subscribe((country) => {
-        this.getCountryList();
         dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.SNO === country.SNO);
+        this.tableDataService.editedData(country, index);
       });
   }
   openRemoveDialog(country: Country, dialog: RemoveItemDialogComponent) {
@@ -345,6 +353,18 @@ export class CountryListComponent implements OnInit {
       };
       this.requestRemoveCountry(data);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.countryForm.get('headers') as FormArray;

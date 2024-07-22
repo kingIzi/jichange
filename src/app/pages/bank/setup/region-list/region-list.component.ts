@@ -47,6 +47,9 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-region-list',
@@ -73,6 +76,10 @@ import {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -82,21 +89,6 @@ export class RegionListComponent implements OnInit {
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public RegionTable: typeof RegionTable = RegionTable;
-  // public regionsData: Region[] = [];
-  // public regions: Region[] = [];
-  public tableData: {
-    regions: Region[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Region>;
-  } = {
-    regions: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Region>([]),
-  };
   public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -110,6 +102,8 @@ export class RegionListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private tr: TranslocoService,
     private regionService: RegionService,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Region>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -118,11 +112,8 @@ export class RegionListComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Region,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Region, filter: string) => {
       return data.Country_Name &&
         data.Country_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -136,43 +127,24 @@ export class RegionListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Region>(
-      this.tableData.regions
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseRegionListResponse(result: HttpDataResponse<number | Region[]>) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Region[]);
+    }
   }
   private requestRegionList() {
-    // this.emptyRegionList();
-    this.tableData.regions = [];
     this.tableLoading = true;
     this.regionService
       .getAllRegionsList({})
       .then((result) => {
-        // if (
-        //   result.response &&
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number'
-        // ) {
-        //   this.regionsData = result.response;
-        //   this.regions = this.regionsData;
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
-        if (result.response instanceof Array) {
-          this.tableData.regions = result.response as Region[];
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.regions = [];
-        }
-        this.prepareDataSource();
+        this.parseRegionListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -193,40 +165,34 @@ export class RegionListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `regionDialog.regionsTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`regionDialog.regionsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -235,23 +201,42 @@ export class RegionListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+  }
+  private switchDeleteRegionErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.regionDialog.failedToDeleteRegion`);
+    }
+  }
+  private parseDeleteRegionResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteRegionErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.regionDialog.removeRegionSuccessfully`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Region_SNO === result.response);
+      this.tableDataService.removedData(index);
+    }
   }
   private requestDeleteRegion(body: { sno: number; userid: number }) {
     this.startLoading = true;
     this.regionService
       .deleteRegion(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response === body.sno
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.regionDialog.removeRegionSuccessfully`)
-          );
-          this.requestRegionList();
-        }
+        this.parseDeleteRegionResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -266,54 +251,6 @@ export class RegionListComponent implements OnInit {
         throw err;
       });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case RegionTable.COUNTRY:
-  //       this.regions.sort((a, b) =>
-  //         a.Country_Name.toLocaleLowerCase() >
-  //         b.Country_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case RegionTable.REGION:
-  //       this.regions.sort((a, b) =>
-  //         a.Region_Name.toLocaleLowerCase() > b.Region_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case RegionTable.COUNTRY:
-  //       this.regions.sort((a, b) =>
-  //         a.Country_Name.toLocaleLowerCase() <
-  //         b.Country_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case RegionTable.REGION:
-  //       this.regions.sort((a, b) =>
-  //         a.Region_Name.toLocaleLowerCase() < b.Region_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createTableHeadersFormGroup();
@@ -353,7 +290,10 @@ export class RegionListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.tableData.regions, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableDataService.getData(),
+          element
+        );
       default:
         return element[key];
     }
@@ -366,10 +306,13 @@ export class RegionListComponent implements OnInit {
         region: null,
       },
     });
-    dialogRef.componentInstance.addedRegion.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestRegionList();
-    });
+    dialogRef.componentInstance.addedRegion
+      .asObservable()
+      .subscribe((region) => {
+        dialogRef.close();
+        this.tableDataService.addedData(region);
+        //this.requestRegionList();
+      });
   }
   openEditRegionDialog(region: Region) {
     let dialogRef = this.dialog.open(RegionDialogComponent, {
@@ -379,10 +322,15 @@ export class RegionListComponent implements OnInit {
         region: region,
       },
     });
-    dialogRef.componentInstance.addedRegion.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestRegionList();
-    });
+    dialogRef.componentInstance.addedRegion
+      .asObservable()
+      .subscribe((region) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.Region_SNO === region.Region_SNO);
+        this.tableDataService.editedData(region, index);
+      });
   }
   openRemoveDialog(region: Region, dialog: RemoveItemDialogComponent) {
     dialog.title = this.tr.translate(`setup.regionDialog.removeRegion`);
@@ -395,6 +343,18 @@ export class RegionListComponent implements OnInit {
       };
       this.requestDeleteRegion(data);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableFormGroup.get('headers') as FormArray;

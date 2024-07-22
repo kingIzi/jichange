@@ -22,16 +22,16 @@ export class DistrictService {
   }
   public async getAllDistrictList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        {},
-        HttpDataResponse<District[] | string | number>
-      >(`/api/district/GetdIST`, body)
+      this.client.performPost<{}, HttpDataResponse<District[] | number>>(
+        `/api/district/GetdIST`,
+        body
+      )
     );
     return data;
   }
   public async insertDistrict(body: AddDistrictForm) {
     let data = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<number | string | boolean>>(
+      this.client.performPost<{}, HttpDataResponse<number | District>>(
         `/api/District/AddDistrict`,
         body
       )
@@ -42,7 +42,7 @@ export class DistrictService {
     let data = await lastValueFrom(
       this.client.performPost<
         { userid: number | string; sno: number | string },
-        HttpDataResponse<number | string | boolean>
+        HttpDataResponse<number>
       >(`/api/District/DeleteDist`, body)
     );
     return data;

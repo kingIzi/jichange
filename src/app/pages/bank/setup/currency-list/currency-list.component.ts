@@ -37,9 +37,12 @@ import {
 import { CurrencyTable } from 'src/app/core/enums/bank/setup/currency-table';
 import { RemoveCurrencyForm } from 'src/app/core/models/bank/forms/setup/currency/remove-currency-form';
 import { Currency } from 'src/app/core/models/bank/setup/currency';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CurrencyService } from 'src/app/core/services/bank/setup/currency/currency.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -70,6 +73,10 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -77,21 +84,6 @@ export class CurrencyListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableFormGroup!: FormGroup;
-  // public currenciesData: Currency[] = [];
-  // public currencies: Currency[] = [];
-  public tableData: {
-    currencies: Currency[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Currency>;
-  } = {
-    currencies: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Currency>([]),
-  };
   private userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CurrencyTable: typeof CurrencyTable = CurrencyTable;
@@ -107,6 +99,8 @@ export class CurrencyListComponent implements OnInit {
     private tr: TranslocoService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Currency>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -121,40 +115,34 @@ export class CurrencyListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `currency.currenciesTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`currency.currenciesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -163,63 +151,11 @@ export class CurrencyListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case CurrencyTable.CODE:
-  //       this.currencies.sort((a, b) =>
-  //         a.Currency_Code.toLocaleLowerCase() >
-  //         b.Currency_Code.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case CurrencyTable.NAME:
-  //       this.currencies.sort((a, b) =>
-  //         a.Currency_Name.toLocaleLowerCase() >
-  //         b.Currency_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case CurrencyTable.CODE:
-  //       this.currencies.sort((a, b) =>
-  //         a.Currency_Code.toLocaleLowerCase() <
-  //         b.Currency_Code.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case CurrencyTable.NAME:
-  //       this.currencies.sort((a, b) =>
-  //         a.Currency_Name.toLocaleLowerCase() <
-  //         b.Currency_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Currency,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Currency, filter: string) => {
       return data.Currency_Code &&
         data.Currency_Code.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -233,48 +169,26 @@ export class CurrencyListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Currency>(
-      this.tableData.currencies
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseCurrencyListResponse(
+    result: HttpDataResponse<number | Currency[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Currency[]);
+    }
   }
   private requestCurrencyList() {
-    //this.emptyCurrencyList();
-    this.tableData.currencies = [];
     this.tableLoading = true;
     this.currencyService
       .getCurrencyList({})
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number'
-        // ) {
-        //   this.currenciesData = result.response;
-        //   this.currencies = this.currenciesData;
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
-        if (result.response instanceof Array) {
-          this.tableData.currencies = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.currencies = [];
-        }
-        this.prepareDataSource();
+        this.parseCurrencyListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -289,20 +203,49 @@ export class CurrencyListComponent implements OnInit {
         throw err;
       });
   }
+  private switchRemoveCurrencyErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(
+          `setup.currency.form.dialog.failedToRemoveCurrency`
+        );
+    }
+  }
+  private parseRemoveCurrencyResponse(
+    result: HttpDataResponse<string | number>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchRemoveCurrencyErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex(
+          (item) =>
+            item.Currency_Code.toLocaleLowerCase() ===
+            (result.response as string).toLocaleLowerCase()
+        );
+      this.tableDataService.removedData(index);
+    }
+  }
   private requestRemoveCurrency(form: RemoveCurrencyForm) {
     this.startLoading = true;
     this.currencyService
       .deleteCurrency(form)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          result.response === form.code
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
-          );
-          this.requestCurrencyList();
-        }
+        this.parseRemoveCurrencyResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -356,7 +299,7 @@ export class CurrencyListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.currencies,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -371,9 +314,9 @@ export class CurrencyListComponent implements OnInit {
         currency: null,
       },
     });
-    dialogRef.componentInstance.added.asObservable().subscribe(() => {
-      this.requestCurrencyList();
+    dialogRef.componentInstance.added.asObservable().subscribe((currency) => {
       dialogRef.close();
+      this.tableDataService.addedData(currency);
     });
   }
   editCurrencyForm(currency: Currency) {
@@ -384,9 +327,16 @@ export class CurrencyListComponent implements OnInit {
         currency: currency,
       },
     });
-    dialogRef.componentInstance.added.asObservable().subscribe(() => {
-      this.requestCurrencyList();
+    dialogRef.componentInstance.added.asObservable().subscribe((currency) => {
       dialogRef.close();
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex(
+          (item) =>
+            item.Currency_Code.toLocaleLowerCase() ===
+            currency.Currency_Code.toLocaleLowerCase()
+        );
+      this.tableDataService.editedData(currency, index);
     });
   }
   openRemoveCurrencyDialog(
@@ -402,6 +352,18 @@ export class CurrencyListComponent implements OnInit {
         userid: this.userProfile.Usno,
       } as RemoveCurrencyForm);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableFormGroup.get('headers') as FormArray;

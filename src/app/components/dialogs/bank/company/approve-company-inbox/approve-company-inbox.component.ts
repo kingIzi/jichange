@@ -161,10 +161,12 @@ export class ApproveCompanyInboxComponent implements OnInit {
       .getSuspenseActiveAccountList({})
       .then((result) => {
         if (
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() == 'failed'.toLocaleLowerCase()
         ) {
           this.noSuspenseAccountFoundDilog.nativeElement.showModal();
         } else if (
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() === 'success' &&
           typeof result.response !== 'number' &&
           typeof result.response !== 'string'
@@ -191,7 +193,9 @@ export class ApproveCompanyInboxComponent implements OnInit {
       .getDepositAccountList({})
       .then((result) => {
         if (
-          result.message.toLocaleLowerCase() == 'failed'.toLocaleLowerCase() ||
+          (typeof result.message === 'string' &&
+            result.message.toLocaleLowerCase() ==
+              'failed'.toLocaleLowerCase()) ||
           typeof result.response === 'number'
         ) {
           this.noDepositAccountFound.nativeElement.showModal();

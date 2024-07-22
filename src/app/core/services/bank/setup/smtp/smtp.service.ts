@@ -13,7 +13,7 @@ export class SmtpService {
   constructor(private client: RequestClientService) {}
   public async getAllSmtpList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<SMTP[] | number | string>>(
+      this.client.performPost<{}, HttpDataResponse<SMTP[] | number>>(
         `/api/SMTP/GetSmtpDetails`,
         body
       )
@@ -22,19 +22,19 @@ export class SmtpService {
   }
   public async insertSmtp(body: AddSmtpForm) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        AddSmtpForm,
-        HttpDataResponse<number | string | boolean>
-      >(`/api/SMTP/AddSMTP`, body)
+      this.client.performPost<AddSmtpForm, HttpDataResponse<number | SMTP>>(
+        `/api/SMTP/AddSMTP`,
+        body
+      )
     );
     return data;
   }
   public async deleteSmtp(body: RemoveSmtpForm) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        RemoveSmtpForm,
-        HttpDataResponse<number | string | boolean>
-      >(`/api/SMTP/DeleteSMTP`, body)
+      this.client.performPost<RemoveSmtpForm, HttpDataResponse<number>>(
+        `/api/SMTP/DeleteSMTP`,
+        body
+      )
     );
     return data;
   }

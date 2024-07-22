@@ -3,4 +3,5 @@ export class AddCountryForm {
   dummy!: boolean;
   sno!: number | string;
   AuditBy!: number | string;
+  userid!: number | string;
 }

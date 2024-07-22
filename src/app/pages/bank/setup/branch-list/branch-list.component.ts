@@ -7,6 +7,7 @@ import {
   ChangeDetectorRef,
   ElementRef,
   ChangeDetectionStrategy,
+  InjectionToken,
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import {
@@ -45,13 +46,20 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { BranchTable } from 'src/app/core/enums/bank/setup/branch-table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import {
+  MatTableModule,
+  MatTableDataSource,
+  MatTable,
+} from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import {
   listAnimationMobile,
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-branch-list',
@@ -78,6 +86,10 @@ import {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [
     toggle,
@@ -89,49 +101,28 @@ import {
 export class BranchListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  // public branches: Branch[] = [];
-  // public branchesData: Branch[] = [];
-  public tableData: {
-    branches: Branch[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Branch>;
-  } = {
-    branches: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Branch>([]),
-  };
   public branchHeadersForm!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public BranchTable: typeof BranchTable = BranchTable;
-  // public headersMap = {
-  //   SNO: 0,
-  //   BRANCH: 1,
-  //   LOCATION: 2,
-  //   STATUS: 3,
-  // };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatTable) table!: MatTable<Branch>;
   constructor(
     private dialog: MatDialog,
     private branchService: BranchService,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Branch>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Branch,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Branch, filter: string) => {
       return data.Name &&
         data.Name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
@@ -143,47 +134,24 @@ export class BranchListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Branch>(
-      this.tableData.branches
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseBranchListResponse(result: HttpDataResponse<number | Branch[]>) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Branch[]);
+    }
   }
   private getBranchList() {
-    this.tableData.branches = [];
     this.tableLoading = true;
     this.branchService
       .postBranchList({})
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number'
-        // ) {
-        //   this.branchesData = result.response;
-        //   this.branches = this.branchesData;
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
-        if (result.response instanceof Array) {
-          this.tableData.branches = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.branches = [];
-        }
-        this.prepareDataSource();
+        this.parseBranchListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -204,40 +172,34 @@ export class BranchListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `branch.branchesTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`branch.branchesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -246,23 +208,44 @@ export class BranchListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
+  private switchDeleteBranchErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.branch.failedToDeleteBranch`);
+    }
+  }
+  private parseDeleteBranchResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteBranchErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.branch.form.dialog.removedSuccessfully`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Sno === result.response);
+      this.tableDataService.removedData(index);
     }
   }
   private removeBranch(sno: number) {
-    this.tableLoading = true;
+    this.startLoading = true;
     this.branchService
       .removeBranch(sno)
-      .then((results: any) => {
-        let sal = AppUtilities.sweetAlertSuccessMessage(
-          this.tr.translate(`setup.branch.form.dialog.removedSuccessfully`)
-        );
-        this.getBranchList();
+      .then((result) => {
+        this.parseDeleteBranchResponse(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
@@ -270,57 +253,11 @@ export class BranchListComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.tableLoading = false;
+        this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
   }
-  // private sortTableAsc(ind: number): void {
-  //   switch (ind) {
-  //     case BranchTable.NAME:
-  //       this.branches.sort((a, b) =>
-  //         a.Name.toLocaleLowerCase() > b.Name.toLocaleLowerCase() ? 1 : -1
-  //       );
-  //       break;
-  //     case BranchTable.LOCATION:
-  //       this.branches.sort((a, b) =>
-  //         a.Location.toLocaleLowerCase() > b.Location.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case BranchTable.STATUS:
-  //       this.branches.sort((a, b) =>
-  //         a.Status.toLocaleLowerCase() > b.Status.toLocaleLowerCase() ? 1 : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number): void {
-  //   switch (ind) {
-  //     case BranchTable.NAME:
-  //       this.branches.sort((a, b) =>
-  //         a.Name.toLocaleLowerCase() < b.Name.toLocaleLowerCase() ? 1 : -1
-  //       );
-  //       break;
-  //     case BranchTable.LOCATION:
-  //       this.branches.sort((a, b) =>
-  //         a.Location.toLocaleLowerCase() < b.Location.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     case BranchTable.STATUS:
-  //       this.branches.sort((a, b) =>
-  //         a.Status.toLocaleLowerCase() < b.Status.toLocaleLowerCase() ? 1 : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
   ngOnInit(): void {
     this.createFormHeaders();
     this.getBranchList();
@@ -369,7 +306,7 @@ export class BranchListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.branches,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -381,10 +318,12 @@ export class BranchListComponent implements OnInit {
       width: '600px',
       disableClose: true,
     });
-    dialogRef.componentInstance.addedBranch.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.getBranchList();
-    });
+    dialogRef.componentInstance.addedBranch
+      .asObservable()
+      .subscribe((branch) => {
+        dialogRef.close();
+        this.tableDataService.addedData(branch);
+      });
   }
   openEditBranchForm(branch: Branch) {
     let dialogRef = this.dialog.open(BranchDialogComponent, {
@@ -394,10 +333,15 @@ export class BranchListComponent implements OnInit {
         branch: branch,
       },
     });
-    dialogRef.componentInstance.addedBranch.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.getBranchList();
-    });
+    dialogRef.componentInstance.addedBranch
+      .asObservable()
+      .subscribe((branch) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.Sno === branch.Sno);
+        this.tableDataService.editedData(branch, index);
+      });
   }
   openRemoveDialog(branch: Branch, dialog: RemoveItemDialogComponent) {
     dialog.title = this.tr.translate(`setup.branch.form.dialog.removeBranch`);
@@ -406,6 +350,18 @@ export class BranchListComponent implements OnInit {
     dialog.remove.asObservable().subscribe((e) => {
       this.removeBranch(branch.Sno);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.branchHeadersForm.get(`headers`) as FormArray;

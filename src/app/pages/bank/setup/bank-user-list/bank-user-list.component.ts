@@ -50,6 +50,11 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { DeleteBankUserForm } from 'src/app/core/models/bank/forms/setup/bank-user/delete-bank-user-form';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-bank-user-list',
@@ -75,6 +80,10 @@ import {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -82,19 +91,6 @@ export class BankUserListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  public tableData: {
-    employeeDetails: EmployeeDetail[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<EmployeeDetail>;
-  } = {
-    employeeDetails: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<EmployeeDetail>([]),
-  };
   public branches: Branch[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public EmployeeTable: typeof EmployeeTable = EmployeeTable;
@@ -103,12 +99,15 @@ export class BankUserListComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private bankService: BankService,
     private branchService: BranchService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<EmployeeDetail>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableHeadersFormGroup() {
@@ -120,32 +119,34 @@ export class BankUserListComponent implements OnInit {
     this.tr
       .selectTranslate(`bankUser.bankUserTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -154,7 +155,8 @@ export class BankUserListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
   private requestBranchDetailsList() {
     this.startLoading = true;
@@ -179,11 +181,8 @@ export class BankUserListComponent implements OnInit {
         throw err;
       });
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: EmployeeDetail,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: EmployeeDetail, filter: string) => {
       return data.Full_Name &&
         data.Full_Name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
@@ -195,31 +194,26 @@ export class BankUserListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<EmployeeDetail>(
-      this.tableData.employeeDetails
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseBankDetailsResponse(
+    result: HttpDataResponse<number | EmployeeDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as EmployeeDetail[]);
+    }
   }
   private requestBankDetails() {
     this.tableLoading = true;
     this.bankService
       .postEmployeeDetails({})
       .then((result) => {
-        if (result.response instanceof Array) {
-          this.tableData.employeeDetails = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.employeeDetails = [];
-        }
-        this.prepareDataSource();
+        this.parseBankDetailsResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -253,11 +247,54 @@ export class BankUserListComponent implements OnInit {
     }
     return keys;
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
+  private switchDeleteBankUserErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.bankUser.failedToDeleteBankUser`);
     }
+  }
+  private parseDeleteBankUserResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteBankUserErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.bankUser.removedBankUserSucessfully`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Detail_Id === result.response);
+      this.tableDataService.removedData(index);
+    }
+  }
+  private requestDeleteBankUser(body: DeleteBankUserForm) {
+    this.startLoading = true;
+    this.bankService
+      .deleteEmployeeDetail(body)
+      .then((result) => {
+        this.parseBankDetailsResponse(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
@@ -309,7 +346,7 @@ export class BankUserListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.employeeDetails,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -327,10 +364,12 @@ export class BankUserListComponent implements OnInit {
         Detail_Id: null,
       },
     });
-    dialogRef.componentInstance.added.asObservable().subscribe(() => {
-      this.requestBankDetails();
-      dialogRef.close();
-    });
+    dialogRef.componentInstance.added
+      .asObservable()
+      .subscribe((employeeDetail) => {
+        dialogRef.close();
+        this.tableDataService.addedData(employeeDetail);
+      });
   }
   openEditBankUserForm(employeeDetail: EmployeeDetail) {
     let dialogRef = this.dialog.open(BankUserDialogComponent, {
@@ -340,10 +379,17 @@ export class BankUserListComponent implements OnInit {
         Detail_Id: employeeDetail.Detail_Id,
       },
     });
-    dialogRef.componentInstance.added.asObservable().subscribe(() => {
-      this.requestBankDetails();
-      dialogRef.close();
-    });
+    dialogRef.componentInstance.added
+      .asObservable()
+      .subscribe((employeeDetail) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex(
+            (item) => item.Detail_Id === employeeDetail.Detail_Id
+          );
+        this.tableDataService.editedData(employeeDetail, index);
+      });
   }
   openRemoveDialog(
     employeeDetail: EmployeeDetail,
@@ -353,8 +399,24 @@ export class BankUserListComponent implements OnInit {
     dialog.message = this.tr.translate(`setup.branch.form.dialog.sureDelete`);
     dialog.openDialog();
     dialog.remove.asObservable().subscribe((e) => {
-      console.log(employeeDetail);
+      let body = {
+        sno: employeeDetail.Detail_Id,
+        userid: this.appConfig.getUserIdFromLocalStorage(),
+      };
+      this.requestDeleteBankUser(body);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

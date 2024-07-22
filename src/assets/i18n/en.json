@@ -40,13 +40,17 @@
     "noInternet": "You are offline",
     "connected": "Back online",
     "noDataFound": "No data found",
+    "notFound": "Item not found.",
+    "alreadyExists": "{} already exists.",
     "validDate": "Please select a valid date",
     "contactSupport": "An unexpected error occurred, please try again or contact support.",
     "timeoutError": "Request timed out. Please verify your connection or try again.",
     "invalidForm": "Invalid form",
     "noFilterItemFound": "No data found matching the filter.",
     "unAuthorizedUser": "You need to log in to continue.",
-    "accessDenied": "Access Denied"
+    "accessDenied": "Access Denied",
+    "missingUserIdMessage": "Invalid request. Please contact support.",
+    "serverError": "An error occured on the server."
   },
   "dialogs": {
     "sureSaveChanges": "Are you sure you want to save changes?"

@@ -50,27 +50,6 @@
   <div class="grid grid-cols-2 gap-3 w-full h-full">
     <div class="flex flex-col space-y-1 w-full py-8">
       <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
-        {{ t("currencyName") }} <span class="text-red-600">*</span>
-      </h6>
-      <input
-        *transloco="let t; read: 'setup.currency.form.placeholders'"
-        #currencyNumber
-        [formControl]="cname"
-        type="text"
-        [placeholder]="t('name')"
-        class="input input-bordered w-full max-w-lg bg-transparent text-black"
-      />
-      <span *ngIf="cname && cname.invalid && cname.touched">
-        <p
-          *transloco="let t; read: 'setup.currency.form.errors'"
-          class="text-xs text-red-600"
-        >
-          {{ t("name") }}
-        </p>
-      </span>
-    </div>
-    <div class="flex flex-col space-y-1 w-full py-8">
-      <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
         {{ t("code") }} <span class="text-red-600">*</span>
       </h6>
       <input
@@ -87,6 +66,27 @@
           class="text-xs text-red-600"
         >
           {{ t("code") }}
+        </p>
+      </span>
+    </div>
+    <div class="flex flex-col space-y-1 w-full py-8">
+      <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
+        {{ t("currencyName") }} <span class="text-red-600">*</span>
+      </h6>
+      <input
+        *transloco="let t; read: 'setup.currency.form.placeholders'"
+        #currencyNumber
+        [formControl]="cname"
+        type="text"
+        [placeholder]="t('name')"
+        class="input input-bordered w-full max-w-lg bg-transparent text-black"
+      />
+      <span *ngIf="cname && cname.invalid && cname.touched">
+        <p
+          *transloco="let t; read: 'setup.currency.form.errors'"
+          class="text-xs text-red-600"
+        >
+          {{ t("name") }}
         </p>
       </span>
     </div>

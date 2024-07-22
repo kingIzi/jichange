@@ -13,10 +13,10 @@ export class EmailTextService {
   constructor(private client: RequestClientService) {}
   public async getAllEmailTextList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        {},
-        HttpDataResponse<EmailText[] | number | string>
-      >(`/api/Email/GetEmailDetails`, body)
+      this.client.performPost<{}, HttpDataResponse<EmailText[] | number>>(
+        `/api/Email/GetEmailDetails`,
+        body
+      )
     );
     return data;
   }
@@ -24,17 +24,17 @@ export class EmailTextService {
     let data = await lastValueFrom(
       this.client.performPost<
         AddEmailTextForm,
-        HttpDataResponse<number | string | boolean>
+        HttpDataResponse<number | EmailText>
       >(`/api/Email/AddEmail`, body)
     );
     return data;
   }
   public async deleteEmailText(body: RemoveEmailTextForm) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        RemoveEmailTextForm,
-        HttpDataResponse<number | string | boolean>
-      >(`/api/Email/DeleteEmail`, body)
+      this.client.performPost<RemoveEmailTextForm, HttpDataResponse<number>>(
+        `/api/Email/DeleteEmail`,
+        body
+      )
     );
     return data;
   }

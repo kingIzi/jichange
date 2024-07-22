@@ -13,16 +13,16 @@ export class CurrencyService {
   constructor(private client: RequestClientService) {}
   public async getCurrencyList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        any,
-        HttpDataResponse<Currency[] | string | number>
-      >(`/api/Currency/GetCurrencyDetails`, body)
+      this.client.performPost<any, HttpDataResponse<Currency[] | number>>(
+        `/api/Currency/GetCurrencyDetails`,
+        body
+      )
     );
     return data;
   }
   public async addCurrency(body: AddCurrency) {
     let data = await lastValueFrom(
-      this.client.performPost<any, HttpDataResponse<string>>(
+      this.client.performPost<any, HttpDataResponse<number | Currency>>(
         `/api/Currency/AddCurrency`,
         body
       )
@@ -31,10 +31,10 @@ export class CurrencyService {
   }
   public async deleteCurrency(body: RemoveCurrencyForm) {
     let data = await lastValueFrom(
-      this.client.performPost<any, HttpDataResponse<string>>(
-        `/api/Currency/Deletecurrency`,
-        body
-      )
+      this.client.performPost<
+        RemoveCurrencyForm,
+        HttpDataResponse<string | number>
+      >(`/api/Currency/Deletecurrency`, body)
     );
     return data;
   }

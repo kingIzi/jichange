@@ -38,6 +38,7 @@ import { RegionService } from 'src/app/core/services/bank/setup/region/region.se
 import { CountryService } from 'src/app/core/services/bank/setup/country/country.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddRegionForm } from 'src/app/core/models/bank/forms/setup/region/add-region-form';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-region-dialog',
@@ -64,7 +65,7 @@ export class RegionDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public regionForm!: FormGroup;
   public countries: Country[] = [];
-  public addedRegion = new EventEmitter<any>();
+  public addedRegion = new EventEmitter<Region>();
   public PerformanceUtils: PerformanceUtils = PerformanceUtils;
   public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
@@ -181,25 +182,50 @@ export class RegionDialogComponent implements OnInit {
       );
     }
   }
+  private switchAddRegionErrorRespones(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.region.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing name'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.regionDialog.form.dialog.missingRegion`
+        );
+      case 'Country not found'.toLocaleLowerCase():
+      case 'Missing country sno'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.regionDialog.form.dialog.missingCountry`
+        );
+      default:
+        return this.tr.translate(`setup.wardDialog.failedToAddWard`);
+    }
+  }
+  private parseAddRegionResponse(
+    result: HttpDataResponse<number | Region>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddRegionErrorRespones(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.addedRegion.emit(result.response as Region);
+    }
+  }
   private requestAddRegion(body: AddRegionForm, message: string) {
     this.startLoading = true;
     this.regionService
       .addRegion(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response > 0
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(message);
-          this.addedRegion.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.wardDialog.failedToAddWard`)
-          );
-        }
+        this.parseAddRegionResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

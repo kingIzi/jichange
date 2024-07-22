@@ -34,6 +34,7 @@ import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { Region } from 'src/app/core/models/bank/setup/region';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddDistrictForm } from 'src/app/core/models/bank/forms/setup/district/add-district-form';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-district-dialog',
@@ -61,7 +62,7 @@ export class DistrictDialogComponent implements OnInit {
   public districtForm!: FormGroup;
   public startLoading: boolean = false;
   public regions: Region[] = [];
-  public addedDistrict = new EventEmitter<any>();
+  public addedDistrict = new EventEmitter<District>();
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -85,21 +86,59 @@ export class DistrictDialogComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
+  private switchInsertDistrictErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.district_name.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing district name'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.districtDialog.form.dialog.missingDistrict`
+        );
+      case 'Missing region'.toLocaleLowerCase():
+      case 'Region not found'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.districtDialog.form.dialog.missingRegion`
+        );
+      case 'Missing status'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.districtDialog.form.dialog.missingStatus`
+        );
+      case 'Missing SNO'.toLocaleLowerCase():
+      case 'Missing Dummy'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(`setup.districtDialog.failedToAddDistrict`);
+    }
+  }
+  private parseInsertDistrictResponse(
+    result: HttpDataResponse<number | District>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchInsertDistrictErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.addedDistrict.emit(result.response as District);
+    }
+  }
   private requestInsertDistrict(body: AddDistrictForm, message: string) {
     this.startLoading = true;
     this.districtService
       .insertDistrict(body)
       .then((result) => {
-        if (result.response && typeof result.response !== 'boolean') {
-          let sal = AppUtilities.sweetAlertSuccessMessage(message);
-          this.addedDistrict.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.districtDialog.failedToAddDistrict`)
-          );
-        }
+        this.parseInsertDistrictResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -185,6 +224,7 @@ export class DistrictDialogComponent implements OnInit {
       district_status: this.fb.control('', [Validators.required]),
       userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
+      dummy: this.fb.control(true, []),
     });
   }
   private createEditForm(district: District) {

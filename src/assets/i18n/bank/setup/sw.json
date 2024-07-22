@@ -3,6 +3,9 @@
     "country": "Nchi",
     "searchBy": "Utafutaji kwa nchi",
     "addCountry": "Ongeza Nchi",
+    "countryExists": "Nchi tayari ipo.",
+    "failedToAddCountry": "Imeshindwa kuongeza nchi.",
+    "failedToDeleteCountry": "Imeshindwa kufuta nchi.",
     "form": {
       "placeholders": {
         "name": "Ingiza nchi"
@@ -47,6 +50,7 @@
     "removeRegionSuccessfully": "Mkoa ulioondolewa kwa mafanikio!",
     "addedRegionSuccessfully": "Mkoa ulioongezwa kwa mafanikio!",
     "modifiedReginSuccessfully": "Mkoa limebadilishiwa kwa mafanikio!",
+    "failedToDeleteRegion": "Imeshindwa kufuta eneo.",
     "form": {
       "placeholders": {
         "name": "Ingiza mkoa",
@@ -96,6 +100,7 @@
     "addedDistrictSuccessfully": "Wilaya imeongezwa kwa mafanikio!",
     "modifiedDistrictSuccessfully": "Wilaya imebadilishwa kwa mafanikio!",
     "failedToAddDistrict": "Imeshindwa kuongeza wilaya.",
+    "failedToRemoveDistrict": "Imeshindwa kutoa wilaya.",
     "form": {
       "placeholders": {
         "name": "Wilaya ya Ingiza",
@@ -151,6 +156,7 @@
     "addedWardSuccessfully": "Kata imeongezwa kwa mafanikio!",
     "modifiedWardSuccessfully": "Kata imebadilishwa kwa mafanikio!",
     "failedToAddWard": "Imeshindwa kuongeza kata.",
+    "failedToDeleteWard": "Imeshindwa kukatiza kata.",
     "form": {
       "placeholders": {
         "name": "Ingiza kata",
@@ -221,7 +227,8 @@
         "missingCode": "Tafadhali toa msimbo wa sarafu",
         "missingName": "Tafadhali toa jina la fedha",
         "failedToAddCurrency": "Imeshindwa kuongeza sarafu.",
-        "failedToModifyCurrency": "Imeshindwa kubadilisha sarafu."
+        "failedToModifyCurrency": "Imeshindwa kubadilisha sarafu.",
+        "failedToRemoveCurrency": "Imeshindwa kuondoa sarafu."
       }
     },
     "currenciesTable": [
@@ -292,6 +299,8 @@
     "searchBy": "Tafuta kwa tawi au mahali",
     "branch": "Tawi",
     "location": "Mahali",
+    "exists": "Jina la tawi {} tayari linatumika.",
+    "failedToDeleteBranch": "Imeshindwa kufuta tawi.",
     "form": {
       "placeholders": {
         "branch": "Ingiza jina la tawi",
@@ -532,6 +541,8 @@
     "modifiedBankUserSuccessfully": "Mteja amebadilishwa kwa mafanikio!",
     "failedToAddUser": "Kushindwa kuongeza mteja",
     "failedToModifyUser": "Kushindwa kubadilisha mteja",
+    "removedBankUserSucessfully": "Mtumiaji wa benki aliyefutwa kwa mafanikio!",
+    "failedToDeleteBankUser": "Imeshindwa kufuta mtumiaji wa benki.",
     "form": {
       "employeeId": "Id ya Mfanyakazi",
       "firstName": "Jina la kwanza",
@@ -574,7 +585,8 @@
         "designation": "Tafadhali toa jina",
         "branch": "Tafadhali toa tawi",
         "emailId": "Tafadhali tuma barua pepe",
-        "mobileNo": "Tafadhali toa nambari ya simu"
+        "mobileNo": "Tafadhali toa nambari ya simu",
+        "status": "Tafadhali bainisha hali"
       }
     },
     "bankUserTable": [
@@ -628,6 +640,10 @@
     "addSuspenseAccount": "Ongeza",
     "searchBy": "Tafuta kwa akaunti",
     "suspenseAccount": "Akaunti ya Suspense",
+    "addedSuspenseAccountSuccessfully": "Akaunti ya mashaka iliyoongezwa kwa mafanikio!",
+    "modifiedSuspenseAccountSuccessfully": "Akaunti ya mashaka iliyobadilishwa kwa mafanikio!",
+    "failedToDeleteSuspenseAccount": "Imeshindwa kufuta akaunti ya mashaka!",
+    "deletedAccountSuccessully": "Futa akaunti ya mashaka kwa mafanikio!",
     "form": {
       "placeholders": {
         "suspenseAccount": "Ingiza akaunti ya mashaka"
@@ -640,7 +656,8 @@
         "failed": "Imeshindwa.",
         "suspenseAccount": "Lazima utoe nambari ya akaunti ya mashaka.",
         "missingStatus": "Tafadhali chagua hali.",
-        "failedToAddSuspenseAccount": "Imeshindwa kuongeza akaunti ya mashaka."
+        "failedToAddSuspenseAccount": "Imeshindwa kuongeza akaunti ya mashaka.",
+        "exists": "Namba ya akaunti tayari inatumika."
       }
     },
     "suspenseAccountsTable": [

@@ -34,6 +34,8 @@ import { DistrictService } from 'src/app/core/services/bank/setup/district/distr
 import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddWardForm } from 'src/app/core/models/bank/forms/setup/ward/AddWardForm';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-ward-dialog',
@@ -58,10 +60,10 @@ import { AddWardForm } from 'src/app/core/models/bank/forms/setup/ward/AddWardFo
 })
 export class WardDialogComponent implements OnInit {
   public startLoading: boolean = false;
-  public userProfile!: LoginResponse;
+  //public userProfile!: LoginResponse;
   public wardForm!: FormGroup;
   public districts: District[] = [];
-  public addedWard = new EventEmitter<any>();
+  public addedWard = new EventEmitter<Ward>();
   public PerfomanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -70,6 +72,7 @@ export class WardDialogComponent implements OnInit {
   @ViewChild('confirmAddWard', { static: true })
   confirmAddWard!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<WardDialogComponent>,
     private wardService: WardService,
@@ -81,12 +84,6 @@ export class WardDialogComponent implements OnInit {
       ward: Ward;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private buildPage() {
     this.startLoading = true;
     let countryList = from(this.districtService.getAllDistrictList({}));
@@ -148,6 +145,9 @@ export class WardDialogComponent implements OnInit {
       ward_name: this.fb.control('', [Validators.required]),
       ward_status: this.fb.control('', [Validators.required]),
       dummy: this.fb.control(true, []),
+      userid: this.fb.control(this.appConfig.getUserIdFromLocalStorage(), [
+        Validators.required,
+      ]),
     });
     this.districtChangedEventListener();
   }
@@ -159,6 +159,9 @@ export class WardDialogComponent implements OnInit {
       ward_name: this.fb.control(ward.Ward_Name, [Validators.required]),
       ward_status: this.fb.control(ward.Ward_Status, [Validators.required]),
       dummy: this.fb.control(true, []),
+      userid: this.fb.control(this.appConfig.getUserIdFromLocalStorage(), [
+        Validators.required,
+      ]),
     });
     this.districtChangedEventListener();
   }
@@ -170,21 +173,57 @@ export class WardDialogComponent implements OnInit {
       }
     });
   }
+  private switchInsertWardErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.ward_name.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing ward'.toLocaleUpperCase():
+        return this.tr.translate(`setup.wardDialog.form.dialog.missingWard`);
+      case 'Missing region'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.districtDialog.form.dialog.missingRegion`
+        );
+      case 'Missing district'.toLocaleLowerCase():
+      case 'District not found'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.wardDialog.form.dialog.missingDistrict`
+        );
+      case 'Missing status'.toLocaleLowerCase():
+        return this.tr.translate(`setup.wardDialog.form.dialog.missingStatus`);
+      case 'Missing SNO'.toLocaleLowerCase():
+      case 'Missing user id'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(`setup.wardDialog.failedToAddWard`);
+    }
+  }
+  private parseInsertWardResponse(
+    result: HttpDataResponse<number | Ward>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchInsertWardErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.addedWard.emit(result.response as Ward);
+    }
+  }
   private requestInsertWard(body: AddWardForm, successMessage: string) {
     this.startLoading = true;
     this.wardService
       .insertWard(body)
       .then((result) => {
-        if (result.response && typeof result.response !== 'boolean') {
-          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          this.addedWard.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.wardDialog.failedToAddWard`)
-          );
-        }
+        this.parseInsertWardResponse(result, successMessage);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -200,7 +239,6 @@ export class WardDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildPage();
     if (this.data.ward) {
       this.createEditForm(this.data.ward);

@@ -31,6 +31,7 @@ import { CurrencyService } from 'src/app/core/services/bank/setup/currency/curre
 import { AddCurrency } from 'src/app/core/models/bank/forms/setup/currency/add-currency';
 import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-currency-dialog',
@@ -56,7 +57,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 export class CurrencyDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public currencyForm!: FormGroup;
-  public added = new EventEmitter<any>();
+  public added = new EventEmitter<Currency>();
   private userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -81,26 +82,52 @@ export class CurrencyDialogComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
+  private switchCurrencyErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.cname.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing code'.toLocaleLowerCase():
+        return this.tr.translate(`setup.currency.form.dialog.missingCode`);
+      case 'Missing currency'.toLocaleLowerCase():
+        return this.tr.translate(`setup.currency.form.dialog.missingName`);
+      case 'Missing SNO'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(
+          `setup.currency.form.dialog.failedToAddCurrency`
+        );
+    }
+  }
+  private parseCurrencyResponse(
+    result: HttpDataResponse<number | Currency>,
+    succesMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchCurrencyErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(succesMessage);
+      this.added.emit(result.response as Currency);
+    }
+  }
   private requestModifyCurrency(form: AddCurrency) {
     this.startLoading = true;
     this.currencyService
       .addCurrency(form)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          result.response.toLocaleLowerCase() === '1'.toLocaleLowerCase()
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.currency.modifiedCurrencySuccessfully`)
-          );
-          this.added.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.currency.form.dialog.failedToAddCurrency`)
-          );
-        }
+        let message = this.tr.translate(
+          `setup.currency.modifiedCurrencySuccessfully`
+        );
+        this.parseCurrencyResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -120,22 +147,10 @@ export class CurrencyDialogComponent implements OnInit {
     this.currencyService
       .addCurrency(form)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          result.response.toLocaleLowerCase() ===
-            'Created Successfuly'.toLocaleLowerCase()
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
-          );
-          this.added.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.currency.form.dialog.failedToAddCurrency`)
-          );
-        }
+        let message = this.tr.translate(
+          `setup.currency.createdCurrencySuccessfully`
+        );
+        this.parseCurrencyResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -182,6 +197,7 @@ export class CurrencyDialogComponent implements OnInit {
       sno: this.fb.control(1, [Validators.required]),
       dummy: this.fb.control(true, [Validators.required]),
     });
+    this.code.disable();
   }
   ngOnInit(): void {
     this.parseUserProfile();
@@ -208,6 +224,7 @@ export class CurrencyDialogComponent implements OnInit {
     if (!this.data?.currency) {
       this.requestAddCurrency(this.currencyForm.value);
     } else {
+      this.code.enable();
       this.requestModifyCurrency(this.currencyForm.value);
     }
   }

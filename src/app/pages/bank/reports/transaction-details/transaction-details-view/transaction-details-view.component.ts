@@ -157,6 +157,7 @@ export class TransactionDetailsViewComponent implements OnInit {
   downloadReceipt(payment: TransactionDetail) {
     let dialogRef = this.dialog.open(CustomerReceiptDialogComponent, {
       width: '800px',
+      height: '500px',
       data: {
         payments: [payment],
       },

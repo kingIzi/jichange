@@ -452,7 +452,10 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   }
   resetForm() {
     if (this.generatedInvoice) {
-      this.createEditForm();
+      //location.reload();
+      //this.createEditForm();
+      //this.ngOnInit();
+      this.retrieveQueryParams();
     } else {
       this.createForm();
     }

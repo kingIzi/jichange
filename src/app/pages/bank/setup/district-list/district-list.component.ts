@@ -37,9 +37,12 @@ import {
 import { DistrictTable } from 'src/app/core/enums/bank/setup/district-table';
 import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/district/remove-district-form';
 import { District } from 'src/app/core/models/bank/setup/district';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { DistrictService } from 'src/app/core/services/bank/setup/district/district.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -70,6 +73,10 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -77,19 +84,6 @@ export class DistrictListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public tableData: {
-    districts: District[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<District>;
-  } = {
-    districts: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<District>([]),
-  };
   public tableFormGroup!: FormGroup;
   public DistrictTable: typeof DistrictTable = DistrictTable;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -103,6 +97,8 @@ export class DistrictListComponent implements OnInit {
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
     private districtService: DistrictService,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<District>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -120,29 +116,31 @@ export class DistrictListComponent implements OnInit {
     this.tr
       .selectTranslate(`districtDialog.districtsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -151,13 +149,11 @@ export class DistrictListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: District,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: District, filter: string) => {
       return data.Region_Name &&
         data.Region_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -171,32 +167,26 @@ export class DistrictListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<District>(
-      this.tableData.districts
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseDistrictListResponse(
+    result: HttpDataResponse<number | District[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as District[]);
+    }
   }
   private requestDistrictList() {
-    this.tableData.districts = [];
     this.tableLoading = true;
     this.districtService
       .getAllDistrictList({})
       .then((result) => {
-        if (result.response instanceof Array) {
-          this.tableData.districts = result.response as District[];
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.districts = [];
-        }
-        this.prepareDataSource();
+        this.parseDistrictListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -210,23 +200,42 @@ export class DistrictListComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
+  }
+  private switchDeleteDistrictErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.districtDialog.failedToRemoveDistrict`);
+    }
+  }
+  private parseDeleteDistrictResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteDistrictErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate('setup.districtDialog.deletedDistrictSuccessfully')
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.SNO === result.response);
+      this.tableDataService.removedData(index);
+    }
   }
   private requestDeleteDistrict(body: RemoveDistrictForm) {
     this.startLoading = true;
     this.districtService
       .deleteDistrict(body)
       .then((result) => {
-        if (
-          result.message.toLocaleLowerCase() ==
-          'Successfuly Deleted'.toLocaleLowerCase()
-        ) {
-          let msg = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(
-              'setup.districtDialog.deletedDistrictSuccessfully'
-            )
-          );
-          this.requestDistrictList();
-        }
+        this.parseDeleteDistrictResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -240,12 +249,6 @@ export class DistrictListComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
   }
   ngOnInit(): void {
     this.parseUserProfile();
@@ -296,7 +299,7 @@ export class DistrictListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.districts,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -311,10 +314,12 @@ export class DistrictListComponent implements OnInit {
         district: null,
       },
     });
-    dialogRef.componentInstance.addedDistrict.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestDistrictList();
-    });
+    dialogRef.componentInstance.addedDistrict
+      .asObservable()
+      .subscribe((district) => {
+        dialogRef.close();
+        this.tableDataService.addedData(district);
+      });
   }
   openEditDistrictDialog(district: District) {
     let dialogRef = this.dialog.open(DistrictDialogComponent, {
@@ -324,10 +329,15 @@ export class DistrictListComponent implements OnInit {
         district: district,
       },
     });
-    dialogRef.componentInstance.addedDistrict.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestDistrictList();
-    });
+    dialogRef.componentInstance.addedDistrict
+      .asObservable()
+      .subscribe((district) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.SNO === district.SNO);
+        this.tableDataService.editedData(district, index);
+      });
   }
   openRemoveDialog(district: District, dialog: RemoveItemDialogComponent) {
     dialog.title = this.tr.translate(`setup.districtDialog.removeDistrict`);
@@ -342,6 +352,18 @@ export class DistrictListComponent implements OnInit {
       } as RemoveDistrictForm;
       this.requestDeleteDistrict(body);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableFormGroup.get('headers') as FormArray;

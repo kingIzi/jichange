@@ -44,6 +44,9 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { DeleteSuspenseAccountForm } from 'src/app/core/models/bank/forms/setup/suspense-account/delete-suspense-account-form';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -62,6 +65,7 @@ import {
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    RemoveItemDialogComponent,
   ],
   providers: [
     {
@@ -96,6 +100,7 @@ export class SuspenseAccountListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -200,6 +205,40 @@ export class SuspenseAccountListComponent implements OnInit {
       this.tableData.dataSource.paginator.firstPage();
     }
   }
+  private requestDeleteSuspenseAccount(body: DeleteSuspenseAccountForm) {
+    this.startLoading = true;
+    this.suspenseAccountService
+      .DeleteSuspenseAccountForm(body)
+      .then((result) => {
+        if (result.response === body.sno) {
+          let message = this.tr.translate(
+            `setup.suspenseAccount.deletedAccountSuccessully`
+          );
+          let sal = AppUtilities.sweetAlertSuccessMessage(message);
+          this.requestSuspenseAccountList();
+        } else {
+          AppUtilities.openDisplayMessageBox(
+            this.displayMessageBox,
+            this.tr.translate('defaults.failed'),
+            this.tr.translate(
+              `setup.suspenseAccount.failedToDeleteSuspenseAccount`
+            )
+          );
+        }
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.createHeadersFormGroup();
     this.requestSuspenseAccountList();
@@ -283,6 +322,21 @@ export class SuspenseAccountListComponent implements OnInit {
         dialogRef.close();
         this.requestSuspenseAccountList();
       });
+  }
+  openRemoveDialog(
+    suspenseAccount: SuspenseAccount,
+    dialog: RemoveItemDialogComponent
+  ) {
+    dialog.title = this.tr.translate(`setup.branch.form.dialog.removeBranch`);
+    dialog.message = this.tr.translate(`setup.branch.form.dialog.sureDelete`);
+    dialog.openDialog();
+    dialog.remove.asObservable().subscribe((e) => {
+      let body = {
+        sno: suspenseAccount.Sus_Acc_Sno,
+        userid: this.appConfig.getUserIdFromLocalStorage(),
+      };
+      this.requestDeleteSuspenseAccount(body);
+    });
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

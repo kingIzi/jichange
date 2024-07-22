@@ -39,13 +39,17 @@
     "noInternet": "Wewe ni nje ya mtandao",
     "connected": "Nyuma ya mtandaoni",
     "noDataFound": "Hakuna taarifa iliyopatikana",
+    "notFound": "Kipengee hakijapatikana.",
+    "alreadyExists": "{} tayari ipo.",
     "validDate": "Tafadhali chagua tarehe halali",
     "contactSupport": "Kosa lisilotarajiwa lilitokea, tafadhali jaribu tena au msaada wa mawasiliano.",
     "timeoutError": "Ombi limepitwa na wakati. Tafadhali thibitisha muunganisho wako au jaribu tena.",
     "invalidForm": "Fomu batili",
     "noFilterItemFound": "Hakuna data iliyopatikana inayolingana na kichujio.",
     "unAuthorizedUser": "Unahitaji kuingia ndani ili kuendelea.",
-    "accessDenied": "Ufikiaji Umekataliwa"
+    "accessDenied": "Ufikiaji Umekataliwa",
+    "missingUserIdMessage": "Ombi batili. Tafadhali wasiliana na msaada.",
+    "serverError": "Kosa lilitokea kwenye seva."
   },
   "dialogs": {
     "sureSaveChanges": "Je, una uhakika unataka kuokoa mabadiliko?"

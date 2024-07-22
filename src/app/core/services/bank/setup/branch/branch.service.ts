@@ -12,7 +12,7 @@ export class BranchService {
   constructor(private client: RequestClientService) {}
   public async postBranchList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<Branch[] | number | string>>(
+      this.client.performPost<{}, HttpDataResponse<Branch[] | number>>(
         `/api/Branch/GetBranchLists`,
         body
       )
@@ -21,16 +21,19 @@ export class BranchService {
   }
   public async removeBranch(sno: number) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Branch/DeleteBranch?sno=${sno}`, {})
+      this.client.performPost<{}, HttpDataResponse<number>>(
+        `/api/Branch/DeleteBranch?sno=${sno}`,
+        {}
+      )
     );
     return data;
   }
   public async addBranch(body: AddBranchForm) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        AddBranchForm,
-        HttpDataResponse<number | string | boolean>
-      >(`/api/Branch/AddBranch`, body)
+      this.client.performPost<AddBranchForm, HttpDataResponse<number | Branch>>(
+        `/api/Branch/AddBranch`,
+        body
+      )
     );
     return data;
   }

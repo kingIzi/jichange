@@ -78,7 +78,7 @@
     <ul
       *transloco="let t"
       formArrayName="headers"
-      class="menu menu-horizontal px-1"
+      class="flex flex-row items-center px-1"
     >
       <li
         formGroupName="{{ ind }}"
@@ -88,17 +88,17 @@
         <button
           tabindex="0"
           role="button"
-          class="flex flex-row items-center m-1 tracking-widest text-sm hover:text-neutral-50 focus:text-neutral-50 active:text-neutral-50"
-          [class]="
+          class="flex flex-row items-center m-1 tracking-widest btn btn-sm border-none hover:bg-neutral-900 hover:bg-opacity-5"
+          [ngClass]="
             verifyCurrentRoute(header.get('rootLink')?.value)
-              ? 'text-black bg-darkPurple'
+              ? 'text-black bg-darkPurple hover:text-neutral-50'
               : 'text-neutral-50 bg-transparent'
           "
         >
-          <p class="font-extrabold capitalize">
+          <p class="capitalize">
             {{ header.get("label")?.value }}
           </p>
-          <span class="">
+          <span>
             <i class="bi bi-chevron-down"></i>
           </span>
         </button>

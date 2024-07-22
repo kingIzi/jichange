@@ -45,7 +45,7 @@
       <ul class="flex flex-col space-y-4">
         <li
           *ngFor="
-            let element of tableData.dataSource.filteredData
+            let element of getTableDataSource().filteredData
               | slice
                 : 1 + paginator.pageSize * paginator.pageIndex - 1
                 : 1 +
@@ -54,7 +54,7 @@
                     1;
             index as i
           "
-          [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
+          [@listAnimationDesktop]="getTableDataSource().filteredData.length"
         >
           <div
             class="flex flex-col space-y-1 rounded"
@@ -118,7 +118,7 @@
           *transloco="let t; read: 'errors'"
         >
           <p
-            *ngIf="tableData.emailtexts.length <= 0"
+            *ngIf="getTableDataList().length <= 0"
             class="text-center text-sm tracking-wide p-3"
           >
             {{ t("noDataFound") }}
@@ -137,12 +137,12 @@
       <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
         <div class="overflow-y-auto shadow">
           <ng-container
-            *ngIf="tableData.tableColumns$ | async as displayedColumns"
+            *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
           >
             <table
               mat-table
               matSort
-              [dataSource]="tableData.dataSource"
+              [dataSource]="getTableDataSource()"
               class="mat-elevation-z2 w-full"
             >
               <ng-container
@@ -224,7 +224,7 @@
               <tr
                 mat-row
                 [@listAnimationDesktop]="
-                  tableData.dataSource.filteredData.length
+                  getTableDataSource().filteredData.length
                 "
                 *matRowDef="
                   let row;
@@ -236,12 +236,12 @@
                 <td
                   *transloco="let t; read: 'errors'"
                   class="mat-cell"
-                  [attr.colspan]="tableData.tableColumns.length"
+                  [attr.colspan]="getTableDataColumns().length"
                 >
                   <p
                     *ngIf="
                       tableSearch.value &&
-                      tableData.dataSource.data.length > 0 &&
+                      getTableDataList().length > 0 &&
                       !tableLoading
                     "
                     class="text-xs lg:text-sm py-2 px-4"
@@ -249,9 +249,7 @@
                     {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                   </p>
                   <p
-                    *ngIf="
-                      tableData.dataSource.data.length <= 0 && !tableLoading
-                    "
+                    *ngIf="getTableDataList().length <= 0 && !tableLoading"
                     class="text-center text-sm tracking-wide pt-3 pb-1"
                   >
                     {{ t("noDataFound") }}

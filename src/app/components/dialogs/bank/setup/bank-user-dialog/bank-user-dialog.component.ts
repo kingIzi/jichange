@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -74,11 +75,13 @@ export class BankUserDialogComponent implements OnInit {
   public branches: Branch[] = [];
   public userProfile!: LoginResponse;
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public added = new EventEmitter<any>();
+  public added = new EventEmitter<EmployeeDetail>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddBankUser')
+  confirmAddBankUser!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
@@ -259,66 +262,95 @@ export class BankUserDialogComponent implements OnInit {
       this.createForm();
     }
   }
-  private requestAddBankUser(form: AddBankUserForm) {
-    this.startLoading = true;
-    this.bankService
-      .addEmployeeDetail(form)
-      .then((result) => {
-        console.log(result);
-        if (typeof result.response === 'number' && result.response > 0) {
-          let message = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.bankUser.addedBankUserSuccessfully`)
-          );
-          this.added.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.bankUser.failedToAddUser`)
-          );
-        }
-        this.startLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
-        this.startLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
+  private switchBankUserErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing employee number'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.employeeId`);
+      case 'Missing first name'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.firstName`);
+      case 'Missing last name'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.lastName`);
+      case 'Missing designation'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.designation`);
+      case 'Missing email'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.emailId`);
+      case 'Missing mobile number'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.mobileNo`);
+      case 'Missing username'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.username`);
+      case 'Missing status'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.status`);
+      case 'Missing branch'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.branch`);
+      default:
+        return this.tr.translate(`setup.bankUser.failedToAddUser`);
+    }
   }
-  private requestModifyBankUser(form: AddBankUserForm) {
+  private switchAddBankUserErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'User'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toString()) {
+      case 'Missing employee number'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.employeeId`);
+      case 'Missing first name'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.firstName`);
+      case 'Missing last name'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.lastName`);
+      case 'Missing designation'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.designation`);
+      case 'Missing email'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.emailId`);
+      case 'Missing mobile number'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.mobileNo`);
+      case 'Missing username'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.username`);
+      case 'Missing status'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.status`);
+      case 'Missing branch'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.branch`);
+      case 'Missing SNO'.toLocaleLowerCase():
+      case 'Missing user id'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(`setup.bankUser.failedToAddUser`);
+    }
+  }
+  private parseAddBankUserResponse(
+    result: HttpDataResponse<number | EmployeeDetail>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddBankUserErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.added.emit(result.response as EmployeeDetail);
+    }
+  }
+  private requestAddBankUser(form: AddBankUserForm, successMessage: string) {
     this.startLoading = true;
     this.bankService
       .addEmployeeDetail(form)
       .then((result) => {
-        if (typeof result.response === 'number' && result.response > 0) {
-          let message = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.bankUser.modifiedBankUserSuccessfully`)
-          );
-          message.then(() => {
-            this.added.emit();
-          });
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.bankUser.failedToModifyUser`)
-          );
-        }
+        this.parseAddBankUserResponse(result, successMessage);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        if (err instanceof TimeoutError) {
-          AppUtilities.openTimeoutError(this.displayMessageBox, this.tr);
-        } else {
-          AppUtilities.noInternetError(this.displayMessageBox, this.tr);
-        }
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -332,12 +364,23 @@ export class BankUserDialogComponent implements OnInit {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitBankUserForm() {
-    if (this.bankUserForm.valid && !this.data.Detail_Id) {
-      this.requestAddBankUser(this.bankUserForm.value);
-    } else if (this.bankUserForm.valid && this.data.Detail_Id) {
-      this.requestModifyBankUser(this.bankUserForm.value);
+    if (this.bankUserForm.valid) {
+      this.confirmAddBankUser.nativeElement.showModal();
     } else {
       this.bankUserForm.markAllAsTouched();
+    }
+  }
+  addBankUser() {
+    if (!this.data.Detail_Id) {
+      let message = this.tr.translate(
+        `setup.bankUser.addedBankUserSuccessfully`
+      );
+      this.requestAddBankUser(this.bankUserForm.value, message);
+    } else {
+      let message = this.tr.translate(
+        `setup.bankUser.modifiedBankUserSuccessfully`
+      );
+      this.requestAddBankUser(this.bankUserForm.value, message);
     }
   }
   get empid() {

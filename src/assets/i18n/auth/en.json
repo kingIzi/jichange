@@ -40,6 +40,7 @@
   },
   "vendorRegistration": {
     "title": "Vendor Registration",
+    "failedToRetrieveBranchList": "Failed to retrieve branch list.",
     "form": {
       "vendorName": "Vendor name",
       "mobileNo": "Mobile Number",

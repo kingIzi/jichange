@@ -36,9 +36,12 @@ import {
 import { SmtpTable } from 'src/app/core/enums/bank/setup/smtp-table';
 import { RemoveSmtpForm } from 'src/app/core/models/bank/forms/setup/smtp/remove-smtp';
 import { SMTP } from 'src/app/core/models/bank/setup/smtp';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { SmtpService } from 'src/app/core/services/bank/setup/smtp/smtp.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -68,6 +71,10 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -76,21 +83,6 @@ export class SmtpListComponent implements OnInit {
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  // public smtps: SMTP[] = [];
-  // public smtpsData: SMTP[] = [];
-  public tableData: {
-    smtps: SMTP[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<SMTP>;
-  } = {
-    smtps: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<SMTP>([]),
-  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public SmtpTable: typeof SmtpTable = SmtpTable;
   @ViewChild('displayMessageBox')
@@ -103,6 +95,8 @@ export class SmtpListComponent implements OnInit {
     private tr: TranslocoService,
     private smtpService: SmtpService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<SMTP>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -111,11 +105,8 @@ export class SmtpListComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: SMTP,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: SMTP, filter: string) => {
       return data.SMTP_UName &&
         data.SMTP_UName.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
@@ -127,12 +118,10 @@ export class SmtpListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Effective_Date':
           return new Date(item['Effective_Date']);
@@ -140,42 +129,25 @@ export class SmtpListComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<SMTP>(
-      this.tableData.smtps
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  private parseSmtpListResponse(result: HttpDataResponse<number | SMTP[]>) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as SMTP[]);
+    }
   }
   private requestSmtpList() {
     this.tableLoading = true;
     this.smtpService
       .getAllSmtpList({})
       .then((result) => {
-        // if (
-        //   result.response &&
-        //   typeof result.response !== 'number' &&
-        //   typeof result.response !== 'string'
-        // ) {
-        //   this.smtpsData = result.response;
-        //   this.smtps = this.smtpsData;
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
-        if (result.response instanceof Array) {
-          this.tableData.smtps = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.smtps = [];
-        }
-        this.prepareDataSource();
+        this.parseSmtpListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
+        this.dataSourceSortingAccessor();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -190,27 +162,39 @@ export class SmtpListComponent implements OnInit {
         throw err;
       });
   }
+  private switchDeleteSmtpErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.smtp.failedToRemoveSmtp`);
+    }
+  }
+  private parseDeleteSmtpResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteSmtpErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let m = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.smtp.deletedSmtp`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.SNO === result.response);
+      this.tableDataService.removedData(index);
+    }
+  }
   private requestRemoveSmtp(body: RemoveSmtpForm) {
     this.startLoading = true;
     this.smtpService
       .deleteSmtp(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response == body.sno
-        ) {
-          let m = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.smtp.deletedSmtp`)
-          );
-          this.requestSmtpList();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.smtp.failedToRemoveSmtp`)
-          );
-        }
+        this.parseDeleteSmtpResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -231,47 +215,39 @@ export class SmtpListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `smtp.smtpTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this,
-    //   7,
-    //   true
-    // );
     this.tr
       .selectTranslate(`smtp.smtpTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -280,13 +256,8 @@ export class SmtpListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
   ngOnInit(): void {
     this.parseUserProfile();
@@ -338,7 +309,10 @@ export class SmtpListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.tableData.smtps, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableDataService.getData(),
+          element
+        );
       case 'Effective_Date':
         return new Date(element[key]).toDateString();
       default:
@@ -353,9 +327,9 @@ export class SmtpListComponent implements OnInit {
         smtp: null,
       },
     });
-    dialogRef.componentInstance.addedSmtp.asObservable().subscribe(() => {
+    dialogRef.componentInstance.addedSmtp.asObservable().subscribe((smtp) => {
       dialogRef.close();
-      this.requestSmtpList();
+      this.tableDataService.addedData(smtp);
     });
   }
   openEditSmtpForm(smtp: SMTP) {
@@ -366,9 +340,12 @@ export class SmtpListComponent implements OnInit {
         smtp: smtp,
       },
     });
-    dialogRef.componentInstance.addedSmtp.asObservable().subscribe(() => {
+    dialogRef.componentInstance.addedSmtp.asObservable().subscribe((smtp) => {
       dialogRef.close();
-      this.requestSmtpList();
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.SNO === smtp.SNO);
+      this.tableDataService.editedData(smtp, index);
     });
   }
   openRemoveDialog(smtp: SMTP, dialog: RemoveItemDialogComponent) {
@@ -382,6 +359,18 @@ export class SmtpListComponent implements OnInit {
       };
       this.requestRemoveSmtp(data);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -31,6 +32,7 @@ import { AddEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-tex
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { EmailTextService } from 'src/app/core/services/bank/setup/email-text/email-text.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-email-text-dialog',
@@ -66,12 +68,14 @@ export class EmailTextDialogComponent implements OnInit {
   public emailTextForm!: FormGroup;
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
-  public addedEmailText = new EventEmitter<any>();
+  public addedEmailText = new EventEmitter<EmailText>();
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddEmailText')
+  confirmAddEmailText!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
@@ -148,6 +152,47 @@ export class EmailTextDialogComponent implements OnInit {
       );
     }
   }
+  private switchInsertEmailTextErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Email'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing flow'.toLocaleLowerCase():
+        return this.tr.translate(`setup.emailText.form.dialog.flowId`);
+      case 'Missing text'.toLocaleLowerCase():
+        return this.tr.translate(`setup.emailText.form.dialog.emailText`);
+      case 'Missing text in swahili'.toLocaleLowerCase():
+        return this.tr.translate(`setup.emailText.form.dialog.emailSwahili`);
+      case 'Missing subject'.toLocaleLowerCase():
+        return this.tr.translate(`setup.emailText.form.dialog.subjectEnglish`);
+      case 'Missing subject in swahili'.toLocaleLowerCase():
+        return this.tr.translate(`setup.emailText.form.dialog.subjectSwahili`);
+      default:
+        return this.tr.translate(`setup.emailText.failedToAddEmailText`);
+    }
+  }
+  private parseInsertEmailTextResponse(
+    result: HttpDataResponse<number | EmailText>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchInsertEmailTextErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.addedEmailText.emit(result.response as EmailText);
+    }
+  }
   private requestInsertEmailText(
     body: AddEmailTextForm,
     successMessage: string
@@ -156,16 +201,7 @@ export class EmailTextDialogComponent implements OnInit {
     this.emailTextService
       .insertEmailText(body)
       .then((result) => {
-        if (result.response && typeof result.response !== 'boolean') {
-          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          this.addedEmailText.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.emailText.failedToAddEmailText`)
-          );
-        }
+        this.parseInsertEmailTextResponse(result, successMessage);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -192,18 +228,19 @@ export class EmailTextDialogComponent implements OnInit {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitEmailTextForm() {
-    if (this.emailTextForm.valid && this.data.emailText) {
-      this.requestInsertEmailText(
-        this.emailTextForm.value,
-        this.tr.translate(`setup.emailText.modifiedEmailText`)
-      );
-    } else if (this.emailTextForm.valid && !this.data.emailText) {
-      this.requestInsertEmailText(
-        this.emailTextForm.value,
-        this.tr.translate(`setup.emailText.addedEmailText`)
-      );
+    if (this.emailTextForm.valid) {
+      this.confirmAddEmailText.nativeElement.showModal();
     } else {
       this.emailTextForm.markAllAsTouched();
+    }
+  }
+  addEmailText() {
+    if (this.data?.emailText) {
+      let message = this.tr.translate(`setup.emailText.modifiedEmailText`);
+      this.requestInsertEmailText(this.emailTextForm.value, message);
+    } else {
+      let message = this.tr.translate(`setup.emailText.addedEmailText`);
+      this.requestInsertEmailText(this.emailTextForm.value, message);
     }
   }
   get flow() {

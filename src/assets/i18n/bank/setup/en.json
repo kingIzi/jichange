@@ -3,6 +3,9 @@
     "country": "Country",
     "searchBy": "Search by country",
     "addCountry": "Add Country",
+    "countryExists": "Country already exists.",
+    "failedToAddCountry": "Failed to add country.",
+    "failedToDeleteCountry": "Failed to delete country.",
     "form": {
       "placeholders": {
         "name": "Enter country"
@@ -47,6 +50,7 @@
     "removeRegionSuccessfully": "Removed region successfully!",
     "addedRegionSuccessfully": "Added region successfully!",
     "modifiedReginSuccessfully": "Modified region successfully!",
+    "failedToDeleteRegion": "Failed to delete region.",
     "form": {
       "placeholders": {
         "name": "Enter region",
@@ -97,6 +101,7 @@
     "addedDistrictSuccessfully": "Added district successfully!",
     "modifiedDistrictSuccessfully": "Modified district successfully!",
     "failedToAddDistrict": "Failed to add district.",
+    "failedToRemoveDistrict": "Failed to remove district.",
     "form": {
       "placeholders": {
         "name": "Enter district",
@@ -109,9 +114,9 @@
       },
       "dialog": {
         "invalidForm": "Invalid form",
-        "missingRegion": "Please select a region",
+        "missingRegion": "Please provide a region",
         "missingDistrict": "Please provide a district name",
-        "missingStatus": "Please select a status"
+        "missingStatus": "Please provide a status"
       }
     },
     "districtsTable": [
@@ -152,6 +157,7 @@
     "addedWardSuccessfully": "Added ward successfully!",
     "modifiedWardSuccessfully": "Modified ward successfully!",
     "failedToAddWard": "Failed to add ward.",
+    "failedToDeleteWard": "Failed to delte ward.",
     "form": {
       "placeholders": {
         "name": "Enter ward",
@@ -164,9 +170,9 @@
       },
       "dialog": {
         "invalidForm": "Invalid form",
-        "missingDistrict": "Please select a district",
+        "missingDistrict": "Please povide a district",
         "missingWard": "Please provide a ward name",
-        "missingStatus": "Please select a status"
+        "missingStatus": "Please provide a status"
       }
     },
     "wardsTable": [
@@ -222,7 +228,8 @@
         "missingCode": "Please provide a currency code",
         "missingName": "Please provide the currency name",
         "failedToAddCurrency": "Failed to add currency.",
-        "failedToModifyCurrency": "Failed to modify currency."
+        "failedToModifyCurrency": "Failed to modify currency.",
+        "failedToRemoveCurrency": "Failed to remove currency."
       }
     },
     "currenciesTable": [
@@ -295,6 +302,8 @@
     "searchBy": "Search by branch or location",
     "branch": "Branch",
     "location": "Location",
+    "exists": "The branch name {} is already in use.",
+    "failedToDeleteBranch": "Failed to delete branch.",
     "form": {
       "placeholders": {
         "branch": "Enter branch name",
@@ -309,7 +318,7 @@
         "invalidForm": "Invalid form",
         "missingBranch": "Please provide a branch name",
         "missingLocation": "Please provide a location",
-        "missingStatus": "Please select a status",
+        "missingStatus": "Please provide a status",
         "failedToAddBranch": "Failed to add new branch",
         "addedSuccessfully": "Branch Added successfully!",
         "updated": "Branch modified successfully!",
@@ -407,12 +416,12 @@
       },
       "dialog": {
         "invalidForm": "Invalid form",
-        "fromAddress": "Please provide sender's email",
-        "address": "Please provide an address",
-        "portNumber": "Please provide a port number",
-        "username": "Please provide a username",
-        "password": "Please provide a password",
-        "sslEnable": "You must select a SSL Mode"
+        "fromAddress": "Please provide sender's email.",
+        "address": "Please provide an address.",
+        "portNumber": "Please provide a port number.",
+        "username": "Please provide a username.",
+        "password": "Please provide a password.",
+        "sslEnable": "Please provide a SSL Mode."
       }
     },
     "smtpTable": [
@@ -535,6 +544,8 @@
     "modifiedBankUserSuccessfully": "Modified user successfully!",
     "failedToAddUser": "Failed to add user",
     "failedToModifyUser": "Failed to modify user",
+    "removedBankUserSucessfully": "Deleted bank user successfully!",
+    "failedToDeleteBankUser": "Failed to delete bank user.",
     "form": {
       "employeeId": "Employee Id",
       "firstName": "First name",
@@ -577,7 +588,8 @@
         "designation": "Please provide a designation",
         "branch": "Please provide a branch",
         "emailId": "Please provide a email Id",
-        "mobileNo": "Please provide a mobile number"
+        "mobileNo": "Please provide a mobile number",
+        "status": "Please specify a status"
       }
     },
     "bankUserTable": [
@@ -632,6 +644,9 @@
     "suspenseAccount": "Suspense Account",
     "searchBy": "Search by account",
     "addedSuspenseAccountSuccessfully": "Added suspense account successfully!",
+    "modifiedSuspenseAccountSuccessfully": "Modified suspense account successfully!",
+    "failedToDeleteSuspenseAccount": "Failed to delete suspense account!",
+    "deletedAccountSuccessully": "Delete suspense account successfully!",
     "form": {
       "placeholders": {
         "suspenseAccount": "Enter suspense account"
@@ -644,7 +659,8 @@
         "failed": "Failed.",
         "suspenseAccount": "You must provide a suspense account number.",
         "missingStatus": "Please select a status.",
-        "failedToAddSuspenseAccount": "Failed to add suspense account."
+        "failedToAddSuspenseAccount": "Failed to add suspense account.",
+        "exists": "Account number already in use."
       }
     },
     "suspenseAccountsTable": [

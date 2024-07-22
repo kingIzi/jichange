@@ -196,6 +196,7 @@ export class ProfileComponent implements OnInit {
       .postFetchEmployeeDetail(body)
       .then((result) => {
         if (
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() === 'success'.toLocaleLowerCase()
         ) {
           this.employeeDetail = result.response;
@@ -221,6 +222,7 @@ export class ProfileComponent implements OnInit {
       .changePassword(form)
       .then((result) => {
         if (
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase()
         ) {
           AppUtilities.openDisplayMessageBox(

@@ -73,13 +73,31 @@ export class VendorRegistrationComponent implements OnInit {
     private branchService: BranchService,
     private cdr: ChangeDetectorRef
   ) {}
+  private assignBranchList(
+    result: HttpDataResponse<string | number | Branch[]>
+  ) {
+    if (
+      result.response &&
+      typeof result.response !== 'string' &&
+      typeof result.response !== 'number'
+    ) {
+      this.branchDetails = result.response;
+    } else {
+      this.branchDetails = [];
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`auth.vendorRegistration.failedToRetrieveBranchList`)
+      );
+    }
+  }
   private async fetchBranchList() {
     this.startLoading = true;
     this.branchService
       .postBranchList({})
-      .then((results: any) => {
+      .then((result) => {
+        this.assignBranchList(result);
         this.startLoading = false;
-        this.branchDetails = results.response;
         this.cdr.detectChanges();
       })
       .catch((err) => {

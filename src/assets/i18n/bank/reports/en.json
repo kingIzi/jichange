@@ -2,6 +2,7 @@
   "overview": {
     "overview": "Overview",
     "exportToExcel": "Export to excel",
+    "exportToPdf": "Export to PDF",
     "summary": "Summary",
     "vendorsTableTitle": "Latest transactions",
     "transactions": "Transactions",

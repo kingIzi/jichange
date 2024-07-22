@@ -32,6 +32,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { CountryService } from 'src/app/core/services/bank/setup/country/country.service';
 import { AddCountryForm } from 'src/app/core/models/bank/forms/setup/country/add-country-form';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-country-dialog',
@@ -57,7 +58,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 export class CountryDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public countryForm!: FormGroup;
-  public addedCountry = new EventEmitter<void>();
+  public addedCountry = new EventEmitter<Country>();
   private userProfile = JSON.parse(
     localStorage.getItem('userProfile') as string
   ) as LoginResponse;
@@ -88,6 +89,7 @@ export class CountryDialogComponent implements OnInit {
       Auditby: this.fb.control(this.userProfile.Usno.toString(), [
         Validators.required,
       ]),
+      userid: this.fb.control(this.userProfile.Usno, []),
     });
   }
   private editForm(country: Country) {
@@ -102,6 +104,7 @@ export class CountryDialogComponent implements OnInit {
       Auditby: this.fb.control(this.userProfile.Usno.toString(), [
         Validators.required,
       ]),
+      userid: this.fb.control(this.userProfile.Usno, []),
     });
   }
   private formErrors(errorsPath: string = 'setup.countryDialog.form.dialog') {
@@ -113,19 +116,53 @@ export class CountryDialogComponent implements OnInit {
       );
     }
   }
-  private requestAddCountry(form: AddCountryForm, successMessage: string) {
+  private switchAddCountryErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.country_name.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing user id'.toLocaleLowerCase():
+      case 'Missing Audit By'.toLocaleLowerCase():
+      case 'Missing SNO'.toLocaleLowerCase():
+      case 'Missing dummy'.toLocaleLowerCase():
+      case 'Dummy must be true for country updates.':
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      case 'Missing name':
+        return this.tr.translate(
+          `setup.countryDialog.form.dialog.missingCountry`
+        );
+      default:
+        return this.tr.translate(`setup.countryDialog.failedToAddCountry`);
+    }
+  }
+  private parseAddCountryResponse(
+    result: HttpDataResponse<number | Country>,
+    message: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddCountryErrorMessage(
+        result.message[0].toLocaleLowerCase()
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let m = AppUtilities.sweetAlertSuccessMessage(message);
+      this.addedCountry.emit(result.response as Country);
+    }
+  }
+  private requestAddCountry(form: AddCountryForm, message: string) {
     this.startLoading = true;
     this.countryService
       .addCountry(form)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response > 0
-        ) {
-          let m = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          this.addedCountry.emit();
-        }
+        this.parseAddCountryResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

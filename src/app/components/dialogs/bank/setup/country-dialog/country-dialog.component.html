@@ -62,7 +62,7 @@
         (change)="setCountryValue(controlNumber.value)"
         type="text"
         [placeholder]="t('name')"
-        class="input input-bordered w-full max-w-lg bg-transparent text-black"
+        class="input input-bordered capitalize w-full max-w-lg bg-transparent text-black"
       />
       <span
         *ngIf="country_name && country_name.invalid && country_name.touched"

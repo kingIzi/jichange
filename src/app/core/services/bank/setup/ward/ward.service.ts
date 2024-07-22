@@ -22,7 +22,7 @@ export class WardService {
   }
   public async getAllWardsList(body: {}) {
     let wards = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<Ward[] | string | number>>(
+      this.client.performPost<{}, HttpDataResponse<Ward[] | number>>(
         `/api/Ward/GetWard`,
         body
       )
@@ -31,7 +31,7 @@ export class WardService {
   }
   public async insertWard(body: AddWardForm) {
     let data = await lastValueFrom(
-      this.client.performPost<AddWardForm, HttpDataResponse<number | string>>(
+      this.client.performPost<AddWardForm, HttpDataResponse<number | Ward>>(
         `/api/Ward/AddWard`,
         body
       )
@@ -40,10 +40,10 @@ export class WardService {
   }
   public async deleteWard(body: RemoveWardForm) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        RemoveWardForm,
-        HttpDataResponse<number | string>
-      >(`/api/Ward/DeleteWard`, body)
+      this.client.performPost<RemoveWardForm, HttpDataResponse<number>>(
+        `/api/Ward/DeleteWard`,
+        body
+      )
     );
     return data;
   }

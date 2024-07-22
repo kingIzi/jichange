@@ -74,6 +74,7 @@ export class ConfirmDeliveryCodeComponent implements OnInit {
       .confirmDeliveryCode(body)
       .then((result) => {
         if (
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() === 'success'.toLocaleLowerCase()
         ) {
           let sal = AppUtilities.sweetAlertSuccessMessage(

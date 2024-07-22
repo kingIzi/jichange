@@ -10,6 +10,7 @@ import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Keepalive } from '@ng-idle/keepalive';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+import { HttpDataResponse } from '../core/models/http-data-response';
 
 export class AppUtilities {
   static phoneNumberPrefixRegex: any = /^(?:[67]\d{8}|255\d{9})$/;
@@ -195,7 +196,7 @@ export class AppUtilities {
     dialog: DisplayMessageBoxComponent,
     tr: TranslocoService
   ) {
-    if (err instanceof TimeoutError) {
+    if (err instanceof TimeoutError || err.status === 0) {
       AppUtilities.openTimeoutError(dialog, tr);
     } else if (err.status === 500) {
       AppUtilities.unexpectedErrorOccured(dialog, tr);
@@ -220,5 +221,28 @@ export class AppUtilities {
     router.navigate([path]).then(() => {
       window.history.replaceState(null, '', window.location.href);
     });
+  }
+
+  static hasErrorResult(result: HttpDataResponse<number | any>) {
+    return typeof result.response === 'number' && result.response === 0;
+  }
+
+  static switchGenericSetupErrorMessage(
+    message: string,
+    tr: TranslocoService,
+    exists: string
+  ) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Already exists.'.toLocaleLowerCase():
+        return tr.translate(`errors.alreadyExists`).replace('{}', exists);
+      case 'An error occured on the server.'.toLocaleLowerCase():
+        return tr.translate(`errors.serverError`);
+      case 'No data found.'.toLocaleLowerCase():
+        return tr.translate(`errors.noDataFound`);
+      case 'Not found.'.toLocaleLowerCase():
+        return tr.translate(`errors.notFound`);
+      default:
+        return '';
+    }
   }
 }

@@ -55,6 +55,10 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { Branch } from '@langchain/core/runnables';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-designation-list',
@@ -81,6 +85,10 @@ import {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -88,21 +96,6 @@ export class DesignationListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  // public designations: Designation[] = [];
-  // public designationsData: Designation[] = [];
-  public tableData: {
-    designations: Designation[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Designation>;
-  } = {
-    designations: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Designation>([]),
-  };
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public DesignationTable: typeof DesignationTable = DesignationTable;
@@ -116,6 +109,8 @@ export class DesignationListComponent implements OnInit {
     private fb: FormBuilder,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Designation>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -130,40 +125,35 @@ export class DesignationListComponent implements OnInit {
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
-    // TableUtilities.createHeaders(
-    //   this.tr,
-    //   `designation.designationsTable`,
-    //   this.scope,
-    //   this.headers,
-    //   this.fb,
-    //   this
-    // );
     this.tr
       .selectTranslate(`designation.designationsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -172,85 +162,36 @@ export class DesignationListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  // private sortTableAsc(ind: number) {
-  //   switch (ind) {
-  //     case DesignationTable.NAME:
-  //       this.designations.sort((a, b) =>
-  //         a.Desg_Name.toLocaleLowerCase() > b.Desg_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  // private sortTableDesc(ind: number) {
-  //   switch (ind) {
-  //     case DesignationTable.NAME:
-  //       this.designations.sort((a, b) =>
-  //         a.Desg_Name.toLocaleLowerCase() < b.Desg_Name.toLocaleLowerCase()
-  //           ? 1
-  //           : -1
-  //       );
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Designation,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Designation, filter: string) => {
       return data.Desg_Name &&
         data.Desg_Name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Designation>(
-      this.tableData.designations
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseDesignationListResponse(
+    result: HttpDataResponse<number | Designation[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Designation[]);
+    }
   }
   private requestDesignationList() {
-    this.tableData.designations = [];
     this.tableLoading = true;
     this.designationService
-      .getDesignationList()
+      .getDesignationList({})
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number'
-        // ) {
-        //   this.designationsData = result.response;
-        //   this.designations = this.designationsData;
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        // }
-        // this.tableLoading = false;
-        // this.cdr.detectChanges();
-        if (result.response instanceof Array) {
-          this.tableData.designations = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.designations = [];
-        }
-        this.prepareDataSource();
+        this.parseDesignationListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -265,10 +206,35 @@ export class DesignationListComponent implements OnInit {
         throw err;
       });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
+  private switchDeleteDesignationErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(
+          `setup.designation.form.dialog.failedToAddDesignation`
+        );
+    }
+  }
+  private parseDeleteDesignationResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteDesignationErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.designation.form.dialog.removedSuccessfully`)
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Desg_Id === result.response);
+      this.tableDataService.removedData(index);
     }
   }
   private requestDeleteDesignation(body: RemoveDesignationForm) {
@@ -276,25 +242,7 @@ export class DesignationListComponent implements OnInit {
     this.designationService
       .deleteDesignation(body)
       .then((result) => {
-        if (
-          typeof result.response === 'number' &&
-          result.response == body.sno
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(
-              `setup.designation.form.dialog.removedSuccessfully`
-            )
-          );
-          this.requestDesignationList();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate('defaults.failed'),
-            this.tr.translate(
-              `setup.designation.form.dialog.failedToAddDesignation`
-            )
-          );
-        }
+        this.parseDeleteDesignationResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -347,7 +295,7 @@ export class DesignationListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.designations,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -368,9 +316,9 @@ export class DesignationListComponent implements OnInit {
     });
     dialogRef.componentInstance.addedDesignation
       .asObservable()
-      .subscribe(() => {
+      .subscribe((designation) => {
         dialogRef.close();
-        this.requestDesignationList();
+        this.tableDataService.addedData(designation);
       });
   }
   openEditDesignationDialog(designation: Designation) {
@@ -383,9 +331,12 @@ export class DesignationListComponent implements OnInit {
     });
     dialogRef.componentInstance.addedDesignation
       .asObservable()
-      .subscribe(() => {
+      .subscribe((desg) => {
         dialogRef.close();
-        this.requestDesignationList();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.Desg_Id === designation.Desg_Id);
+        this.tableDataService.editedData(desg, index);
       });
   }
   openRemoveDialog(
@@ -406,6 +357,18 @@ export class DesignationListComponent implements OnInit {
       };
       this.requestDeleteDesignation(body);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

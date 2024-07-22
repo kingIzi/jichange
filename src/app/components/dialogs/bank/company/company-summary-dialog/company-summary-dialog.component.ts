@@ -369,101 +369,6 @@ export class CompanySummaryDialogComponent implements OnInit {
     // this.updateWardList();
     this.addBankDetail();
   }
-  // private formErrors(
-  //   errorsPath: string = 'company.summary.companyForm.dialogs'
-  // ) {
-  //   if (this.compname.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.customer`)
-  //     );
-  //   } else if (this.mob.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.mobileNo`)
-  //     );
-  //   } else if (this.branch.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.branch`)
-  //     );
-  //   } else if (this.check_status.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.makerChecker`)
-  //     );
-  //   } else if (this.fax.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.faxNo`)
-  //     );
-  //   } else if (this.vat.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.vatNo`)
-  //     );
-  //   } else if (this.pbox.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.postBoxNo`)
-  //     );
-  //   } else if (this.addr.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.address`)
-  //     );
-  //   } else if (this.rsno.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.region`)
-  //     );
-  //   } else if (this.dsno.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.district`)
-  //     );
-  //   } else if (this.wsno.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.ward`)
-  //     );
-  //   } else if (this.tin.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.tinNo`)
-  //     );
-  //   } else if (this.dname.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.directorName`)
-  //     );
-  //   } else if (this.telno.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.telephoneNo`)
-  //     );
-  //   } else if (this.email.invalid) {
-  //     AppUtilities.openDisplayMessageBox(
-  //       this.displayMessageBox,
-  //       this.tr.translate(`${errorsPath}.invalidForm`),
-  //       this.tr.translate(`${errorsPath}.emailId`)
-  //     );
-  //   }
-  // }
   private determineAddCompanyErrorMessage(message: string) {
     if (
       message.toLocaleLowerCase() ===
@@ -491,6 +396,7 @@ export class CompanySummaryDialogComponent implements OnInit {
       .addCompany(this.companySummaryForm.value as AddCompany)
       .then((result) => {
         if (
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() === 'failed' &&
           typeof result.response === 'string'
         ) {
@@ -500,7 +406,10 @@ export class CompanySummaryDialogComponent implements OnInit {
             this.tr.translate(`errors.errorOccured`),
             msg
           );
-        } else if (result.message.toLocaleLowerCase() === 'success') {
+        } else if (
+          typeof result.message === 'string' &&
+          result.message.toLocaleLowerCase() === 'success'
+        ) {
           let msg = AppUtilities.sweetAlertSuccessMessage(successMessage);
           this.companyAddedSuccessfully.emit();
         }

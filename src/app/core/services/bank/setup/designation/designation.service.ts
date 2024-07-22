@@ -4,28 +4,28 @@ import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
 import { Designation } from 'src/app/core/models/bank/setup/designation';
+import { AddDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/add-designation-form';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DesignationService {
   constructor(private client: RequestClientService) {}
-  public async getDesignationList() {
+  public async getDesignationList(body: {} = {}) {
     let data = await lastValueFrom(
-      this.client.performGet<HttpDataResponse<Designation[] | number | string>>(
-        `/api/EmployDet/GetdesgDetails`
+      this.client.performPost<{}, HttpDataResponse<Designation[] | number>>(
+        `/api/Designation/GetdesgDetails`,
+        body
       )
     );
     return data;
   }
-  public async addDesignation(form: {
-    desg: string;
-    sno: number;
-    userid: number;
-    dummy: boolean;
-  }) {
+  public async addDesignation(form: AddDesignationForm) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/Designation/Adddesg`, form)
+      this.client.performPost<
+        AddDesignationForm,
+        HttpDataResponse<number | Designation>
+      >(`/api/Designation/Adddesg`, form)
     );
     return data;
   }
@@ -34,10 +34,10 @@ export class DesignationService {
     userid: number | string;
   }) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        RemoveDesignationForm,
-        HttpDataResponse<number | string>
-      >(`/api/Designation/Deletedesg`, body)
+      this.client.performPost<RemoveDesignationForm, HttpDataResponse<number>>(
+        `/api/Designation/Deletedesg`,
+        body
+      )
     );
     return data;
   }

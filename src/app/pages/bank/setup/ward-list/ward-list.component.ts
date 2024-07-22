@@ -39,9 +39,12 @@ import { WardTable } from 'src/app/core/enums/bank/setup/ward-table';
 import { RemoveWardForm } from 'src/app/core/models/bank/forms/setup/ward/RemoveWard';
 import { District } from 'src/app/core/models/bank/setup/district';
 import { Ward } from 'src/app/core/models/bank/setup/ward';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { WardService } from 'src/app/core/services/bank/setup/ward/ward.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -73,6 +76,10 @@ import { BreadcrumbService } from 'xng-breadcrumb';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/setup', alias: 'setup' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -81,19 +88,6 @@ export class WardListComponent implements OnInit {
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  public tableData: {
-    wards: Ward[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Ward>;
-  } = {
-    wards: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Ward>([]),
-  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public WardTable: typeof WardTable = WardTable;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -106,6 +100,8 @@ export class WardListComponent implements OnInit {
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private wardService: WardService,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Ward>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -123,29 +119,31 @@ export class WardListComponent implements OnInit {
     this.tr
       .selectTranslate(`wardDialog.wardsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -154,13 +152,11 @@ export class WardListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Ward,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Ward, filter: string) => {
       return data.Ward_Name &&
         data.Ward_Name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
@@ -172,32 +168,24 @@ export class WardListComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Ward>(
-      this.tableData.wards
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseWardListResponse(result: HttpDataResponse<number | Ward[]>) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Ward[]);
+    }
   }
   private requestWardList() {
-    this.tableData.wards = [];
     this.tableLoading = true;
     this.wardService
       .getAllWardsList({})
       .then((result) => {
-        if (result.response instanceof Array) {
-          this.tableData.wards = result.response;
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.wards = [];
-        }
-        this.prepareDataSource();
+        this.parseWardListResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -212,21 +200,39 @@ export class WardListComponent implements OnInit {
         throw err;
       });
   }
-  private requestDeleteRegion(body: RemoveWardForm) {
+  private switchDeleteWardErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`setup.wardDialog.failedToDeleteWard`);
+    }
+  }
+  private parseDeleteWardResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteWardErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate('setup.wardDialog.deletedWardSuccessfully')
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.SNO === result.response);
+      this.tableDataService.removedData(index);
+    }
+  }
+  private requestDeleteWard(body: RemoveWardForm) {
     this.startLoading = true;
     this.wardService
       .deleteWard(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response == body.sno
-        ) {
-          let msg = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate('setup.wardDialog.deletedWardSuccessfully')
-          );
-          this.requestWardList();
-        }
+        this.parseDeleteWardResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -240,12 +246,6 @@ export class WardListComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
   }
   ngOnInit(): void {
     this.parseUserProfile();
@@ -295,7 +295,10 @@ export class WardListComponent implements OnInit {
   tableValue(element: any, key: string) {
     switch (key) {
       case 'No.':
-        return PerformanceUtils.getIndexOfItem(this.tableData.wards, element);
+        return PerformanceUtils.getIndexOfItem(
+          this.tableDataService.getData(),
+          element
+        );
       default:
         return element[key];
     }
@@ -308,9 +311,9 @@ export class WardListComponent implements OnInit {
         ward: null,
       },
     });
-    dialogRef.componentInstance.addedWard.asObservable().subscribe(() => {
+    dialogRef.componentInstance.addedWard.asObservable().subscribe((ward) => {
       dialogRef.close();
-      this.requestWardList();
+      this.tableDataService.addedData(ward);
     });
   }
   openEditWardForm(ward: Ward) {
@@ -321,9 +324,12 @@ export class WardListComponent implements OnInit {
         ward: ward,
       },
     });
-    dialogRef.componentInstance.addedWard.asObservable().subscribe(() => {
+    dialogRef.componentInstance.addedWard.asObservable().subscribe((ward) => {
       dialogRef.close();
-      this.requestWardList();
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.SNO === ward.SNO);
+      this.tableDataService.editedData(ward, index);
     });
   }
   openRemoveDialog(ward: Ward, dialog: RemoveItemDialogComponent) {
@@ -335,8 +341,20 @@ export class WardListComponent implements OnInit {
         sno: ward.SNO,
         userid: this.userProfile.Usno,
       };
-      this.requestDeleteRegion(data);
+      this.requestDeleteWard(data);
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

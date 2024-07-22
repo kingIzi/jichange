@@ -1,9 +1,10 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnDestroy,
   OnInit,
@@ -62,6 +63,13 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-transaction-details',
@@ -83,8 +91,10 @@ import {
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTableExporterModule,
   ],
   providers: [
+    DatePipe,
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
@@ -127,6 +137,9 @@ export class TransactionDetailsComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('summaryTableContainer', { static: false })
+  summaryTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
@@ -135,6 +148,7 @@ export class TransactionDetailsComponent implements OnInit {
     private branchService: BranchService,
     private reportsService: ReportsService,
     private fileHandler: FileHandlerService,
+    private datePipe: DatePipe,
     private cdr: ChangeDetectorRef,
     private activatedRoute: ActivatedRoute,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -486,6 +500,120 @@ export class TransactionDetailsComponent implements OnInit {
       }
     });
   }
+  private calculatePdfTextWidth(text: string, doc: jsPDF) {
+    let width =
+      (doc.getStringUnitWidth(text) * doc.getFontSize()) /
+      doc.internal.scaleFactor;
+    return width;
+  }
+  private writePdfTitleLabels(
+    doc: jsPDF,
+    titleText: string,
+    branchText: string,
+    vendorText: string,
+    customerText: string,
+    fromText: string,
+    ToText: string
+  ) {
+    let pageWidth = doc.internal.pageSize.getWidth();
+    let titleTextWidth = this.calculatePdfTextWidth(titleText, doc);
+    let xPosition = (pageWidth - titleTextWidth) / 2;
+    let titlePositionY = 10;
+    doc.setFont('helvetica', 'bold');
+    doc.text(titleText, xPosition, titlePositionY);
+
+    doc.setFontSize(10);
+    let branchTextWidth = this.calculatePdfTextWidth(branchText, doc);
+    let branchTextXPosition = branchTextWidth;
+    doc.text(branchText, branchTextXPosition, titlePositionY * 2);
+
+    doc.setFont('helvetica', 'normal');
+    if (this.branch.value === '0') {
+      let branch = this.tr.translate(`defaults.any`);
+      doc.text(branch, branchTextXPosition, titlePositionY * 2.5);
+    } else {
+      let branch = this.filterFormData.branches.find(
+        (b) => b.Branch_Sno === Number(this.branch.value)
+      ) as Branch;
+      doc.text(branch?.Name, branchTextXPosition, titlePositionY * 2.5);
+    }
+
+    doc.setFont('helvetica', 'bold');
+    let vendorTextWidth = this.calculatePdfTextWidth(vendorText, doc);
+    let vendorTextXPosition = (pageWidth - vendorTextWidth) / 2;
+    doc.text(vendorText, vendorTextXPosition, titlePositionY * 2);
+
+    doc.setFont('helvetica', 'normal');
+    if (this.compid.value === 'all') {
+      let vendor = this.tr.translate(`defaults.any`);
+      doc.text(vendor, vendorTextXPosition, titlePositionY * 2.5);
+    } else {
+      let vendor = this.filterFormData.companies.find(
+        (c) => c.CompSno === Number(this.compid.value)
+      ) as Company;
+      doc.text(vendor?.CompName, vendorTextXPosition, titlePositionY * 2.5);
+    }
+
+    doc.setFont('helvetica', 'bold');
+    let customerTextWidth = this.calculatePdfTextWidth(customerText, doc);
+    let cutomerTextXPosition = pageWidth - customerTextWidth;
+    doc.text(customerText, cutomerTextXPosition, titlePositionY * 2, {
+      align: 'right',
+    });
+
+    doc.setFont('helvetica', 'normal');
+    if (this.cusid.value === 'all') {
+      let vendor = this.tr.translate(`defaults.any`);
+      doc.text(vendor, cutomerTextXPosition, titlePositionY * 2.5);
+    } else {
+      let customer = this.filterFormData.customers.find(
+        (c) => c.Cust_Sno === Number(this.cusid.value)
+      ) as Customer;
+      doc.text(
+        customer?.Cust_Name,
+        cutomerTextXPosition,
+        titlePositionY * 2.5,
+        { align: 'right' }
+      );
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.text(fromText, branchTextXPosition, titlePositionY * 3.2);
+    doc.setFont('helvetica', 'normal');
+    if (this.stdate.value === '') {
+      doc.text('-', branchTextXPosition, titlePositionY * 3.6);
+    } else {
+      //let date = this.dateP;
+      //doc.text();
+    }
+
+    doc.text(ToText, cutomerTextXPosition, titlePositionY * 3.2, {
+      align: 'right',
+    });
+  }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate(
+      'reports.transactionDetails.transactionDetails'
+    );
+    let branchText = this.tr.translate(`reports.invoiceDetails.form.branch`);
+    let vendorText = this.tr.translate(`reports.invoiceDetails.form.company`);
+    let customerText = this.tr.translate(
+      `reports.invoiceDetails.form.customer`
+    );
+    let fromText = this.tr.translate(`forms.from`);
+    let toText = this.tr.translate(`forms.to`);
+    let doc = new jsPDF();
+    this.writePdfTitleLabels(
+      doc,
+      titleText,
+      branchText,
+      vendorText,
+      customerText,
+      fromText,
+      toText
+    );
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.createHeadersFormGroup();
@@ -586,12 +714,27 @@ export class TransactionDetailsComponent implements OnInit {
   }
   downloadSheet() {
     if (this.tableData.transactions.length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableData.transactions,
-        this.getActiveTableKeys(),
-        'transaction_details_report',
-        ['Payment_Date']
+      this.exporter.hiddenColumns = [this.tableData.tableColumns.length - 1];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'transactions_details_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
       );
+    }
+  }
+
+  downloadPdf() {
+    if (this.tableData.transactions.length > 0) {
+      let table =
+        this.summaryTableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
@@ -606,15 +749,13 @@ export class TransactionDetailsComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  downloadPdf(ind: number, route: string) {
-    this.router.navigate([route], { queryParams: { download: true } });
-  }
   submitForm() {
     if (this.filterTableFormGroup.valid) {
       let form = {
         ...this.filterTableFormGroup.value,
       } as TransactionDetailsReportForm;
       if (form.stdate) {
+        console.log(this.datePipe.transform(this.stdate.value, 'dd/MM/yyyy'));
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }
       if (form.enddate) {

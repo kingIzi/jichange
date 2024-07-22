@@ -33,6 +33,8 @@
     "dom-to-image": "^2.6.0",
     "file-saver": "^2.0.5",
     "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "mat-table-exporter": "^15.0.0",
     "ng-connection-service": "^9.0.3",
     "ngx-loading": "^16.0.0",
     "pg": "^8.11.3",

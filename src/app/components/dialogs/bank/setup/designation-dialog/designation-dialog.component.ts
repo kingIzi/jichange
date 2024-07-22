@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -29,6 +30,8 @@ import { DesignationService } from 'src/app/core/services/bank/setup/designation
 import { TimeoutError } from 'rxjs';
 import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { AddDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/add-designation-form';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-designation-dialog',
@@ -55,11 +58,13 @@ export class DesignationDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public designationForm!: FormGroup;
   public userProfile!: LoginResponse;
-  public addedDesignation = new EventEmitter<any>();
+  public addedDesignation = new EventEmitter<Designation>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddDesignation')
+  confirmAddDesignation!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DesignationDialogComponent>,
@@ -100,33 +105,52 @@ export class DesignationDialogComponent implements OnInit {
       dummy: this.fb.control(true, [Validators.required]),
     });
   }
-  ngOnInit(): void {
-    this.parseUserProfile();
-    if (this.data.designationData) {
-      this.createEditForm(this.data.designationData);
-    } else {
-      this.createForm();
+  private switchInsertDesignationErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.desg.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing designation'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.designation.form.dialog.missingDesignation`
+        );
+      case 'Missing SNO'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(
+          `setup.designation.form.dialog.failedToAddDesignation`
+        );
     }
   }
-  requestPostDesignation(form: any) {
+  private parseInsertDesignationResponse(
+    result: HttpDataResponse<number | Designation>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchInsertDesignationErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
+      );
+      this.addedDesignation.emit(result.response as Designation);
+    }
+  }
+  private requestInsertDesignation(form: AddDesignationForm, message: string) {
     this.startLoading = true;
     this.designationService
       .addDesignation(form)
-      .then((res: any) => {
-        if (typeof res.response === 'number' && res.response > 0) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`setup.designation.addedDesignationSuccessfully`)
-          );
-          this.addedDesignation.emit();
-        } else if (typeof res.response === 'boolean' && res.response) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`setup.designation.form.dialog.failed`),
-            this.tr.translate(
-              `setup.designation.form.dialog.failedToAddDesignation`
-            )
-          );
-        }
+      .then((result) => {
+        this.parseInsertDesignationResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -141,12 +165,33 @@ export class DesignationDialogComponent implements OnInit {
         throw err;
       });
   }
+  ngOnInit(): void {
+    this.parseUserProfile();
+    if (this.data.designationData) {
+      this.createEditForm(this.data.designationData);
+    } else {
+      this.createForm();
+    }
+  }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
+  addDesignation() {
+    if (!this.data.designationData) {
+      let message = this.tr.translate(
+        `setup.designation.form.dialog.addedSuccessfully`
+      );
+      this.requestInsertDesignation(this.designationForm.value, message);
+    } else {
+      let message = this.tr.translate(
+        `setup.designation.form.dialog.modifiedSuccessfully`
+      );
+      this.requestInsertDesignation(this.designationForm.value, message);
+    }
+  }
   submitDesignationForm() {
     if (this.designationForm.valid) {
-      this.requestPostDesignation(this.designationForm.value);
+      this.confirmAddDesignation.nativeElement.showModal();
     } else {
       this.designationForm.markAllAsTouched();
     }

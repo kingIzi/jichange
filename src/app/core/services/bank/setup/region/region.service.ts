@@ -20,7 +20,7 @@ export class RegionService {
   }
   public async getAllRegionsList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<Region[] | string | number>>(
+      this.client.performPost<{}, HttpDataResponse<Region[] | number>>(
         `/api/Region/GetRegionDetails`,
         body
       )
@@ -31,17 +31,17 @@ export class RegionService {
     let data = await lastValueFrom(
       this.client.performPost<
         { sno: number; userid: number },
-        HttpDataResponse<number | string | boolean>
+        HttpDataResponse<number>
       >(`/api/Region/DeleteRegion`, body)
     );
     return data;
   }
   public async addRegion(body: AddRegionForm) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        AddRegionForm,
-        HttpDataResponse<number | string | boolean>
-      >(`/api/Region/AddRegion`, body)
+      this.client.performPost<AddRegionForm, HttpDataResponse<number | Region>>(
+        `/api/Region/AddRegion`,
+        body
+      )
     );
     return data;
   }

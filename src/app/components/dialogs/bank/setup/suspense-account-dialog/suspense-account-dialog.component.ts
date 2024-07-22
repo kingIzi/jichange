@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -31,6 +32,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
 import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { AddSuspenseAccountForm } from 'src/app/core/models/bank/forms/setup/suspense-account/add-suspense-account-form';
 
 @Component({
   selector: 'app-suspense-account-dialog',
@@ -63,6 +65,8 @@ export class SuspenseAccountDialogComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddSuspenseAccount')
+  confirmAddSuspenseAccount!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
@@ -78,22 +82,22 @@ export class SuspenseAccountDialogComponent implements OnInit {
       this.userProfile = JSON.parse(userProfile) as LoginResponse;
     }
   }
-  private formErrors(errorsPath: string = 'setup.suspenseAccount.form.dialog') {
-    if (this.account.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.suspenseAccount`)
-      );
-    }
-    if (this.status.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.missingStatus`)
-      );
-    }
-  }
+  // private formErrors(errorsPath: string = 'setup.suspenseAccount.form.dialog') {
+  //   if (this.account.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.suspenseAccount`)
+  //     );
+  //   }
+  //   if (this.status.invalid) {
+  //     AppUtilities.openDisplayMessageBox(
+  //       this.displayMessageBox,
+  //       this.tr.translate(`${errorsPath}.invalidForm`),
+  //       this.tr.translate(`${errorsPath}.missingStatus`)
+  //     );
+  //   }
+  // }
   private createForm() {
     this.suspenseAccountForm = this.fb.group({
       account: this.fb.control('', [Validators.required]),
@@ -113,25 +117,44 @@ export class SuspenseAccountDialogComponent implements OnInit {
       dummy: this.fb.control(true, []),
     });
   }
-  private requestPostSuspenseAccount(form: any) {
+  private switchSuspenseAccountResponse(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing account'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.suspenseAccount.form.dialog.suspenseAccount`
+        );
+      case 'Missing status'.toLocaleLowerCase():
+        return this.tr.translate(
+          `setup.suspenseAccount.form.dialog.missingStatus`
+        );
+      case 'Already exists.'.toLocaleLowerCase():
+        return this.tr.translate(`setup.suspenseAccount.form.dialog.exists`);
+      default:
+        return this.tr.translate(
+          `setup.suspenseAccount.form.dialog.failedToAddSuspenseAccount`
+        );
+    }
+  }
+  private requestAddSuspenseAccount(
+    form: AddSuspenseAccountForm,
+    successMessage: string
+  ) {
     this.startLoading = true;
     this.suspenseAccountService
       .addSuspenseAccount(form)
-      .then((res: any) => {
-        if (typeof res.response === 'string' && res.response === 'Exist') {
+      .then((result) => {
+        if (
+          result.response == 0 &&
+          result.message instanceof Array &&
+          result.message.length > 0
+        ) {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
-            this.tr.translate(`setup.suspenseAccount.form.dialog.failed`),
-            this.tr.translate(
-              `setup.suspenseAccount.form.dialog.failedToAddSuspenseAccount`
-            )
+            this.tr.translate(`defaults.warning`),
+            this.switchSuspenseAccountResponse(result.message[0])
           );
-        } else if (typeof res.response === 'string' && res.response === '0') {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(
-              `setup.suspenseAccount.addedSuspenseAccountSuccessfully`
-            )
-          );
+        } else {
+          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
           this.addedSuspenseAccount.emit();
         }
         this.startLoading = false;
@@ -161,9 +184,22 @@ export class SuspenseAccountDialogComponent implements OnInit {
   }
   submitSuspenseAccountForm() {
     if (this.suspenseAccountForm.valid) {
-      this.requestPostSuspenseAccount(this.suspenseAccountForm.value);
+      this.confirmAddSuspenseAccount.nativeElement.showModal();
     } else {
       this.suspenseAccountForm.markAllAsTouched();
+    }
+  }
+  addSuspenseAccount() {
+    if (this.data?.suspenseAccount) {
+      let message = this.tr.translate(
+        `setup.suspenseAccount.addedSuspenseAccountSuccessfully`
+      );
+      this.requestAddSuspenseAccount(this.suspenseAccountForm.value, message);
+    } else {
+      let message = this.tr.translate(
+        `setup.suspenseAccount.addedSuspenseAccountSuccessfully`
+      );
+      this.requestAddSuspenseAccount(this.suspenseAccountForm.value, message);
     }
   }
   get account() {

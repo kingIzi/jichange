@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   NO_ERRORS_SCHEMA,
@@ -62,6 +63,13 @@ import {
   listAnimationMobile,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-summary',
@@ -83,6 +91,7 @@ import {
     MatTableModule,
     MatSortModule,
     MatListModule,
+    MatTableExporterModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -118,6 +127,9 @@ export class SummaryComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('summaryTableContainer', { static: false })
+  summaryTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private dialog: MatDialog,
     private router: Router,
@@ -293,6 +305,26 @@ export class SummaryComponent implements OnInit {
       this.tableData.dataSource.paginator.firstPage();
     }
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let doc = new jsPDF();
+    doc.text('Vendors Summary Table', 13, 15);
+    autoTable(doc, {
+      html: table as HTMLTableElement,
+      margin: {
+        top: 20,
+      },
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit() {
     this.parseUserProfile();
     this.createHeadersFormGroup();
@@ -406,12 +438,34 @@ export class SummaryComponent implements OnInit {
     });
   }
   downloadSheet() {
-    this.fileHandler.downloadExcelTable(
-      this.tableData.companies,
-      this.getTableActiveKeys(),
-      'vendors_summary',
-      ['Posteddate']
-    );
+    if (this.tableData.companies.length > 0) {
+      this.exporter.hiddenColumns = [this.tableData.tableColumns.length - 1];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'vendors_summary',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableData.companies.length > 0) {
+      let table =
+        this.summaryTableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `vendors_summary`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   get headers(): FormArray {
     return this.headersFormGroup.get('headers') as FormArray;

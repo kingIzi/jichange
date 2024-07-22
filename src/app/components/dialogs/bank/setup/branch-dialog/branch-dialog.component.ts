@@ -32,6 +32,7 @@ import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { AddBranchForm } from 'src/app/core/models/bank/forms/setup/branch/add-branch-form';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-branch-dialog',
@@ -58,7 +59,7 @@ import { AddBranchForm } from 'src/app/core/models/bank/forms/setup/branch/add-b
 export class BranchDialogComponent implements OnInit {
   public branchForm!: FormGroup;
   public startLoading: boolean = false;
-  public addedBranch = new EventEmitter<void>();
+  public addedBranch = new EventEmitter<Branch>();
   private userProfile = JSON.parse(
     localStorage.getItem('userProfile') as string
   ) as LoginResponse;
@@ -118,28 +119,53 @@ export class BranchDialogComponent implements OnInit {
       Location: this.fb.control(branch.Location, [Validators.required]),
       Status: this.fb.control(branch.Status, [Validators.required]),
       AuditBy: this.fb.control(this.userProfile.Usno, [Validators.required]),
-      Branch_Sno: this.fb.control(branch.Branch_Sno, [Validators.required]),
+      Branch_Sno: this.fb.control(branch.Sno, [Validators.required]),
     });
   }
-  private addNewBranch(body: AddBranchForm, successMessage: string) {
+  private switchAddNewBranchErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.Name.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing name'.toLocaleLowerCase():
+        return this.tr.translate(`setup.branch.form.dialog.missingBranch`);
+      case 'Missing location'.toLocaleLowerCase():
+        return this.tr.translate(`setup.branch.form.dialog.missingLocation`);
+      case 'Missing status'.toLocaleLowerCase():
+        return this.tr.translate(`setup.branch.form.dialog.missingStatus`);
+      case 'Missing Audit by'.toLocaleLowerCase():
+      case 'Missing Branch sno'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(`setup.branch.form.dialog.failedToAddBranch`);
+    }
+  }
+  private parseAddNewBranchResponse(
+    result: HttpDataResponse<number | Branch>,
+    message: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddNewBranchErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      this.addedBranch.emit(result.response as Branch);
+    }
+  }
+  private addNewBranch(body: AddBranchForm, message: string) {
     this.startLoading = true;
     this.branchService
       .addBranch(body)
       .then((result) => {
-        if (
-          (typeof result.response === 'string' &&
-            Number(result.response) > 0) ||
-          Number(result.response) == 0
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          this.addedBranch.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.branch.form.dialog.failedToAddBranch`)
-          );
-        }
+        this.parseAddNewBranchResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

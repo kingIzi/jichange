@@ -366,7 +366,7 @@ export class DashboardComponent implements OnInit {
     this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.breadcrumbService.set('@dashboard', 'Child One');
-    this.buildPage();
+    //this.buildPage();
   }
   transactionsLatest(): any[] {
     let groupedByDate = this.latestTransactions.reduce((acc, obj) => {

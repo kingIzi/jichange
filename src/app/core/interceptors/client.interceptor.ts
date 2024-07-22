@@ -70,21 +70,10 @@ export const timeoutInterceptor: HttpInterceptorFn = (req, next) => {
     timeout(timeoutDuration),
     catchError((err) => {
       if (err instanceof HttpErrorResponse) {
-        if (err.status === 401) {
+        if (err.status === 401 && appConfig.getLoginResponse()) {
           login
             .logout({ userid: appConfig.getUserIdFromLocalStorage() })
             .then((result) => {
-              // let title = tr.translate('errors.accessDenied');
-              // let message = tr.translate('errors.unAuthorizedUser');
-              // let dialogRef = appConfig.openMessageDialog(title, message);
-              // dialogRef.componentInstance.ok.asObservable().subscribe(() => {
-              //   dialogRef.close();
-              // });
-              // dialogRef.afterClosed().subscribe(() => {
-              //   router.navigate(['/auth']).then((e) => {
-              //     location.reload();
-              //   });
-              // });
               handleUnauthorizedUser(appConfig, router, tr);
             })
             .catch((err) => {

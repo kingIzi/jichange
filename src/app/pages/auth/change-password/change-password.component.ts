@@ -93,6 +93,7 @@ export class ChangePasswordComponent implements OnInit {
       .then((result) => {
         if (
           typeof result.response === 'string' &&
+          typeof result.message === 'string' &&
           result.message.toLocaleLowerCase() === 'Success'.toLocaleLowerCase()
         ) {
           this.router.navigate(['/auth']);

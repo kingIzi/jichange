@@ -20,7 +20,7 @@ export class CountryService {
           sno: number | string;
           userid: number | string;
         },
-        HttpDataResponse<number | string>
+        HttpDataResponse<number>
       >(`/api/Country/DeleteCount`, body)
     );
     return data;
@@ -29,17 +29,17 @@ export class CountryService {
     let data = await lastValueFrom(
       this.client.performPost<
         AddCountryForm,
-        HttpDataResponse<number | string>
+        HttpDataResponse<number | Country>
       >(`/api/Country/AddCountry`, body)
     );
     return data;
   }
   public async getCountryList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        {},
-        HttpDataResponse<Country[] | number | string>
-      >(`/api/Country/getCountries`, body)
+      this.client.performPost<{}, HttpDataResponse<Country[] | number>>(
+        `/api/Country/getCountries`,
+        body
+      )
     );
     return data;
   }

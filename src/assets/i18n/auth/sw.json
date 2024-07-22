@@ -37,6 +37,7 @@
   },
   "vendorRegistration": {
     "title": "Usajili wa Vendor",
+    "failedToRetrieveBranchList": "Imeshindwa kupata orodha ya tawi.",
     "form": {
       "vendorName": "Jina la Vendor",
       "mobileNo": "Nambari ya Simu ya Mkononi",

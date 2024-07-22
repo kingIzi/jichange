@@ -100,6 +100,15 @@
                         <i class="bi bi-pen text-lg text-info"></i>
                       </span>
                     </button>
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      [attr.data-tip]="t('delete')"
+                      class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-bottom"
+                    >
+                      <span>
+                        <i class="bi bi-trash text-lg text-danger-600"></i>
+                      </span>
+                    </button>
                   </div>
                 </div>
               </ng-template>
@@ -185,6 +194,9 @@
                     <div
                       class="flex flex-row items-center justify-end space-x-2"
                     >
+                      <app-remove-item-dialog
+                        #removeItemDialog
+                      ></app-remove-item-dialog>
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('edit')"
@@ -193,6 +205,16 @@
                       >
                         <span>
                           <i class="bi bi-pen text-lg text-info"></i>
+                        </span>
+                      </button>
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        [attr.data-tip]="t('delete')"
+                        class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-bottom"
+                        (click)="openRemoveDialog(element, removeItemDialog)"
+                      >
+                        <span>
+                          <i class="bi bi-trash text-lg text-danger-600"></i>
                         </span>
                       </button>
                     </div>

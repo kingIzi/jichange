@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -30,6 +31,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { AddSmtpForm } from 'src/app/core/models/bank/forms/setup/smtp/add-smtp';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { SmtpService } from 'src/app/core/services/bank/setup/smtp/smtp.service';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-smtp-dialog',
@@ -56,11 +58,12 @@ export class SmtpDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public smtpForm!: FormGroup;
   public userProfile!: LoginResponse;
-  public addedSmtp = new EventEmitter<any>();
+  public addedSmtp = new EventEmitter<SMTP>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddSmtp') confirmAddSmtp!: ElementRef<HTMLDialogElement>;
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
@@ -122,21 +125,53 @@ export class SmtpDialogComponent implements OnInit {
       );
     }
   }
+  private switchInsertSmtpErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Smtp'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing from address'.toLocaleLowerCase():
+        return this.tr.translate(`setup.smtp.form.dialog.fromAddress`);
+      case 'Missing smtp address'.toLocaleLowerCase():
+        return this.tr.translate(`setup.smtp.form.dialog.address`);
+      case 'Missing smtp port'.toLocaleLowerCase():
+        return this.tr.translate(`setup.smtp.form.dialog.portNumber`);
+      case 'Missing smtp username'.toLocaleLowerCase():
+        return this.tr.translate(`setup.smtp.form.dialog.username`);
+      case 'Missing gender'.toLocaleLowerCase():
+        return this.tr.translate(`setup.smtp.form.dialog.sslEnable`);
+      case 'Missing SNO'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      default:
+        return this.tr.translate(`setup.smtp.failedToAddSmtp`);
+    }
+  }
+  private parseInsertSmtpResponse(
+    result: HttpDataResponse<number | SMTP>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchInsertSmtpErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.addedSmtp.emit(result.response as SMTP);
+    }
+  }
   private requestInsertSmtp(body: AddSmtpForm, successMessage: string) {
     this.startLoading = true;
     this.smtpService
       .insertSmtp(body)
       .then((result) => {
-        if (result.response && typeof result.response !== 'boolean') {
-          let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
-          this.addedSmtp.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`setup.smtp.failedToAddSmtp`)
-          );
-        }
+        this.parseInsertSmtpResponse(result, successMessage);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -160,7 +195,7 @@ export class SmtpDialogComponent implements OnInit {
       smtp_address: this.fb.control('', [Validators.required]),
       smtp_port: this.fb.control('', [Validators.required]),
       smtp_uname: this.fb.control('', [Validators.required]),
-      smtp_pwd: this.fb.control('', [Validators.required]),
+      smtp_pwd: this.fb.control('', []),
       gender: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, []),
       userid: this.fb.control(this.userProfile.Usno, []),
@@ -196,19 +231,23 @@ export class SmtpDialogComponent implements OnInit {
     this.dialogRef.close({ data: 'Dialog closed' });
   }
   submitSmtpForm() {
-    if (this.smtpForm.valid && this.data.smtp) {
-      //this.addedSmtp.emit(this.smtpForm.value);
+    if (this.smtpForm.valid) {
+      this.confirmAddSmtp.nativeElement.showModal();
+    } else {
+      this.smtpForm.markAllAsTouched();
+    }
+  }
+  addSmtp() {
+    if (this.data.smtp) {
       this.requestInsertSmtp(
         this.smtpForm.value,
         this.tr.translate(`setup.smtp.modifiedSmtp`)
       );
-    } else if (this.smtpForm.valid && !this.data.smtp) {
+    } else {
       this.requestInsertSmtp(
         this.smtpForm.value,
         this.tr.translate(`setup.smtp.addedSmtp`)
       );
-    } else {
-      this.smtpForm.markAllAsTouched();
     }
   }
   get from_address() {

@@ -339,6 +339,7 @@ export class AddVendorComponent implements OnInit {
     message: string
   ) {
     if (
+      typeof result.message === 'string' &&
       result.message.toLocaleLowerCase() === 'failed' &&
       typeof result.response === 'string'
     ) {
@@ -348,7 +349,10 @@ export class AddVendorComponent implements OnInit {
         this.tr.translate(`defaults.failed`),
         msg
       );
-    } else if (result.message.toLocaleLowerCase() === 'success') {
+    } else if (
+      typeof result.message === 'string' &&
+      result.message.toLocaleLowerCase() === 'success'
+    ) {
       let sal = AppUtilities.sweetAlertSuccessMessage(message);
       this.resetForm();
     }
@@ -494,9 +498,10 @@ export class AddVendorComponent implements OnInit {
   }
   resetForm() {
     if (this.company) {
-      this.company.subscribe((company) => {
-        this.createEditForm(company);
-      });
+      // this.company.subscribe((company) => {
+      //   this.createEditForm(company);
+      // });
+      this.retrieveQueryParams();
     } else {
       this.createForm();
     }

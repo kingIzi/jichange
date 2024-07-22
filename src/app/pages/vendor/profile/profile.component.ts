@@ -201,7 +201,8 @@ export class ProfileComponent implements OnInit {
       .changePassword(form)
       .then((result) => {
         if (
-          result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase()
+          typeof result.message === 'string' &&
+          result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase() //newly updated
         ) {
           AppUtilities.openDisplayMessageBox(
             this.displayMessageBox,
