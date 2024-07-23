@@ -19,7 +19,7 @@ export class InvoiceReportServiceService {
     let data = lastValueFrom(
       this.client.performPost<
         InvoiceReportFormBanker | InvoiceReportFormVendor,
-        HttpDataResponse<InvoiceReport[] | number | string>
+        HttpDataResponse<InvoiceReport[] | number>
       >(`/api/RepCompInvoice/GetInvReport`, body)
     );
     return data;

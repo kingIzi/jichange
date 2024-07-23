@@ -31,7 +31,9 @@
     }
   ],
   "addedCustomerSuccessfully": "Aliongeza wateja kwa mafanikio!",
+  "modifiedCustomerSuccessfully": "Wateja waliobadilishwa kwa mafanikio!",
   "removedCustomerSuccessfully": "Kuondolewa kwa wateja kwa mafanikio!",
+  "failedToRemoveCustomer": "Imeshindwa kuondoa wateja.",
   "form": {
     "customerName": "Jina la Mteja",
     "mobileNo": "Nambari ya Simu",
@@ -62,7 +64,11 @@
       "mobileNo": "Tafadhali toa nambari ya simu sahihi",
       "emailId": "Tafadhali toa anwani sahihi ya barua pepe",
       "failedToAddCustomer": "Imeshindwa kuongeza mteja.",
-      "addFailedCustomerMappedToInvoice": "Huwezi kurekebisha mteja aliyechorwa kwa ankara."
+      "addFailedCustomerMappedToInvoice": "Huwezi kurekebisha mteja aliyechorwa kwa ankara.",
+      "existsName": "Mteja {} tayari yupo.",
+      "existsMobileNumber": "Namba ya simu uliyoingiza tayari inatumika.",
+      "existsTin": "Nambari ya Tin uliyoingiza tayari inatumika.",
+      "existsEmail": "Anwani ya barua pepe uliyoingiza tayari inatumika."
     }
   },
   "customerView": {

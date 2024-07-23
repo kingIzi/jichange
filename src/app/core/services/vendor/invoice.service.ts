@@ -86,7 +86,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         AddInvoiceForm,
-        HttpDataResponse<string | number>
+        HttpDataResponse<GeneratedInvoice | number>
       >(`/api/Invoice/AddInvoice`, body)
     );
     return data;
@@ -95,7 +95,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: string | number },
-        HttpDataResponse<GeneratedInvoice[] | string | number>
+        HttpDataResponse<GeneratedInvoice[] | number>
       >(`/api/Invoice/GetchDetails`, body)
     );
     return data;

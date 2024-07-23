@@ -31,7 +31,9 @@
     }
   ],
   "addedCustomerSuccessfully": "Added customer successfully!",
+  "modifiedCustomerSuccessfully": "Modified customer successfully!",
   "removedCustomerSuccessfully": "Removed customer successfully!",
+  "failedToRemoveCustomer": "Failed to remove customer.",
   "form": {
     "customerName": "Customer name",
     "mobileNo": "Mobile No",
@@ -59,10 +61,14 @@
     "dialog": {
       "invalidForm": "Invalid form",
       "customerName": "Please provide a customer name",
-      "mobileNo": "Please provide a valid mobile number",
+      "mobileNo": "Please provide a mobile number",
       "emailId": "Please provide a valid email Id",
       "failedToAddCustomer": "Failed to add customer.",
-      "addFailedCustomerMappedToInvoice": "You cannot modify a customer mapped to an invoice."
+      "addFailedCustomerMappedToInvoice": "You cannot modify a customer mapped to an invoice.",
+      "existsName": "Customer {} already exists.",
+      "existsMobileNumber": "The mobile number you have entered already in use.",
+      "existsTin": "The Tin number you have entered is already in use.",
+      "existsEmail": "The email address you have entered is already in use."
     }
   },
   "customerView": {

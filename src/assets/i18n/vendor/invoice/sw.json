@@ -73,6 +73,7 @@
       "customer": "Tafadhali eleza mteja",
       "paymentType": "Tafadhali eleza aina ya malipo",
       "maximumItemDetails": "Idadi kubwa ya bidhaa {} imefikiwa.",
+      "missingItemDetails": "Ankara lazima iwe na angalau kitu kimoja.",
       "status": "Unapaswa kutoa hali.",
       "total": "Lazima angalau uongeze kipengee kimoja ili kuongeza ankara.",
       "invoiceRemark": "Lazima ubainishe alama ya ankara.",
@@ -80,7 +81,8 @@
       "addedInvoiceSuccessfully": "Ankara iliyoongezwa kwa mafanikio!",
       "modifiedSuccessfully": "Ankara imebadilika kwa mafanikio!",
       "failedToApproveInvoice": "Imeshindwa kuidhinisha ankara",
-      "invoiceApprovedSuccessfully": "Ankara imeidhinishwa kwa mafanikio"
+      "invoiceApprovedSuccessfully": "Ankara imeidhinishwa kwa mafanikio",
+      "failedToCreateInvoice": "Imeshindwa kuunda ankara."
     }
   },
   "invoiceDetailsTable": [

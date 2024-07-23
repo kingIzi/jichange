@@ -57,6 +57,9 @@ import {
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { DeleteBankUserForm as DeleteCustomerForm } from 'src/app/core/models/bank/forms/setup/bank-user/delete-bank-user-form';
 
 @Component({
   selector: 'app-customers-list',
@@ -86,6 +89,10 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/customer', alias: 'customer' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -93,21 +100,7 @@ export class CustomersListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  //public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public tableData: {
-    customers: Customer[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Customer>;
-  } = {
-    customers: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Customer>([]),
-  };
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -122,54 +115,29 @@ export class CustomersListComponent implements OnInit {
     private customerService: CustomerService,
     private cdr: ChangeDetectorRef,
     private appConfigService: AppConfigService,
-    //private reportService: ReportsService,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Customer>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  // private parseUserProfile() {
-  //   let userProfile = localStorage.getItem('userProfile');
-  //   if (userProfile) {
-  //     this.userProfile = JSON.parse(userProfile) as LoginResponse;
-  //   }
-  // }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Customer,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Customer, filter: string) => {
       return (
         data.Cust_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
         ) || data.Email.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Customer>(
-      this.tableData.customers
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-  }
-  private assignCustomersDataList(
+  private parseRequestCustomerNamesResponse(
     result: HttpDataResponse<string | number | Customer[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.customers = result.response;
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
     } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`customer.noCustomersFound`)
-      );
-      this.tableData.customers = [];
+      this.tableDataService.setData(result.response as Customer[]);
     }
-    this.prepareDataSource();
   }
   private requestCustomerNames() {
     this.tableLoading = true;
@@ -180,7 +148,9 @@ export class CustomersListComponent implements OnInit {
         dist: '0',
       })
       .then((result) => {
-        this.assignCustomersDataList(result);
+        this.parseRequestCustomerNamesResponse(result);
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilterPredicate();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -195,22 +165,41 @@ export class CustomersListComponent implements OnInit {
         throw err;
       });
   }
-  private deleteCustomer(body: { sno: number | string }) {
+  private switchDeleteCustomerErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Not found.'.toLocaleLowerCase():
+        return this.tr.translate(`errors.notFound`);
+      default:
+        return this.tr.translate(`customer.failedToRemoveCustomer`);
+    }
+  }
+  private parseDeleteCustomerResponse(result: HttpDataResponse<number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchDeleteCustomerErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate('customer.removedCustomerSuccessfully')
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Cust_Sno === result.response);
+      this.tableDataService.removedData(index);
+    }
+  }
+  private deleteCustomer(body: DeleteCustomerForm) {
     this.startLoading = true;
     this.customerService
       .deleteCustomer(body)
       .then((result) => {
-        if (
-          result.response &&
-          typeof result.response === 'number' &&
-          result.response.toString().toLocaleLowerCase() ===
-            body.sno.toString().toLocaleLowerCase()
-        ) {
-          let msg = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate('customer.removedCustomerSuccessfully')
-          );
-          this.requestCustomerNames();
-        }
+        this.parseDeleteCustomerResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -234,32 +223,34 @@ export class CustomersListComponent implements OnInit {
     this.tr
       .selectTranslate(`customersTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -268,13 +259,8 @@ export class CustomersListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
   private openAttachCustomerToInvoiceDialog(customerId: number) {
     let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
@@ -317,7 +303,7 @@ export class CustomersListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.customers,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -347,10 +333,12 @@ export class CustomersListComponent implements OnInit {
       width: '800px',
       disableClose: true,
     });
-    dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestCustomerNames();
-    });
+    dialogRef.componentInstance.addedCustomer
+      .asObservable()
+      .subscribe((customer) => {
+        dialogRef.close();
+        this.tableDataService.addedData(customer);
+      });
   }
   openCustomerEditDialog(customer: Customer) {
     let dialogRef = this.dialog.open(CustomersDialogComponent, {
@@ -358,21 +346,42 @@ export class CustomersListComponent implements OnInit {
       data: customer,
       disableClose: true,
     });
-    dialogRef.componentInstance.addedCustomer.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestCustomerNames();
-    });
+    dialogRef.componentInstance.addedCustomer
+      .asObservable()
+      .subscribe((customer) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.Cust_Sno === customer.Cust_Sno);
+        this.tableDataService.editedData(customer, index);
+      });
   }
   openRemoveDialog(id: number, removeClient: RemoveItemDialogComponent) {
     removeClient.title = 'Confirm';
     removeClient.message = 'Are you sure you want to delete this customer?';
     removeClient.openDialog();
     removeClient.remove.asObservable().subscribe((event) => {
-      this.deleteCustomer({ sno: id });
+      let deleteCustomerForm = {
+        sno: id,
+        userid: this.appConfigService.getUserIdFromLocalStorage(),
+      };
+      this.deleteCustomer(deleteCustomerForm);
     });
   }
   encodeCustomerId(customerId: number) {
     return btoa(customerId.toString());
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

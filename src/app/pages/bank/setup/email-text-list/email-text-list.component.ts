@@ -87,6 +87,15 @@ export class EmailTextListComponent implements OnInit {
   public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public EmailTextTable: typeof EmailTextTable = EmailTextTable;
+  public flows: string[] = [
+    'On Registration',
+    'On Invoice Generation',
+    'On Receipt',
+    'On Invoice Cancellation',
+    'On Invoice Ammendent',
+    'On OTP',
+    'On User Registration',
+  ];
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -300,6 +309,8 @@ export class EmailTextListComponent implements OnInit {
         );
       case 'Effective_Date':
         return new Date(element[key]).toDateString();
+      case 'Flow_Id':
+        return this.flows[element[key]];
       default:
         return element[key];
     }

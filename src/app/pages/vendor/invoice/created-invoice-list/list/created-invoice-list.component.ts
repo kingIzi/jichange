@@ -55,7 +55,9 @@ import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -86,6 +88,10 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/invoice', alias: 'invoice' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
@@ -96,19 +102,19 @@ export class CreatedInvoiceListComponent implements OnInit {
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public tableData: {
-    invoiceList: GeneratedInvoice[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<GeneratedInvoice>;
-  } = {
-    invoiceList: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
-  };
+  // public tableData: {
+  //   invoiceList: GeneratedInvoice[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<GeneratedInvoice>;
+  // } = {
+  //   invoiceList: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  // };
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
@@ -124,6 +130,8 @@ export class CreatedInvoiceListComponent implements OnInit {
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
     private activatedRoute: ActivatedRoute,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<GeneratedInvoice>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -141,34 +149,37 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.tr
       .selectTranslate(`createdInvoice.createdInvoiceTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -177,19 +188,17 @@ export class CreatedInvoiceListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: GeneratedInvoice,
-      filter: string
-    ) => {
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: GeneratedInvoice, filter: string) => {
       return (
         data.Chus_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -197,12 +206,10 @@ export class CreatedInvoiceListComponent implements OnInit {
         data.Invoice_No.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -210,38 +217,27 @@ export class CreatedInvoiceListComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.tableData.invoiceList
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  private parseCreatedInvoiceDataListResponse(
+    result: HttpDataResponse<number | GeneratedInvoice[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as GeneratedInvoice[]);
+    }
   }
   private assignCreatedInvoiceDataList(
-    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+    result: HttpDataResponse<number | GeneratedInvoice[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.invoiceList = result.response;
-    } else {
-      this.tableData.invoiceList = [];
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`invoice.noInvoices`)
-      );
-    }
-    this.prepareDataSource();
+    this.parseCreatedInvoiceDataListResponse(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilterPredicate();
+    this.dataSourceSortingAccessor();
   }
   private requestCreatedInvoiceList() {
-    this.tableData.invoiceList = [];
     this.tableLoading = true;
     this.invoiceService
       .getCreatedInvoiceList({ compid: this.userProfile.InstID })
@@ -251,7 +247,6 @@ export class CreatedInvoiceListComponent implements OnInit {
         this.cdr.detectChanges();
       })
       .catch((err) => {
-        this.tableData.invoiceList = [];
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
@@ -264,7 +259,7 @@ export class CreatedInvoiceListComponent implements OnInit {
   }
   private prepareInvoiceFormGroup() {
     let form = this.fb.group({
-      user_id: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
       compid: this.fb.control(this.userProfile.InstID.toString(), [
         Validators.required,
       ]),
@@ -376,19 +371,65 @@ export class CreatedInvoiceListComponent implements OnInit {
       this.tr.translate(`invoice.form.dialog.invoiceExists`)
     );
   }
+  private switchAddInvoiceErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Invoice'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Invoice Number is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceNo');
+      case 'Invoice Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceDate');
+      case 'Invoice Expiry Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceExpire');
+      case 'Invoice Due Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.dueDate');
+      case 'Payment Type is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.paymentType');
+      case 'Customer Id is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.customer');
+      case 'Invoice Details is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.customer');
+      case 'Comp ID is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.customer');
+      default:
+        return this.tr.translate('invoice.form.dialog.failedToApproveInvoice');
+    }
+  }
+  private parseAddInvoiceResponse(
+    result: HttpDataResponse<number | GeneratedInvoice>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddInvoiceErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate('invoice.form.dialog.invoiceApprovedSuccessfully')
+      );
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex(
+          (item) =>
+            item.Inv_Mas_Sno ===
+            (result.response as GeneratedInvoice).Inv_Mas_Sno
+        );
+      this.tableDataService.removedData(index);
+    }
+  }
   private requestAddInvoiceForm(value: AddInvoiceForm) {
     this.startLoading = true;
     this.invoiceService
       .addInvoice(value)
-      .then((results: any) => {
-        if (results.response === 0 || results.response === 'EXIST') {
-          this.failedToApproveInvoice();
-        } else {
-          let m = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate('invoice.form.dialog.invoiceApprovedSuccessfully')
-          );
-          this.requestCreatedInvoiceList();
-        }
+      .then((results) => {
+        this.parseAddInvoiceResponse(results);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -464,7 +505,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.invoiceList,
+          this.tableDataService.getData(),
           element
         );
       case 'Invoice_Date':
@@ -565,19 +606,6 @@ export class CreatedInvoiceListComponent implements OnInit {
   }
   //opens invoice details for editing
   openEditInvoiceDialog(generatedInvoice: GeneratedInvoice) {
-    // let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
-    //   width: '800px',
-    //   disableClose: true,
-    //   data: {
-    //     invid: generatedInvoice.Inv_Mas_Sno,
-    //     userProfile: this.userProfile,
-    //     customerId: null,
-    //   },
-    // });
-    // dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
-    //   dialogRef.close();
-    //   this.requestCreatedInvoiceList();
-    // });
     this.router.navigate(['/vendor/invoice/list/add'], {
       queryParams: { invno: btoa(generatedInvoice.Inv_Mas_Sno.toString()) },
     });
@@ -646,6 +674,18 @@ export class CreatedInvoiceListComponent implements OnInit {
       return 'Done';
     }
     return '-';
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get(`headers`) as FormArray;

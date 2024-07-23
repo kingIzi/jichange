@@ -54,6 +54,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { TableDataService } from 'src/app/core/services/table-data.service';
 
 @Component({
   selector: 'app-customer-view',
@@ -63,6 +65,10 @@ import {
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/customer', alias: 'customer' },
+    },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
     },
   ],
   standalone: true,
@@ -87,19 +93,6 @@ export class CustomerViewComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public customer!: Customer;
-  public tableData: {
-    invoiceReports: InvoiceReport[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<InvoiceReport>;
-  } = {
-    invoiceReports: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<InvoiceReport>([]),
-  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headerFormGroup!: FormGroup;
   public userProfile!: LoginResponse;
@@ -116,6 +109,8 @@ export class CustomerViewComponent implements OnInit {
     private dialog: MatDialog,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private parseUserProfile() {
@@ -133,34 +128,37 @@ export class CustomerViewComponent implements OnInit {
     this.tr
       .selectTranslate(`customerView.customerInvoicesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -169,23 +167,19 @@ export class CustomerViewComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: InvoiceReport,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: InvoiceReport, filter: string) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -193,15 +187,17 @@ export class CustomerViewComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<InvoiceReport>(
-      this.tableData.invoiceReports
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  private parseInvoiceReportDataList(
+    result: HttpDataResponse<number | InvoiceReport[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as InvoiceReport[]);
+    }
   }
   private assignViewingCustomer(
     result: HttpDataResponse<string | number | Customer>
@@ -217,19 +213,12 @@ export class CustomerViewComponent implements OnInit {
     }
   }
   private assignInvoiceReportDataList(
-    result: HttpDataResponse<string | number | InvoiceReport[]>
+    result: HttpDataResponse<number | InvoiceReport[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.invoiceReports = result.response;
-    } else {
-      this.tableData.invoiceReports = [];
-    }
-    this.prepareDataSource();
+    this.parseInvoiceReportDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilterPredicate();
+    this.dataSourceSortingAccessor();
   }
   private buildPage(customerId: string) {
     this.startLoading = true;
@@ -293,12 +282,6 @@ export class CustomerViewComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.customerViewTable(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
   ngOnInit(): void {
     this.parseUserProfile();
     this.buildFormHeaders();
@@ -313,7 +296,7 @@ export class CustomerViewComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.invoiceReports,
+          this.tableDataService.getData(),
           element
         );
       case 'Invoice_Date':
@@ -422,6 +405,18 @@ export class CustomerViewComponent implements OnInit {
       default:
         return `${style}`;
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.headerFormGroup.get('headers') as FormArray;

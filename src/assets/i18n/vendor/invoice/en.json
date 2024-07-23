@@ -75,9 +75,10 @@
       "invoiceDate": "Please specify the invoice date",
       "dueDate": "Please specify the invoice due date",
       "invoiceExpire": "Please specify the invoice expiry date",
-      "customer": "Please specify a customer",
+      "customer": "Please pick a customer",
       "paymentType": "Please specify a payment type",
       "maximumItemDetails": "Maximum number of items {} reached.",
+      "missingItemDetails": "Invoice must have at least one item.",
       "status": "You must specify a status.",
       "currency": "You must specify a currency.",
       "company": "You must specify a company.",
@@ -87,7 +88,8 @@
       "addedInvoiceSuccessfully": "Added invoice successfully!",
       "modifiedSuccessfully": "Invoice modified successfully!",
       "failedToApproveInvoice": "Failed to approve invoice",
-      "invoiceApprovedSuccessfully": "Invoice successfully approved"
+      "invoiceApprovedSuccessfully": "Invoice successfully approved",
+      "failedToCreateInvoice": "Failed to create invoice."
     }
   },
   "cancelledInvoiceTable": [

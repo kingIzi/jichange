@@ -199,21 +199,51 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
       this.formData.currencies = of([]);
     }
   }
-  private assignAddInvoiceResponse(result: HttpDataResponse<string | number>) {
-    if (
-      result.response &&
-      typeof result.response === 'number' &&
-      result.response > 0
-    ) {
-      let message = this.generatedInvoice
-        ? `invoice.form.dialog.modifiedSuccessfully`
-        : `invoice.form.dialog.addedInvoiceSuccessfully`;
+  private switchAddInvoiceErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.invno.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Invoice Number is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceNo');
+      case 'Invoice Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceDate');
+      case 'Invoice Expiry Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceExpire');
+      case 'Invoice Due Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.dueDate');
+      case 'Payment Type is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.paymentType');
+      case 'Customer Id is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.customer');
+      case 'Invoice Details is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.customer');
+      case 'Comp ID is missing'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.customer');
+      default:
+        return this.tr.translate('invoice.form.dialog.failedToCreateInvoice');
+    }
+  }
+  private parseAddInvoiceResponse(
+    result: HttpDataResponse<GeneratedInvoice | number>,
+    message: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddInvoiceErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
       let sal = AppUtilities.sweetAlertSuccessMessage(
         this.tr.translate(message)
       );
       this.resetForm();
-    } else {
-      this.invoiceFormExistsMessage();
     }
   }
   private createEditForm() {
@@ -304,7 +334,10 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     this.invoiceService
       .addInvoice(body)
       .then((result) => {
-        this.assignAddInvoiceResponse(result);
+        let message = this.generatedInvoice
+          ? `invoice.form.dialog.modifiedSuccessfully`
+          : `invoice.form.dialog.addedInvoiceSuccessfully`;
+        this.parseAddInvoiceResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -390,9 +423,9 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     if (this.generatedInvoice) {
       let form = { ...this.invoiceDetailsForm.value };
       form.invno = this.invno.value;
-      form.date = this.datePipe.transform(this.date.value, 'MM/dd/yyyy');
-      form.edate = this.datePipe.transform(this.edate.value, 'MM/dd/yyyy');
-      form.iedate = this.datePipe.transform(this.iedate.value, 'MM/dd/yyyy');
+      form.date = new Date(this.date.value).toISOString(); //this.datePipe.transform(this.date.value, 'MM/dd/yyyy');
+      form.edate = new Date(this.edate.value).toISOString(); //this.datePipe.transform(this.edate.value, 'MM/dd/yyyy');
+      form.iedate = new Date(this.iedate.value).toISOString(); //this.datePipe.transform(this.iedate.value, 'MM/dd/yyyy');
       this.requestAddInvoiceForm(form);
     } else {
       this.requestAddInvoiceForm(this.invoiceDetailsForm.value);
@@ -452,9 +485,6 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   }
   resetForm() {
     if (this.generatedInvoice) {
-      //location.reload();
-      //this.createEditForm();
-      //this.ngOnInit();
       this.retrieveQueryParams();
     } else {
       this.createForm();

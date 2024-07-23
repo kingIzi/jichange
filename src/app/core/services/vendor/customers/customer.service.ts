@@ -5,6 +5,7 @@ import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { CustomerReportForm } from 'src/app/core/models/vendors/forms/customer-report-form';
+import { DeleteBankUserForm as DeleteCustomerForm } from 'src/app/core/models/bank/forms/setup/bank-user/delete-bank-user-form';
 
 @Injectable({
   providedIn: 'root',
@@ -15,16 +16,16 @@ export class CustomerService {
     let data = await lastValueFrom(
       this.client.performPost<
         AddCustomerForm,
-        HttpDataResponse<number | string | boolean>
+        HttpDataResponse<number | Customer>
       >(`/api/Customer/AddCustomer`, body)
     );
     return data;
   }
-  public async deleteCustomer(body: { sno: number | string }) {
+  public async deleteCustomer(body: DeleteCustomerForm) {
     let data = await lastValueFrom(
       this.client.performPost<
         { sno: number | string },
-        HttpDataResponse<number | string | boolean>
+        HttpDataResponse<number>
       >(`/api/Customer/DeleteCust`, body)
     );
     return data;

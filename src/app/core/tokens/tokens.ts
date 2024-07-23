@@ -11,6 +11,8 @@ import { SMTP } from '../models/bank/setup/smtp';
 import { EmailText } from '../models/bank/setup/email-text';
 import { EmployeeDetail } from '../models/bank/setup/employee-detail';
 import { SuspenseAccount } from '../models/bank/setup/suspense-account';
+import { Customer as VendorCustomer } from 'src/app/core/models/vendors/customer';
+import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -27,3 +29,7 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | SuspenseAccount
   >
 >('TABLE_DATA_SERVICE');
+
+export const VENDOR_TABLE_DATA_SERVICE = new InjectionToken<
+  TableDataService<VendorCustomer | InvoiceReport>
+>('VENDOR_TABLE_DATA_SERVICE');

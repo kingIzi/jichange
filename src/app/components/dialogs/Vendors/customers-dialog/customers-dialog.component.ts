@@ -33,6 +33,7 @@ import { LoginResponse } from 'src/app/core/models/login-response';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { AddCustomerForm } from 'src/app/core/models/vendors/forms/add-customer-form';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-customers-dialog',
@@ -61,8 +62,7 @@ export class CustomersDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public userProfile!: LoginResponse;
   public customerForm!: FormGroup;
-  //public attachInvoice = new EventEmitter<number>();
-  public addedCustomer = new EventEmitter<void>();
+  public addedCustomer = new EventEmitter<Customer>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -152,35 +152,61 @@ export class CustomersDialogComponent implements OnInit {
       check_status: this.fb.control(''),
     });
   }
-  private requestAddCustomer(body: AddCustomerForm) {
+  private switchAddCustomerErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.CName.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing Company Id'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      case 'Missing Customer name'.toLocaleLowerCase():
+        return this.tr.translate('customer.form.dialog.customerName');
+      case 'Missing Mobile Number'.toLocaleLowerCase():
+        return this.tr.translate('customer.form.dialog.mobileNo');
+      case 'Exists name'.toLocaleLowerCase():
+        return this.tr
+          .translate('customer.form.dialog.existsName')
+          .replace('{}', this.CName.value);
+      case 'Exists phone'.toLocaleLowerCase():
+        return this.tr.translate('customer.form.dialog.existsMobileNumber');
+      case 'Exists tin'.toLocaleLowerCase():
+        return this.tr.translate('customer.form.dialog.existsTin');
+      case 'Exists email'.toLocaleLowerCase():
+        return this.tr.translate('customer.form.dialog.existsEmail');
+      case 'Customer has invoice'.toLocaleLowerCase():
+        return this.tr.translate(
+          `customer.form.dialog.addFailedCustomerMappedToInvoice`
+        );
+      default:
+        return this.tr.translate(`customer.form.dialog.failedToAddCustomer`);
+    }
+  }
+  private parseAddCustomerResponse(
+    result: HttpDataResponse<number | Customer>,
+    successMessage: string
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddCustomerErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      this.addedCustomer.emit(result.response as Customer);
+    }
+  }
+  private requestAddCustomer(body: AddCustomerForm, successMessage: string) {
     this.startLoading = true;
     this.customerService
       .addCustomer(body)
       .then((result) => {
-        if (typeof result.response === 'boolean') {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`customer.form.dialog.failedToAddCustomer`)
-          );
-        } else if (
-          typeof result.response === 'string' &&
-          result.response.toLocaleLowerCase() ===
-            'Customer already mapped to an Invoice'.toLocaleLowerCase()
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(
-              `customer.form.dialog.addFailedCustomerMappedToInvoice`
-            )
-          );
-        } else if (typeof result.response === 'number' && result.response > 0) {
-          let success = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`customer.addedCustomerSuccessfully`)
-          );
-          this.addedCustomer.emit();
-        }
+        this.parseAddCustomerResponse(result, successMessage);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -216,15 +242,16 @@ export class CustomersDialogComponent implements OnInit {
       dialog.showModal();
     } else {
       this.customerForm.markAllAsTouched();
-      //this.formErrors();
     }
   }
-  // addCustomer(attachInvoice: boolean, dialog: HTMLDialogElement) {
-  //   dialog.close();
-  //   this.requestAddCustomer(this.customerForm.value, attachInvoice);
-  // }
   addCustomer() {
-    this.requestAddCustomer(this.customerForm.value);
+    if (this.data) {
+      let message = this.tr.translate(`customer.modifiedCustomerSuccessfully`);
+      this.requestAddCustomer(this.customerForm.value, message);
+    } else {
+      let message = this.tr.translate(`customer.addedCustomerSuccessfully`);
+      this.requestAddCustomer(this.customerForm.value, message);
+    }
   }
   get CName() {
     return this.customerForm.get('CName') as FormControl;
