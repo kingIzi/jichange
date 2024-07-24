@@ -72,7 +72,7 @@
           "missingBranchName": "Please provide a Branch name",
           "missingAccountNo": "Please provide an account number",
           "makerChecker": "Please, specify a need for your request's approval",
-          "invalidAccounntNo": "The account number you have entered is invalid.",
+          "invalidAccounntNo": "The account number you have entered is already in use.",
           "mobileNumberExists": "The mobile number you have entered already exists.",
           "vendorExists": "The vendor name you have entered already exists."
         }

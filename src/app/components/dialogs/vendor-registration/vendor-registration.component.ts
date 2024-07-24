@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   OnInit,
   ViewChild,
@@ -65,6 +66,8 @@ export class VendorRegistrationComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
+  @ViewChild('confirmAddVendor', { static: true })
+  confirmAddVendor!: ElementRef<HTMLDialogElement>;
   constructor(
     private dialogRef: MatDialogRef<VendorRegistrationComponent>,
     private fb: FormBuilder,
@@ -204,31 +207,81 @@ export class VendorRegistrationComponent implements OnInit {
         throw err;
       });
   }
+  private switchCheckAccountErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.accno.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing Account Number'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.missingAccountNo'
+        );
+      default:
+        return this.tr.translate('errors.serverError');
+    }
+  }
+
+  private parseCheckAccountResponse(result: HttpDataResponse<boolean>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchCheckAccountErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    }
+    let isInValid = result.response;
+    if (isInValid) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(
+          `auth.vendorRegistration.form.errors.dialogs.invalidFormError`
+        ),
+        this.tr.translate(
+          `auth.vendorRegistration.form.errors.dialogs.invalidAccounntNo`
+        )
+      );
+    } else {
+      this.requestAddCompanyL(this.vendorFormGroup.value as AddCompanyL);
+    }
+  }
 
   ngOnInit(): void {
     this.createVendorForm();
     this.fetchBranchList();
   }
 
-  async submitVendor() {
-    if (!this.vendorFormGroup.valid) {
-      this.vendorFormGroup.markAllAsTouched();
-      this.formErrors();
-      return;
-    }
-    let errorsPath = `auth.vendorRegistration.form.errors.dialogs`;
-    let res = (await this.companyService.checkAccount(
-      this.accno.value
-    )) as HttpDataResponse<Boolean>;
-    if (res.response == true) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidFormError`),
-        this.tr.translate(`${errorsPath}.invalidAccounntNo`)
-      );
+  submitVendor() {
+    if (this.vendorFormGroup.valid) {
+      this.confirmAddVendor.nativeElement.showModal();
     } else {
-      this.requestAddCompanyL(this.vendorFormGroup.value as AddCompanyL);
+      this.vendorFormGroup.markAllAsTouched();
     }
+  }
+
+  addVendor() {
+    this.startLoading = true;
+    this.companyService
+      .checkAccount({ acc: this.accno.value })
+      .then((result) => {
+        this.parseCheckAccountResponse(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
 
   createVendorForm() {

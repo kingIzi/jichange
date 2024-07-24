@@ -13,9 +13,12 @@ import { Region } from 'src/app/core/models/bank/setup/region';
 })
 export class CompanyService {
   constructor(private client: RequestClientService) {}
-  public async checkAccount(acc: string) {
+  public async checkAccount(body: { acc: string }) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/company/CheckAccount`, { acc: acc })
+      this.client.performPost<{ acc: string }, HttpDataResponse<boolean>>(
+        `/api/company/CheckAccount`,
+        body
+      )
     );
     return data;
   }
