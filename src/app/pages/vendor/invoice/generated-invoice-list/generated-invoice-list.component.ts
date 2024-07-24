@@ -40,7 +40,6 @@ import {
 } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
@@ -62,6 +61,10 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -71,6 +74,10 @@ import {
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/generated', alias: 'generated' },
+    },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
     },
   ],
   standalone: true,
@@ -97,23 +104,23 @@ import {
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class GeneratedInvoiceListComponent implements OnInit {
-  public userProfile!: LoginResponse;
+  //public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
-  public tableData: {
-    generatedInvoices: GeneratedInvoice[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<GeneratedInvoice>;
-  } = {
-    generatedInvoices: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
-  };
+  // public tableData: {
+  //   generatedInvoices: GeneratedInvoice[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<GeneratedInvoice>;
+  // } = {
+  //   generatedInvoices: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('generatedInvoiceTable', { static: true })
   generatedInvoiceTable!: ElementRef<HTMLTableElement>;
@@ -124,20 +131,17 @@ export class GeneratedInvoiceListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private fileHandler: FileHandlerService,
     private invoiceService: InvoiceService,
     private cdr: ChangeDetectorRef,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<GeneratedInvoice>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   //create formGroup for each header item in table
   private createHeadersForm() {
     let TABLE_SHOWING = 7;
@@ -148,34 +152,37 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.tr
       .selectTranslate(`generatedInvoicesTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -184,13 +191,12 @@ export class GeneratedInvoiceListComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: GeneratedInvoice,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: GeneratedInvoice, filter: string) => {
       return (
         data.Chus_Name.toLocaleLowerCase().includes(
           filter.toLocaleLowerCase()
@@ -198,12 +204,10 @@ export class GeneratedInvoiceListComponent implements OnInit {
         data.Invoice_No.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -211,41 +215,55 @@ export class GeneratedInvoiceListComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.tableData.generatedInvoices
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
+  //     this.tableData.generatedInvoices
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private parseGeneratedInvoiceResponse(
+    result: HttpDataResponse<number | GeneratedInvoice[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as GeneratedInvoice[]);
+    }
   }
   private assignGeneratedInvoiceDataList(
-    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+    result: HttpDataResponse<number | GeneratedInvoice[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.generatedInvoices = result.response;
-    } else {
-      this.tableData.generatedInvoices = [];
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`invoice.noGeneratedInvoicesFound`)
-      );
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.generatedInvoices = result.response;
+    // } else {
+    //   this.tableData.generatedInvoices = [];
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`invoice.noGeneratedInvoicesFound`)
+    //   );
+    // }
+    // this.prepareDataSource();
+    this.parseGeneratedInvoiceResponse(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilterPredicate();
+    this.dataSourceSortingAccessor();
   }
   private requestGeneratedInvoice() {
-    this.tableData.generatedInvoices = [];
     this.tableLoading = true;
     this.invoiceService
-      .postSignedDetails({ compid: this.userProfile.InstID })
+      .postSignedDetails({ compid: this.getUserProfile().InstID })
       .then((result) => {
         this.assignGeneratedInvoiceDataList(result);
         this.tableLoading = false;
@@ -299,17 +317,12 @@ export class GeneratedInvoiceListComponent implements OnInit {
         this.cdr.detectChanges();
       });
   }
-  //action to filter table by search key up
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeadersForm();
     this.requestGeneratedInvoice();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -318,7 +331,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.generatedInvoices,
+          this.tableDataService.getData(),
           element
         );
       case 'Invoice_Date':
@@ -391,7 +404,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       data: {
         headersMap: GeneratedInvoiceListTable,
         headers: this.headers.controls.map((c) => c.get('label')?.value),
-        generatedInvoices: this.tableData.generatedInvoices,
+        generatedInvoices: this.tableDataService.getData(),
       },
     });
   }
@@ -402,7 +415,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       //height: '700px',
       data: {
         Inv_Mas_Sno: generatedInvoice.Inv_Mas_Sno,
-        userProfile: this.userProfile,
+        userProfile: this.getUserProfile(),
       },
     });
   }
@@ -413,7 +426,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       height: '700px',
       data: {
         Inv_Mas_Sno: generatedInvoice.Inv_Mas_Sno,
-        userProfile: this.userProfile,
+        userProfile: this.getUserProfile(),
       },
     });
     dialogRef.componentInstance.viewReady.asObservable().subscribe((view) => {
@@ -481,7 +494,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
     messageBox.confirm.asObservable().subscribe(() => {
       let body = {
         sno: invoice.Inv_Mas_Sno,
-        user_id: this.userProfile.Usno,
+        user_id: this.getUserProfile().Usno,
       };
       this.requestSendAddDeliveryCode(body);
     });
@@ -510,12 +523,24 @@ export class GeneratedInvoiceListComponent implements OnInit {
     dialog.message = this.tr
       .translate(`invoice.createdInvoice.sureCancelInvoice`)
       .replace('{}', invoice.Invoice_No);
-    dialog.userId = this.userProfile.Usno;
+    dialog.userId = this.getUserProfile().Usno;
     dialog.invoiceId = invoice.Inv_Mas_Sno;
     dialog.cancelledInvoice.asObservable().subscribe(() => {
       this.requestGeneratedInvoice();
     });
     dialog.openDialog();
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

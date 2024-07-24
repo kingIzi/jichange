@@ -53,7 +53,6 @@ import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/rep
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -70,6 +69,8 @@ import {
 } from 'mat-table-exporter';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-transaction-details',
@@ -120,7 +121,6 @@ export class TransactionDetailsComponent implements OnInit {
     tableColumns$: of([]),
     dataSource: new MatTableDataSource<TransactionDetail>([]),
   };
-  public userProfile!: LoginResponse;
   public filterFormData: {
     companies: Company[];
     customers: Customer[];
@@ -141,6 +141,7 @@ export class TransactionDetailsComponent implements OnInit {
   @ViewChild('summaryTableContainer', { static: false })
   summaryTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialog: MatDialog,
     private tr: TranslocoService,
@@ -153,24 +154,20 @@ export class TransactionDetailsComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createRequestFormGroup() {
     this.filterTableFormGroup = this.fb.group({
       compid: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, [Validators.required]),
+      branch: this.fb.control(this.getUserProfile().braid, [
+        Validators.required,
+      ]),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
-    if (Number(this.userProfile.braid) === 0) {
+    if (Number(this.getUserProfile().braid) === 0) {
       this.branchChangedEventHandler();
     }
     this.companyChangedEventHandler();
@@ -330,7 +327,7 @@ export class TransactionDetailsComponent implements OnInit {
     this.startLoading = true;
     let companiesObs = from(
       this.reportsService.getBranchedCompanyList({
-        branch: this.userProfile.braid,
+        branch: this.getUserProfile().braid,
       })
     );
     let branchObs = from(this.branchService.postBranchList({}));
@@ -615,11 +612,13 @@ export class TransactionDetailsComponent implements OnInit {
     doc.save(`${filename}.pdf`);
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeadersFormGroup();
     this.createRequestFormGroup();
     this.buildPage();
     this.initialSubmission();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

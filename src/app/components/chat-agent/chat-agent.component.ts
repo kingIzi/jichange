@@ -6,7 +6,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 
 @Component({
@@ -20,14 +20,16 @@ import { RequestClientService } from 'src/app/core/services/request-client.servi
 export class ChatAgentComponent {
   public serviceTexts: any[] = [];
   @ViewChild('serviceUl') serviceUl!: ElementRef;
-  constructor(private client: RequestClientService) {}
+  constructor(
+    private client: RequestClientService,
+    private appConfig: AppConfigService
+  ) {}
   private sendRequest(text: string): Observable<any> {
     let response = localStorage.getItem('userProfile');
     if (!response) {
       throw Error(`Failed to find user object`);
     }
-    let res = JSON.parse(response) as LoginResponse;
-    //let payload = this.createChatPayload(res.usno, text);
+    let res = this.appConfig.getLoginResponse();
     let payload = { userId: res.Usno, text: text };
     return this.client.performPostChat(`/chat`, payload);
   }

@@ -33,10 +33,11 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { DepositAccount } from 'src/app/core/models/bank/setup/deposit-account';
 import { AddDepositAccount } from 'src/app/core/models/bank/forms/setup/deposit/add-deposit-account';
 import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-account/deposit-account.service';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-deposit-account-dialog',
@@ -61,7 +62,6 @@ import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-
 })
 export class DepositAccountDialogComponent implements OnInit {
   public startLoading: boolean = false;
-  public userProfile!: LoginResponse;
   public depositAccountForm!: FormGroup;
   public customers: Company[] = [];
   public accounts: SuspenseAccount[] = [];
@@ -72,6 +72,7 @@ export class DepositAccountDialogComponent implements OnInit {
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   constructor(
+    private appconfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RegionDialogComponent>,
     private translocoService: TranslocoService,
@@ -82,12 +83,6 @@ export class DepositAccountDialogComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: { depositAccount: DepositAccount }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private requestAddDepositAccount(body: AddDepositAccount) {
     this.startLoading = true;
     this.depositAccountService
@@ -147,7 +142,9 @@ export class DepositAccountDialogComponent implements OnInit {
       csno: this.fb.control(0, [Validators.required]),
       account: this.fb.control('', [Validators.required]),
       reason: this.fb.control('', [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       sno: this.fb.control(0, [Validators.required]),
     });
   }
@@ -190,12 +187,14 @@ export class DepositAccountDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildPage();
     if (this.data?.depositAccount) {
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appconfig.getLoginResponse() as BankLoginResponse;
   }
   submitDepositForm() {
     if (this.depositAccountForm.valid) {

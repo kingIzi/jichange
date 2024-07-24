@@ -38,8 +38,9 @@ import { CurrencyTable } from 'src/app/core/enums/bank/setup/currency-table';
 import { RemoveCurrencyForm } from 'src/app/core/models/bank/forms/setup/currency/remove-currency-form';
 import { Currency } from 'src/app/core/models/bank/setup/currency';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { CurrencyService } from 'src/app/core/services/bank/setup/currency/currency.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
@@ -84,7 +85,6 @@ export class CurrencyListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableFormGroup!: FormGroup;
-  private userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CurrencyTable: typeof CurrencyTable = CurrencyTable;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -94,6 +94,7 @@ export class CurrencyListComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private currencyService: CurrencyService,
     private dialog: MatDialog,
     private tr: TranslocoService,
@@ -103,12 +104,6 @@ export class CurrencyListComponent implements OnInit {
     private tableDataService: TableDataService<Currency>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableFormGroup() {
     let TABLE_SHOWING = 5;
     this.tableFormGroup = this.fb.group({
@@ -261,9 +256,11 @@ export class CurrencyListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableFormGroup();
     this.requestCurrencyList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -349,7 +346,7 @@ export class CurrencyListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       this.requestRemoveCurrency({
         code: currency.Currency_Code,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       } as RemoveCurrencyForm);
     });
   }

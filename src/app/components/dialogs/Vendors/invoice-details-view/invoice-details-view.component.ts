@@ -27,11 +27,11 @@ import { CancelledDialogComponent } from '../../cancelled-dialog/cancelled-dialo
 import { DisplayMessageBoxComponent } from '../../display-message-box/display-message-box.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { from, zip, lastValueFrom, map, catchError } from 'rxjs';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { GeneratedInvoiceViewComponent } from '../generated-invoice-view/generated-invoice-view.component';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-invoice-details-view',
@@ -75,7 +75,7 @@ export class InvoiceDetailsViewComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA)
     public data: {
       Inv_Mas_Sno: string;
-      userProfile: LoginResponse;
+      userProfile: VendorLoginResponse;
     }
   ) {}
   private createForm() {

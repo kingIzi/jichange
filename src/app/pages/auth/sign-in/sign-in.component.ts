@@ -26,12 +26,16 @@ import {
 } from '@angular/forms';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
-import { LoginResponse } from 'src/app/core/models/login-response';
+//import { LoginResponse } from 'src/app/core/models/login-response';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { UserRoles } from 'src/app/core/enums/bank/user-roles';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { LoginService } from 'src/app/core/services/login.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import {
+  BankLoginResponse,
+  VendorLoginResponse,
+} from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-sign-in',
@@ -89,12 +93,15 @@ export class SignInComponent implements OnInit {
       );
     }
   }
-  private toRoute(response: LoginResponse, route: string) {
+  private toRoute(
+    response: VendorLoginResponse | BankLoginResponse,
+    route: string
+  ) {
     localStorage.setItem('userProfile', JSON.stringify(response));
     this.cdr.detectChanges();
     this.router.navigate([route]);
   }
-  private switchUserLogin(response: LoginResponse) {
+  private switchUserLogin(response: VendorLoginResponse | BankLoginResponse) {
     switch (response.role.toLocaleLowerCase()) {
       case UserRoles.COMPANYS.toLocaleLowerCase():
         this.toRoute(response, '/vendor');
@@ -121,7 +128,7 @@ export class SignInComponent implements OnInit {
     this.startLoading = true;
     this.loginService
       .loginUser(value)
-      .then((results: any) => {
+      .then((results) => {
         if (!results.response.Usno) {
           this.loginFailedMessageDialog();
         } else {

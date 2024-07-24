@@ -43,7 +43,6 @@ import { District } from 'src/app/core/models/bank/setup/district';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AddCompany } from 'src/app/core/models/bank/forms/company/summary/add-company';
 import { Ward } from 'src/app/core/models/bank/setup/ward';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { RegionService } from 'src/app/core/services/bank/setup/region/region.service';
 import { DistrictService } from 'src/app/core/services/bank/setup/district/district.service';
@@ -52,6 +51,8 @@ import { CompanyService } from 'src/app/core/services/bank/company/summary/compa
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-company-summary-dialog',
@@ -85,7 +86,6 @@ export class CompanySummaryDialogComponent implements OnInit {
   public districts: District[] = [];
   public wards: Ward[] = [];
   public companySummaryForm!: FormGroup;
-  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -96,6 +96,7 @@ export class CompanySummaryDialogComponent implements OnInit {
   public openDialogFailed = new EventEmitter<any>();
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private branchService: BranchService,
@@ -108,12 +109,6 @@ export class CompanySummaryDialogComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any,
     private cdr: ChangeDetectorRef
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private async prepareEditForm(company: Company) {
     this.startLoading = true;
     let regSno = company.RegId ? company?.RegId.toString() : '0';
@@ -223,7 +218,9 @@ export class CompanySummaryDialogComponent implements OnInit {
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       branch: this.fb.control(company.Branch_Sno ?? '', [Validators.required]),
       check_status: this.fb.control(company.Checker, [Validators.required]),
       fax: this.fb.control(company.FaxNo, []),
@@ -343,7 +340,9 @@ export class CompanySummaryDialogComponent implements OnInit {
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       branch: this.fb.control('', [Validators.required]),
       check_status: this.fb.control('', [Validators.required]),
       fax: this.fb.control('', []),
@@ -428,8 +427,10 @@ export class CompanySummaryDialogComponent implements OnInit {
       });
   }
   ngOnInit() {
-    this.parseUserProfile();
     this.prepareForm();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   addBankDetail(ind: number = -1) {
     let group = this.fb.group({

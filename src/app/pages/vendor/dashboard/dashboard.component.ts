@@ -36,7 +36,6 @@ import {
 } from '@angular/forms';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
@@ -55,6 +54,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-dashboard',
@@ -88,7 +89,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public overviewLoading: boolean = false;
-  private userProfile!: LoginResponse;
   public inboxApprovals: any[] = [];
   public transactions: any[] = [];
   public tableHeadersFormGroup!: FormGroup;
@@ -127,6 +127,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -135,12 +136,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private router: Router,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   //create formGroup for each header item in table
   private createHeadersForm() {
     let TABLE_SHOWING = 6;
@@ -364,11 +359,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.startLoading = true;
     this.overviewLoading = true;
     let generatedInvoiceObs = from(
-      this.invoiceService.postSignedDetails({ compid: this.userProfile.InstID })
+      this.invoiceService.postSignedDetails({
+        compid: this.getUserProfile().InstID,
+      })
     );
     let invoiceStatisticsObs = from(
       this.invoiceService.getCompanysInvoiceStats({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let mergedObs = zip(generatedInvoiceObs, invoiceStatisticsObs);
@@ -395,14 +392,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         throw err;
       });
   }
+  ngOnInit(): void {
+    this.createHeadersForm();
+    this.buildPage();
+  }
   ngAfterViewInit(): void {
     //this.createTransactionChart();
     //this.createOperationsChart();
   }
-  ngOnInit(): void {
-    this.parseUserProfile();
-    this.createHeadersForm();
-    this.buildPage();
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

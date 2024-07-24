@@ -57,7 +57,6 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatListModule } from '@angular/material/list';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import {
   listAnimationDesktop,
   listAnimationMobile,
@@ -70,6 +69,8 @@ import {
 } from 'mat-table-exporter';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-summary',
@@ -106,7 +107,6 @@ export class SummaryComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public tableData: {
     companies: Company[];
     originalTableColumns: TableColumnsData[];
@@ -131,6 +131,7 @@ export class SummaryComponent implements OnInit {
   @ViewChild('summaryTableContainer', { static: false })
   summaryTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private router: Router,
     private reportsService: ReportsService,
@@ -140,12 +141,6 @@ export class SummaryComponent implements OnInit {
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeadersFormGroup() {
     let TABLE_SHOWING = 7;
     this.headersFormGroup = this.fb.group({
@@ -274,7 +269,7 @@ export class SummaryComponent implements OnInit {
     this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
-      .getBranchedCompanyList({ branch: this.userProfile.braid })
+      .getBranchedCompanyList({ branch: this.getUserProfile().braid })
       .then((result) => {
         this.assignVendorsDataList(result);
         this.tableLoading = false;
@@ -326,9 +321,11 @@ export class SummaryComponent implements OnInit {
     doc.save(`${filename}.pdf`);
   }
   ngOnInit() {
-    this.parseUserProfile();
     this.createHeadersFormGroup();
     this.requestList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

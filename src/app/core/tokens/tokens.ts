@@ -13,6 +13,8 @@ import { EmployeeDetail } from '../models/bank/setup/employee-detail';
 import { SuspenseAccount } from '../models/bank/setup/suspense-account';
 import { Customer as VendorCustomer } from 'src/app/core/models/vendors/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
+import { GeneratedInvoice } from '../models/vendors/generated-invoice';
+import { Company as BankCompany } from 'src/app/core/models/bank/company/company';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -27,9 +29,10 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | EmailText
     | EmployeeDetail
     | SuspenseAccount
+    | BankCompany
   >
 >('TABLE_DATA_SERVICE');
 
 export const VENDOR_TABLE_DATA_SERVICE = new InjectionToken<
-  TableDataService<VendorCustomer | InvoiceReport>
+  TableDataService<VendorCustomer | InvoiceReport | GeneratedInvoice>
 >('VENDOR_TABLE_DATA_SERVICE');

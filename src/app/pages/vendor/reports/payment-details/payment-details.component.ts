@@ -48,13 +48,14 @@ import { PaymentDetailsTable } from 'src/app/core/enums/vendor/reports/payment-d
 import { Company } from 'src/app/core/models/bank/company/company';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
@@ -118,13 +119,13 @@ export class PaymentDetailsComponent implements OnInit {
     tableColumns$: of([]),
     dataSource: new MatTableDataSource<PaymentDetail>([]),
   };
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
@@ -135,15 +136,11 @@ export class PaymentDetailsComponent implements OnInit {
     private invoiceReportService: InvoiceReportServiceService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createFilterForm() {
     this.filterFormGroup = this.fb.group({
-      compid: this.fb.control(this.userProfile.InstID, [Validators.required]),
+      compid: this.fb.control(this.getUserProfile().InstID, [
+        Validators.required,
+      ]),
       cust: this.fb.control('', [Validators.required]),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
@@ -228,7 +225,7 @@ export class PaymentDetailsComponent implements OnInit {
     this.cust.valueChanges.subscribe((value) => {
       if (value !== 'all') {
         let form = {
-          Comp: this.userProfile.InstID,
+          Comp: this.getUserProfile().InstID,
           cusid: value,
           stdate: '',
           enddate: '',
@@ -296,7 +293,7 @@ export class PaymentDetailsComponent implements OnInit {
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let mergedObservable = zip(companiesObservable, customersObservable);
@@ -482,10 +479,12 @@ export class PaymentDetailsComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
@@ -596,7 +595,7 @@ export class PaymentDetailsComponent implements OnInit {
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value };
-      form.compid = this.userProfile.InstID;
+      form.compid = this.getUserProfile().InstID;
       form.stdate = this.reformatDate(
         this.filterFormGroup.value.stdate.split('-')
       );

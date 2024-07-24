@@ -29,7 +29,6 @@ import {
 } from '@angular/material/paginator';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import {
   Observable,
   TimeoutError,
@@ -77,6 +76,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-dashboard',
@@ -110,8 +111,6 @@ import {
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DashboardComponent implements OnInit {
-  private userProfile!: LoginResponse;
-
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public transactionsLoading: boolean = false;
@@ -143,6 +142,7 @@ export class DashboardComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appconfig: AppConfigService,
     private tr: TranslocoService,
     private breadcrumbService: BreadcrumbService,
     private companyService: CompanyService,
@@ -154,12 +154,6 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeadersFormGroup() {
     let TABLE_SHOWING = 6;
     this.tableHeadersFormGroup = this.fb.group({
@@ -210,8 +204,8 @@ export class DashboardComponent implements OnInit {
     this.inboxApprovalLoading = true;
     this.approvalService
       .postCompanyInboxList({
-        design: this.userProfile.desig,
-        braid: Number(this.userProfile.braid),
+        design: this.getUserProfile().desig,
+        braid: Number(this.getUserProfile().braid),
       } as CompanyInboxListForm)
       .then((results) => {
         if (
@@ -290,18 +284,18 @@ export class DashboardComponent implements OnInit {
     this.tableLoading = true;
     let approvalsObs = from(
       this.approvalService.postCompanyInboxList({
-        design: this.userProfile.desig,
-        braid: Number(this.userProfile.braid),
+        design: this.getUserProfile().desig,
+        braid: Number(this.getUserProfile().braid),
       } as CompanyInboxListForm)
     );
     let bankerInvoiceStatsObs = from(
       this.reportsService.getBankerInvoiceStats({
-        sessB: this.userProfile.sessb,
+        sessB: this.getUserProfile().sessB,
       })
     );
     let compListObs = from(
       this.reportsService.getBranchedCompanyList({
-        branch: this.userProfile.braid,
+        branch: this.getUserProfile().braid,
       })
     );
     let latestTransactionsObs = from(
@@ -363,10 +357,12 @@ export class DashboardComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.breadcrumbService.set('@dashboard', 'Child One');
     //this.buildPage();
+  }
+  getUserProfile() {
+    return this.appconfig.getLoginResponse() as BankLoginResponse;
   }
   transactionsLatest(): any[] {
     let groupedByDate = this.latestTransactions.reduce((acc, obj) => {

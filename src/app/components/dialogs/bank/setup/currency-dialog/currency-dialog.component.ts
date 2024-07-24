@@ -26,12 +26,13 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Currency } from 'src/app/core/models/bank/setup/currency';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { CurrencyService } from 'src/app/core/services/bank/setup/currency/currency.service';
 import { AddCurrency } from 'src/app/core/models/bank/forms/setup/currency/add-currency';
 import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-currency-dialog',
@@ -58,7 +59,6 @@ export class CurrencyDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public currencyForm!: FormGroup;
   public added = new EventEmitter<Currency>();
-  private userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -66,6 +66,7 @@ export class CurrencyDialogComponent implements OnInit {
   @ViewChild('confirmAddCurrency', { static: true })
   confirmAddCurrency!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CurrencyDialogComponent>,
     private tr: TranslocoService,
@@ -76,12 +77,6 @@ export class CurrencyDialogComponent implements OnInit {
       currency: Currency;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private switchCurrencyErrorMessage(message: string) {
     let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
       message,
@@ -185,7 +180,9 @@ export class CurrencyDialogComponent implements OnInit {
     this.currencyForm = this.fb.group({
       cname: this.fb.control('', [Validators.required]),
       code: this.fb.control('', [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       sno: this.fb.control(0, [Validators.required]),
     });
   }
@@ -193,19 +190,23 @@ export class CurrencyDialogComponent implements OnInit {
     this.currencyForm = this.fb.group({
       cname: this.fb.control(currency.Currency_Name, [Validators.required]),
       code: this.fb.control(currency.Currency_Code, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       sno: this.fb.control(1, [Validators.required]),
       dummy: this.fb.control(true, [Validators.required]),
     });
     this.code.disable();
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data.currency) {
       this.createEditForm(this.data.currency);
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

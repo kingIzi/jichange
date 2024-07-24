@@ -32,7 +32,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import {
   from,
   zip,
@@ -69,6 +68,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -116,7 +117,6 @@ export class InvoiceCancelledComponent implements OnInit {
     dataSource: new MatTableDataSource<CancelledInvoice>([]),
   };
   public filterFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public filterFormData: {
     companies: Company[];
     customers: CustomerName[];
@@ -133,6 +133,7 @@ export class InvoiceCancelledComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private invoiceService: InvoiceService,
@@ -143,12 +144,6 @@ export class InvoiceCancelledComponent implements OnInit {
     private invoiceReportService: InvoiceReportServiceService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeadersFormGroup() {
     let TABLE_SHOWING = 7;
     this.tableHeadersFormGroup = this.fb.group({
@@ -193,7 +188,9 @@ export class InvoiceCancelledComponent implements OnInit {
   }
   private createFilterForm() {
     this.filterFormGroup = this.fb.group({
-      compid: this.fb.control(this.userProfile.InstID, [Validators.required]),
+      compid: this.fb.control(this.getUserProfile().InstID, [
+        Validators.required,
+      ]),
       cust: this.fb.control(0, [Validators.required]),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
@@ -206,7 +203,7 @@ export class InvoiceCancelledComponent implements OnInit {
     this.cust.valueChanges.subscribe((value) => {
       if (value !== 'all') {
         let form = {
-          Comp: this.userProfile.InstID,
+          Comp: this.getUserProfile().InstID,
           cusid: value,
           stdate: '',
           enddate: '',
@@ -274,7 +271,7 @@ export class InvoiceCancelledComponent implements OnInit {
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let mergedObservable = zip(companiesObservable, customersObservable);
@@ -457,10 +454,12 @@ export class InvoiceCancelledComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.createFilterForm();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableSortableColumns(column: TableColumnsData) {
     switch (column.value) {

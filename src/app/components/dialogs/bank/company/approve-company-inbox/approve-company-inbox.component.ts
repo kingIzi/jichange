@@ -31,7 +31,6 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { Company } from 'src/app/core/models/bank/company/company';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
@@ -46,6 +45,8 @@ import { SuspenseAccountDialogComponent } from '../../setup/suspense-account-dia
 import { DepositAccount } from 'src/app/core/models/bank/setup/deposit-account';
 import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-account/deposit-account.service';
 import { DepositAccountDialogComponent } from '../../setup/deposit-account-dialog/deposit-account-dialog.component';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-approve-company-inbox',
@@ -75,7 +76,6 @@ import { DepositAccountDialogComponent } from '../../setup/deposit-account-dialo
 export class ApproveCompanyInboxComponent implements OnInit {
   public startLoading: boolean = false;
   public formGroup!: FormGroup;
-  private userProfile!: LoginResponse;
   public accountPool: FormControl = this.fb.control('', []);
   public selectAccountList: SuspenseAccount[] = [];
   public selectDepositAccountList: DepositAccount[] = [];
@@ -90,6 +90,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
   @ViewChild('noDepositAccountFound', { static: true })
   noDepositAccountFound!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -100,12 +101,6 @@ export class ApproveCompanyInboxComponent implements OnInit {
     private dialogRef: MatDialogRef<ApproveCompanyInboxComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { company: Company }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private accountPoolChangeEventListener() {
     this.accountPool.valueChanges.subscribe((value) => {
       if (
@@ -219,7 +214,9 @@ export class ApproveCompanyInboxComponent implements OnInit {
   private createFormGroup(company: Company) {
     this.formGroup = this.fb.group({
       compsno: this.fb.control(company.CompSno, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       suspenseAccSno: this.fb.control('', [Validators.required]),
       depositAccNo: this.fb.control('', [Validators.required]),
     });
@@ -274,12 +271,14 @@ export class ApproveCompanyInboxComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data.company) {
       this.createFormGroup(this.data.company);
     }
     this.accountPoolChangeEventListener();
     this.depositAccNoChangedEventListener();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   submitInboxApproval() {
     if (this.formGroup.valid) {

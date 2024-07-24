@@ -27,10 +27,11 @@ import { BranchDialogComponent } from '../branch-dialog/branch-dialog.component'
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { QuestionName } from 'src/app/core/models/bank/setup/question-name';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { QuestionNameService } from 'src/app/core/services/bank/setup/question-name/question-name.service';
 import { AddQuestionName } from 'src/app/core/models/bank/forms/setup/question-name/add-question-name';
 import { TimeoutError } from 'rxjs';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-question-name-dialog',
@@ -55,7 +56,6 @@ import { TimeoutError } from 'rxjs';
 })
 export class QuestionNameDialogComponent implements OnInit {
   public startLoading: boolean = false;
-  private userProfile!: LoginResponse;
   public questionNameForm!: FormGroup;
   public added = new EventEmitter<any>();
   @ViewChild('displayMessageBox')
@@ -63,6 +63,7 @@ export class QuestionNameDialogComponent implements OnInit {
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   constructor(
+    private appConfig: AppConfigService,
     private questionNameService: QuestionNameService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
@@ -73,12 +74,6 @@ export class QuestionNameDialogComponent implements OnInit {
       questionName: QuestionName;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(errorsPath: string = 'setup.questionName.form.dialog') {
     if (this.q_name.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -100,7 +95,9 @@ export class QuestionNameDialogComponent implements OnInit {
       q_name: this.fb.control('', [Validators.required]),
       q_qstatus: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       dummy: this.fb.control(true, []),
     });
   }
@@ -109,7 +106,9 @@ export class QuestionNameDialogComponent implements OnInit {
       q_name: this.fb.control(questionName.Q_Name, [Validators.required]),
       q_qstatus: this.fb.control(questionName.Q_Status, [Validators.required]),
       sno: this.fb.control(questionName.SNO, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       dummy: this.fb.control(true, []),
     });
   }
@@ -147,12 +146,14 @@ export class QuestionNameDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data.questionName) {
       this.createEditForm(this.data.questionName);
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   setControlValue(control: FormControl, value: string) {
     control.setValue(value.trim());

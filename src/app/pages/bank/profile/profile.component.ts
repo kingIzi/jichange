@@ -31,13 +31,14 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { TimeoutError } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BankUserDialogComponent } from 'src/app/components/dialogs/bank/setup/bank-user-dialog/bank-user-dialog.component';
 import { LoginService } from 'src/app/core/services/login.service';
 import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-form';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-profile',
@@ -80,7 +81,6 @@ export class ProfileComponent implements OnInit {
   public languageFormGroup!: FormGroup;
   public employeeDetail!: EmployeeDetail;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public userProfile!: LoginResponse;
   public filterFormData: { branches: Branch[] } = { branches: [] };
   @ViewChild('changePasswordSubmit')
   changePasswordSubmit!: SubmitMessageBoxComponent;
@@ -89,6 +89,7 @@ export class ProfileComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private bankUserService: BankService,
@@ -112,18 +113,15 @@ export class ProfileComponent implements OnInit {
       return null;
     };
   }
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createChangePasswordFormGroup() {
     this.changePasswordFormGroup = this.fb.group({
-      type: this.fb.control(this.userProfile.check.toLocaleUpperCase(), []),
+      type: this.fb.control(
+        this.getUserProfile().check.toLocaleUpperCase(),
+        []
+      ),
       pwd: this.fb.control('', [Validators.required]),
       confirmPwd: this.fb.control('', [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
     this.pwd.addValidators(
       this.passwordsMatchValidator(this.changePasswordFormGroup)
@@ -138,7 +136,7 @@ export class ProfileComponent implements OnInit {
       lname: this.fb.control('', []),
       email: this.fb.control('', []),
       mobile: this.fb.control('', []),
-      role: this.fb.control(this.userProfile.role, []),
+      role: this.fb.control(this.getUserProfile().role, []),
       branch: this.fb.control('', []),
     });
   }
@@ -160,7 +158,7 @@ export class ProfileComponent implements OnInit {
         ) {
           this.filterFormData.branches = result.response;
           let branch = this.filterFormData.branches.find(
-            (b) => b.Sno === Number(this.userProfile.braid)
+            (b) => b.Sno === Number(this.getUserProfile().braid)
           );
           this.generalFormGroup.get('branch')?.setValue(branch?.Name ?? '-');
         }
@@ -253,12 +251,14 @@ export class ProfileComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createGeneralFormGroup();
     this.createChangePasswordFormGroup();
     this.createLanguageFormGroup();
-    this.requestEmployeeDetail({ sno: this.userProfile.Usno });
+    this.requestEmployeeDetail({ sno: this.getUserProfile().Usno });
     this.requestBranchList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   saveLanguageClicked() {
     if (

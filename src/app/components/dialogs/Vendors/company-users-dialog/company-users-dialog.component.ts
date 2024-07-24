@@ -26,7 +26,6 @@ import { SuccessMessageBoxComponent } from '../../success-message-box/success-me
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CountryDialogComponent } from '../../bank/setup/country-dialog/country-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
 import { RoleAct } from 'src/app/core/models/vendors/role-act';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -35,6 +34,8 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
 import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-company-users-dialog',
@@ -64,7 +65,6 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   public companyUsersForm!: FormGroup;
   public companyUser!: CompanyUser;
   public addedUser = new EventEmitter<any>();
-  private userProfile!: LoginResponse;
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -73,6 +73,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('addCompanyUserDialog', { static: true })
   addCompanyUserDialog!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
     private tr: TranslocoService,
@@ -83,12 +84,6 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       companyUserId: number | string;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(
     errorsPath: string = 'company.companyUsersForm.errors.dialog'
   ) {
@@ -138,9 +133,11 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       mail: this.fb.control('', [Validators.required, Validators.email]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       sno: this.fb.control('0', [Validators.required]),
-      compid: this.fb.control(this.userProfile.InstID.toString(), [
+      compid: this.fb.control(this.getUserProfile().InstID.toString(), [
         Validators.required,
       ]),
       chname: this.fb.control('', []),
@@ -268,7 +265,6 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.requestRolesAct();
     this.createForm();
     if (this.data.companyUserId) {
@@ -281,6 +277,9 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       .subscribe(() => {
         this.dialogRef.close();
       });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

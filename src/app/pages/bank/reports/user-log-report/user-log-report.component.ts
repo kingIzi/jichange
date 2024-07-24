@@ -38,7 +38,6 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -50,6 +49,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-user-log-report',
@@ -96,13 +97,13 @@ export class UserLogReportComponent implements OnInit {
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
   public tableLoading: boolean = false;
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private tr: TranslocoService,
@@ -111,19 +112,13 @@ export class UserLogReportComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableFilterFormGroup() {
     this.tableFilterFormGroup = this.fb.group({
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, []),
+      branch: this.fb.control(this.getUserProfile().braid, []),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
   }
@@ -328,10 +323,12 @@ export class UserLogReportComponent implements OnInit {
     return keys;
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildPage();
     this.createTableFilterFormGroup();
     this.createTableHeadersFormGroup();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

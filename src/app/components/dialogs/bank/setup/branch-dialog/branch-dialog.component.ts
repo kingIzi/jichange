@@ -25,7 +25,6 @@ import { DisplayMessageBoxComponent } from '../../../display-message-box/display
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
@@ -33,6 +32,8 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { AddBranchForm } from 'src/app/core/models/bank/forms/setup/branch/add-branch-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-branch-dialog',
@@ -60,9 +61,6 @@ export class BranchDialogComponent implements OnInit {
   public branchForm!: FormGroup;
   public startLoading: boolean = false;
   public addedBranch = new EventEmitter<Branch>();
-  private userProfile = JSON.parse(
-    localStorage.getItem('userProfile') as string
-  ) as LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -70,10 +68,10 @@ export class BranchDialogComponent implements OnInit {
   @ViewChild('confirmAddBranch', { static: true })
   confirmAddBranch!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
     private tr: TranslocoService,
-    //private client: RequestClientService,
     private branchService: BranchService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
@@ -109,7 +107,9 @@ export class BranchDialogComponent implements OnInit {
       Name: this.fb.control('', [Validators.required]),
       Location: this.fb.control('', [Validators.required]),
       Status: this.fb.control('', [Validators.required]),
-      AuditBy: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      AuditBy: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       Branch_Sno: this.fb.control(0, [Validators.required]),
     });
   }
@@ -118,7 +118,9 @@ export class BranchDialogComponent implements OnInit {
       Name: this.fb.control(branch.Name, [Validators.required]),
       Location: this.fb.control(branch.Location, [Validators.required]),
       Status: this.fb.control(branch.Status, [Validators.required]),
-      AuditBy: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      AuditBy: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       Branch_Sno: this.fb.control(branch.Sno, [Validators.required]),
     });
   }
@@ -186,6 +188,9 @@ export class BranchDialogComponent implements OnInit {
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   setControlValue(control: FormControl, value: string) {
     control.setValue(value.trim());

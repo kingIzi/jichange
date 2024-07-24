@@ -47,7 +47,6 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceDetailsTable } from 'src/app/core/enums/bank/reports/invoice-details-table';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -58,6 +57,8 @@ import {
   listAnimationDesktop,
   listAnimationMobile,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-invoice-details',
@@ -115,12 +116,12 @@ export class InvoiceDetailsComponent implements OnInit {
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
-  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private dialog: MatDialog,
     private reportsService: ReportsService,
@@ -131,17 +132,11 @@ export class InvoiceDetailsComponent implements OnInit {
     private fileHandler: FileHandlerService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private async buildPage() {
     this.startLoading = true;
     let companiesObs = from(
       this.reportsService.getBranchedCompanyList({
-        branch: this.userProfile.braid,
+        branch: this.getUserProfile().braid,
       })
     );
     let branchObs = from(this.branchService.postBranchList({}));
@@ -180,14 +175,14 @@ export class InvoiceDetailsComponent implements OnInit {
     this.formGroup = this.fb.group({
       Comp: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, []),
+      branch: this.fb.control(this.getUserProfile().braid, []),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
-    if (Number(this.userProfile.braid) === 0) {
+    if (Number(this.getUserProfile().braid) === 0) {
       this.branchChangedEventHandler();
     }
     this.companyChangedEventHandler();
@@ -498,10 +493,12 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   ngOnInit(): void {
     initTE({ Datepicker, Input });
-    this.parseUserProfile();
     this.createRequestFormGroup();
     this.createHeaderGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   submitForm() {
     if (this.formGroup.valid) {

@@ -1,6 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { TimeoutError, catchError, throwError, timeout } from 'rxjs';
-import { LoginResponse } from '../models/login-response';
 import { inject } from '@angular/core';
 import { AppConfigService } from '../services/app-config.service';
 import { Router } from '@angular/router';

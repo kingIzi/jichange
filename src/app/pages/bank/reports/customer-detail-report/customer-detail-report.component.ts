@@ -56,7 +56,6 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
@@ -65,6 +64,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -97,7 +98,6 @@ export class CustomerDetailReportComponent implements OnInit {
   public tableLoading: boolean = false;
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public filterFormData: {
     companies: Company[];
     regions: Region[];
@@ -130,6 +130,7 @@ export class CustomerDetailReportComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private companyService: CompanyService,
@@ -140,23 +141,17 @@ export class CustomerDetailReportComponent implements OnInit {
     private tr: TranslocoService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableFilterForm() {
     this.tableFilterFormGroup = this.fb.group({
       Comp: this.fb.control('', [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, []),
+      branch: this.fb.control(this.getUserProfile().braid, []),
       reg: this.fb.control('', [Validators.required]),
       dist: this.fb.control('', [Validators.required]),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
-    if (Number(this.userProfile.braid) === 0) {
+    if (Number(this.getUserProfile().braid) === 0) {
       this.branchChangedEventHandler();
     }
     this.regionChangeEventHandler();
@@ -299,7 +294,7 @@ export class CustomerDetailReportComponent implements OnInit {
     this.startLoading = true;
     let companiesObs = from(
       this.reportsService.getBranchedCompanyList({
-        branch: this.userProfile.braid,
+        branch: this.getUserProfile().braid,
       })
     );
     let regionsObs = from(this.companyService.getRegionList());
@@ -485,7 +480,6 @@ export class CustomerDetailReportComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.buildPage();
     this.createTableFilterForm();
@@ -495,6 +489,9 @@ export class CustomerDetailReportComponent implements OnInit {
         this.initData(q);
       }
     });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

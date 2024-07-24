@@ -9,10 +9,11 @@ import { LanguageSelectorComponent } from '../../language-selector/language-sele
 import { Router, RouterModule } from '@angular/router';
 import { MatDialogRef } from '@angular/material/dialog';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from '../display-message-box/display-message-box.component';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-bank-user-profile',
@@ -31,10 +32,8 @@ import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 export class BankUserProfileComponent {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  public userProfile = JSON.parse(
-    localStorage.getItem('userProfile') as string
-  ) as LoginResponse;
   constructor(
+    private appConfig: AppConfigService,
     private dialogRef: MatDialogRef<BankUserProfileComponent>,
     private router: Router,
     private client: RequestClientService,
@@ -44,9 +43,12 @@ export class BankUserProfileComponent {
   // [routerLink]="'/auth'"
   private logout() {
     this.client
-      .performPost(`/api/LoginUser/Logout/Userid=${this.userProfile.Usno}`, {
-        Userid: this.userProfile.Usno,
-      })
+      .performPost(
+        `/api/LoginUser/Logout/Userid=${this.getUserProfile().Usno}`,
+        {
+          Userid: this.getUserProfile().Usno,
+        }
+      )
       .subscribe({
         next: (result) => {
           localStorage.clear();
@@ -62,6 +64,9 @@ export class BankUserProfileComponent {
           throw err;
         },
       });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.logout();

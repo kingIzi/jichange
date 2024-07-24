@@ -40,6 +40,7 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-add-invoice',
@@ -100,10 +101,9 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
       userid: this.fb.control(this.appConfigService.getLoginResponse().Usno, [
         Validators.required,
       ]),
-      compid: this.fb.control(
-        this.appConfigService.getLoginResponse().InstID.toString(),
-        [Validators.required]
-      ),
+      compid: this.fb.control(this.getUserProfile().InstID.toString(), [
+        Validators.required,
+      ]),
       auname: this.fb.control('', [Validators.required]),
       invno: this.fb.control('', [Validators.required]),
       date: this.fb.control('', [Validators.required]),
@@ -322,7 +322,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   private getBuildPageRequests() {
     let customerNamesObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
-        compid: this.appConfigService.getLoginResponse().InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let currenciesObservable = from(this.invoiceService.getCurrencyCodes());
@@ -355,7 +355,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   private getEditInvoiceFormRequests(invoiceNumber: string) {
     let invoiceDetails = from(
       this.invoiceService.invoiceDetailsById({
-        compid: this.appConfigService.getLoginResponse().InstID,
+        compid: this.getUserProfile().InstID,
         invid: Number(invoiceNumber),
       })
     );
@@ -415,6 +415,9 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.createForm();
     this.retrieveQueryParams();
+  }
+  getUserProfile() {
+    return this.appConfigService.getLoginResponse() as VendorLoginResponse;
   }
   ngAfterViewInit(): void {
     this.buildPage();

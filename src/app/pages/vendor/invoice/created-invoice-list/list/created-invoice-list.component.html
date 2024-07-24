@@ -143,7 +143,7 @@
                   >
                     <app-cancel-generated-invoice
                       [invoiceId]="element.Inv_Mas_Sno"
-                      [userId]="userProfile.Usno"
+                      [userId]="getUserProfile().Usno"
                       #cancelGeneratedInvoice
                     ></app-cancel-generated-invoice>
                     <button
@@ -157,7 +157,7 @@
                   <ng-template #approveInvoiceTemplate>
                     <ng-container
                       *ngIf="
-                        userProfile.Usno.toString().toLocaleLowerCase() !==
+                        getUserProfile().Usno.toString().toLocaleLowerCase() !==
                         element?.AuditBy?.trim()
                           ?.toString()
                           ?.toLocaleLowerCase()
@@ -175,7 +175,7 @@
                     </ng-container>
                     <ng-container
                       *ngIf="
-                        userProfile.Usno.toString().toLocaleLowerCase() ===
+                        getUserProfile().Usno.toString().toLocaleLowerCase() ===
                         element?.AuditBy?.trim()
                           ?.toString()
                           ?.toLocaleLowerCase()
@@ -320,7 +320,7 @@
                       >
                         <app-cancel-generated-invoice
                           [invoiceId]="element.Inv_Mas_Sno"
-                          [userId]="userProfile.Usno"
+                          [userId]="getUserProfile().Usno"
                           #cancelGeneratedInvoice
                         ></app-cancel-generated-invoice>
                         <button
@@ -336,7 +336,9 @@
                       <ng-template #approveInvoiceTemplate>
                         <ng-container
                           *ngIf="
-                            userProfile.Usno.toString().toLocaleLowerCase() !==
+                            getUserProfile()
+                              .Usno.toString()
+                              .toLocaleLowerCase() !==
                             element?.AuditBy?.trim()
                               ?.toString()
                               ?.toLocaleLowerCase()
@@ -356,7 +358,9 @@
                         </ng-container>
                         <ng-container
                           *ngIf="
-                            userProfile.Usno.toString().toLocaleLowerCase() ===
+                            getUserProfile()
+                              .Usno.toString()
+                              .toLocaleLowerCase() ===
                             element?.AuditBy?.trim()
                               ?.toString()
                               ?.toLocaleLowerCase()

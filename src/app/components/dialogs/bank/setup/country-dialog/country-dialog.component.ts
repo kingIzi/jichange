@@ -28,11 +28,12 @@ import {
 import { Branch } from '@langchain/core/runnables';
 import { Country } from 'src/app/core/models/bank/setup/country';
 import { environment } from 'src/environments/environment';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { CountryService } from 'src/app/core/services/bank/setup/country/country.service';
 import { AddCountryForm } from 'src/app/core/models/bank/forms/setup/country/add-country-form';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-country-dialog',
@@ -59,9 +60,6 @@ export class CountryDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public countryForm!: FormGroup;
   public addedCountry = new EventEmitter<Country>();
-  private userProfile = JSON.parse(
-    localStorage.getItem('userProfile') as string
-  ) as LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -69,6 +67,7 @@ export class CountryDialogComponent implements OnInit {
   @ViewChild('confirmAddCountry', { static: true })
   confirmAddCountry!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
     private tr: TranslocoService,
@@ -86,10 +85,10 @@ export class CountryDialogComponent implements OnInit {
         Validators.required,
       ]),
       sno: this.fb.control(0, [Validators.required]),
-      Auditby: this.fb.control(this.userProfile.Usno.toString(), [
+      Auditby: this.fb.control(this.getUserProfile().Usno.toString(), [
         Validators.required,
       ]),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
   }
   private editForm(country: Country) {
@@ -101,10 +100,10 @@ export class CountryDialogComponent implements OnInit {
         Validators.required,
       ]),
       sno: this.fb.control(country.SNO, [Validators.required]),
-      Auditby: this.fb.control(this.userProfile.Usno.toString(), [
+      Auditby: this.fb.control(this.getUserProfile().Usno.toString(), [
         Validators.required,
       ]),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
   }
   private formErrors(errorsPath: string = 'setup.countryDialog.form.dialog') {
@@ -178,6 +177,9 @@ export class CountryDialogComponent implements OnInit {
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   setCountryValue(value: string) {
     this.country_name.setValue(value.trim());

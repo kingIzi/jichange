@@ -49,11 +49,12 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
@@ -118,12 +119,12 @@ export class AmendmentsComponent implements OnInit {
     customers: [],
     invoices: [],
   };
-  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private invoiceService: InvoiceService,
@@ -133,15 +134,11 @@ export class AmendmentsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createFilterForm() {
     this.filterFormGroup = this.fb.group({
-      compid: this.fb.control(this.userProfile.InstID, [Validators.required]),
+      compid: this.fb.control(this.getUserProfile().InstID, [
+        Validators.required,
+      ]),
       cust: this.fb.control('all', [Validators.required]),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
@@ -247,7 +244,7 @@ export class AmendmentsComponent implements OnInit {
     this.cust.valueChanges.subscribe((value) => {
       if (value !== 'all') {
         let form = {
-          Comp: this.userProfile.InstID,
+          Comp: this.getUserProfile().InstID,
           cusid: value,
           stdate: '',
           enddate: '',
@@ -264,7 +261,7 @@ export class AmendmentsComponent implements OnInit {
     let companiesObservable = from(this.reportService.getCompaniesList({}));
     let customersObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let mergedObservable = zip(companiesObservable, customersObservable);
@@ -427,10 +424,12 @@ export class AmendmentsComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableSortableColumns(column: TableColumnsData) {
     switch (column.value) {
@@ -496,7 +495,7 @@ export class AmendmentsComponent implements OnInit {
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value };
-      form.compid = this.userProfile.InstID;
+      form.compid = this.getUserProfile().InstID;
       form.stdate = this.reformatDate(
         this.filterFormGroup.value.stdate.split('-')
       );

@@ -26,7 +26,6 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Ward } from 'src/app/core/models/bank/setup/ward';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { District } from 'src/app/core/models/bank/setup/district';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { WardService } from 'src/app/core/services/bank/setup/ward/ward.service';

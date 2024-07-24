@@ -27,7 +27,6 @@ import { ChatAgentComponent } from '../../chat-agent/chat-agent.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BankUserProfileComponent } from '../../dialogs/bank-user-profile/bank-user-profile.component';
 import { LoginService } from 'src/app/core/services/login.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { TimeoutError } from 'rxjs';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
@@ -40,6 +39,8 @@ import {
   BankReportMap,
   BankSetupMap,
 } from 'src/app/core/enums/bank/bank-headers-map';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-header',
@@ -66,13 +67,13 @@ export class HeaderComponent implements OnInit {
   private lastPing!: Date;
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('timeoutWarning') timeoutWarning!: DisplayMessageBoxComponent;
   @ViewChild('timeOut') timeOut!: DisplayMessageBoxComponent;
   @ViewChild('header', { static: true }) header!: ElementRef<HTMLDivElement>;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private dialog: MatDialog,
@@ -136,12 +137,6 @@ export class HeaderComponent implements OnInit {
       }
     });
   }
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeaders() {
     type Header = {
       name: string;
@@ -159,7 +154,7 @@ export class HeaderComponent implements OnInit {
     this.tr.selectTranslation(activeLang).subscribe((headers) => {
       let bankHeaders: Header[] = headers['bankHeaders'];
       bankHeaders.forEach((bankHeader, bankHeaderIndex) => {
-        if (bankHeader.access.includes(this.userProfile.desig)) {
+        if (bankHeader.access.includes(this.getUserProfile().desig)) {
           let header = this.fb.group({
             label: this.fb.control(bankHeader.name, []),
             dropdowns: this.fb.array([], []),
@@ -169,7 +164,7 @@ export class HeaderComponent implements OnInit {
             ),
           });
           bankHeader.dropdowns.forEach((dropdown, dropdownIndex) => {
-            if (dropdown.access.includes(this.userProfile.desig)) {
+            if (dropdown.access.includes(this.getUserProfile().desig)) {
               let dropdownGroup = this.fb.group({
                 label: this.fb.control(dropdown.label, []),
                 routerLink: this.fb.control(dropdown.routerLink, []),
@@ -276,7 +271,7 @@ export class HeaderComponent implements OnInit {
   private requestLogout() {
     this.routeLoading = true;
     this.loginService
-      .logout({ userid: this.userProfile.Usno })
+      .logout({ userid: this.getUserProfile().Usno })
       .then((result) => {
         this.routeLoading = false;
         localStorage.clear();
@@ -296,8 +291,10 @@ export class HeaderComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeaders();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   switchRouterLinks(ind: number) {
     return '';

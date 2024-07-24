@@ -27,13 +27,14 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CountryDialogComponent } from '../country-dialog/country-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
 import { TimeoutError } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AddSuspenseAccountForm } from 'src/app/core/models/bank/forms/setup/suspense-account/add-suspense-account-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-suspense-account-dialog',
@@ -60,7 +61,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 export class SuspenseAccountDialogComponent implements OnInit {
   public suspenseAccountForm!: FormGroup;
   public startLoading: boolean = false;
-  private userProfile!: LoginResponse;
   public addedSuspenseAccount = new EventEmitter<SuspenseAccount>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -69,6 +69,7 @@ export class SuspenseAccountDialogComponent implements OnInit {
   @ViewChild('confirmAddSuspenseAccount')
   confirmAddSuspenseAccount!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
     private tr: TranslocoService,
@@ -77,17 +78,13 @@ export class SuspenseAccountDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { suspenseAccount: SuspenseAccount },
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createForm() {
     this.suspenseAccountForm = this.fb.group({
       account: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       status: this.fb.control('', [Validators.required]),
     });
   }
@@ -97,7 +94,9 @@ export class SuspenseAccountDialogComponent implements OnInit {
         Validators.required,
       ]),
       sno: this.fb.control(suspenseAccount.Sus_Acc_Sno, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       status: this.fb.control(suspenseAccount.Status, [Validators.required]),
       dummy: this.fb.control(true, []),
     });
@@ -168,12 +167,14 @@ export class SuspenseAccountDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data?.suspenseAccount) {
       this.createEditForm(this.data.suspenseAccount);
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

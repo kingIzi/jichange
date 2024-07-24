@@ -45,7 +45,6 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/district/remove-district-form';
 import { RemoveDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/remove-designation-form';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { DesignationTable } from 'src/app/core/enums/bank/setup/designation-table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -59,6 +58,8 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { Branch } from '@langchain/core/runnables';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-designation-list',
@@ -93,7 +94,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DesignationListComponent implements OnInit {
-  public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
@@ -104,6 +104,7 @@ export class DesignationListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private designationService: DesignationService,
     private fb: FormBuilder,
@@ -113,12 +114,6 @@ export class DesignationListComponent implements OnInit {
     private tableDataService: TableDataService<Designation>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeadersFormGroup() {
     let TABLE_SHOWING = 5;
     this.tableHeadersFormGroup = this.fb.group({
@@ -258,9 +253,11 @@ export class DesignationListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestDesignationList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -353,7 +350,7 @@ export class DesignationListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let body = {
         sno: designation.Desg_Id,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       };
       this.requestDeleteDesignation(body);
     });

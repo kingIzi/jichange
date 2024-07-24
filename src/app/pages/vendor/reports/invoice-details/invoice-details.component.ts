@@ -33,7 +33,7 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { InvoiceDetailsReportTable } from 'src/app/core/enums/vendor/reports/invoice-details-report-table';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
@@ -125,12 +125,6 @@ export class InvoiceDetailsComponent implements OnInit {
     private appConfig: AppConfigService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  // private parseUserProfile() {
-  //   let userProfile = localStorage.getItem('userProfile');
-  //   if (userProfile) {
-  //     this.userProfile = JSON.parse(userProfile) as LoginResponse;
-  //   }
-  // }
   private createHeaderGroup() {
     let TABLE_SHOWING = 9;
     this.tableFormGroup = this.fb.group({
@@ -226,7 +220,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private createFilterFormGroup() {
     this.filterFormGroup = this.fb.group({
-      Comp: this.fb.control(this.appConfig.getLoginResponse().InstID, []),
+      Comp: this.fb.control(this.getUserProfile().InstID, []),
       cusid: this.fb.control('', [Validators.required]),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
@@ -237,7 +231,7 @@ export class InvoiceDetailsComponent implements OnInit {
     this.startLoading = true;
     let getInvoiceReport = from(
       this.reportService.getCustomerDetailsList({
-        Sno: this.appConfig.getLoginResponse().InstID,
+        Sno: this.getUserProfile().InstID,
       })
     );
     let companiesObs = from(this.reportService.getCompaniesList({}));
@@ -397,7 +391,7 @@ export class InvoiceDetailsComponent implements OnInit {
   private initialFormSubmission(q: string) {
     let form = { ...this.filterFormGroup.value };
     this.cusid.setValue('all');
-    form.Comp = this.appConfig.getLoginResponse().InstID;
+    form.Comp = this.getUserProfile().InstID;
     if (form.stdate) {
       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
     }
@@ -455,6 +449,9 @@ export class InvoiceDetailsComponent implements OnInit {
         this.initialFormSubmission(this.queryData);
       }
     });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -568,7 +565,7 @@ export class InvoiceDetailsComponent implements OnInit {
   submitFilterForm() {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value } as InvoiceReportFormVendor;
-      form.Comp = this.appConfig.getLoginResponse().InstID;
+      form.Comp = this.getUserProfile().InstID;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }

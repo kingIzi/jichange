@@ -41,7 +41,8 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { NgxLoadingModule } from 'ngx-loading';
 import { AddBankUserForm } from 'src/app/core/models/bank/forms/setup/bank-user/add-bank-user-form';
 import Swal from 'sweetalert2';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-bank-user-dialog',
@@ -73,7 +74,6 @@ export class BankUserDialogComponent implements OnInit {
   public employeeDetail!: EmployeeDetail;
   public designations: Designation[] = [];
   public branches: Branch[] = [];
-  public userProfile!: LoginResponse;
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public added = new EventEmitter<EmployeeDetail>();
   @ViewChild('displayMessageBox')
@@ -83,6 +83,7 @@ export class BankUserDialogComponent implements OnInit {
   @ViewChild('confirmAddBankUser')
   confirmAddBankUser!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
     private tr: TranslocoService,
@@ -93,12 +94,6 @@ export class BankUserDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { Detail_Id: number },
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(errorsPath: string = 'setup.bankUser.form.dialog') {
     if (this.empid.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -181,7 +176,9 @@ export class BankUserDialogComponent implements OnInit {
       gender: this.fb.control('', [Validators.required]),
       dummy: this.fb.control(true, [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
     });
   }
   private setEditFormValues() {
@@ -202,7 +199,7 @@ export class BankUserDialogComponent implements OnInit {
       gender: this.employeeDetail.Emp_Status,
       dummy: true,
       sno: this.employeeDetail.Detail_Id,
-      userid: this.userProfile.Usno,
+      userid: this.getUserProfile().Usno,
     });
   }
   private fetchFormData() {
@@ -333,8 +330,10 @@ export class BankUserDialogComponent implements OnInit {
       });
   }
   ngOnInit() {
-    this.parseUserProfile();
     this.prepareForm();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

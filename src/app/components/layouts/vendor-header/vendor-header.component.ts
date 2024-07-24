@@ -24,7 +24,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { firstValueFrom, from, zip } from 'rxjs';
-import { LoginResponse } from 'src/app/core/models/login-response';
+//import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoginService } from 'src/app/core/services/login.service';
 import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -35,6 +35,8 @@ import { CustomerService } from 'src/app/core/services/vendor/customers/customer
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-vendor-header',
@@ -63,7 +65,7 @@ export class VendorHeaderComponent implements OnInit {
   };
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
-  public userProfile!: LoginResponse;
+  //public userProfile!: LoginResponse;
   private reportsMap = {
     overview: 0,
     transactionDetails: 1,
@@ -79,6 +81,7 @@ export class VendorHeaderComponent implements OnInit {
   @ViewChild('timeOut') timeOut!: DisplayMessageBoxComponent;
   @ViewChild('header', { static: true }) header!: ElementRef<HTMLDivElement>;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private loginService: LoginService,
     //private customerService: CustomerService,
@@ -146,16 +149,10 @@ export class VendorHeaderComponent implements OnInit {
       }
     });
   }
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private requestLogout() {
     this.routeLoading = true;
     this.loginService
-      .logout({ userid: this.userProfile.Usno })
+      .logout({ userid: this.getUserProfile().Usno })
       .then((result) => {
         this.routeLoading = false;
         localStorage.clear();
@@ -260,7 +257,7 @@ export class VendorHeaderComponent implements OnInit {
   }
   private buildPage() {
     let vendorObs = from(
-      this.invoiceService.getCompanyS({ compid: this.userProfile.InstID })
+      this.invoiceService.getCompanyS({ compid: this.getUserProfile().InstID })
     );
     let res = AppUtilities.pipedObservables(zip(vendorObs));
     res
@@ -285,9 +282,11 @@ export class VendorHeaderComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeaders();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   getHeaderDropdownArray(index: number) {
     return this.headers.at(index).get('dropdowns') as FormArray;

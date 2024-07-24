@@ -27,12 +27,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BranchDialogComponent } from '../branch-dialog/branch-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { EmailText } from 'src/app/core/models/bank/setup/email-text';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { AddEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/add-email-text-form';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { EmailTextService } from 'src/app/core/services/bank/setup/email-text/email-text.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-email-text-dialog',
@@ -66,7 +67,6 @@ export class EmailTextDialogComponent implements OnInit {
     'On User Registration',
   ];
   public emailTextForm!: FormGroup;
-  public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public addedEmailText = new EventEmitter<EmailText>();
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -77,6 +77,7 @@ export class EmailTextDialogComponent implements OnInit {
   @ViewChild('confirmAddEmailText')
   confirmAddEmailText!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
     private tr: TranslocoService,
@@ -87,12 +88,6 @@ export class EmailTextDialogComponent implements OnInit {
       emailText: EmailText;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createForm() {
     this.emailTextForm = this.fb.group({
       flow: this.fb.control('', [Validators.required]),
@@ -101,7 +96,7 @@ export class EmailTextDialogComponent implements OnInit {
       sub: this.fb.control('', [Validators.required]),
       subloc: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, []),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
   }
   private createEditForm(email: EmailText) {
@@ -112,7 +107,7 @@ export class EmailTextDialogComponent implements OnInit {
       sub: this.fb.control(email.Subject, [Validators.required]),
       subloc: this.fb.control(email.Local_subject, [Validators.required]),
       sno: this.fb.control(email.SNO, []),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
   }
   private formErrors(errorsPath: string = 'setup.emailText.form.dialog') {
@@ -217,12 +212,14 @@ export class EmailTextDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data.emailText) {
       this.createEditForm(this.data.emailText);
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

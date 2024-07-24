@@ -38,7 +38,7 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
-import { LoginResponse } from 'src/app/core/models/login-response';
+//import { LoginResponse } from 'src/app/core/models/login-response';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { Observable, from, of, zip } from 'rxjs';
 import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
@@ -51,6 +51,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-list',
@@ -98,7 +100,7 @@ export class ListComponent implements OnInit {
   };
   public headersFormGroup!: FormGroup;
   public filterTableFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
+  //public userProfile!: LoginResponse;
   public filterFormData: {
     companies: Company[];
     customers: Customer[];
@@ -114,6 +116,7 @@ export class ListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private tr: TranslocoService,
@@ -121,12 +124,6 @@ export class ListComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeadersFormGroup() {
     let TABLE_SHOWING = 7;
     this.headersFormGroup = this.fb.group({
@@ -180,12 +177,14 @@ export class ListComponent implements OnInit {
   }
   private createRequestFormGroup() {
     this.filterTableFormGroup = this.fb.group({
-      compid: this.fb.control(this.userProfile.InstID, [Validators.required]),
+      compid: this.fb.control(this.getUserProfile().InstID, [
+        Validators.required,
+      ]),
       cusid: this.fb.control('', [Validators.required]),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
-    if (this.userProfile.InstID > 0) {
+    if (this.getUserProfile().InstID > 0) {
       this.compid.disable();
     }
   }
@@ -244,7 +243,7 @@ export class ListComponent implements OnInit {
     let companiesObs = from(this.reportsService.getCompaniesList({}));
     let customersObs = from(
       this.reportsService.getCustomerDetailsList({
-        Sno: this.userProfile.InstID,
+        Sno: this.getUserProfile().InstID,
       })
     );
     let res = AppUtilities.pipedObservables(zip(companiesObs, customersObs));
@@ -350,7 +349,7 @@ export class ListComponent implements OnInit {
   private initialFormSubmission() {
     this.cusid.setValue('all');
     let form = { ...this.filterTableFormGroup.value };
-    form.compid = this.userProfile.InstID;
+    form.compid = this.getUserProfile().InstID;
     if (form.stdate) {
       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
     }
@@ -360,11 +359,13 @@ export class ListComponent implements OnInit {
     this.requestTransactionDetailsList(form);
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createRequestFormGroup();
     this.createHeadersFormGroup();
     this.buildPage();
     this.initialFormSubmission();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -474,7 +475,7 @@ export class ListComponent implements OnInit {
   submitForm() {
     if (this.filterTableFormGroup.valid) {
       let form = { ...this.filterTableFormGroup.value };
-      form.compid = this.userProfile.InstID;
+      form.compid = this.getUserProfile().InstID;
       if (form.stdate) {
         form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
       }

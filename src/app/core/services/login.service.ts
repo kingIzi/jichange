@@ -4,6 +4,10 @@ import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from '../models/http-data-response';
 import { ChangePasswordForm } from '../models/auth/change-password-form';
 import { ForgotPasswordResponse } from '../models/auth/forgot-password-response';
+import {
+  BankLoginResponse,
+  VendorLoginResponse,
+} from '../models/login-response';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +16,10 @@ export class LoginService {
   constructor(private client: RequestClientService) {}
   public async loginUser(body: { uname: string; pwd: string }) {
     let data = await lastValueFrom(
-      this.client.performPost(`/api/LoginUser/AddLogins`, body)
+      this.client.performPost<
+        { uname: string; pwd: string },
+        HttpDataResponse<VendorLoginResponse | BankLoginResponse>
+      >(`/api/LoginUser/AddLogins`, body)
     );
     return data;
   }

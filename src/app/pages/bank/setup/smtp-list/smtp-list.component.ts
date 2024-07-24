@@ -37,8 +37,9 @@ import { SmtpTable } from 'src/app/core/enums/bank/setup/smtp-table';
 import { RemoveSmtpForm } from 'src/app/core/models/bank/forms/setup/smtp/remove-smtp';
 import { SMTP } from 'src/app/core/models/bank/setup/smtp';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { SmtpService } from 'src/app/core/services/bank/setup/smtp/smtp.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
@@ -79,7 +80,6 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class SmtpListComponent implements OnInit {
-  public userProfile!: LoginResponse;
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
@@ -90,6 +90,7 @@ export class SmtpListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -99,12 +100,6 @@ export class SmtpListComponent implements OnInit {
     private tableDataService: TableDataService<SMTP>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private dataSourceFilterPredicate() {
     let filterPredicate = (data: SMTP, filter: string) => {
       return data.SMTP_UName &&
@@ -260,9 +255,11 @@ export class SmtpListComponent implements OnInit {
     this.tableDataService.setTableColumnsObservable(tableColumns);
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeaders();
     this.requestSmtpList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -355,7 +352,7 @@ export class SmtpListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let data = {
         sno: smtp.SNO,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       };
       this.requestRemoveSmtp(data);
     });

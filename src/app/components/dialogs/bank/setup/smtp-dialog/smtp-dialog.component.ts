@@ -27,11 +27,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BranchDialogComponent } from '../branch-dialog/branch-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { SMTP } from 'src/app/core/models/bank/setup/smtp';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { AddSmtpForm } from 'src/app/core/models/bank/forms/setup/smtp/add-smtp';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { SmtpService } from 'src/app/core/services/bank/setup/smtp/smtp.service';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-smtp-dialog',
@@ -57,7 +58,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 export class SmtpDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public smtpForm!: FormGroup;
-  public userProfile!: LoginResponse;
   public addedSmtp = new EventEmitter<SMTP>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -65,6 +65,7 @@ export class SmtpDialogComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('confirmAddSmtp') confirmAddSmtp!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BranchDialogComponent>,
     private smtpService: SmtpService,
@@ -75,12 +76,6 @@ export class SmtpDialogComponent implements OnInit {
       smtp: SMTP;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(errorsPath: string = 'setup.smtp.form.dialog') {
     if (this.from_address.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -198,7 +193,7 @@ export class SmtpDialogComponent implements OnInit {
       smtp_pwd: this.fb.control('', []),
       gender: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, []),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
   }
   private createEditForm(smtp: SMTP) {
@@ -213,16 +208,18 @@ export class SmtpDialogComponent implements OnInit {
       smtp_pwd: this.fb.control(smtp.SMTP_Password ?? '', []),
       gender: this.fb.control(smtp.SSL_Enable, [Validators.required]),
       sno: this.fb.control(smtp.SNO, []),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data.smtp) {
       this.createEditForm(this.data.smtp);
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   setControlValue(control: FormControl, value: string) {
     control.setValue(value.trim());

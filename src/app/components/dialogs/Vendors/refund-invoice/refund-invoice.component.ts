@@ -12,13 +12,14 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { from, zip } from 'rxjs';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { DisplayMessageBoxComponent } from '../../display-message-box/display-message-box.component';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-refund-invoice',
@@ -35,7 +36,6 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
   ],
 })
 export class RefundInvoiceComponent implements OnInit {
-  private userProfile!: LoginResponse;
   public generatedInvoice!: GeneratedInvoice;
   public startLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -45,6 +45,7 @@ export class RefundInvoiceComponent implements OnInit {
   @ViewChild('refundInvoice', { static: true })
   refundInvoice!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RefundInvoiceComponent>,
     private invoiceService: InvoiceService,
@@ -52,17 +53,11 @@ export class RefundInvoiceComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: { invid: number | string }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private async buildPage(invid: number | string) {
     this.startLoading = true;
     let invoiceById = from(
       this.invoiceService.getGeneratedInvoicebyId({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
         invid: invid,
       })
     );
@@ -95,11 +90,13 @@ export class RefundInvoiceComponent implements OnInit {
     this.formGroup = this.fb.group({});
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createFormGroup();
     if (this.data && this.data.invid) {
       this.buildPage(this.data.invid);
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   fullRefundDescription(description: string) {
     if (this.generatedInvoice) {

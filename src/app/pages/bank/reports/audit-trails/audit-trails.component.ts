@@ -43,7 +43,6 @@ import { AuditTrailsTable } from 'src/app/core/enums/bank/reports/audit-trails-t
 import { AuditTrailsReportForm } from 'src/app/core/models/bank/forms/reports/audit-trails-report-form';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -54,6 +53,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-audit-trails',
@@ -116,13 +117,13 @@ export class AuditTrailsComponent implements OnInit {
     dataSource: new MatTableDataSource<AuditTrail>([]),
   };
   public headersFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private auditTrailsService: AuditTrailsService,
@@ -131,12 +132,6 @@ export class AuditTrailsComponent implements OnInit {
     private cdf: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeadersGroup() {
     let TABLE_SHOWING = 7;
     this.headersFormGroup = this.fb.group({
@@ -185,9 +180,9 @@ export class AuditTrailsComponent implements OnInit {
       Startdate: this.fb.control('', [Validators.required]),
       Enddate: this.fb.control('', [Validators.required]),
       act: this.fb.control(this.actions[0], [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, []),
+      branch: this.fb.control(this.getUserProfile().braid, []),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
   }
@@ -368,10 +363,12 @@ export class AuditTrailsComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createForm();
     this.createHeadersGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

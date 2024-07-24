@@ -31,7 +31,6 @@ import {
 } from '@angular/forms';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { CompanyInboxTable } from 'src/app/core/enums/bank/company/company-inbox-table-headers';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { CompanySummaryDialogComponent } from 'src/app/components/dialogs/bank/company/company-summary-dialog/company-summary-dialog.component';
 import {
@@ -60,6 +59,11 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -87,27 +91,30 @@ import {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/company', alias: 'company' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class InboxApprovalComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public tableData: {
-    companies: Company[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Company>;
-  } = {
-    companies: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Company>([]),
-  };
+  // public tableData: {
+  //   companies: Company[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<Company>;
+  // } = {
+  //   companies: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<Company>([]),
+  // };
   public tableHeadersFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CompanyInboxTable: typeof CompanyInboxTable = CompanyInboxTable;
   @ViewChild('successMessageBox')
@@ -117,20 +124,17 @@ export class InboxApprovalComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private approvalService: ApprovalService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private fileHandler: FileHandlerService,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Company>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeadersFormGroup() {
     let TABLE_SHOWING = 6;
     this.tableHeadersFormGroup = this.fb.group({
@@ -140,34 +144,36 @@ export class InboxApprovalComponent implements OnInit {
     this.tr
       .selectTranslate(`inboxApproval.inboxApprovalTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -176,7 +182,8 @@ export class InboxApprovalComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -205,46 +212,47 @@ export class InboxApprovalComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.companyKeys(indexes);
   }
-  private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Company,
-      filter: string
-    ) => {
+  private dataSourceFilterPredicate() {
+    let filterPredicate = (data: Company, filter: string) => {
       return data.CompName &&
         data.CompName.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Company>(
-      this.tableData.companies
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<Company>(
+  //     this.tableData.companies
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  // }
+  private parseCompanyInboxResponse(
+    result: HttpDataResponse<number | Company[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Company[]);
+    }
+  }
+  private assignCompanyInbox(result: HttpDataResponse<number | Company[]>) {
+    this.parseCompanyInboxResponse(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilterPredicate();
   }
   private requestCompanyInbox() {
     this.tableLoading = true;
     let inbox = this.approvalService.postCompanyInboxList({
-      design: this.userProfile.desig,
-      braid: Number(this.userProfile.braid),
+      design: this.getUserProfile().desig,
+      braid: Number(this.getUserProfile().braid),
     } as CompanyInboxListForm);
     inbox
       .then((result) => {
-        if (
-          typeof result.response === 'number' ||
-          typeof result.response === 'string'
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-        } else {
-          this.tableData.companies = result.response;
-          this.prepareDataSource();
-        }
+        this.assignCompanyInbox(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -259,16 +267,18 @@ export class InboxApprovalComponent implements OnInit {
         throw err;
       });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestCompanyInbox();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
@@ -308,7 +318,7 @@ export class InboxApprovalComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.companies,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -320,7 +330,7 @@ export class InboxApprovalComponent implements OnInit {
   }
   downloadSheet() {
     this.fileHandler.downloadExcelTable(
-      this.tableData.companies,
+      this.tableDataService.getData(),
       this.getTableActiveKeys(),
       'pending_approval_companies',
       []
@@ -338,6 +348,18 @@ export class InboxApprovalComponent implements OnInit {
       dialogRef.close();
       this.requestCompanyInbox();
     });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

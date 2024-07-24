@@ -29,12 +29,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 import * as json from 'src/assets/temp/data.json';
 import { CancelledDialogComponent } from '../../cancelled-dialog/cancelled-dialog.component';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { DisplayMessageBoxComponent } from '../../display-message-box/display-message-box.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-generated-invoice-view',
@@ -78,7 +78,7 @@ export class GeneratedInvoiceViewComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA)
     public data: {
       Inv_Mas_Sno: string;
-      userProfile: LoginResponse;
+      userProfile: VendorLoginResponse;
     }
   ) {}
   private createForm() {

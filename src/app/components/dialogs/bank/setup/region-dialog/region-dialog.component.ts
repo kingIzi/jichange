@@ -30,7 +30,6 @@ import {
   validate,
   validator,
 } from '@langchain/core/dist/utils/fast-json-patch';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { Country } from 'src/app/core/models/bank/setup/country';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
@@ -39,6 +38,8 @@ import { CountryService } from 'src/app/core/services/bank/setup/country/country
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddRegionForm } from 'src/app/core/models/bank/forms/setup/region/add-region-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-region-dialog',
@@ -67,7 +68,6 @@ export class RegionDialogComponent implements OnInit {
   public countries: Country[] = [];
   public addedRegion = new EventEmitter<Region>();
   public PerformanceUtils: PerformanceUtils = PerformanceUtils;
-  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -75,6 +75,7 @@ export class RegionDialogComponent implements OnInit {
   @ViewChild('confirmAddRegion', { static: true })
   confirmAddRegion!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RegionDialogComponent>,
     private tr: TranslocoService,
@@ -86,12 +87,6 @@ export class RegionDialogComponent implements OnInit {
       region: Region;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private buildPage() {
     this.startLoading = true;
     let countryList = from(this.countryService.getCountryList({}));
@@ -138,7 +133,9 @@ export class RegionDialogComponent implements OnInit {
       Status: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
       csno: this.fb.control('', [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       country: this.fb.control('', []),
     });
   }
@@ -154,7 +151,9 @@ export class RegionDialogComponent implements OnInit {
       csno: this.fb.control(this.data.region.Country_Sno, [
         Validators.required,
       ]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       dummy: this.fb.control(true, [Validators.required]),
       country: this.fb.control('', []),
     });
@@ -241,13 +240,15 @@ export class RegionDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildPage();
     if (!this.data.region) {
       this.createForm();
     } else {
       this.createEditForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   setRegionValue(value: string) {
     this.region.setValue(value.trim());

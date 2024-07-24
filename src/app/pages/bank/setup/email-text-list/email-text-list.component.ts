@@ -38,8 +38,9 @@ import { EmailTextTable } from 'src/app/core/enums/bank/setup/email-text-table';
 import { RemoveEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/remove-email-text-form';
 import { EmailText } from 'src/app/core/models/bank/setup/email-text';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { EmailTextService } from 'src/app/core/services/bank/setup/email-text/email-text.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
@@ -84,7 +85,6 @@ export class EmailTextListComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public EmailTextTable: typeof EmailTextTable = EmailTextTable;
   public flows: string[] = [
@@ -101,6 +101,7 @@ export class EmailTextListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -110,12 +111,6 @@ export class EmailTextListComponent implements OnInit {
     private tableDataService: TableDataService<EmailText>,
     @Inject(TRANSLOCO_SCOPE) public scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeaders() {
     let TABLE_SHOWING = 5;
     this.tableFormGroup = this.fb.group({
@@ -265,9 +260,11 @@ export class EmailTextListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeaders();
     this.requestEmailTextList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -355,7 +352,7 @@ export class EmailTextListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let data = {
         sno: emailText.SNO,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       };
       this.requestRemoveEmailText(data);
     });

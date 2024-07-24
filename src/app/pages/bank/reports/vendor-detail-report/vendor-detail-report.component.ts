@@ -34,8 +34,9 @@ import { VendorReportTable } from 'src/app/core/enums/bank/reports/vendor-report
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
@@ -71,7 +72,6 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
 export class VendorDetailReportComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  public userProfile!: LoginResponse;
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -98,6 +98,7 @@ export class VendorDetailReportComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private fileHandler: FileHandlerService,
     private tr: TranslocoService,
@@ -107,17 +108,11 @@ export class VendorDetailReportComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableFilterForm() {
     this.tableFilterFormGroup = this.fb.group({
-      branch: this.fb.control(this.userProfile.braid, []),
+      branch: this.fb.control(this.getUserProfile().braid, []),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
   }
@@ -288,7 +283,6 @@ export class VendorDetailReportComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableFilterForm();
     this.createTableHeadersFormGroup();
     this.buildPage();
@@ -298,6 +292,9 @@ export class VendorDetailReportComponent implements OnInit {
         this.submitTableFilterForm();
       }
     });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

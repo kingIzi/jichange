@@ -37,9 +37,10 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { CompanyUsersTable } from 'src/app/core/enums/vendor/company/company-users-table';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
@@ -76,7 +77,6 @@ export class CompanyUsersComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public tableData: {
     companUsers: CompanyUser[];
     originalTableColumns: TableColumnsData[];
@@ -96,6 +96,7 @@ export class CompanyUsersComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
@@ -103,12 +104,6 @@ export class CompanyUsersComponent implements OnInit {
     private companyService: CompanyService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private prepareDataSource() {
     this.tableData.dataSource = new MatTableDataSource<CompanyUser>(
       this.tableData.companUsers
@@ -160,7 +155,7 @@ export class CompanyUsersComponent implements OnInit {
   private requestCompanyUsers() {
     this.tableLoading = true;
     this.companyService
-      .postCompanyUsersList({ compid: this.userProfile.InstID })
+      .postCompanyUsersList({ compid: this.getUserProfile().InstID })
       .then((result) => {
         this.assignCompanyUsersDataList(result);
         this.tableLoading = false;
@@ -235,9 +230,11 @@ export class CompanyUsersComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeadersFormGroup();
     this.requestCompanyUsers();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

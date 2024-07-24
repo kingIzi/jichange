@@ -50,7 +50,6 @@ import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payme
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -60,6 +59,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-payment-details',
@@ -114,7 +115,6 @@ export class PaymentDetailsComponent implements OnInit {
   };
   public filterForm!: FormGroup;
   public tableFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
@@ -126,6 +126,7 @@ export class PaymentDetailsComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private branchService: BranchService,
@@ -136,12 +137,6 @@ export class PaymentDetailsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
     if (this.compid.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -176,15 +171,17 @@ export class PaymentDetailsComponent implements OnInit {
     this.filterForm = this.fb.group({
       compid: this.fb.control('', [Validators.required]),
       cusid: this.fb.control('', [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, [Validators.required]),
+      branch: this.fb.control(this.getUserProfile().braid, [
+        Validators.required,
+      ]),
       invno: this.fb.control('', []),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
-    if (Number(this.userProfile.braid) === 0) {
+    if (Number(this.getUserProfile().braid) === 0) {
       this.branchChangedEventHandler();
     }
     this.companyChangedEventHandler();
@@ -204,7 +201,7 @@ export class PaymentDetailsComponent implements OnInit {
     this.filterForm.valueChanges.subscribe((value) => {
       if (value.compid && value.cusid) {
         let form = {
-          branch: this.userProfile.braid,
+          branch: this.getUserProfile().braid,
           Comp: value.compid,
           cusid: value.cusid,
           stdate: '',
@@ -474,7 +471,7 @@ export class PaymentDetailsComponent implements OnInit {
     this.startLoading = true;
     let companiesObs = from(
       this.reportsService.getBranchedCompanyList({
-        branch: this.userProfile.braid,
+        branch: this.getUserProfile().braid,
       })
     );
     let branchObs = from(this.branchService.postBranchList({}));
@@ -586,10 +583,12 @@ export class PaymentDetailsComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   submitFilterForm() {
     if (this.filterForm.valid) {

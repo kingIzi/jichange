@@ -40,7 +40,6 @@ import { District } from 'src/app/core/models/bank/setup/district';
 import { Region } from 'src/app/core/models/bank/setup/region';
 import { Ward } from 'src/app/core/models/bank/setup/ward';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { DistrictService } from 'src/app/core/services/bank/setup/district/district.service';
@@ -56,6 +55,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-add-vendor',
@@ -82,7 +83,6 @@ import {
 export class AddVendorComponent implements OnInit {
   public startLoading: boolean = false;
   public companySummaryForm!: FormGroup;
-  public userProfile!: LoginResponse;
   public company!: Observable<Company>;
   public formData: {
     branches$: Observable<Branch[]>;
@@ -102,6 +102,7 @@ export class AddVendorComponent implements OnInit {
   @ViewChild('confirmAddCompany', { static: true })
   confirmAddCompany!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private branchService: BranchService,
@@ -113,12 +114,6 @@ export class AddVendorComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private location: Location
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private retrieveQueryParams() {
     this.activatedRoute.queryParams.subscribe((params) => {
       if (params && params['Comp']) {
@@ -168,7 +163,9 @@ export class AddVendorComponent implements OnInit {
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       branch: this.fb.control('', [Validators.required]),
       check_status: this.fb.control('', [Validators.required]),
       fax: this.fb.control('', []),
@@ -465,10 +462,12 @@ export class AddVendorComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildPage();
     this.createForm();
     this.retrieveQueryParams();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   addBankDetail(ind: number = -1) {
     let group = this.fb.group({

@@ -40,8 +40,9 @@ import { RemoveWardForm } from 'src/app/core/models/bank/forms/setup/ward/Remove
 import { District } from 'src/app/core/models/bank/setup/district';
 import { Ward } from 'src/app/core/models/bank/setup/ward';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { WardService } from 'src/app/core/services/bank/setup/ward/ward.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
@@ -84,7 +85,6 @@ import { BreadcrumbService } from 'xng-breadcrumb';
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class WardListComponent implements OnInit {
-  public userProfile!: LoginResponse;
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public tableHeadersFormGroup!: FormGroup;
@@ -95,6 +95,7 @@ export class WardListComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private tr: TranslocoService,
     private fb: FormBuilder,
@@ -104,12 +105,6 @@ export class WardListComponent implements OnInit {
     private tableDataService: TableDataService<Ward>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeaders() {
     let TABLE_SHOWING = 5;
     this.tableHeadersFormGroup = this.fb.group({
@@ -248,9 +243,11 @@ export class WardListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeaders();
     this.requestWardList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -339,7 +336,7 @@ export class WardListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let data = {
         sno: ward.SNO,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       };
       this.requestDeleteWard(data);
     });

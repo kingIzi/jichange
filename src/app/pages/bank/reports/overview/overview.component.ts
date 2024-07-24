@@ -25,7 +25,6 @@ import Chart from 'chart.js/auto';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -52,6 +51,8 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-overview',
@@ -95,7 +96,6 @@ export class OverviewComponent implements OnInit, AfterViewInit {
   // public invoicePieChartLoading: boolean = false;
   public buildPageLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public userProfile!: LoginResponse;
   public tableData: {
     latestTransactions: TransactionDetail[];
     originalTableColumns: TableColumnsData[];
@@ -119,6 +119,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     invoices: [],
   };
   constructor(
+    private appConfig: AppConfigService,
     private router: Router,
     private reportsService: ReportsService,
     private invoiceReportService: InvoiceReportServiceService,
@@ -127,12 +128,6 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeadersFormGroup() {
     let TABLE_SHOWING = 9;
     this.headersFormGroup = this.fb.group({
@@ -330,14 +325,14 @@ export class OverviewComponent implements OnInit, AfterViewInit {
   }
   private buildPage() {
     let transactionsForm = {
-      branch: this.userProfile.braid,
+      branch: this.getUserProfile().braid,
       compid: 'all',
       cusid: 'all',
       stdate: '',
       enddate: '',
     } as TransactionDetailsReportForm;
     let invoiceForm = {
-      branch: this.userProfile.braid,
+      branch: this.getUserProfile().braid,
       Comp: 'all',
       cusid: 'all',
       stdate: '',
@@ -349,7 +344,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     );
     let bankerInvoiceStatsObs = from(
       this.reportsService.getBankerInvoiceStats({
-        sessB: this.userProfile.sessb,
+        sessB: this.getUserProfile().sessB,
       })
     );
     let invoiceObs = from(
@@ -415,11 +410,13 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeadersFormGroup();
   }
   ngAfterViewInit(): void {
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

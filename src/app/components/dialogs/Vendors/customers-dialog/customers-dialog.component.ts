@@ -29,11 +29,12 @@ import { SubmitMessageBoxComponent } from '../../submit-message-box/submit-messa
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { AddCustomerForm } from 'src/app/core/models/vendors/forms/add-customer-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-customers-dialog',
@@ -60,7 +61,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 })
 export class CustomersDialogComponent implements OnInit {
   public startLoading: boolean = false;
-  public userProfile!: LoginResponse;
   public customerForm!: FormGroup;
   public addedCustomer = new EventEmitter<Customer>();
   @ViewChild('displayMessageBox')
@@ -69,6 +69,7 @@ export class CustomersDialogComponent implements OnInit {
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('submitMessagBox') submitMessagBox!: SubmitMessageBoxComponent;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CountryDialogComponent>,
     private tr: TranslocoService,
@@ -77,12 +78,6 @@ export class CustomersDialogComponent implements OnInit {
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data: Customer
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(errorsPath: string = 'customer.form.dialog') {
     if (this.CName.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -108,8 +103,8 @@ export class CustomersDialogComponent implements OnInit {
   }
   private createForm() {
     this.customerForm = this.fb.group({
-      compid: this.fb.control(this.userProfile.InstID, []),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      compid: this.fb.control(this.getUserProfile().InstID, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
       CSno: this.fb.control(0, []),
       CName: this.fb.control('', [Validators.required]),
       PostboxNo: this.fb.control('', []),
@@ -131,8 +126,8 @@ export class CustomersDialogComponent implements OnInit {
   }
   private createEditForm() {
     this.customerForm = this.fb.group({
-      compid: this.fb.control(this.userProfile.InstID, []),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      compid: this.fb.control(this.getUserProfile().InstID, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
       CSno: this.fb.control(this.data.Cust_Sno, []),
       CName: this.fb.control(this.data.Cust_Name, [Validators.required]),
       PostboxNo: this.fb.control('', []),
@@ -221,12 +216,14 @@ export class CustomersDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data) {
       this.createEditForm();
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

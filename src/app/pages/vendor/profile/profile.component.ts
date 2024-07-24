@@ -33,8 +33,9 @@ import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-mes
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-form';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
 import { LoginService } from 'src/app/core/services/login.service';
 import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
@@ -91,7 +92,6 @@ export class ProfileComponent implements OnInit {
   public companyUser!: CompanyUser;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public PROFILE_OPTIONS: typeof PROFILE_OPTIONS = PROFILE_OPTIONS;
-  public userProfile!: LoginResponse;
   @ViewChild('changeLanguageSubmit')
   changeLanguageSubmit!: SubmitMessageBoxComponent;
   @ViewChild('changePasswordSubmit')
@@ -100,6 +100,7 @@ export class ProfileComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('messageBox') messageBox!: DisplayMessageBoxComponent;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
     private companyUserService: CompanyUserService,
@@ -108,12 +109,6 @@ export class ProfileComponent implements OnInit {
     private loginService: LoginService,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private passwordsMatchValidator(formGroup: FormGroup): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       let password = formGroup.get('pwd');
@@ -130,10 +125,13 @@ export class ProfileComponent implements OnInit {
   }
   private createChangePasswordFormGroup() {
     this.changePasswordFormGroup = this.fb.group({
-      type: this.fb.control(this.userProfile.check.toLocaleUpperCase(), []),
+      type: this.fb.control(
+        this.getUserProfile().check.toLocaleUpperCase(),
+        []
+      ),
       pwd: this.fb.control('', [Validators.required]),
       confirmPwd: this.fb.control('', [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, []),
+      userid: this.fb.control(this.getUserProfile().Usno, []),
     });
     this.pwd.addValidators(
       this.passwordsMatchValidator(this.changePasswordFormGroup)
@@ -147,7 +145,7 @@ export class ProfileComponent implements OnInit {
       fname: this.fb.control('', []),
       mobile: this.fb.control('', []),
       email: this.fb.control('', [Validators.email]),
-      role: this.fb.control(this.userProfile.role, []),
+      role: this.fb.control(this.getUserProfile().role, []),
       username: this.fb.control('', []),
     });
   }
@@ -163,7 +161,7 @@ export class ProfileComponent implements OnInit {
       fname: this.companyUser.Fullname ?? '',
       mobile: this.companyUser.Mobile,
       email: this.companyUser.Email,
-      role: this.userProfile.role,
+      role: this.getUserProfile().role,
       username: this.companyUser.Username,
     });
     this.generalFormGroup.disable();
@@ -232,11 +230,13 @@ export class ProfileComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createGeneralFormGroup();
     this.createLanguageFormGroup();
     this.createChangePasswordFormGroup();
-    this.requestEmployeeDetail({ sno: this.userProfile.Usno });
+    this.requestEmployeeDetail({ sno: this.getUserProfile().Usno });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   saveLanguageClicked() {
     if (
@@ -274,7 +274,7 @@ export class ProfileComponent implements OnInit {
     });
     dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
       dialogRef.close();
-      this.requestEmployeeDetail({ sno: this.userProfile.Usno });
+      this.requestEmployeeDetail({ sno: this.getUserProfile().Usno });
     });
   }
   changePasswordClicked() {

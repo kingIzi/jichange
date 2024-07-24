@@ -31,7 +31,6 @@ import {
 } from '@angular/forms';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { RegionService } from 'src/app/core/services/bank/setup/region/region.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Region } from 'src/app/core/models/bank/setup/region';
@@ -50,6 +49,8 @@ import {
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-region-list',
@@ -89,7 +90,6 @@ export class RegionListComponent implements OnInit {
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public RegionTable: typeof RegionTable = RegionTable;
-  public userProfile!: LoginResponse;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -97,6 +97,7 @@ export class RegionListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
@@ -106,12 +107,6 @@ export class RegionListComponent implements OnInit {
     private tableDataService: TableDataService<Region>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private dataSourceFilterPredicate() {
     let filterPredicate = (data: Region, filter: string) => {
       return data.Country_Name &&
@@ -252,9 +247,11 @@ export class RegionListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestRegionList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -339,7 +336,7 @@ export class RegionListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let data = {
         sno: region.Region_SNO,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       };
       this.requestDeleteRegion(data);
     });

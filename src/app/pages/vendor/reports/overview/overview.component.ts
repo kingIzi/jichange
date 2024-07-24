@@ -28,9 +28,10 @@ import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/rep
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
@@ -78,7 +79,6 @@ export class OverviewComponent {
     transactionsLineChartLabels: [],
     transactionsLineChartData: [],
   };
-  private userProfile!: LoginResponse;
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   public invoiceStatisticsData: DashboardOverviewStatistic[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -89,6 +89,7 @@ export class OverviewComponent {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
+    private appConfig: AppConfigService,
     private router: Router,
     private invoiceService: InvoiceService,
     private fb: FormBuilder,
@@ -97,12 +98,6 @@ export class OverviewComponent {
     private reportsService: ReportsService,
     private cdr: ChangeDetectorRef
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeadersFormGroup() {
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
@@ -222,11 +217,6 @@ export class OverviewComponent {
     result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
   ) {
     if (typeof result === 'string' && typeof result === 'number') {
-      // AppUtilities.openDisplayMessageBox(
-      //   this.displayMessageBox,
-      //   this.tr.translate(`defaults.failed`),
-      //   this.tr.translate(`dashboard.dashboard.invoiceData.message`)
-      // );
     } else {
       this.invoiceStatisticsData =
         result.response as DashboardOverviewStatistic[];
@@ -276,7 +266,7 @@ export class OverviewComponent {
     this.startLoading = true;
     let invoiceStatisticsObs = from(
       this.invoiceService.getCompanysInvoiceStats({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let form = {
@@ -288,14 +278,14 @@ export class OverviewComponent {
     let transactionsObs = from(this.reportsService.getTransactionsReport(form));
     let customersObs = from(
       this.customerService.getCustomersList({
-        Comp: this.userProfile.InstID.toString(),
+        Comp: this.getUserProfile().InstID.toString(),
         reg: '0',
         dist: '0',
       })
     );
     let createdInvoicesObs = from(
       this.invoiceService.getCreatedInvoiceList({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let mergedObs = zip(
@@ -329,11 +319,13 @@ export class OverviewComponent {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeadersFormGroup();
   }
   ngAfterViewInit(): void {
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   dashboardStatisticRouterLink(name: string) {
     switch (name.toLocaleLowerCase()) {

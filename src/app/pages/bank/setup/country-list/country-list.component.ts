@@ -35,7 +35,6 @@ import { CountryDialogComponent } from 'src/app/components/dialogs/bank/setup/co
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { Country } from 'src/app/core/models/bank/setup/country';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { CountryService } from 'src/app/core/services/bank/setup/country/country.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
@@ -60,6 +59,8 @@ import {
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-country-list',
@@ -100,7 +101,6 @@ export class CountryListComponent implements OnInit {
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CountryTable: typeof CountryTable = CountryTable;
-  private userProfile!: LoginResponse;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('displayMessageBox')
@@ -108,6 +108,7 @@ export class CountryListComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -117,12 +118,6 @@ export class CountryListComponent implements OnInit {
     private tableDataService: TableDataService<Country>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createHeadersForm() {
     let TABLE_SHOWING = 5;
     this.countryForm = this.fb.group({
@@ -264,9 +259,11 @@ export class CountryListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createHeadersForm();
     this.getCountryList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -349,7 +346,7 @@ export class CountryListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let data = {
         sno: country.SNO,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       };
       this.requestRemoveCountry(data);
     });

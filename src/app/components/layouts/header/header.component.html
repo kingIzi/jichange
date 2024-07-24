@@ -145,7 +145,7 @@
           <li>
             <a
               #profileAhref
-              [routerLink]="'/main/profile/' + userProfile.Usno.toString()"
+              [routerLink]="'/main/profile/' + getUserProfile().Usno.toString()"
               (click)="routerClicked(profileAhref)"
               class="flex flex-row items-center"
             >
@@ -153,10 +153,10 @@
                 <i class="bi bi-person-circle text-lg"></i>
               </span>
               <div class="flex flex-row items-center justify-between w-full">
-                <p class="text-sm">{{ userProfile.Uname }}</p>
+                <p class="text-sm">{{ getUserProfile().Uname }}</p>
                 <span
                   class="badge badge-accent badge-sm text-white uppercase"
-                  >{{ userProfile.role }}</span
+                  >{{ getUserProfile().role }}</span
                 >
               </div>
             </a>

@@ -38,8 +38,9 @@ import { DistrictTable } from 'src/app/core/enums/bank/setup/district-table';
 import { RemoveDistrictForm } from 'src/app/core/models/bank/forms/setup/district/remove-district-form';
 import { District } from 'src/app/core/models/bank/setup/district';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { DistrictService } from 'src/app/core/services/bank/setup/district/district.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
@@ -81,7 +82,6 @@ import { BreadcrumbService } from 'xng-breadcrumb';
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class DistrictListComponent implements OnInit {
-  public userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public tableFormGroup!: FormGroup;
@@ -92,6 +92,7 @@ export class DistrictListComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -101,12 +102,6 @@ export class DistrictListComponent implements OnInit {
     private tableDataService: TableDataService<District>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeaders() {
     let TABLE_SHOWING = 5;
     this.tableFormGroup = this.fb.group({
@@ -251,9 +246,11 @@ export class DistrictListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeaders();
     this.requestDistrictList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -348,7 +345,7 @@ export class DistrictListComponent implements OnInit {
     dialog.remove.asObservable().subscribe(() => {
       let body = {
         sno: district.SNO,
-        userid: this.userProfile.Usno,
+        userid: this.getUserProfile().Usno,
       } as RemoveDistrictForm;
       this.requestDeleteDistrict(body);
     });

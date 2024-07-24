@@ -1,20 +1,26 @@
 import { Injectable, OnInit } from '@angular/core';
-import { LoginResponse } from '../models/login-response';
+//import { LoginResponse } from '../models/login-response';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErrorMessageDialogComponent } from 'src/app/components/dialogs/error-message-dialog/error-message-dialog.component';
+import {
+  BankLoginResponse,
+  VendorLoginResponse,
+} from '../models/login-response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppConfigService {
-  public userProfile!: LoginResponse;
+  public userProfile!: VendorLoginResponse | BankLoginResponse;
   constructor(private dialog: MatDialog) {
     this.parseUserProfile();
   }
   private parseUserProfile() {
     let userProfile = localStorage.getItem('userProfile');
     if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
+      this.userProfile = JSON.parse(userProfile) as
+        | VendorLoginResponse
+        | BankLoginResponse;
     }
   }
   getLoginResponse() {

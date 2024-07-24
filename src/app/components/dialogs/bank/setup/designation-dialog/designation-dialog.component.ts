@@ -28,10 +28,11 @@ import { Designation } from 'src/app/core/models/bank/setup/designation';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { DesignationService } from 'src/app/core/services/bank/setup/designation/designation.service';
 import { TimeoutError } from 'rxjs';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AddDesignationForm } from 'src/app/core/models/bank/forms/setup/designation/add-designation-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-designation-dialog',
@@ -57,7 +58,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 export class DesignationDialogComponent implements OnInit {
   public startLoading: boolean = false;
   public designationForm!: FormGroup;
-  public userProfile!: LoginResponse;
   public addedDesignation = new EventEmitter<Designation>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -66,6 +66,7 @@ export class DesignationDialogComponent implements OnInit {
   @ViewChild('confirmAddDesignation')
   confirmAddDesignation!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DesignationDialogComponent>,
     private tr: TranslocoService,
@@ -74,12 +75,6 @@ export class DesignationDialogComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any,
     @Inject(MAT_DIALOG_DATA) public data: { designationData: Designation }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private formErrors(errorsPath: string = 'setup.designation.form.dialog') {
     if (this.designationForm.invalid) {
       AppUtilities.openDisplayMessageBox(
@@ -93,7 +88,9 @@ export class DesignationDialogComponent implements OnInit {
     this.designationForm = this.fb.group({
       desg: this.fb.control('', [Validators.required]),
       sno: this.fb.control(0, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       dummy: this.fb.control(true, [Validators.required]),
     });
   }
@@ -101,7 +98,9 @@ export class DesignationDialogComponent implements OnInit {
     this.designationForm = this.fb.group({
       desg: this.fb.control(designation.Desg_Name, [Validators.required]),
       sno: this.fb.control(designation.Desg_Id, [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       dummy: this.fb.control(true, [Validators.required]),
     });
   }
@@ -166,12 +165,14 @@ export class DesignationDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     if (this.data.designationData) {
       this.createEditForm(this.data.designationData);
     } else {
       this.createForm();
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

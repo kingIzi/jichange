@@ -50,10 +50,11 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
@@ -97,7 +98,6 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class CreatedInvoiceListComponent implements OnInit {
-  public userProfile!: LoginResponse;
   public tableHeadersFormGroup!: FormGroup;
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
@@ -122,6 +122,7 @@ export class CreatedInvoiceListComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private router: Router,
     private fb: FormBuilder,
     private dialog: MatDialog,
@@ -134,12 +135,6 @@ export class CreatedInvoiceListComponent implements OnInit {
     private tableDataService: TableDataService<GeneratedInvoice>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createTableHeadersFormGroup() {
     let TABLE_SHOWING = 8;
     this.tableHeadersFormGroup = this.fb.group({
@@ -240,7 +235,7 @@ export class CreatedInvoiceListComponent implements OnInit {
   private requestCreatedInvoiceList() {
     this.tableLoading = true;
     this.invoiceService
-      .getCreatedInvoiceList({ compid: this.userProfile.InstID })
+      .getCreatedInvoiceList({ compid: this.getUserProfile().InstID })
       .then((result) => {
         this.assignCreatedInvoiceDataList(result);
         this.tableLoading = false;
@@ -259,8 +254,10 @@ export class CreatedInvoiceListComponent implements OnInit {
   }
   private prepareInvoiceFormGroup() {
     let form = this.fb.group({
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
-      compid: this.fb.control(this.userProfile.InstID.toString(), [
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
+      compid: this.fb.control(this.getUserProfile().InstID.toString(), [
         Validators.required,
       ]),
       auname: this.fb.control('', [Validators.required]),
@@ -448,7 +445,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.startLoading = true;
     let invoiceDetailsObservable = from(
       this.invoiceService.invoiceDetailsById({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
         invid: Number(invoice.Inv_Mas_Sno),
       })
     );
@@ -494,9 +491,11 @@ export class CreatedInvoiceListComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createTableHeadersFormGroup();
     this.requestCreatedInvoiceList();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -584,7 +583,7 @@ export class CreatedInvoiceListComponent implements OnInit {
       disableClose: true,
       data: {
         invid: null,
-        userProfile: this.userProfile,
+        userProfile: this.getUserProfile(),
         customerId: null,
       },
     });
@@ -600,7 +599,7 @@ export class CreatedInvoiceListComponent implements OnInit {
       height: '700px',
       data: {
         Inv_Mas_Sno: generatedInvoice.Inv_Mas_Sno,
-        userProfile: this.userProfile,
+        userProfile: this.getUserProfile(),
       },
     });
   }
@@ -617,7 +616,7 @@ export class CreatedInvoiceListComponent implements OnInit {
       height: '800px',
       data: {
         Inv_Mas_Sno: invoice.Inv_Mas_Sno,
-        userProfile: this.userProfile,
+        userProfile: this.getUserProfile(),
       },
     });
     dialogRef.componentInstance.viewReady.asObservable().subscribe((view) => {
@@ -645,7 +644,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     dialog.message = this.tr
       .translate(`invoice.createdInvoice.sureCancelInvoice`)
       .replace('{}', invoice.Invoice_No);
-    dialog.userId = this.userProfile.Usno;
+    dialog.userId = this.getUserProfile().Usno;
     dialog.invoiceId = invoice.Inv_Mas_Sno;
     dialog.cancelledInvoice.asObservable().subscribe(() => {
       dialog.closeDialog();

@@ -36,7 +36,6 @@ import {
 } from '@angular/material/paginator';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -60,6 +59,7 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { DeleteBankUserForm as DeleteCustomerForm } from 'src/app/core/models/bank/forms/setup/bank-user/delete-bank-user-form';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-customers-list',
@@ -143,7 +143,7 @@ export class CustomersListComponent implements OnInit {
     this.tableLoading = true;
     this.customerService
       .getCustomersList({
-        Comp: this.appConfigService.getLoginResponse().InstID.toString(),
+        Comp: this.getUserProfile().InstID.toString(),
         reg: '0',
         dist: '0',
       })
@@ -285,6 +285,9 @@ export class CustomersListComponent implements OnInit {
         this.openCustomersDialog();
       }
     });
+  }
+  getUserProfile() {
+    return this.appConfigService.getLoginResponse() as VendorLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);

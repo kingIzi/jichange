@@ -26,7 +26,6 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { District } from 'src/app/core/models/bank/setup/district';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { DistrictService } from 'src/app/core/services/bank/setup/district/district.service';
 import { RegionService } from 'src/app/core/services/bank/setup/region/region.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
@@ -35,6 +34,8 @@ import { Region } from 'src/app/core/models/bank/setup/region';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddDistrictForm } from 'src/app/core/models/bank/forms/setup/district/add-district-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-district-dialog',
@@ -58,7 +59,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
   ],
 })
 export class DistrictDialogComponent implements OnInit {
-  public userProfile!: LoginResponse;
   public districtForm!: FormGroup;
   public startLoading: boolean = false;
   public regions: Region[] = [];
@@ -71,6 +71,7 @@ export class DistrictDialogComponent implements OnInit {
   @ViewChild('confirmAddDistrict', { static: true })
   confirmAddDistrict!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DistrictDialogComponent>,
     private translocoService: TranslocoService,
@@ -80,12 +81,6 @@ export class DistrictDialogComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: { district: District }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private switchInsertDistrictErrorMessage(message: string) {
     let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
       message,
@@ -222,7 +217,9 @@ export class DistrictDialogComponent implements OnInit {
       region_id: this.fb.control('', [Validators.required]),
       district_name: this.fb.control('', [Validators.required]),
       district_status: this.fb.control('', [Validators.required]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       sno: this.fb.control(0, [Validators.required]),
       dummy: this.fb.control(true, []),
     });
@@ -236,19 +233,23 @@ export class DistrictDialogComponent implements OnInit {
       district_status: this.fb.control(district.District_Status, [
         Validators.required,
       ]),
-      userid: this.fb.control(this.userProfile.Usno, [Validators.required]),
+      userid: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
       sno: this.fb.control(district.SNO, [Validators.required]),
       dummy: this.fb.control(true, []),
     });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildPage();
     if (!this.data.district) {
       this.createForm();
     } else {
       this.createEditForm(this.data.district);
     }
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close({ data: 'Dialog closed' });

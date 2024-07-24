@@ -38,7 +38,6 @@ import { Customer } from 'src/app/core/models/vendors/customer';
 import { Router } from '@angular/router';
 import { ConfirmAddCustomerDialogComponent } from './confirm-add-customer-dialog/confirm-add-customer-dialog.component';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import {
@@ -61,6 +60,8 @@ import { Autocomplete, Input, initTE } from 'tw-elements';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 
 @Component({
   selector: 'app-invoice-details-dialog',
@@ -91,7 +92,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
   ],
 })
 export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
-  private userProfile!: LoginResponse;
   public startLoading: boolean = false;
   public generatedInvoice!: GeneratedInvoice;
   public invoices: GeneratedInvoice[] = [];
@@ -114,6 +114,7 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('customer', { static: true })
   customer!: ElementRef<HTMLInputElement>;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private router: Router,
@@ -123,17 +124,11 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      userProfile: LoginResponse;
+      userProfile: VendorLoginResponse;
       invid: number;
       customerId: number;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private modifyInvoiceDetailsForm() {
     this.invno.setValue(this.generatedInvoice.Invoice_No);
     this.date.setValue(
@@ -257,8 +252,10 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
   }
   private createForm() {
     this.invoiceDetailsForm = this.fb.group({
-      user_id: this.fb.control(this.userProfile.Usno, [Validators.required]),
-      compid: this.fb.control(this.userProfile.InstID.toString(), [
+      user_id: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
+      compid: this.fb.control(this.getUserProfile().InstID.toString(), [
         Validators.required,
       ]),
       auname: this.fb.control('', [Validators.required]),
@@ -382,7 +379,7 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
     this.startLoading = true;
     let customerNamesObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let currenciesObservable = from(this.invoiceService.getCurrencyCodes());
@@ -435,7 +432,6 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
   }
   ngOnInit(): void {
     initTE({ Input });
-    this.parseUserProfile();
     this.createForm();
     if (this.data && this.data.invid) {
       this.createGeneratedInvoiceViewForm();
@@ -446,6 +442,9 @@ export class InvoiceDetailsDialogComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.buildPage();
     this.autocompleteEventListener();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   addItemDetail(ind: number = -1) {
     let group = this.fb.group({

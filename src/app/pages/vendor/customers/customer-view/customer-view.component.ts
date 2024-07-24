@@ -37,7 +37,6 @@ import {
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { CustomerService } from 'src/app/core/services/vendor/customers/customer.service';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
@@ -56,6 +55,8 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-customer-view',
@@ -95,12 +96,12 @@ export class CustomerViewComponent implements OnInit {
   public customer!: Customer;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public headerFormGroup!: FormGroup;
-  public userProfile!: LoginResponse;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -113,12 +114,6 @@ export class CustomerViewComponent implements OnInit {
     private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private buildFormHeaders() {
     let TABLE_SHOWING = 6;
     this.headerFormGroup = this.fb.group({
@@ -224,14 +219,14 @@ export class CustomerViewComponent implements OnInit {
     this.startLoading = true;
     let customerObs = from(
       this.customerService.getCustomerById({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
         Sno: customerId,
       })
     );
     let invoiceReportObs = from(
       this.invoiceReportService.getInvoiceReport({
         branch: '',
-        Comp: this.userProfile.InstID,
+        Comp: this.getUserProfile().InstID,
         cusid: customerId,
         stdate: '',
         enddate: '',
@@ -283,7 +278,6 @@ export class CustomerViewComponent implements OnInit {
     return this.customerViewTable(indexes);
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.buildFormHeaders();
     this.activatedRoute.params.subscribe((params) => {
       if (params['id']) {
@@ -291,6 +285,9 @@ export class CustomerViewComponent implements OnInit {
         this.buildPage(customerId);
       }
     });
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   tableValue(element: any, key: string) {
     switch (key) {

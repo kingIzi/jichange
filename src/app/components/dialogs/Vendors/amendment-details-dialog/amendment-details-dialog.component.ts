@@ -11,7 +11,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { LoginResponse } from 'src/app/core/models/login-response';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
@@ -36,6 +35,8 @@ import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
 import { AmendInvoiceForm } from 'src/app/core/models/vendors/forms/amend-invoice-form';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { VendorLoginResponse } from 'src/app/core/models/login-response';
 
 @Component({
   selector: 'app-amendment-details-dialog',
@@ -64,7 +65,6 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   public formGroup!: FormGroup;
   public customers: CustomerName[] = [];
   public currencies: Currency[] = [];
-  private userProfile!: LoginResponse;
   public invoices: GeneratedInvoice[] = [];
   public amended = new EventEmitter<void>();
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -73,6 +73,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   @ViewChild('confirmAddAmendment', { static: true })
   confirmAddAmendment!: ElementRef<HTMLDialogElement>;
   constructor(
+    private appConfig: AppConfigService,
     private dialogRef: MatDialogRef<AmendmentDetailsDialogComponent>,
     private invoiceService: InvoiceService,
     private fb: FormBuilder,
@@ -83,16 +84,12 @@ export class AmendmentDetailsDialogComponent implements OnInit {
       invid: number | string;
     }
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createFormGroup() {
     this.formGroup = this.fb.group({
-      user_id: this.fb.control(this.userProfile.Usno, [Validators.required]),
-      compid: this.fb.control(this.userProfile.InstID.toString(), [
+      user_id: this.fb.control(this.getUserProfile().Usno, [
+        Validators.required,
+      ]),
+      compid: this.fb.control(this.getUserProfile().InstID.toString(), [
         Validators.required,
       ]),
       auname: this.fb.control('', [Validators.required]),
@@ -121,7 +118,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     this.startLoading = true;
     let generatedInvoiceObservable = from(
       this.invoiceService.getGeneratedInvoicebyId({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
         invid: this.data.invid,
       })
     );
@@ -132,7 +129,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     );
     let customerNamesObservable = from(
       this.invoiceService.getInvoiceCustomerNames({
-        compid: this.userProfile.InstID,
+        compid: this.getUserProfile().InstID,
       })
     );
     let currenciesObservable = from(this.invoiceService.getCurrencyCodes());
@@ -325,9 +322,11 @@ export class AmendmentDetailsDialogComponent implements OnInit {
       });
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createFormGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
   closeDialog() {
     this.dialogRef.close();

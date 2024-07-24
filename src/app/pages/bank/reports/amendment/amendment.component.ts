@@ -41,10 +41,11 @@ import { Customer } from 'src/app/core/models/bank/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { LoginResponse } from 'src/app/core/models/login-response';
+import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
@@ -111,7 +112,6 @@ export class AmendmentComponent implements OnInit {
   };
   public statuses: string[] = ['Paid', 'Pending', 'Cancelled'];
   public paymentTypes: string[] = ['Fixed', 'Flexible'];
-  public userProfile!: LoginResponse;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public AmendmentReportTable: typeof AmendmentReportTable =
     AmendmentReportTable;
@@ -120,6 +120,7 @@ export class AmendmentComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
+    private appConfig: AppConfigService,
     private tr: TranslocoService,
     private fb: FormBuilder,
     private reportsService: ReportsService,
@@ -130,25 +131,21 @@ export class AmendmentComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
-    if (userProfile) {
-      this.userProfile = JSON.parse(userProfile) as LoginResponse;
-    }
-  }
   private createFilterForm() {
     this.filterForm = this.fb.group({
       compid: this.fb.control('', [Validators.required]),
       cust: this.fb.control('', [Validators.required]),
-      branch: this.fb.control(this.userProfile.braid, [Validators.required]),
+      branch: this.fb.control(this.getUserProfile().braid, [
+        Validators.required,
+      ]),
       invno: this.fb.control('', []),
       stdate: this.fb.control('', [Validators.required]),
       enddate: this.fb.control('', [Validators.required]),
     });
-    if (Number(this.userProfile.braid) > 0) {
+    if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
     }
-    if (Number(this.userProfile.braid) === 0) {
+    if (Number(this.getUserProfile().braid) === 0) {
       this.branchChangedEventHandler();
     }
     this.companyChangedEventHandler();
@@ -168,7 +165,7 @@ export class AmendmentComponent implements OnInit {
     this.filterForm.valueChanges.subscribe((value) => {
       if (value.compid && value.cust) {
         let form = {
-          branch: this.userProfile.braid,
+          branch: this.getUserProfile().braid,
           Comp: value.compid,
           cusid: value.cust,
           stdate: '',
@@ -478,7 +475,7 @@ export class AmendmentComponent implements OnInit {
     this.startLoading = true;
     let companiesObs = from(
       this.reportsService.getBranchedCompanyList({
-        branch: this.userProfile.braid,
+        branch: this.getUserProfile().braid,
       })
     );
     let branchObs = from(this.branchService.postBranchList({}));
@@ -552,10 +549,12 @@ export class AmendmentComponent implements OnInit {
     }
   }
   ngOnInit(): void {
-    this.parseUserProfile();
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
+  }
+  getUserProfile() {
+    return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
