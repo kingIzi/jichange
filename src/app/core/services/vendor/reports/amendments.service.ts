@@ -14,7 +14,7 @@ export class AmendmentsService {
     const data = await lastValueFrom(
       this.client.performPost<
         AmendmentReportForm,
-        HttpDataResponse<GeneratedInvoice[] | number | string>
+        HttpDataResponse<GeneratedInvoice[] | number>
       >(`/api/Invoice/GetAmendReport`, body)
     );
     return data;
