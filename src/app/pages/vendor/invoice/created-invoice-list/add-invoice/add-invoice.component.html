@@ -1,3 +1,5 @@
+add invoice
+
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
@@ -128,8 +130,8 @@
       >
         {{ t("details") }}
       </h4>
-      <!-- <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2"> -->
-      <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2 py-2">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2">
+        <!-- <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2 py-2"> -->
         <div class="flex flex-col space-y-1 w-full">
           <p *transloco="let t; read: 'invoice.form'" class="text-xs">
             {{ t("invoiceNo") }}<span class="text-red-600">*</span>
