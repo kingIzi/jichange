@@ -2,7 +2,7 @@
   "summary": {
     "name": "Wachuuzi",
     "searchBy": "Tafuta kwa jina au nambari ya TIN",
-    "noVendorsFoundInBranch": "Hakuna wachuuzi wanaopatikana katika tawi la {}.",
+    "noVendorsFoundInBranch": "Hakuna wachuuzi wanaopatikana katika tawi hii.",
     "noVendorFound": "Vendor haipatikani.",
     "actions": {
       "addCompany": "Ongeza muuzaji",
@@ -14,7 +14,8 @@
       "createSuspenseAccount": "Ongeza Akaunti ya Suspense",
       "createDepositAccount": "Ongeza akaunti ya amana",
       "exportToExcel": "Pakua Excel",
-      "exportToPdf": "Pakua PDF"
+      "exportToPdf": "Pakua PDF",
+      "failedToAddCompany": "Imeshindwa kuongeza kampuni."
     },
     "companySummary": [
       {
@@ -126,9 +127,22 @@
         "invalidTin": "TIN si sahihi. Lazima iwe na urefu wa herufi 9.",
         "directorName": "Tafadhali ingiza jina la mkurugenzi",
         "emailId": "Tafadhali ingiza anwani ya barua pepe",
-        "telephoneNo": "Tafadhali ingiza nambari ya simu yenye sahihi"
+        "telephoneNo": "Tafadhali ingiza nambari ya simu yenye sahihi",
+        "accountNumber": "Ingiza namba ya akaunti"
       },
       "dialogs": {
+        "customer": "Tafadhali toa jina la kampuni.",
+        "email": "Tafadhali toa barua pepe halali.",
+        "mobileNo": "Tafadhali toa nambari ya simu.",
+        "customerExists": "Jina la kampuni tayari linatumika.",
+        "emailExists": "Barua pepe uliyotoa tayari inatumika.",
+        "mobileNoExists": "Nambari ya simu uliyotoa tayari inatumika.",
+        "userExists": "Jina la mtumiaji ulilotoa tayari linatumika.",
+        "tinNumberExists": "Nambari ya TIN uliyotoa tayari inatumika.",
+        "region": "Tafadhali toa eneo.",
+        "district": "Tafadhali toa wilaya.",
+        "ward": "Tafadhali toa kata.",
+        "details": "Angalau namba moja ya akaunti inahitajika kwa kampuni.",
         "noBranchesFound": "Hakukuwa na tawi lililopatikana.",
         "noRegionsFound": "Hakukuwa na maeneo yaliyopatikana.",
         "noDistrictsFound": "Hakuna wilaya zilizohifadhiwa katika {}.",
@@ -142,10 +156,12 @@
     "searchBy": "Tafuta kwa jina",
     "companyApproval": "Idhini ya Kampuni",
     "approvedSuccessfully": "Kampuni imeidhinishwa kwa mafanikio!",
+    "failedToRetrieveSuspenseAccount": "Imeshindwa kurejesha akaunti za mashaka.",
+    "failedToRetrieveDepositAccount": "Imeshindwa kurejesha akaunti za amana.",
     "form": {
       "pleaseSelect": "Tafadhali chagua",
       "suspense": "Akaunti ya Kutungwa",
-      "deposit": "Akaunti ya Amana",
+      "deposit": "Akaunti ya Muuzaji",
       "account": "Akaunti",
       "placeholders": {
         "account": "Chagua akaunti"

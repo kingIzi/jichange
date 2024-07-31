@@ -174,6 +174,7 @@
   "createdInvoice": {
     "createdInvoice": "Created Invoice(s)",
     "searchTableBy": "Search by name or invoice",
+    "noCustomersFoundAddCustomer": "No customers found. At least one customer needed to add an invoice. Would you like to add one now?",
     "createdInvoiceTable": [
       {
         "label": "No.",
@@ -233,6 +234,7 @@
       "label": "Cancel Invoice",
       "cautionMessage": "Once cancelled, changes can not be undone. Please proceed with caution.",
       "cancelledSuccessfully": "Cancelled invoice successfully!",
+      "cannotCancelInvoice": "You cannot cancel an already paid invoice.",
       "form": {
         "reason": "Reason",
         "placeholders": {

@@ -64,7 +64,7 @@
       "mobileNo": "Tafadhali toa nambari ya simu sahihi",
       "emailId": "Tafadhali toa anwani sahihi ya barua pepe",
       "failedToAddCustomer": "Imeshindwa kuongeza mteja.",
-      "addFailedCustomerMappedToInvoice": "Huwezi kurekebisha mteja aliyechorwa kwa ankara.",
+      "addFailedCustomerMappedToInvoice": "Imeshindwa kufuta mteja: ankara amilifu zilizopatikana.",
       "existsName": "Mteja {} tayari yupo.",
       "existsMobileNumber": "Namba ya simu uliyoingiza tayari inatumika.",
       "existsTin": "Nambari ya Tin uliyoingiza tayari inatumika.",

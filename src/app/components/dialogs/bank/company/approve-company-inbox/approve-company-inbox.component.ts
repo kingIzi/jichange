@@ -47,6 +47,7 @@ import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-
 import { DepositAccountDialogComponent } from '../../setup/deposit-account-dialog/deposit-account-dialog.component';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-approve-company-inbox',
@@ -103,71 +104,61 @@ export class ApproveCompanyInboxComponent implements OnInit {
   ) {}
   private accountPoolChangeEventListener() {
     this.accountPool.valueChanges.subscribe((value) => {
-      if (
-        value.toLocaleLowerCase() === 'Suspense Account'.toLocaleLowerCase()
-      ) {
-        this.requestAccountPool();
-        this.selectDepositAccountList =
-          this.selectDepositAccountList.length > 0
-            ? []
-            : this.selectDepositAccountList;
-        this.depositAccNo.setValue('');
-      } else if (
-        value.toLocaleLowerCase() === 'Deposit Account'.toLocaleLowerCase()
-      ) {
-        this.requestDepositAccountPool();
-        this.selectAccountList =
-          this.selectAccountList.length > 0 ? [] : this.selectAccountList;
+      if (value) {
+        this.selectDepositAccountList = [];
+        this.requestActiveSuspenseAccountsList();
         this.depositAccNo.setValue('');
       } else {
+        this.selectAccountList = [];
+        this.requestActiveDepositAccountsList();
+        this.depositAccNo.setValue('');
       }
     });
   }
   private depositAccNoChangedEventListener() {
-    this.depositAccNo.valueChanges.subscribe((value) => {
-      if (
-        this.accountPool.value.toLocaleLowerCase() ===
-          'Suspense Account'.toLocaleLowerCase() &&
-        this.selectAccountList.length > 0
-      ) {
+    this.depositAccNo.valueChanges.subscribe((value: string) => {
+      if (this.accountPool.value === true) {
         let foundIndex = this.selectAccountList.findIndex(
-          (account: SuspenseAccount) => account.Sus_Acc_No === value
+          (account: SuspenseAccount) => account.Sus_Acc_No?.localeCompare(value)
         );
-        if (foundIndex > -1) {
-          this.suspenseAccSno.setValue(
-            this.selectAccountList.at(foundIndex)?.Sus_Acc_Sno
-          );
-        }
+        this.suspenseAccSno.setValue(
+          this.selectAccountList.at(foundIndex)?.Sus_Acc_Sno
+        );
       } else {
-        let foundIndex = this.selectDepositAccountList.findIndex(
-          (account) => account.Deposit_Acc_No == value
+        let foundIndex = this.selectDepositAccountList.findIndex((account) =>
+          account.Deposit_Acc_No.localeCompare(value)
         );
-        if (foundIndex > -1) {
-          this.suspenseAccSno.setValue(
-            this.selectDepositAccountList.at(foundIndex)?.Comp_Dep_Acc_Sno
-          );
-        }
+        this.suspenseAccSno.setValue(
+          this.selectDepositAccountList.at(foundIndex)?.Comp_Dep_Acc_Sno
+        );
       }
     });
   }
-  private requestAccountPool() {
+  private parseActiveSuspenseAccountsListResponse(
+    result: HttpDataResponse<number | SuspenseAccount[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate('defaults.warning'),
+        this.tr.translate(
+          'company.inboxApproval.failedToRetrieveSuspenseAccount'
+        )
+      );
+    } else if ((result.response as SuspenseAccount[]).length === 0) {
+      this.selectAccountList = [];
+      this.noSuspenseAccountFoundDilog.nativeElement.showModal();
+    } else {
+      this.selectAccountList = result.response as SuspenseAccount[];
+    }
+  }
+  private requestActiveSuspenseAccountsList() {
     this.startLoading = true;
     this.suspenseAccountService
       .getSuspenseActiveAccountList({})
       .then((result) => {
-        if (
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() == 'failed'.toLocaleLowerCase()
-        ) {
-          this.noSuspenseAccountFoundDilog.nativeElement.showModal();
-        } else if (
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() === 'success' &&
-          typeof result.response !== 'number' &&
-          typeof result.response !== 'string'
-        ) {
-          this.selectAccountList = result.response;
-        }
+        this.parseActiveSuspenseAccountsListResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -182,21 +173,41 @@ export class ApproveCompanyInboxComponent implements OnInit {
         throw err;
       });
   }
-  private requestDepositAccountPool() {
+  private parseActiveDepositAccountsListResponse(
+    result: HttpDataResponse<number | DepositAccount[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate('defaults.warning'),
+        this.tr.translate(
+          'company.inboxApproval.failedToRetrieveSuspenseAccount'
+        )
+      );
+    } else if ((result.response as DepositAccount[]).length === 0) {
+      this.selectDepositAccountList = [];
+      this.noDepositAccountFound.nativeElement.showModal();
+    } else {
+      this.selectDepositAccountList = result.response as DepositAccount[];
+    }
+  }
+  private requestActiveDepositAccountsList() {
     this.startLoading = true;
     this.depositAccountService
       .getDepositAccountList({})
       .then((result) => {
-        if (
-          (typeof result.message === 'string' &&
-            result.message.toLocaleLowerCase() ==
-              'failed'.toLocaleLowerCase()) ||
-          typeof result.response === 'number'
-        ) {
-          this.noDepositAccountFound.nativeElement.showModal();
-        } else {
-          this.selectDepositAccountList = result.response;
-        }
+        // if (
+        //   (typeof result.message === 'string' &&
+        //     result.message.toLocaleLowerCase() ==
+        //       'failed'.toLocaleLowerCase()) ||
+        //   typeof result.response === 'number'
+        // ) {
+        //   this.noDepositAccountFound.nativeElement.showModal();
+        // } else {
+        //   this.selectDepositAccountList = result.response;
+        // }
+        this.parseActiveDepositAccountsListResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -217,8 +228,8 @@ export class ApproveCompanyInboxComponent implements OnInit {
       userid: this.fb.control(this.getUserProfile().Usno, [
         Validators.required,
       ]),
-      suspenseAccSno: this.fb.control('', [Validators.required]),
-      depositAccNo: this.fb.control('', [Validators.required]),
+      suspenseAccSno: this.fb.control('', []),
+      depositAccNo: this.fb.control('', []),
     });
   }
   private formErrors(errorsPath: string = 'company.inboxApproval.form.dialog') {
@@ -237,25 +248,46 @@ export class ApproveCompanyInboxComponent implements OnInit {
       );
     }
   }
+  private switchApproveCompanyErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      ''
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate(
+          `company.inboxApproval.form.dialog.failedToApprove`
+        );
+    }
+  }
+  private parseApproveCompanyResponse(
+    result: HttpDataResponse<number | Company>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchApproveCompanyErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let m = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`company.inboxApproval.approvedSuccessfully`)
+      );
+      this.approved.emit();
+    }
+  }
   private requestApproveCompany(form: CompanyApprovalForm) {
     this.startLoading = true;
     this.approvalService
       .approveCompany(form)
       .then((result) => {
-        if (typeof result.response === 'number') {
-          let m = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`company.inboxApproval.approvedSuccessfully`)
-          );
-          this.approved.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(
-              `company.inboxApproval.form.dialog.failedToApprove`
-            )
-          );
-        }
+        this.parseApproveCompanyResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -300,7 +332,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
       .asObservable()
       .subscribe(() => {
         dialogRef.close();
-        this.requestAccountPool();
+        this.requestActiveSuspenseAccountsList();
       });
   }
   addDepositAccount() {
@@ -313,7 +345,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
     });
     dialogRef.componentInstance.added.asObservable().subscribe(() => {
       dialogRef.close();
-      this.requestDepositAccountPool();
+      this.requestActiveDepositAccountsList();
     });
   }
   closeDialog() {

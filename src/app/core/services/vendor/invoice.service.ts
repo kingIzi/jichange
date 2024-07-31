@@ -58,7 +58,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { compid: number },
-        HttpDataResponse<CustomerName[] | string | number>
+        HttpDataResponse<CustomerName[] | number>
       >(`/api/Invoice/GetCustomersS`, body)
     );
     return data;
@@ -102,10 +102,10 @@ export class InvoiceService {
   }
   public async cancelInvoice(body: AddCancelForm) {
     let data = await lastValueFrom(
-      this.client.performPost<AddCancelForm, HttpDataResponse<number | string>>(
-        `/api/Invoice/AddCancel`,
-        body
-      )
+      this.client.performPost<
+        AddCancelForm,
+        HttpDataResponse<number | GeneratedInvoice>
+      >(`/api/Invoice/AddCancel`, body)
     );
     return data;
   }
@@ -113,7 +113,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         AmendInvoiceForm,
-        HttpDataResponse<number | string>
+        HttpDataResponse<number | GeneratedInvoice>
       >(`/api/Invoice/AddAmend`, body)
     );
     return data;
@@ -148,6 +148,15 @@ export class InvoiceService {
         { code: number | string; mobile_no: string },
         HttpDataResponse<number | string>
       >(`/api/Invoice/ConfirmDel`, body)
+    );
+    return data;
+  }
+  public async findInvoice(body: { compid: number; inv: number }) {
+    let query = `compid=${body.compid}&inv=${body.inv}`;
+    let data = await lastValueFrom(
+      this.client.performGet<HttpDataResponse<GeneratedInvoice | number>>(
+        `/api/Invoice/FindInvoice?${query}`
+      )
     );
     return data;
   }

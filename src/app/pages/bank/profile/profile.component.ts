@@ -39,6 +39,7 @@ import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.se
 import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-profile',
@@ -75,6 +76,11 @@ export class ProfileComponent implements OnInit {
       name: 'English',
     },
   ];
+  public themes: { label: string; color: string }[] = [
+    { label: 'light', color: '#0B6587' },
+    { label: 'coffee', color: '#20161F' },
+  ];
+  public selectedThemeIndex: number = 0;
   public startLoading: boolean = false;
   public generalFormGroup!: FormGroup;
   public changePasswordFormGroup!: FormGroup;
@@ -188,18 +194,42 @@ export class ProfileComponent implements OnInit {
       .get('mobile')
       ?.setValue(this.employeeDetail.Mobile_No);
   }
+  private switchEmployeeDetailErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.generalFormGroup.get('fname')?.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate('auth.profile.failedToFetchUser');
+    }
+  }
+  private parseEmployeeDetailResponse(
+    result: HttpDataResponse<number | EmployeeDetail>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchEmployeeDetailErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      this.employeeDetail = result.response as EmployeeDetail;
+      this.setGeneralFormGroupData();
+    }
+  }
   private requestEmployeeDetail(body: { sno: string | number }) {
     this.startLoading = true;
     this.bankUserService
       .postFetchEmployeeDetail(body)
       .then((result) => {
-        if (
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() === 'success'.toLocaleLowerCase()
-        ) {
-          this.employeeDetail = result.response;
-          this.setGeneralFormGroupData();
-        }
+        this.parseEmployeeDetailResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -250,10 +280,23 @@ export class ProfileComponent implements OnInit {
         throw err;
       });
   }
+  private prepareCurrentTheme() {
+    let theme = localStorage.getItem('theme') as string;
+    if (!theme) {
+      this.selectedThemeIndex = 0;
+    }
+    // let foundIndex = this.themes.findIndex((val) =>
+    //   val.label.localeCompare(theme)
+    // );
+    // if (foundIndex != -1) {
+    //   this.selectedThemeIndex = foundIndex;
+    // }
+  }
   ngOnInit(): void {
     this.createGeneralFormGroup();
     this.createChangePasswordFormGroup();
     this.createLanguageFormGroup();
+    //this.prepareCurrentTheme();
     this.requestEmployeeDetail({ sno: this.getUserProfile().Usno });
     this.requestBranchList();
   }
@@ -311,6 +354,13 @@ export class ProfileComponent implements OnInit {
       });
     } else {
       this.changePasswordFormGroup.markAllAsTouched();
+    }
+  }
+  themeClicked(index: number) {
+    let theme = this.themes.at(index);
+    if (theme) {
+      localStorage.setItem('theme', theme?.label);
+      location.reload();
     }
   }
   get type() {

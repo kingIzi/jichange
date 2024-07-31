@@ -24,7 +24,7 @@ export class BankService {
     let data = await lastValueFrom(
       this.client.performPost<
         { sno: string | number },
-        HttpDataResponse<EmployeeDetail>
+        HttpDataResponse<EmployeeDetail | number>
       >(`/api/EmployDet/GetEmpIndivi`, body)
     );
     return data;

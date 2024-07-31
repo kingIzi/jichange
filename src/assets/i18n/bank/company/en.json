@@ -2,7 +2,7 @@
   "summary": {
     "name": "Vendors",
     "searchBy": "Search by name or TIN number",
-    "noVendorsFoundInBranch": "There are no vendors found in the {} branch.",
+    "noVendorsFoundInBranch": "There were no vendors found.",
     "noVendorFound": "Vendor not found.",
     "actions": {
       "addCompany": "Add Vendor",
@@ -14,7 +14,8 @@
       "createSuspenseAccount": "Add Suspense account",
       "createDepositAccount": "Add deposit account",
       "exportToExcel": "Export to excel",
-      "exportToPdf": "Export to PDF"
+      "exportToPdf": "Export to PDF",
+      "failedToAddCompany": "Failed to add company."
     },
     "companySummary": [
       {
@@ -126,9 +127,22 @@
         "invalidTin": "Invalid TIN. Must be 9 numeric characters long.",
         "directorName": "Please enter director name",
         "emailId": "Please enter a valid email",
-        "telephoneNo": "Please enter a valid phone number"
+        "telephoneNo": "Please enter a valid phone number",
+        "accountNumber": "Enter account number"
       },
       "dialogs": {
+        "customer": "Please provide company name.",
+        "email": "Please provide a valid email.",
+        "mobileNo": "Please provide a mobile number.",
+        "customerExists": "The company name you provided is already in use.",
+        "emailExists": "The email address you provided is already in use.",
+        "mobileNoExists": "The mobile number you provided is already in use.",
+        "userExists": "The username you provided is already in use.",
+        "tinNumberExists": "The TIN number you have provided is already in use.",
+        "region": "Please provide a region.",
+        "district": "Please provide a district.",
+        "ward": "Please provide a ward",
+        "details": "At least one account number is required for the company.",
         "noBranchesFound": "There were no branch found.",
         "noRegionsFound": "There were no regions found.",
         "noDistrictsFound": "There are no saved districts in {}.",
@@ -142,10 +156,12 @@
     "companyApproval": "Company Approval",
     "approvedSuccessfully": "Company approved successfully!",
     "searchBy": "Search by name",
+    "failedToRetrieveSuspenseAccount": "Failed to retrieve suspense accounts.",
+    "failedToRetrieveDepositAccount": "Failed to retrieve deposit accounts.",
     "form": {
       "pleaseSelect": "Please select",
       "suspense": "Suspense account",
-      "deposit": "Deposit account",
+      "deposit": "Vendor account",
       "account": "Account",
       "placeholders": {
         "account": "Select account"

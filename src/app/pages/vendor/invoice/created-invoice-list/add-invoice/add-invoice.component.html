@@ -67,6 +67,38 @@
   </form>
 </dialog>
 
+<dialog #noCustomersFound id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("warning") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'invoice'">
+      {{ t("createdInvoice.noCustomersFoundAddCustomer") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="noCustomersFound.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("no") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="noCustomersFound.close(); openCustomersDialog()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("yes") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
 <form
   id="add-invoice-form"
   [formGroup]="invoiceDetailsForm"
@@ -96,7 +128,8 @@
       >
         {{ t("details") }}
       </h4>
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2">
+      <!-- <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2"> -->
+      <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2 py-2">
         <div class="flex flex-col space-y-1 w-full">
           <p *transloco="let t; read: 'invoice.form'" class="text-xs">
             {{ t("invoiceNo") }}<span class="text-red-600">*</span>
@@ -195,6 +228,7 @@
             [readOnly]="!!generatedInvoice"
             [matAutocomplete]="auto"
             class="input input-sm input-bordered font-inter w-full"
+            #customerNameInput
           />
           <mat-autocomplete #auto="matAutocomplete">
             @for (customer of filteredCustomers | async; track customer) {
@@ -334,7 +368,7 @@
                 <thead class="font-medium">
                   <tr
                     *transloco="let t; read: 'invoice.form'"
-                    class="bg-lightPurple"
+                    class="bg-base-200"
                   >
                     <th
                       *ngFor="
@@ -507,7 +541,7 @@
         type="submit"
         form="add-invoice-form"
         [disabled]="!invoiceDetailsForm.valid"
-        class="btn text-xs font-inter w-24 bg-darkPurple hover:bg-indigo-900 hover:text-neutral-50 btn-ghost text-black shadow-4"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
       >
         {{ t("submit") }}
       </button>

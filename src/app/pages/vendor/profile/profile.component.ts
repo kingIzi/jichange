@@ -35,6 +35,7 @@ import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-for
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+import { GetCompanyByIdForm } from 'src/app/core/models/vendors/forms/get-company-user-by-id-form';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
 import { LoginService } from 'src/app/core/services/login.service';
@@ -166,7 +167,7 @@ export class ProfileComponent implements OnInit {
     });
     this.generalFormGroup.disable();
   }
-  private requestEmployeeDetail(body: { sno: string | number }) {
+  private requestEmployeeDetail(body: GetCompanyByIdForm) {
     this.startLoading = true;
     this.companyUserService
       .getCompanyUserByid(body)
@@ -233,7 +234,7 @@ export class ProfileComponent implements OnInit {
     this.createGeneralFormGroup();
     this.createLanguageFormGroup();
     this.createChangePasswordFormGroup();
-    this.requestEmployeeDetail({ sno: this.getUserProfile().Usno });
+    this.requestEmployeeDetail({ Sno: this.getUserProfile().Usno });
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;
@@ -274,7 +275,7 @@ export class ProfileComponent implements OnInit {
     });
     dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
       dialogRef.close();
-      this.requestEmployeeDetail({ sno: this.getUserProfile().Usno });
+      this.requestEmployeeDetail({ Sno: this.getUserProfile().Usno });
     });
   }
   changePasswordClicked() {

@@ -77,6 +77,15 @@
     },
     "errors": {
       "reason": "Tafadhali weka sababu"
+    },
+    "dialog": {
+      "invoiceNumber": "Tafadhali toa nambari ya ankara.",
+      "invoiceDate": "Tafadhali toa tarehe ya ankara.",
+      "expiryDate": "Tafadhali toa tarehe ya mwisho.",
+      "dueDate": "Tafadhali toa tarehe ya kulipwa.",
+      "paymentType": "Tafadhali toa aina ya malipo.",
+      "details": "Tafadhali ongeza angalau kipengee kimoja cha ankara.",
+      "reason": "Tafadhali toa sababu."
     }
   },
   "errors": {

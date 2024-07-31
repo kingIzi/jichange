@@ -84,6 +84,11 @@
         "desc": ""
       },
       {
+        "label": "Hali",
+        "value": "Region_Status",
+        "desc": ""
+      },
+      {
         "label": "Kitendo",
         "value": "Action",
         "desc": ""
@@ -475,6 +480,8 @@
     "addedEmailText": "Barua pepe iliyoongezwa kwa mafanikio!",
     "modifiedEmailText": "Barua pepe limebadilishiwa kwa mafanikio!",
     "failedEmailText": "Imeshindwa kuongeza barua pepe.",
+    "flowIdExists": "Mtiririko wa Id uliotolewa tayari unatumika.",
+    "failedToDeleteEmailText": "Imeshindwa kufuta maandishi ya barua pepe.",
     "form": {
       "flowId": "Id ya Mtiririko",
       "subjectEnglish": "Kiingereza cha somo",
@@ -492,7 +499,7 @@
         "flowId": "Tafadhali chagua kitambulisho cha mtiririko",
         "subjectEnglish": "Tafadhali, ingiza mada ya barua pepe kwa Kiingereza",
         "subjectSwahili": "Tafadhali, ingiza mada ya barua pepe kwa Kiswahili",
-        "emailText": "Tafadhali, ingiza maandishi yako ya barua pepe katika enlish",
+        "emailText": "Tafadhali, ingiza maandishi yako ya barua pepe kwa kiingereza",
         "emailSwahili": "Tafadhali, ingiza maandishi yako ya barua pepe kwa Kiswahili"
       },
       "dialog": {

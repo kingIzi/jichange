@@ -86,10 +86,11 @@
       </button>
       <button
         *transloco="let t; read: 'actions'"
+        [disabled]="!countryForm.valid"
         (click)="submitCountryForm()"
         type="submit"
         form="control-number-form"
-        class="btn text-xs btn-outline font-inter btn-success w-24"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
       >
         {{ t("submit") }}
       </button>

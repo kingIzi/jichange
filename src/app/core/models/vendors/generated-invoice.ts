@@ -46,4 +46,5 @@ export class GeneratedInvoice {
   Zreport_Date2!: Date | null;
   Control_No!: string | null;
   Reason!: string | null;
+  details!: GeneratedInvoice[] | null;
 }

@@ -171,9 +171,9 @@ export class AddVendorComponent implements OnInit {
       fax: this.fb.control('', []),
       pbox: this.fb.control('', []),
       addr: this.fb.control('', [Validators.required]),
-      rsno: this.fb.control('', []),
-      dsno: this.fb.control('', []),
-      wsno: this.fb.control('', []),
+      rsno: this.fb.control(0, []),
+      dsno: this.fb.control(0, []),
+      wsno: this.fb.control(0, []),
       tin: this.fb.control('', [
         Validators.required,
         Validators.pattern(/^\d{9}$/),
@@ -331,25 +331,77 @@ export class AddVendorComponent implements OnInit {
       }
     }
   }
+  private switchInsertCompanyErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.compname.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing Company Name"'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.customer'
+        );
+      case 'Missing Email'.toLocaleLowerCase():
+        return this.tr.translate('company.summary.companyForm.dialogs.email');
+      case 'Missing Mobile Number'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.mobileNo'
+        );
+      case 'Missing region'.toLocaleLowerCase():
+        return this.tr.translate('company.summary.companyForm.dialogs.region');
+      case 'Missing distict'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.district'
+        );
+      case 'Missing ward'.toLocaleLowerCase():
+        return this.tr.translate('company.summary.companyForm.dialogs.ward');
+      case 'Missing Bank details'.toLocaleLowerCase():
+        return this.tr.translate('company.summary.companyForm.dialogs.details');
+      case 'Missing Branch Id'.toLocaleLowerCase():
+      case 'Missing Company Id'.toLocaleLowerCase():
+        return this.tr.translate(`errors.missingUserIdMessage`);
+      case 'Tin number exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.tinNumberExists'
+        );
+      case 'Company name exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.customerExists'
+        );
+      case 'Email exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.emailExists'
+        );
+      case 'Mobile number exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.mobileNoExists'
+        );
+      case 'User already exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'company.summary.companyForm.dialogs.userExists'
+        );
+      case 'Failed to create company'.toLocaleLowerCase():
+      default:
+        return this.tr.translate('company.summary.actions.failedToAddCompany');
+    }
+  }
   private assignInsertCompanyResponse(
     result: HttpDataResponse<string | number>,
     message: string
   ) {
-    if (
-      typeof result.message === 'string' &&
-      result.message.toLocaleLowerCase() === 'failed' &&
-      typeof result.response === 'string'
-    ) {
-      let msg = this.determineAddCompanyErrorMessage(result.response);
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchInsertCompanyErrorMessage(
+        result.message[0]
+      );
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`defaults.failed`),
-        msg
+        errorMessage
       );
-    } else if (
-      typeof result.message === 'string' &&
-      result.message.toLocaleLowerCase() === 'success'
-    ) {
+    } else {
       let sal = AppUtilities.sweetAlertSuccessMessage(message);
       this.resetForm();
     }
@@ -471,7 +523,7 @@ export class AddVendorComponent implements OnInit {
   }
   addBankDetail(ind: number = -1) {
     let group = this.fb.group({
-      AccountNo: this.fb.control('', []),
+      AccountNo: this.fb.control('', [Validators.required]),
     });
     let MAX = 1000;
     if (ind > -1 && this.details.at(ind).valid && this.details.length < MAX) {

@@ -320,7 +320,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     formGroup.get('ccode')?.setValue(invoice.Currency_Code);
     formGroup.get('Inv_remark')?.setValue(invoice.Remarks ?? '');
     formGroup.get('sno')?.setValue(invoice.Inv_Mas_Sno);
-    formGroup.get('goods_status')?.setValue('Approve');
+    formGroup.get('goods_status')?.setValue('Approved');
     formGroup
       .get('total')
       ?.setValue(AppUtilities.moneyFormat(invoice.Total.toString()));
@@ -367,6 +367,18 @@ export class CreatedInvoiceListComponent implements OnInit {
       this.tr.translate(`defaults.failed`),
       this.tr.translate(`invoice.form.dialog.invoiceExists`)
     );
+  }
+  private switchApproveInvoiceErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Invoice'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate('invoice.form.dialog.failedToApproveInvoice');
+    }
   }
   private switchAddInvoiceErrorMessage(message: string) {
     let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
@@ -441,43 +453,41 @@ export class CreatedInvoiceListComponent implements OnInit {
         throw err;
       });
   }
-  private requestApproveCompany(invoice: GeneratedInvoice) {
+  private parseApproveInvoiceResponse(
+    result: HttpDataResponse<number | GeneratedInvoice>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchApproveInvoiceErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+      this.startLoading = false;
+      this.cdr.detectChanges();
+    } else {
+      let formGroup = this.prepareInvoiceFormGroup();
+      this.modifyInvoiceDetailsForm(
+        formGroup,
+        result.response as GeneratedInvoice,
+        (result.response as GeneratedInvoice).details ?? []
+      );
+      this.requestAddInvoiceForm(formGroup.value as any);
+    }
+  }
+  private requestApproveInvoice(invoice: GeneratedInvoice) {
+    let compid = this.getUserProfile().InstID;
+    let inv = invoice.Inv_Mas_Sno;
     this.startLoading = true;
-    let invoiceDetailsObservable = from(
-      this.invoiceService.invoiceDetailsById({
-        compid: this.getUserProfile().InstID,
-        invid: Number(invoice.Inv_Mas_Sno),
-      })
-    );
-    let invoiceItemObservable = from(
-      this.invoiceService.invoiceItemDetails({
-        invid: Number(invoice.Inv_Mas_Sno),
-      })
-    );
-    let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
-    let res = AppUtilities.pipedObservables(mergedObservable);
-    res
-      .then((results) => {
-        let [invoiceDetail, invoiceItems] = results;
-        let hasInvoiceDetail =
-          invoiceDetail.response &&
-          typeof invoiceDetail.response !== 'string' &&
-          typeof invoiceDetail.response !== 'number';
-        let hasInvoiceItems =
-          invoiceItems.response &&
-          typeof invoiceItems.response !== 'string' &&
-          typeof invoiceItems.response !== 'number';
-        if (hasInvoiceDetail && hasInvoiceItems) {
-          let formGroup = this.prepareInvoiceFormGroup();
-          this.modifyInvoiceDetailsForm(
-            formGroup,
-            invoiceDetail.response,
-            invoiceItems.response
-          );
-          this.requestAddInvoiceForm(formGroup.value as any);
-        }
-        this.startLoading = false;
-        this.cdr.detectChanges();
+    this.invoiceService
+      .findInvoice({ compid: compid, inv: inv })
+      .then((result) => {
+        this.parseApproveInvoiceResponse(result);
+        // this.startLoading = false;
+        // this.cdr.detectChanges();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
@@ -636,21 +646,31 @@ export class CreatedInvoiceListComponent implements OnInit {
     });
   }
   //cancels created invoice
-  cancelInvoice(
-    invoice: GeneratedInvoice,
-    dialog: CancelGeneratedInvoiceComponent
-  ) {
-    dialog.title = this.tr.translate(`defaults.warning`);
-    dialog.message = this.tr
-      .translate(`invoice.createdInvoice.sureCancelInvoice`)
-      .replace('{}', invoice.Invoice_No);
-    dialog.userId = this.getUserProfile().Usno;
-    dialog.invoiceId = invoice.Inv_Mas_Sno;
-    dialog.cancelledInvoice.asObservable().subscribe(() => {
-      dialog.closeDialog();
-      this.requestCreatedInvoiceList();
+  cancelInvoice(invoice: GeneratedInvoice) {
+    // dialog.title = this.tr.translate(`defaults.warning`);
+    // dialog.message = this.tr
+    //   .translate(`invoice.createdInvoice.sureCancelInvoice`)
+    //   .replace('{}', invoice.Invoice_No);
+    // dialog.userId = this.getUserProfile().Usno;
+    // dialog.invoiceId = invoice.Inv_Mas_Sno;
+    // dialog.cancelledInvoice.asObservable().subscribe(() => {
+    //   dialog.closeDialog();
+    //   this.requestCreatedInvoiceList();
+    // });
+    // dialog.openDialog();
+    let dialogRef = this.dialog.open(CancelGeneratedInvoiceComponent, {
+      width: '800px',
+      data: { invid: invoice.Inv_Mas_Sno },
     });
-    dialog.openDialog();
+    dialogRef.componentInstance.cancelledInvoice
+      .asObservable()
+      .subscribe((invid) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.Inv_Mas_Sno === invid);
+        this.tableDataService.removedData(index);
+      });
   }
   //approve status
   approveInvoice(invoice: GeneratedInvoice, dialog: SubmitMessageBoxComponent) {
@@ -660,7 +680,7 @@ export class CreatedInvoiceListComponent implements OnInit {
       .replace('{}', invoice.Invoice_No);
     dialog.openDialog();
     dialog.confirm.asObservable().subscribe(() => {
-      this.requestApproveCompany(invoice);
+      this.requestApproveInvoice(invoice);
       dialog.closeDialog();
     });
   }
@@ -673,6 +693,13 @@ export class CreatedInvoiceListComponent implements OnInit {
       return 'Done';
     }
     return '-';
+  }
+  isApprovedInvoice(invoice: GeneratedInvoice) {
+    return (
+      this.getUserProfile()
+        .Usno.toString()
+        .localeCompare(invoice.AuditBy ?? '') !== 0
+    );
   }
   getTableDataSource() {
     return this.tableDataService.getDataSource();

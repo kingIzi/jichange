@@ -259,7 +259,7 @@
     </div>
     <div class="flex flex-col space-y-1">
       <p *transloco="let t; read: 'generated.form'" class="text-xs">
-        {{ t("reason") }}
+        {{ t("reason") }}<span class="text-red-600">*</span>
       </p>
       <input
         *transloco="let t; read: 'generated.form.placeholders'"

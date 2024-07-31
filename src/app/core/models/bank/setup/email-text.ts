@@ -9,3 +9,8 @@ export class EmailText {
   AuditBy!: string | null;
   Audit_Date!: string | null;
 }
+
+export class EmailTextFlow {
+  label!: string;
+  flow!: number;
+}

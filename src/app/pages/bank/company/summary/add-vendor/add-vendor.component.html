@@ -66,7 +66,7 @@
         >
           {{ t("details") }}
         </h4>
-        <div class="grid grid-cols-2 gap-x-2 gap-y-3 w-full">
+        <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2">
           <div class="flex flex-col space-y-1 w-full">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
@@ -263,7 +263,7 @@
         >
           {{ t("addressInformation") }}
         </h4>
-        <div class="grid grid-cols-2 gap-x-2 gap-y-3 w-full">
+        <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2">
           <div class="flex flex-col space-y-1">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
@@ -350,7 +350,7 @@
                 "
                 disabled
                 selected
-                value=""
+                value="0"
               >
                 {{ t("region") }}
               </option>
@@ -392,7 +392,7 @@
                 "
                 selected
                 disabled
-                value=""
+                value="0"
               >
                 {{ t("district") }}
               </option>
@@ -434,7 +434,7 @@
                 "
                 selected
                 disabled
-                value=""
+                value="0"
               >
                 {{ t("ward") }}
               </option>
@@ -489,6 +489,22 @@
                 type="number"
                 class="input-sm input-bordered input-ghost input w-full"
               />
+              <span
+                [class]="
+                  details.controls.at(ind)?.get('AccountNo') &&
+                  details.controls.at(ind)?.get('AccountNo')?.invalid &&
+                  details.controls.at(ind)?.get('AccountNo')?.touched
+                    ? 'opacity-100'
+                    : 'opacity-0'
+                "
+              >
+                <p
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                  class="text-xs text-red-600"
+                >
+                  {{ t("accountNumber") }}
+                </p>
+              </span>
             </div>
             <div
               class="flex flex-row justify-center items-center space-x-1 flex-none"
@@ -497,14 +513,14 @@
                 *ngIf="ind === details.controls.length - 1"
                 (click)="addBankDetail(ind)"
                 type="button"
-                class="btn btn-sm bg-transparent border-success mt-5"
+                class="btn btn-sm bg-transparent border-success"
               >
                 <i class="bi bi-plus-lg text-lg lg:text-2xl text-success"></i>
               </button>
               <button
                 (click)="removeBankDetail(ind)"
                 type="button"
-                class="btn btn-sm bg-transparent border-danger-600 mt-5"
+                class="btn btn-sm bg-transparent border-danger-600"
                 *ngIf="details.controls.length > 0 && ind !== 0"
               >
                 <span>
@@ -533,7 +549,8 @@
         (click)="submitCompanySummary()"
         type="submit"
         form="add-company-form"
-        class="btn text-xs font-inter w-24 bg-darkPurple hover:bg-indigo-900 hover:text-neutral-50 btn-ghost text-black shadow-4"
+        [disabled]="!companySummaryForm.valid"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
       >
         {{ t("submit") }}
       </button>

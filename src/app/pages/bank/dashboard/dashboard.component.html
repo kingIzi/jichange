@@ -43,7 +43,7 @@
         <a
           (click)="dashboardStatisticRouterLink(statistic.Name)"
           *transloco="let t; read: 'dashboard.dashboard.overview'"
-          class="text-xs text-darkPurple font-inter hover:underline cursor-pointer"
+          class="text-xs text-primary font-inter hover:underline cursor-pointer"
         >
           {{ t("viewMore") }}
         </a>
@@ -54,7 +54,7 @@
         *ngIf="overviewLoading"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       >
-        <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+        <span class="loading loading-spinner loading-lg bg-primary"></span>
       </div>
     </ng-template>
     <ng-container *ngIf="!overviewLoading && invoiceStatistics.length === 0">
@@ -83,7 +83,7 @@
       <a
         [routerLink]="'/main/company/inbox'"
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple shadow"
+        class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
       >
         {{ t("viewAll") }}
       </a>
@@ -101,7 +101,7 @@
       </p>
       <ng-container *ngIf="inboxApprovalLoading">
         <div class="w-full grid place-items-center mt-6">
-          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+          <span class="loading loading-spinner loading-lg bg-primary"></span>
         </div>
       </ng-container>
     </div>
@@ -159,7 +159,7 @@
         class="w-full h-full shadow bg-white grid place-items-center"
       >
         <div class="w-full grid place-items-center mt-6">
-          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+          <span class="loading loading-spinner loading-lg bg-primary"></span>
         </div>
       </div>
       <ng-template #notFoundTransactionsMessage>
@@ -247,7 +247,7 @@
       <a
         [routerLink]="'/main/company/summary'"
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-lightPurple text-darkPurple border border-darkPurple shadow"
+        class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
       >
         {{ t("viewAll") }}
       </a>
@@ -323,9 +323,7 @@
         </ng-container>
         <div [@inOutAnimation] *ngIf="tableLoading">
           <div class="w-full grid place-items-center mt-6">
-            <span
-              class="loading loading-spinner loading-lg bg-darkPurple"
-            ></span>
+            <span class="loading loading-spinner loading-lg bg-primary"></span>
           </div>
         </div>
       </div>
@@ -352,7 +350,7 @@
                   "
                   [matColumnDef]="column.label"
                 >
-                  <th mat-header-cell *matHeaderCellDef>
+                  <th class="!bg-base-200" mat-header-cell *matHeaderCellDef>
                     <div class="relative">
                       <div
                         *ngIf="tableSortableColumns(column); else notSortable"
@@ -426,7 +424,7 @@
                       class="w-full grid place-items-center mt-6"
                     >
                       <span
-                        class="loading loading-spinner loading-lg bg-darkPurple"
+                        class="loading loading-spinner loading-lg bg-primary"
                       ></span>
                     </div>
                   </td>

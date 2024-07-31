@@ -10,7 +10,7 @@
     </h2>
     <button
       (click)="openCompanyUsersDialog()"
-      class="flex flex-row items-center btn btn-sm bg-darkPurple hover:bg-indigo-900 hover:text-neutral-50 btn-ghost text-black shadow"
+      class="flex flex-row items-center btn btn-sm bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow"
     >
       <span>
         <i class="bi bi-plus-circle text-xl"></i>
@@ -147,7 +147,7 @@
       </ng-container>
       <div [@inOutAnimation] *ngIf="tableLoading">
         <div class="w-full grid place-items-center mt-6">
-          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+          <span class="loading loading-spinner loading-lg bg-primary"></span>
         </div>
       </div>
     </div>
@@ -174,7 +174,7 @@
                 "
                 [matColumnDef]="column.label"
               >
-                <th mat-header-cell *matHeaderCellDef>
+                <th class="!bg-base-200" mat-header-cell *matHeaderCellDef>
                   <div class="relative">
                     <div
                       *ngIf="tableSortableColumns(column); else notSortable"
@@ -269,7 +269,7 @@
                     class="w-full grid place-items-center mt-6"
                   >
                     <span
-                      class="loading loading-spinner loading-lg bg-darkPurple"
+                      class="loading loading-spinner loading-lg bg-primary"
                     ></span>
                   </div>
                 </td>

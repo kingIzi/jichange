@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, Location } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -41,6 +41,9 @@ import {
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { CustomersDialogComponent } from 'src/app/components/dialogs/Vendors/customers-dialog/customers-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Customer } from 'src/app/core/models/vendors/customer';
 
 @Component({
   selector: 'app-add-invoice',
@@ -83,18 +86,24 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     customers: [],
     currencies: of([]),
   };
+  @ViewChild('noCustomersFound', { static: true })
+  noCustomersFound!: ElementRef<HTMLDialogElement>;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('confirmAddInvoiceDetail', { static: true })
   confirmAddInvoiceDetail!: ElementRef<HTMLDialogElement>;
+  @ViewChild('customerNameInput')
+  customerNameInput!: ElementRef<HTMLInputElement>;
   constructor(
+    private dialog: MatDialog,
     private datePipe: DatePipe,
     private fb: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private appConfigService: AppConfigService,
     private invoiceService: InvoiceService,
     private tr: TranslocoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) {}
   private createForm() {
     this.invoiceDetailsForm = this.fb.group({
@@ -106,12 +115,12 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
       ]),
       auname: this.fb.control('', [Validators.required]),
       invno: this.fb.control('', [Validators.required]),
-      date: this.fb.control('', [Validators.required]),
+      date: this.fb.control(new Date(), [Validators.required]),
       edate: this.fb.control('', [Validators.required]),
       iedate: this.fb.control('', [Validators.required]),
       ptype: this.fb.control('', [Validators.required]),
       chus: this.fb.control('', []),
-      customerName: this.fb.control('', [Validators.required]),
+      customerName: this.fb.control('', []),
       ccode: this.fb.control('', [Validators.required]),
       comno: this.fb.control(0, [Validators.required]),
       ctype: this.fb.control('0', [Validators.required]),
@@ -159,10 +168,18 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     });
   }
   private autocompleteEventListener() {
-    this.filteredCustomers = this.customerName.valueChanges.pipe(
-      startWith(''),
-      map((value) => this.customerAutoCompleteData(value || ''))
-    );
+    // this.filteredCustomers = this.customerName.valueChanges.pipe(
+    //   startWith(''),
+    //   map((value) => this.customerAutoCompleteData(value || ''))
+    // );
+    if (this.formData.customers.length > 0) {
+      this.filteredCustomers = this.customerName.valueChanges.pipe(
+        startWith(''),
+        map((value) => this.customerAutoCompleteData(value || ''))
+      );
+    } else {
+      this.noCustomersFound.nativeElement.showModal();
+    }
   }
   private customerAutoCompleteData(value: string): CustomerName[] {
     let filterValue = value.toLocaleLowerCase();
@@ -171,17 +188,13 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     );
   }
   private assignCustomersFormData(
-    result: HttpDataResponse<string | number | CustomerName[]>
+    result: HttpDataResponse<number | CustomerName[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.formData.customers = result.response;
-    } else {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
       this.formData.customers = [];
+    } else {
+      this.formData.customers = result.response as CustomerName[];
     }
     this.autocompleteEventListener();
   }
@@ -290,34 +303,61 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     this.invno.disable();
     this.date.disable();
   }
+  private switchEditInvoiceErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Invoice'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate(`invoice.noGeneratedInvoicesFound`);
+    }
+  }
   private assignEditInvoiceFormResponse(
-    invoice: HttpDataResponse<GeneratedInvoice>,
-    items: HttpDataResponse<GeneratedInvoice[]>
+    // invoice: HttpDataResponse<GeneratedInvoice>,
+    // items: HttpDataResponse<GeneratedInvoice[]>
+    result: HttpDataResponse<GeneratedInvoice | number>
   ) {
-    if (
-      invoice.response &&
-      typeof invoice.response !== 'string' &&
-      typeof invoice.response !== 'number'
-    ) {
-      this.generatedInvoice = of(invoice.response);
-    }
-    if (
-      items.response &&
-      typeof items.response !== 'string' &&
-      typeof items.response !== 'number' &&
-      items.response.length > 0
-    ) {
-      this.invoiceItems = of(items.response);
-    }
-    if (!this.generatedInvoice) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchEditInvoiceErrorMessage(result.message[0]);
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`invoice.noGeneratedInvoicesFound`)
+        this.tr.translate(`defaults.failed`),
+        errorMessage
       );
-      return;
+    } else {
+      let invoice = result.response as GeneratedInvoice;
+      this.generatedInvoice = of(invoice);
+      this.invoiceItems = of(invoice.details ?? []);
+      this.createEditForm();
     }
-    this.createEditForm();
+    // if (
+    //   invoice.response &&
+    //   typeof invoice.response !== 'string' &&
+    //   typeof invoice.response !== 'number'
+    // ) {
+    //   this.generatedInvoice = of(invoice.response);
+    // }
+    // if (
+    //   items.response &&
+    //   typeof items.response !== 'string' &&
+    //   typeof items.response !== 'number' &&
+    //   items.response.length > 0
+    // ) {
+    //   this.invoiceItems = of(items.response);
+    // }
+    // if (!this.generatedInvoice) {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`invoice.noGeneratedInvoicesFound`)
+    //   );
+    //   return;
+    // }
+    // this.createEditForm();
   }
   private getBuildPageRequests() {
     let customerNamesObservable = from(
@@ -368,13 +408,13 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     return merged;
   }
   private buildEditInvoiceForm(invoiceNumber: string) {
+    let compid = this.getUserProfile().InstID;
+    let inv = Number(invoiceNumber);
     this.startLoading = true;
-    let requests = this.getEditInvoiceFormRequests(invoiceNumber);
-    let res = AppUtilities.pipedObservables(requests);
-    res
-      .then((results) => {
-        let [invoiceDetail, invoiceItems] = results;
-        this.assignEditInvoiceFormResponse(invoiceDetail, invoiceItems);
+    this.invoiceService
+      .findInvoice({ compid: compid, inv: inv })
+      .then((result) => {
+        this.assignEditInvoiceFormResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -411,6 +451,14 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
         throw err;
       });
+  }
+  private assignAddedCustomerToCustomerName(customer: Customer) {
+    let data = {
+      Cus_Mas_Sno: customer.Cust_Sno,
+      Customer_Name: customer.Cust_Name,
+    } as CustomerName;
+    this.formData.customers.push(data);
+    this.autocompleteEventListener();
   }
   ngOnInit(): void {
     this.createForm();
@@ -474,7 +522,9 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     return moneyFormat;
   }
   submitInvoiceDetailsForm() {
-    if (this.invoiceDetailsForm.valid) {
+    if (this.formData.customers.length === 0) {
+      this.noCustomersFound.nativeElement.showModal();
+    } else if (this.invoiceDetailsForm.valid) {
       let customer = this.formData.customers.find(
         (c) =>
           c.Customer_Name.toLocaleLowerCase() ===
@@ -492,6 +542,19 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     } else {
       this.createForm();
     }
+  }
+  openCustomersDialog() {
+    let dialogRef = this.dialog.open(CustomersDialogComponent, {
+      width: '800px',
+      disableClose: true,
+    });
+    dialogRef.componentInstance.addedCustomer
+      .asObservable()
+      .subscribe((customer) => {
+        dialogRef.close();
+        this.assignAddedCustomerToCustomerName(customer);
+        this.customerNameInput.nativeElement.focus();
+      });
   }
   get invno() {
     return this.invoiceDetailsForm.get('invno') as FormControl;

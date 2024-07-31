@@ -169,6 +169,10 @@ export class CustomersListComponent implements OnInit {
     switch (message.toLocaleLowerCase()) {
       case 'Not found.'.toLocaleLowerCase():
         return this.tr.translate(`errors.notFound`);
+      case 'Failed to delete customer: active invoice prevents deletion.'.toLocaleLowerCase():
+        return this.tr.translate(
+          'customer.form.dialog.addFailedCustomerMappedToInvoice'
+        );
       default:
         return this.tr.translate(`customer.failedToRemoveCustomer`);
     }

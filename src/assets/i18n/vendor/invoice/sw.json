@@ -167,6 +167,7 @@
   "createdInvoice": {
     "createdInvoice": "Ankara zilizoundwa",
     "searchTableBy": "Tafuta kwa jina la mteja au nambari ya ankara",
+    "noCustomersFoundAddCustomer": "Hakuna wateja waliopatikana. Angalau mteja mmoja alihitaji kuongeza ankara. Je, ungependa kuongeza moja sasa?",
     "createdInvoiceTable": [
       {
         "label": "Na.",
@@ -226,6 +227,7 @@
       "label": "Ghairi Ankara",
       "cautionMessage": "Marakani ikighairiwa, mabadiliko hayawezi kurejeshwa. Tafadhali endelea kwa tahadhari.",
       "cancelledSuccessfully": "Ankara iliyokatishwa kwa mafanikio!",
+      "cannotCancelInvoice": "Huwezi kughairi ankara iliyolipwa tayari.",
       "form": {
         "reason": "Sababu",
         "placeholders": {

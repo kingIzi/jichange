@@ -19,8 +19,7 @@
   height: 40px;
   border-radius: 50%;
   border: 4px solid;
-  //border-color: #ff3d00 transparent;
-  border-color: #8196fe transparent;
+  //border-color: #8196fe transparent;
 }
 
 @keyframes rotation {
@@ -30,4 +29,12 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+// .mat-mdc-progress-spinner {
+//   --mdc-circular-progress-active-indicator-color: #000000;
+// }
+
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: theme(colors.primary);
 }

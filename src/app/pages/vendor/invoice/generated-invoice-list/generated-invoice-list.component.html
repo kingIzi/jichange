@@ -108,13 +108,8 @@
                   </p>
                 </div>
                 <ng-template #cancelInvoiceTemplate>
-                  <app-cancel-generated-invoice
-                    [invoiceId]="element.Inv_Mas_Sno"
-                    [userId]="getUserProfile().Usno"
-                    #cancelGeneratedInvoice
-                  ></app-cancel-generated-invoice>
                   <button
-                    (click)="cancelInvoice(element, cancelGeneratedInvoice)"
+                    (click)="cancelInvoice(element)"
                     *transloco="let t; read: 'defaults'"
                     class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
                   >
@@ -168,7 +163,7 @@
                     <button
                       *transloco="let t; read: 'actions'"
                       [attr.data-tip]="t('download')"
-                      class="btn btn-sm btn-ghost border-linkBlue tooltip tooltip-left"
+                      class="btn btn-sm btn-ghost tooltip border border-black tooltip-left"
                       (click)="downloadInvoice(element)"
                     >
                       <span class="material-symbols-outlined text-linkBlue">
@@ -197,7 +192,7 @@
       </ng-container>
       <div [@inOutAnimation] *ngIf="tableLoading">
         <div class="w-full grid place-items-center mt-6">
-          <span class="loading loading-spinner loading-lg bg-darkPurple"></span>
+          <span class="loading loading-spinner loading-lg bg-primary"></span>
         </div>
       </div>
     </div>
@@ -224,7 +219,7 @@
                 "
                 [matColumnDef]="column.label"
               >
-                <th mat-header-cell *matHeaderCellDef>
+                <th class="!bg-base-200" mat-header-cell *matHeaderCellDef>
                   <div class="relative">
                     <div
                       *ngIf="tableSortableColumns(column); else notSortable"
@@ -262,13 +257,13 @@
                       {{ tableValue(element, column.value) }}
                     </p>
                     <ng-template #cancelInvoiceTemplate>
-                      <app-cancel-generated-invoice
+                      <!-- <app-cancel-generated-invoice
                         [invoiceId]="element.Inv_Mas_Sno"
                         [userId]="getUserProfile().Usno"
                         #cancelGeneratedInvoice
-                      ></app-cancel-generated-invoice>
+                      ></app-cancel-generated-invoice> -->
                       <button
-                        (click)="cancelInvoice(element, cancelGeneratedInvoice)"
+                        (click)="cancelInvoice(element)"
                         *transloco="let t; read: 'defaults'"
                         class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
                       >
@@ -318,7 +313,7 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('download')"
-                        class="btn btn-sm btn-ghost border-linkBlue tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost tooltip border border-black tooltip-left"
                         (click)="downloadInvoice(element)"
                       >
                         <span class="material-symbols-outlined text-linkBlue">
@@ -372,7 +367,7 @@
                     class="w-full grid place-items-center mt-6"
                   >
                     <span
-                      class="loading loading-spinner loading-lg bg-darkPurple"
+                      class="loading loading-spinner loading-lg bg-primary"
                     ></span>
                   </div>
                 </td>

@@ -37,6 +37,7 @@ import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-fo
 import { AmendInvoiceForm } from 'src/app/core/models/vendors/forms/amend-invoice-form';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-amendment-details-dialog',
@@ -66,7 +67,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   public customers: CustomerName[] = [];
   public currencies: Currency[] = [];
   public invoices: GeneratedInvoice[] = [];
-  public amended = new EventEmitter<void>();
+  public amended = new EventEmitter<GeneratedInvoice>();
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -86,7 +87,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   ) {}
   private createFormGroup() {
     this.formGroup = this.fb.group({
-      user_id: this.fb.control(this.getUserProfile().Usno, [
+      userid: this.fb.control(this.getUserProfile().Usno, [
         Validators.required,
       ]),
       compid: this.fb.control(this.getUserProfile().InstID.toString(), [
@@ -290,23 +291,68 @@ export class AmendmentDetailsDialogComponent implements OnInit {
       }
     });
   }
+  private switchAmendInvoiceResponse(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.invno.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Invoice Number is missing'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.invoiceNumber');
+      case 'Invoice Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.invoiceDate');
+      case 'Invoice Expiry Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.expiryDate');
+      case 'Invoice Due Date is missing'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.dueDate');
+      case 'Payment Type is missing'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.paymentType');
+      case 'Invoice Details is missing'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.details');
+      case 'Missing Reason'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.reason');
+      default:
+        return this.tr.translate(`generated.failedToRetrieveAmendedInvoice`);
+    }
+  }
+  private parseAmendInvoiceResponse(
+    result: HttpDataResponse<number | GeneratedInvoice>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAmendInvoiceResponse(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`generated.invoiceAmendedSuccessfully`)
+      );
+      this.amended.emit(result.response as GeneratedInvoice);
+    }
+  }
   private requestAmendInvoice(body: AmendInvoiceForm) {
     this.startLoading = true;
     this.invoiceService
       .addAmendment(body)
       .then((result) => {
-        if (typeof result.response === 'number' && result.response > 0) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`generated.invoiceAmendedSuccessfully`)
-          );
-          this.amended.emit();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`generated.failedToRetrieveAmendedInvoice`)
-          );
-        }
+        // if (typeof result.response === 'number' && result.response > 0) {
+        //   let sal = AppUtilities.sweetAlertSuccessMessage(
+        //     this.tr.translate(`generated.invoiceAmendedSuccessfully`)
+        //   );
+        //   this.amended.emit();
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`generated.failedToRetrieveAmendedInvoice`)
+        //   );
+        // }
+        this.parseAmendInvoiceResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -380,7 +426,9 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   addAmendment() {
     let form = { ...this.formGroup.value };
     form.invno = this.invno.value;
-    form.date = this.date.value;
+    form.date = new Date(this.date.value).toISOString(); //this.datePipe.transform(this.date.value, 'MM/dd/yyyy');
+    form.edate = new Date(this.edate.value).toISOString(); //this.datePipe.transform(this.edate.value, 'MM/dd/yyyy');
+    form.iedate = new Date(this.iedate.value).toISOString(); //this.datePipe.transform(this.iedate.value, 'MM/dd/yyyy');
     this.requestAmendInvoice(form);
   }
   get invno() {

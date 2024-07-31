@@ -280,6 +280,15 @@ export class RegionListComponent implements OnInit {
     switch (key) {
       case 'Region_Name':
         return `${style} text-black font-semibold`;
+      case 'Region_Status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Active',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
+        )} text-center w-fit`;
       default:
         return `${style} text-black font-normal`;
     }

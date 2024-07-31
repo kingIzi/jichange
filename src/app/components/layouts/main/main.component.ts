@@ -42,6 +42,11 @@ import { NgxLoadingModule } from 'ngx-loading';
   ],
 })
 export class MainComponent implements OnInit, AfterViewInit {
+  public themes: { label: string; color: string }[] = [
+    { label: 'light', color: '#0B6587' },
+    { label: 'coffee', color: '#20161F' },
+  ]; //["light","coffee"]
+  public selectedThemeIndex: number = 0;
   public routeLoading: boolean = false;
   @ViewChild('mainHeader') mainHeader!: HeaderComponent;
   @ViewChild('containerDoc', { static: true })
@@ -216,9 +221,27 @@ export class MainComponent implements OnInit, AfterViewInit {
       prevScrollpos = currentScrollPos;
     };
   }
+  private prepareCurrentTheme() {
+    let theme = localStorage.getItem('theme') as string;
+    if (!theme) {
+      this.selectedThemeIndex = 0;
+    }
+    console.log(localStorage.getItem('theme'));
+    let found = this.themes.find((val) => {
+      return val.label.localeCompare(theme);
+    });
+    console.log(found);
+    // let foundIndex = this.themes.findIndex((val) =>
+    //   val.label.localeCompare(theme)
+    // );
+    // if (foundIndex != -1) {
+    //   this.selectedThemeIndex = foundIndex;
+    // }
+  }
   ngOnInit(): void {
     this.prepareBankBreadcrumbs();
     this.routeLoaderListener();
+    //this.prepareCurrentTheme();
   }
   ngAfterViewInit(): void {
     this.hideNavBarOnScroll();

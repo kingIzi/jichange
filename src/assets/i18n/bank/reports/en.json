@@ -400,7 +400,7 @@
         "desc": ""
       },
       {
-        "label": "Created",
+        "label": "Invoice date",
         "value": "Invoice_Date",
         "desc": ""
       },

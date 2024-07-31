@@ -2,7 +2,7 @@
 <app-display-message-box #timeoutWarning></app-display-message-box>
 <app-display-message-box #timeOut></app-display-message-box>
 
-<div #header class="navbar bg-indigo-900 shadow-4 relative">
+<div #header class="navbar bg-primary shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" id="phone-nav" class="dropdown z-50 h-12">
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -48,7 +48,7 @@
               <a
                 #ahref
                 [routerLink]="dropdown.get('routerLink')?.value"
-                [routerLinkActive]="'text-darkPurple'"
+                [routerLinkActive]="'text-primary'"
                 (click)="routerClicked(ahref)"
                 class="capitalize"
                 >{{ dropdown.get("label")?.value }}</a
@@ -64,7 +64,7 @@
     >
       <img
         class="object-contain"
-        src="assets/img/jichangelogo.png"
+        src="assets/img/logo.png"
         alt="TE Logo"
         loading="lazy"
       />
@@ -115,7 +115,7 @@
             <a
               #ahref
               [routerLink]="dropdown.get('routerLink')?.value"
-              [routerLinkActive]="'text-darkPurple'"
+              [routerLinkActive]="'text-primary'"
               (click)="routerClicked(ahref)"
               class="capitalize"
               >{{ dropdown.get("label")?.value }}</a
@@ -154,10 +154,10 @@
               </span>
               <div class="flex flex-row items-center justify-between w-full">
                 <p class="text-sm">{{ getUserProfile().Uname }}</p>
-                <span
+                <!-- <span
                   class="badge badge-accent badge-sm text-white uppercase"
                   >{{ getUserProfile().role }}</span
-                >
+                > -->
               </div>
             </a>
           </li>

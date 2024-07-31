@@ -77,6 +77,15 @@
     },
     "errors": {
       "reason": "Please enter reason"
+    },
+    "dialog": {
+      "invoiceNumber": "Please provide the invoice number.",
+      "invoiceDate": "Please provide an invoice date.",
+      "expiryDate": "Please provide an expiry date.",
+      "dueDate": "Please provide a due date.",
+      "paymentType": "Please provide a payment type.",
+      "details": "Please add at least one invoice item.",
+      "reason": "Please provide a reason."
     }
   },
   "errors": {

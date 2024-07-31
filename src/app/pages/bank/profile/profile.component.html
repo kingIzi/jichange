@@ -5,7 +5,10 @@
   [show]="startLoading"
 ></app-loader-infinite-spinner>
 
-<div class="px-6 py-2 w-full flex flex-col space-y-2">
+<div
+  [attr.data-theme]="themes[selectedThemeIndex].label"
+  class="px-6 py-2 w-full flex flex-col space-y-2"
+>
   <div class="flex flex-row items-center justify-between w-full py-2">
     <h2 *transloco="let t; read: 'auth.profile'" class="text-lg font-bold">
       {{ t("settings") }}
@@ -115,6 +118,35 @@
         </div>
       </div>
     </div>
+    <!-- <div class="flex flex-col border rounded-lg p-4 space-y-2">
+      <div class="flex flex-row items-center justify-between">
+        <h2 *transloco="let t; read: 'auth.profile'" class="text-sm font-bold">
+          {{ t("selectTheme") }}
+        </h2>
+      </div>
+      <div class="grid grid-cols-6 gap-x-2 w-full">
+        <ng-container *ngFor="let theme of themes; index as ind">
+          <div class="flex flex-col" *transloco="let t; read: 'auth.profile'">
+            <h6 class="text-xs">
+              {{ ind === 0 ? t("default") : theme.label }}
+            </h6>
+            <button
+              (click)="themeClicked(ind)"
+              class="w-full h-8 btn btn-ghost hover:bg-[{{
+                theme.color
+              }}] bg-[{{ theme.color }}] relative"
+            >
+              <span
+                [class]="ind === selectedThemeIndex ? '' : 'hidden'"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
+              >
+                <i class="bi bi-check-circle"></i>
+              </span>
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div> -->
     <div
       [formGroup]="languageFormGroup"
       class="flex flex-col border rounded-lg p-4 space-y-2"

@@ -32,6 +32,7 @@ import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { GeneratedInvoiceViewComponent } from '../generated-invoice-view/generated-invoice-view.component';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-invoice-details-view',
@@ -175,48 +176,45 @@ export class InvoiceDetailsViewComponent implements OnInit {
       this.tr.translate(`generated.noItemsFound`)
     );
   }
+  private switchFindInvoiceErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Invoice'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate('generated.failedToRetrieveInvoice');
+    }
+  }
+  private parseApproveInvoiceResponse(
+    result: HttpDataResponse<number | GeneratedInvoice>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchFindInvoiceErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      this.generatedInvoice = result.response as GeneratedInvoice;
+      this.invoices = (result.response as GeneratedInvoice).details ?? [];
+      this.modifyFormGroup();
+      this.viewReady.emit(this.invoiceView.nativeElement);
+    }
+  }
   private async prepareInvoiceView() {
     this.startLoading = true;
-    let invoiceDetailsObservable = from(
-      this.invoiceService.invoiceDetailsById({
+    this.invoiceService
+      .findInvoice({
         compid: this.data.userProfile.InstID,
-        invid: Number(this.data.Inv_Mas_Sno),
+        inv: Number(this.data.Inv_Mas_Sno),
       })
-    );
-    let invoiceItemObservable = from(
-      this.invoiceService.invoiceItemDetails({
-        invid: Number(this.data.Inv_Mas_Sno),
-      })
-    );
-    let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
-    lastValueFrom(
-      mergedObservable.pipe(
-        map((result) => {
-          return result;
-        }),
-        catchError((err) => {
-          throw err;
-        })
-      )
-    )
-      .then((results) => {
-        let [invoiceDetail, invoiceItems] = results;
-        if (
-          typeof invoiceDetail.response === 'string' ||
-          typeof invoiceDetail.response === 'number'
-        ) {
-          this.failedToRetrieveInvoice();
-        } else if (
-          typeof invoiceItems.response === 'string' ||
-          typeof invoiceItems.response === 'number'
-        ) {
-          this.noItemsFoundForInvoice();
-        } else {
-          this.generatedInvoice = invoiceDetail.response;
-          this.invoices = invoiceItems.response;
-          this.modifyFormGroup();
-          this.viewReady.emit(this.invoiceView.nativeElement);
-        }
+      .then((result) => {
+        this.parseApproveInvoiceResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -231,6 +229,62 @@ export class InvoiceDetailsViewComponent implements OnInit {
         throw err;
       });
   }
+  // private async prepareInvoiceView() {
+  //   this.startLoading = true;
+  //   let invoiceDetailsObservable = from(
+  //     this.invoiceService.invoiceDetailsById({
+  //       compid: this.data.userProfile.InstID,
+  //       invid: Number(this.data.Inv_Mas_Sno),
+  //     })
+  //   );
+  //   let invoiceItemObservable = from(
+  //     this.invoiceService.invoiceItemDetails({
+  //       invid: Number(this.data.Inv_Mas_Sno),
+  //     })
+  //   );
+  //   let mergedObservable = zip(invoiceDetailsObservable, invoiceItemObservable);
+  //   lastValueFrom(
+  //     mergedObservable.pipe(
+  //       map((result) => {
+  //         return result;
+  //       }),
+  //       catchError((err) => {
+  //         throw err;
+  //       })
+  //     )
+  //   )
+  //     .then((results) => {
+  //       let [invoiceDetail, invoiceItems] = results;
+  //       if (
+  //         typeof invoiceDetail.response === 'string' ||
+  //         typeof invoiceDetail.response === 'number'
+  //       ) {
+  //         this.failedToRetrieveInvoice();
+  //       } else if (
+  //         typeof invoiceItems.response === 'string' ||
+  //         typeof invoiceItems.response === 'number'
+  //       ) {
+  //         this.noItemsFoundForInvoice();
+  //       } else {
+  //         this.generatedInvoice = invoiceDetail.response;
+  //         this.invoices = invoiceItems.response;
+  //         this.modifyFormGroup();
+  //         this.viewReady.emit(this.invoiceView.nativeElement);
+  //       }
+  //       this.startLoading = false;
+  //       this.cdr.detectChanges();
+  //     })
+  //     .catch((err) => {
+  //       AppUtilities.requestFailedCatchError(
+  //         err,
+  //         this.displayMessageBox,
+  //         this.tr
+  //       );
+  //       this.startLoading = false;
+  //       this.cdr.detectChanges();
+  //       throw err;
+  //     });
+  // }
   ngOnInit() {
     this.createForm();
     this.prepareInvoiceView();

@@ -231,7 +231,7 @@
       </div>
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'setup.bankUser.form'" class="text-xs">
-          {{ t("emailId") }}<span class="text-red-600">*</span>
+          {{ t("emailId") }}
         </p>
         <input
           *transloco="let t; read: 'setup.bankUser.form.placeholders'"
@@ -329,7 +329,8 @@
         (click)="submitBankUserForm()"
         type="submit"
         form="control-number-form"
-        class="btn text-xs btn-outline font-inter btn-success w-24"
+        [disabled]="!bankUserForm.valid"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
       >
         {{ t("submit") }}
       </button>

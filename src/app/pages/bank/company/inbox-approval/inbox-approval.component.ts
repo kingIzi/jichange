@@ -101,19 +101,6 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 export class InboxApprovalComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
-  // public tableData: {
-  //   companies: Company[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<Company>;
-  // } = {
-  //   companies: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<Company>([]),
-  // };
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public CompanyInboxTable: typeof CompanyInboxTable = CompanyInboxTable;
@@ -221,14 +208,6 @@ export class InboxApprovalComponent implements OnInit {
     };
     this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  // private prepareDataSource() {
-  //   this.tableData.dataSource = new MatTableDataSource<Company>(
-  //     this.tableData.companies
-  //   );
-  //   this.tableData.dataSource.paginator = this.paginator;
-  //   this.tableData.dataSource.sort = this.sort;
-  //   this.dataSourceFilter();
-  // }
   private parseCompanyInboxResponse(
     result: HttpDataResponse<number | Company[]>
   ) {
@@ -267,12 +246,6 @@ export class InboxApprovalComponent implements OnInit {
         throw err;
       });
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.requestCompanyInbox();

@@ -171,6 +171,9 @@
     "saveChanges": "Hifadhi Mabadiliko",
     "passowordChangedSuccessfully": "Nywila imebadilishwa kwa mafanikio",
     "failedToUpdatePassword": "Imeshindwa kusasisha nywila.",
+    "selectTheme": "Teua mandhari",
+    "default": "Kaida",
+    "failedToFetchUser": "Imeshindwa kupata mtumiaji.",
     "general": {
       "personalInformation": "Taarifa Binafsi",
       "firstName": "Jina la Kwanza",

@@ -156,7 +156,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     this.startLoading = true;
     let companyUserObservable = from(
       this.companyUserService.getCompanyUserByid({
-        sno: this.data.companyUserId,
+        Sno: this.data.companyUserId,
       })
     );
     let mergedObservable = zip(companyUserObservable);

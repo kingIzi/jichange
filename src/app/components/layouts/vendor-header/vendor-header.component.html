@@ -2,7 +2,9 @@
 <app-display-message-box #timeoutWarning></app-display-message-box>
 <app-display-message-box #timeOut></app-display-message-box>
 
-<div #header class="navbar bg-indigo-900 shadow-4 relative">
+<!-- bg-indigo-900 -->
+<!-- bg-[#0B6587] -->
+<div #header class="navbar bg-primary shadow-4 relative">
   <div class="navbar-start">
     <div [formGroup]="formGroup" class="dropdown">
       <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -54,7 +56,7 @@
               <a
                 #ahref
                 [routerLink]="dropdown.get('routerLink')?.value"
-                [routerLinkActive]="'text-darkPurple'"
+                [routerLinkActive]="'text-primary'"
                 (click)="routerClicked(ahref, header.get('rootLink')?.value)"
                 class="capitalize"
                 >{{ dropdown.get("label")?.value }}</a
@@ -64,24 +66,21 @@
         </li>
       </ul>
     </div>
-    <a
+    <button
       [routerLink]="'/vendor'"
-      class="flex items-center btn btn-ghost bg-white hover:bg-darkPurple w-fit space-x-2"
+      *ngIf="vendor$ | async as vendor"
+      class="flex items-center btn btn-ghost bg-white hover:bg-darkPurple w-fit space-x-2 relative"
     >
-      <div class="w-12 h-12">
-        <img
-          class="object-contain w-full h-full"
-          src="assets/img/jichangelogo.png"
-          alt="TE Logo"
-          loading="lazy"
-        />
-      </div>
-      <ng-container *ngIf="vendor.Comp_Mas_Sno > 0">
-        <h1 class="text-lg head-title lg:block hidden">
-          {{ vendor.Company_Name }}
-        </h1>
-      </ng-container>
-    </a>
+      <img
+        class="object-contain max-h-full max-w-max"
+        src="assets/img/logo.png"
+        alt="TE Logo"
+        loading="lazy"
+      />
+      <h1 class="text-lg head-title lg:block hidden">
+        {{ vendor.Company_Name }}
+      </h1>
+    </button>
   </div>
   <div
     [formGroup]="formGroup"
@@ -148,9 +147,9 @@
             <a
               #ahref
               [routerLink]="dropdown.get('routerLink')?.value"
-              [routerLinkActive]="'text-darkPurple'"
+              [routerLinkActive]="'text-primary'"
               (click)="routerClicked(ahref, header.get('rootLink')?.value)"
-              class="capitalize hover:bg-darkPurple hover:text-white"
+              class="capitalize hover:bg-primary hover:text-white"
               >{{ dropdown.get("label")?.value }}</a
             >
           </li>
@@ -183,11 +182,11 @@
                 <i class="bi bi-person-circle text-lg"></i>
               </span>
               <div class="flex flex-row items-center justify-between w-full">
-                <p class="text-sm">{{ getUserProfile().sessComp }}</p>
-                <span
+                <p class="text-sm">{{ getUserProfile().Uname }}</p>
+                <!-- <span
                   class="badge badge-accent badge-sm text-white uppercase"
                   >{{ getUserProfile().role }}</span
-                >
+                > -->
               </div>
             </a>
           </li>

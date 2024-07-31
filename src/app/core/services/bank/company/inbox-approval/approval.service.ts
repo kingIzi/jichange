@@ -22,10 +22,10 @@ export class ApprovalService {
   }
   public async approveCompany(body: CompanyApprovalForm) {
     const data = await lastValueFrom(
-      this.client.performPost<CompanyApprovalForm, HttpDataResponse<number>>(
-        `/api/CompanyInbox/AddCompanyBank`,
-        body
-      )
+      this.client.performPost<
+        CompanyApprovalForm,
+        HttpDataResponse<Company | number>
+      >(`/api/CompanyInbox/AddCompanyBank`, body)
     );
     return data;
   }

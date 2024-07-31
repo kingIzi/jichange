@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { RequestClientService } from '../../../request-client.service';
 import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { EmailText } from 'src/app/core/models/bank/setup/email-text';
+import {
+  EmailText,
+  EmailTextFlow,
+} from 'src/app/core/models/bank/setup/email-text';
 import { AddEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/add-email-text-form';
 import { RemoveEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/remove-email-text-form';
 
@@ -34,6 +37,14 @@ export class EmailTextService {
       this.client.performPost<RemoveEmailTextForm, HttpDataResponse<number>>(
         `/api/Email/DeleteEmail`,
         body
+      )
+    );
+    return data;
+  }
+  public async getFlows() {
+    let data = await lastValueFrom(
+      this.client.performGet<HttpDataResponse<number | EmailTextFlow[]>>(
+        `/api/Email/GetFlows`
       )
     );
     return data;

@@ -18,7 +18,7 @@
     >
       <div
         *ngIf="buildPageLoading"
-        class="loading loading-spinner loading-lg bg-darkPurple absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        class="loading loading-spinner loading-lg bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       ></div>
       <p
         *transloco="let t; read: 'reports.overview'"
@@ -45,7 +45,7 @@
         >
           <div
             *ngIf="buildPageLoading"
-            class="loading loading-spinner loading-lg bg-darkPurple absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            class="loading loading-spinner loading-lg bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           ></div>
           <canvas #invoiceSummary></canvas>
         </div>
@@ -83,7 +83,7 @@
         </div>
         <div
           *ngIf="buildPageLoading"
-          class="loading loading-spinner loading-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-darkPurple"
+          class="loading loading-spinner loading-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary"
         ></div>
       </div>
     </div>
@@ -234,9 +234,7 @@
         </ng-container>
         <div [@inOutAnimation] *ngIf="buildPageLoading">
           <div class="w-full grid place-items-center mt-6">
-            <span
-              class="loading loading-spinner loading-lg bg-darkPurple"
-            ></span>
+            <span class="loading loading-spinner loading-lg bg-primary"></span>
           </div>
         </div>
       </div>
@@ -263,7 +261,7 @@
                   "
                   [matColumnDef]="column.label"
                 >
-                  <th mat-header-cell *matHeaderCellDef>
+                  <th class="!bg-base-200" mat-header-cell *matHeaderCellDef>
                     <div class="relative">
                       <div
                         *ngIf="tableSortableColumns(column); else notSortable"
@@ -362,7 +360,7 @@
                       class="w-full grid place-items-center mt-6"
                     >
                       <span
-                        class="loading loading-spinner loading-lg bg-darkPurple"
+                        class="loading loading-spinner loading-lg bg-primary"
                       ></span>
                     </div>
                   </td>

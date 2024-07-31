@@ -26,7 +26,10 @@ import { SuccessMessageBoxComponent } from '../../../success-message-box/success
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BranchDialogComponent } from '../branch-dialog/branch-dialog.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { EmailText } from 'src/app/core/models/bank/setup/email-text';
+import {
+  EmailText,
+  EmailTextFlow,
+} from 'src/app/core/models/bank/setup/email-text';
 import { AddEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/add-email-text-form';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { EmailTextService } from 'src/app/core/services/bank/setup/email-text/email-text.service';
@@ -34,6 +37,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { from, zip } from 'rxjs';
 
 @Component({
   selector: 'app-email-text-dialog',
@@ -57,15 +61,16 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
   ],
 })
 export class EmailTextDialogComponent implements OnInit {
-  public flows: string[] = [
-    'On Registration',
-    'On Invoice Generation',
-    'On Receipt',
-    'On Invoice Cancellation',
-    'On Invoice Ammendent',
-    'On OTP',
-    'On User Registration',
-  ];
+  // public flows: string[] = [
+  //   'On Registration',
+  //   'On Invoice Generation',
+  //   'On Receipt',
+  //   'On Invoice Cancellation',
+  //   'On Invoice Ammendent',
+  //   'On OTP',
+  //   'On User Registration',
+  // ];
+  public flows: EmailTextFlow[] = [];
   public emailTextForm!: FormGroup;
   public startLoading: boolean = false;
   public addedEmailText = new EventEmitter<EmailText>();
@@ -101,8 +106,8 @@ export class EmailTextDialogComponent implements OnInit {
   }
   private createEditForm(email: EmailText) {
     this.emailTextForm = this.fb.group({
-      flow: this.fb.control(email.Flow_Id, [Validators.required]),
-      text: this.fb.control(email.Local_subject, [Validators.required]),
+      flow: this.fb.control(Number(email.Flow_Id), [Validators.required]),
+      text: this.fb.control(email.Email_Text, [Validators.required]),
       loctext: this.fb.control(email.Local_Text, [Validators.required]),
       sub: this.fb.control(email.Subject, [Validators.required]),
       subloc: this.fb.control(email.Local_subject, [Validators.required]),
@@ -165,6 +170,8 @@ export class EmailTextDialogComponent implements OnInit {
         return this.tr.translate(`setup.emailText.form.dialog.subjectEnglish`);
       case 'Missing subject in swahili'.toLocaleLowerCase():
         return this.tr.translate(`setup.emailText.form.dialog.subjectSwahili`);
+      case 'Flow already exists'.toLocaleLowerCase():
+        return this.tr.translate('setup.emailText.flowIdExists');
       default:
         return this.tr.translate(`setup.emailText.failedToAddEmailText`);
     }
@@ -211,12 +218,36 @@ export class EmailTextDialogComponent implements OnInit {
         throw err;
       });
   }
+  private buildPage() {
+    this.startLoading = true;
+    let flows = from(this.emailTextService.getFlows());
+    let mergedObservable = zip(flows);
+    let res = AppUtilities.pipedObservables(mergedObservable);
+    res
+      .then((results) => {
+        let [flows] = results;
+        this.flows = flows.response as EmailTextFlow[];
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     if (this.data.emailText) {
       this.createEditForm(this.data.emailText);
     } else {
       this.createForm();
     }
+    this.buildPage();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;

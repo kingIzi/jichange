@@ -23,7 +23,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { firstValueFrom, from, zip } from 'rxjs';
+import { firstValueFrom, from, Observable, of, zip } from 'rxjs';
 //import { LoginResponse } from 'src/app/core/models/login-response';
 import { LoginService } from 'src/app/core/services/login.service';
 import { DisplayMessageBoxComponent } from '../../dialogs/display-message-box/display-message-box.component';
@@ -59,10 +59,7 @@ export class VendorHeaderComponent implements OnInit {
   private idleState = 'Not started.';
   private timedOut = false;
   private lastPing!: Date;
-  public vendor: { Comp_Mas_Sno: number; Company_Name: string } = {
-    Comp_Mas_Sno: -1,
-    Company_Name: '',
-  };
+  public vendor$!: Observable<{ Comp_Mas_Sno: number; Company_Name: string }>;
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
   //public userProfile!: LoginResponse;
@@ -262,12 +259,13 @@ export class VendorHeaderComponent implements OnInit {
     let res = AppUtilities.pipedObservables(zip(vendorObs));
     res
       .then((results) => {
-        let [vendor] = results;
-        if (typeof vendor.response !== 'string') {
-          this.vendor = vendor.response as {
+        let [data] = results;
+        if (typeof data.response !== 'string') {
+          let vendor = data.response as {
             Comp_Mas_Sno: number;
             Company_Name: string;
           };
+          this.vendor$ = of(vendor);
         }
         this.cdr.detectChanges();
       })

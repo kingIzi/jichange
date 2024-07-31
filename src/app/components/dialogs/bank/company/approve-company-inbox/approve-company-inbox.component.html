@@ -94,7 +94,7 @@
               type="radio"
               name="accountNo"
               class="radio radio-xs"
-              [value]="'Suspense Account'"
+              [value]="true"
               [formControl]="accountPool"
             />
             <span class="label-text text-xs font-inter">
@@ -111,7 +111,7 @@
               type="radio"
               name="accountNo"
               class="radio radio-xs"
-              [value]="'Deposit Account'"
+              [value]="false"
               [formControl]="accountPool"
             />
 
@@ -183,8 +183,9 @@
     <button
       (click)="submitInboxApproval()"
       type="submit"
+      [disabled]="!formGroup.valid"
       form="vendor-registration-form"
-      class="btn text-xs btn-outline font-inter btn-success w-24"
+      class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
     >
       {{ t("submit") }}
     </button>

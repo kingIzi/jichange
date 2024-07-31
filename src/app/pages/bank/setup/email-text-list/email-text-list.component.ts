@@ -24,7 +24,7 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
-import { Observable, of } from 'rxjs';
+import { from, Observable, of, zip } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { RemoveItemDialogComponent } from 'src/app/components/dialogs/Vendors/remove-item-dialog/remove-item-dialog.component';
 import { EmailTextDialogComponent } from 'src/app/components/dialogs/bank/setup/email-text-dialog/email-text-dialog.component';
@@ -36,7 +36,10 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { EmailTextTable } from 'src/app/core/enums/bank/setup/email-text-table';
 import { RemoveEmailTextForm } from 'src/app/core/models/bank/forms/setup/email-text/remove-email-text-form';
-import { EmailText } from 'src/app/core/models/bank/setup/email-text';
+import {
+  EmailText,
+  EmailTextFlow,
+} from 'src/app/core/models/bank/setup/email-text';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
@@ -87,15 +90,7 @@ export class EmailTextListComponent implements OnInit {
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public EmailTextTable: typeof EmailTextTable = EmailTextTable;
-  public flows: string[] = [
-    'On Registration',
-    'On Invoice Generation',
-    'On Receipt',
-    'On Invoice Cancellation',
-    'On Invoice Ammendent',
-    'On OTP',
-    'On User Registration',
-  ];
+  public flows: EmailTextFlow[] = [];
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -112,7 +107,7 @@ export class EmailTextListComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) public scope: any
   ) {}
   private createTableHeaders() {
-    let TABLE_SHOWING = 5;
+    let TABLE_SHOWING = 6;
     this.tableFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -187,15 +182,20 @@ export class EmailTextListComponent implements OnInit {
       this.tableDataService.setData(result.response as EmailText[]);
     }
   }
+  private assignEmailTextListResponse(
+    result: HttpDataResponse<number | EmailText[]>
+  ) {
+    this.parseEmailTextListResponse(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilterPredicate();
+    this.dataSourceSortingAccessor();
+  }
   private requestEmailTextList() {
     this.tableLoading = true;
     this.emailTextService
       .getAllEmailTextList({})
       .then((result) => {
-        this.parseEmailTextListResponse(result);
-        this.tableDataService.prepareDataSource(this.paginator, this.sort);
-        this.dataSourceFilterPredicate();
-        this.dataSourceSortingAccessor();
+        this.assignEmailTextListResponse(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -215,7 +215,7 @@ export class EmailTextListComponent implements OnInit {
       case 'Not found.'.toLocaleLowerCase():
         return this.tr.translate(`errors.notFound`);
       default:
-        return this.tr.translate(`setup.smtp.failedEmailText`);
+        return this.tr.translate(`setup.emailText.failedToDeleteEmailText`);
     }
   }
   private parseDeleteEmailTextResponse(result: HttpDataResponse<number>) {
@@ -259,9 +259,35 @@ export class EmailTextListComponent implements OnInit {
         throw err;
       });
   }
+  public buildPage() {
+    this.startLoading = true;
+    let flows = from(this.emailTextService.getFlows());
+    let emails = from(this.emailTextService.getAllEmailTextList({}));
+    let mergedObservable = zip(flows, emails);
+    let res = AppUtilities.pipedObservables(mergedObservable);
+    res
+      .then((results) => {
+        let [flows, emails] = results;
+        this.flows = flows.response as EmailTextFlow[];
+        this.assignEmailTextListResponse(emails);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     this.createTableHeaders();
-    this.requestEmailTextList();
+    this.buildPage();
+    //this.requestEmailTextList();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
@@ -307,7 +333,8 @@ export class EmailTextListComponent implements OnInit {
       case 'Effective_Date':
         return new Date(element[key]).toDateString();
       case 'Flow_Id':
-        return this.flows[element[key]];
+        return this.flows.find((flow) => flow.flow === Number(element[key]))
+          ?.label; //this.flows[element[key]];
       default:
         return element[key];
     }

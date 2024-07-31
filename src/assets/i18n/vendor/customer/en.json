@@ -34,6 +34,7 @@
   "modifiedCustomerSuccessfully": "Modified customer successfully!",
   "removedCustomerSuccessfully": "Removed customer successfully!",
   "failedToRemoveCustomer": "Failed to remove customer.",
+
   "form": {
     "customerName": "Customer name",
     "mobileNo": "Mobile No",
@@ -64,7 +65,7 @@
       "mobileNo": "Please provide a mobile number",
       "emailId": "Please provide a valid email Id",
       "failedToAddCustomer": "Failed to add customer.",
-      "addFailedCustomerMappedToInvoice": "You cannot modify a customer mapped to an invoice.",
+      "addFailedCustomerMappedToInvoice": "Failed to delete customer: active invoices found.",
       "existsName": "Customer {} already exists.",
       "existsMobileNumber": "The mobile number you have entered already in use.",
       "existsTin": "The Tin number you have entered is already in use.",

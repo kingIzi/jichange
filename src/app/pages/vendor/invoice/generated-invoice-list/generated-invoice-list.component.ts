@@ -239,22 +239,6 @@ export class GeneratedInvoiceListComponent implements OnInit {
   private assignGeneratedInvoiceDataList(
     result: HttpDataResponse<number | GeneratedInvoice[]>
   ) {
-    // if (
-    //   result.response &&
-    //   typeof result.response !== 'string' &&
-    //   typeof result.response !== 'number' &&
-    //   result.response.length > 0
-    // ) {
-    //   this.tableData.generatedInvoices = result.response;
-    // } else {
-    //   this.tableData.generatedInvoices = [];
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.warning`),
-    //     this.tr.translate(`invoice.noGeneratedInvoicesFound`)
-    //   );
-    // }
-    // this.prepareDataSource();
     this.parseGeneratedInvoiceResponse(result);
     this.tableDataService.prepareDataSource(this.paginator, this.sort);
     this.dataSourceFilterPredicate();
@@ -515,20 +499,30 @@ export class GeneratedInvoiceListComponent implements OnInit {
         : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow'
       : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
   }
-  cancelInvoice(
-    invoice: GeneratedInvoice,
-    dialog: CancelGeneratedInvoiceComponent
-  ) {
-    dialog.title = this.tr.translate(`defaults.warning`);
-    dialog.message = this.tr
-      .translate(`invoice.createdInvoice.sureCancelInvoice`)
-      .replace('{}', invoice.Invoice_No);
-    dialog.userId = this.getUserProfile().Usno;
-    dialog.invoiceId = invoice.Inv_Mas_Sno;
-    dialog.cancelledInvoice.asObservable().subscribe(() => {
-      this.requestGeneratedInvoice();
+  cancelInvoice(invoice: GeneratedInvoice) {
+    // dialog.title = this.tr.translate(`defaults.warning`);
+    // dialog.message = this.tr
+    //   .translate(`invoice.createdInvoice.sureCancelInvoice`)
+    //   .replace('{}', invoice.Invoice_No);
+    // dialog.userId = this.getUserProfile().Usno;
+    // dialog.invoiceId = invoice.Inv_Mas_Sno;
+    // dialog.cancelledInvoice.asObservable().subscribe(() => {
+    //   this.requestGeneratedInvoice();
+    // });
+    // dialog.openDialog();
+    let dialogRef = this.dialog.open(CancelGeneratedInvoiceComponent, {
+      width: '800px',
+      data: { invid: invoice.Inv_Mas_Sno },
     });
-    dialog.openDialog();
+    dialogRef.componentInstance.cancelledInvoice
+      .asObservable()
+      .subscribe((invid) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex((item) => item.Inv_Mas_Sno === invid);
+        this.tableDataService.removedData(index);
+      });
   }
   getTableDataSource() {
     return this.tableDataService.getDataSource();

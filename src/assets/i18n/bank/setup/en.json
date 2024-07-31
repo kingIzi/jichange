@@ -85,6 +85,11 @@
         "desc": ""
       },
       {
+        "label": "Status",
+        "value": "Region_Status",
+        "desc": ""
+      },
+      {
         "label": "Action",
         "value": "Action",
         "desc": ""
@@ -478,6 +483,8 @@
     "addedEmailText": "Added email successfully!",
     "modifiedEmailText": "Modofied email successfully!",
     "failedEmailText": "Failed to add email",
+    "flowIdExists": "The flow Id provided is already in use.",
+    "failedToDeleteEmailText": "Failed to delete email text.",
     "form": {
       "flowId": "Flow Id",
       "subjectEnglish": "Subject English",
@@ -495,7 +502,7 @@
         "flowId": "Please, select a flow Id",
         "subjectEnglish": "Please, enter email's subject in english",
         "subjectSwahili": "Please, enter email's subject in swahili",
-        "emailText": "Please, enter your email text in enlish",
+        "emailText": "Please, enter your email text in english",
         "emailSwahili": "Please, enter your email text in swahili"
       },
       "dialog": {

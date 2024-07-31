@@ -3,6 +3,7 @@ import { RequestClientService } from '../request-client.service';
 import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from '../../models/http-data-response';
 import { CompanyUser } from '../../models/vendors/company-user';
+import { GetCompanyByIdForm } from '../../models/vendors/forms/get-company-user-by-id-form';
 
 @Injectable({
   providedIn: 'root',
@@ -30,10 +31,10 @@ export class CompanyUserService {
     );
     return data;
   }
-  public async getCompanyUserByid(body: { sno: number | string }) {
+  public async getCompanyUserByid(body: GetCompanyByIdForm) {
     let data = await lastValueFrom(
       this.client.performPost<
-        { sno: number | string },
+        GetCompanyByIdForm,
         HttpDataResponse<number | string | boolean | CompanyUser>
       >(`/api/CompanyUsers/EditCompanyUserss`, body)
     );

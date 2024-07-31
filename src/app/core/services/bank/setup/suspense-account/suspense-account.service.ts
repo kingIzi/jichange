@@ -31,7 +31,7 @@ export class SuspenseAccountService {
   }
   public async getSuspenseActiveAccountList(body: {}) {
     let data = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<SuspenseAccount[]>>(
+      this.client.performPost<{}, HttpDataResponse<SuspenseAccount[] | number>>(
         `/api/SuspenseA/GetAccount_Active`,
         body
       )
