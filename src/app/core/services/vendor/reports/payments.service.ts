@@ -14,7 +14,7 @@ export class PaymentsService {
     let data = await lastValueFrom(
       this.client.performPost<
         PaymentDetailReportForm,
-        HttpDataResponse<number | string | PaymentDetail[]>
+        HttpDataResponse<number | PaymentDetail[]>
       >(`/api/Invoice/GetPaymentReport`, body)
     );
     return data;

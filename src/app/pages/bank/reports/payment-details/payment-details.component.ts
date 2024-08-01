@@ -61,6 +61,7 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-payment-details',
@@ -75,6 +76,7 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payment-details.component.html',

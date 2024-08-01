@@ -56,7 +56,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'vendor/generated', alias: 'generated' },
+      useValue: { scope: 'vendor/invoice', alias: 'invoice' },
     },
   ],
 })
@@ -112,9 +112,12 @@ export class AmendmentDetailsDialogComponent implements OnInit {
       goods_status: this.fb.control('', []),
       total: this.fb.control('', [Validators.required]),
       details: this.fb.array([], [Validators.required]),
-      reason: this.fb.control('', []),
+      reason: this.fb.control('', [Validators.required]),
     });
   }
+  // private disableNeccessaryFormControls() {
+
+  // }
   private buildPage() {
     this.startLoading = true;
     let generatedInvoiceObservable = from(
@@ -261,6 +264,8 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   private disableFormFields() {
     this.invno.disable();
     this.date.disable();
+    this.chus.disable();
+    this.ccode.disable();
   }
   private appendItems() {
     this.invoices.forEach((item) => {
@@ -426,9 +431,13 @@ export class AmendmentDetailsDialogComponent implements OnInit {
   addAmendment() {
     let form = { ...this.formGroup.value };
     form.invno = this.invno.value;
+    form.chus = this.chus.value;
+    form.ccode = this.ccode.value;
     form.date = new Date(this.date.value).toISOString(); //this.datePipe.transform(this.date.value, 'MM/dd/yyyy');
     form.edate = new Date(this.edate.value).toISOString(); //this.datePipe.transform(this.edate.value, 'MM/dd/yyyy');
     form.iedate = new Date(this.iedate.value).toISOString(); //this.datePipe.transform(this.iedate.value, 'MM/dd/yyyy');
+    //this.chus.disable();
+    //this.ccode.disable();
     this.requestAmendInvoice(form);
   }
   get invno() {

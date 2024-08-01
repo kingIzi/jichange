@@ -59,8 +59,10 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -89,6 +91,10 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/reports', alias: 'reports' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -106,19 +112,19 @@ export class PaymentDetailsComponent implements OnInit {
     customers: [],
     invoices: [],
   };
-  public tableData: {
-    payments: PaymentDetail[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<PaymentDetail>;
-  } = {
-    payments: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<PaymentDetail>([]),
-  };
+  // public tableData: {
+  //   payments: PaymentDetail[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<PaymentDetail>;
+  // } = {
+  //   payments: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<PaymentDetail>([]),
+  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
@@ -134,17 +140,29 @@ export class PaymentDetailsComponent implements OnInit {
     private paymentService: PaymentsService,
     private fileHandler: FileHandlerService,
     private invoiceReportService: InvoiceReportServiceService,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<PaymentDetail>,
+
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createFilterForm() {
+    // this.filterFormGroup = this.fb.group({
+    //   compid: this.fb.control(this.getUserProfile().InstID, [
+    //     Validators.required,
+    //   ]),
+    //   cust: this.fb.control('', [Validators.required]),
+    //   stdate: this.fb.control('', [Validators.required]),
+    //   enddate: this.fb.control('', [Validators.required]),
+    //   invno: this.fb.control('', [Validators.required]),
+    // });
     this.filterFormGroup = this.fb.group({
       compid: this.fb.control(this.getUserProfile().InstID, [
         Validators.required,
       ]),
-      cust: this.fb.control('', [Validators.required]),
-      stdate: this.fb.control('', [Validators.required]),
-      enddate: this.fb.control('', [Validators.required]),
-      invno: this.fb.control('', [Validators.required]),
+      cust: this.fb.control(0, [Validators.required]),
+      stdate: this.fb.control('', []),
+      enddate: this.fb.control('', []),
+      invno: this.fb.control('', []),
     });
     this.compid.disable();
     this.customerChanged();
@@ -158,29 +176,32 @@ export class PaymentDetailsComponent implements OnInit {
     this.tr
       .selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.tableHeaders.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.tableHeaders.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.tableHeaders.controls
+    let tableColumns = this.tableHeaders.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -189,7 +210,9 @@ export class PaymentDetailsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
     if (this.cust.invalid) {
@@ -329,10 +352,7 @@ export class PaymentDetailsComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: PaymentDetail,
-      filter: string
-    ) => {
+    let filterPredicate = (data: PaymentDetail, filter: string) => {
       return data.Invoice_Sno.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -355,12 +375,10 @@ export class PaymentDetailsComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Payment_Date':
           return new Date(item['Payment_Date']);
@@ -368,39 +386,52 @@ export class PaymentDetailsComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<PaymentDetail>(
-      this.tableData.payments
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<PaymentDetail>(
+  //     this.tableData.payments
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private parsePaymentDataList(
+    result: HttpDataResponse<number | PaymentDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as PaymentDetail[]);
+    }
+  }
+  private assignPaymentsDataList(
+    result: HttpDataResponse<number | PaymentDetail[]>
+  ) {
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.payments = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`reports.paymentDetails.noPaymentsFound`)
+    //   );
+    //   this.tableData.payments = [];
+    // }
+    // this.prepareDataSource();
+    this.parsePaymentDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private assignPaymentsDataList(
-    result: HttpDataResponse<string | number | PaymentDetail[]>
-  ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.payments = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.paymentDetails.noPaymentsFound`)
-      );
-      this.tableData.payments = [];
-    }
-    this.prepareDataSource();
-  }
   private requestPaymentReport(value: PaymentDetailReportForm) {
-    this.tableData.payments = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
@@ -472,12 +503,12 @@ export class PaymentDetailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.paymentKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
@@ -552,7 +583,7 @@ export class PaymentDetailsComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.payments,
+          this.tableDataService.getData(),
           element
         );
       case 'Payment_Date':
@@ -577,9 +608,9 @@ export class PaymentDetailsComponent implements OnInit {
     return columns.map((col) => col.label);
   }
   downloadSheet() {
-    if (this.tableData.payments.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.tableData.payments,
+        this.tableDataService.getData(),
         this.getActiveTableKeys(),
         'payments_report',
         ['Payment_Date']
@@ -596,16 +627,34 @@ export class PaymentDetailsComponent implements OnInit {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value };
       form.compid = this.getUserProfile().InstID;
-      form.stdate = this.reformatDate(
-        this.filterFormGroup.value.stdate.split('-')
-      );
-      form.enddate = this.reformatDate(
-        this.filterFormGroup.value.enddate.split('-')
-      );
+      // form.stdate = this.reformatDate(
+      //   this.filterFormGroup.value.stdate.split('-')
+      // );
+      // form.enddate = this.reformatDate(
+      //   this.filterFormGroup.value.enddate.split('-')
+      // );
+      form.stdate = !form.stdate
+        ? form.stdate
+        : new Date(form.stdate).toISOString();
+      form.enddate = !form.enddate
+        ? form.enddate
+        : new Date(form.enddate).toISOString();
       this.requestPaymentReport(form);
     } else {
       this.filterFormGroup.markAllAsTouched();
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get compid() {
     return this.filterFormGroup.get('compid') as FormControl;

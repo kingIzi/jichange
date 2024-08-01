@@ -114,6 +114,11 @@
       "desc": ""
     },
     {
+      "label": "Payment type",
+      "value": "Payment_Type",
+      "desc": ""
+    },
+    {
       "label": "Total Amount",
       "value": "Invoice_Amount",
       "desc": ""
@@ -199,11 +204,6 @@
       {
         "label": "Approve",
         "value": "Approve Invoice",
-        "desc": ""
-      },
-      {
-        "label": "Cancel Invoice",
-        "value": "Cancel Invoice",
         "desc": ""
       },
       {

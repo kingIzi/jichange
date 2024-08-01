@@ -103,19 +103,6 @@ export class AmendmentsComponent implements OnInit {
   public filterFormGroup!: FormGroup;
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  // public tableData: {
-  //   amendments: GeneratedInvoice[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<GeneratedInvoice>;
-  // } = {
-  //   amendments: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<GeneratedInvoice>([]),
-  // };
   public filterFormData: {
     companies: Company[];
     customers: CustomerName[];
@@ -147,9 +134,9 @@ export class AmendmentsComponent implements OnInit {
       compid: this.fb.control(this.getUserProfile().InstID, [
         Validators.required,
       ]),
-      cust: this.fb.control('all', [Validators.required]),
-      stdate: this.fb.control('', [Validators.required]),
-      enddate: this.fb.control('', [Validators.required]),
+      cust: this.fb.control(0, [Validators.required]),
+      stdate: this.fb.control('', []),
+      enddate: this.fb.control('', []),
       invno: this.fb.control('', []),
     });
     this.compid.disable();
@@ -521,12 +508,12 @@ export class AmendmentsComponent implements OnInit {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value };
       form.compid = this.getUserProfile().InstID;
-      form.stdate = this.reformatDate(
-        this.filterFormGroup.value.stdate.split('-')
-      );
-      form.enddate = this.reformatDate(
-        this.filterFormGroup.value.enddate.split('-')
-      );
+      form.stdate = !form.stdate
+        ? form.stdate
+        : new Date(form.stdate).toISOString();
+      form.enddate = !form.enddate
+        ? form.enddate
+        : new Date(form.enddate).toISOString();
       this.requestAmendmentsReport(form);
     } else {
       this.filterFormGroup.markAllAsTouched();

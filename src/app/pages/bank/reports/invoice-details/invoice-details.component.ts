@@ -173,8 +173,8 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private createRequestFormGroup() {
     this.formGroup = this.fb.group({
-      Comp: this.fb.control('', [Validators.required]),
-      cusid: this.fb.control('', [Validators.required]),
+      Comp: this.fb.control(0, [Validators.required]),
+      cusid: this.fb.control(0, [Validators.required]),
       branch: this.fb.control(this.getUserProfile().braid, []),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
@@ -195,28 +195,27 @@ export class InvoiceDetailsComponent implements OnInit {
   private assignCompaniesFilterData(
     result: HttpDataResponse<string | number | Company[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'number' &&
-      typeof result.response !== 'string'
-    ) {
-      this.filterFormData.companies = result.response;
-    } else {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
       this.filterFormData.companies = [];
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr
-          .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
-          .replace(
-            '{}',
-            this.filterFormData.branches.find(
-              (b) => b.Branch_Sno.toString() === this.branch.value
-            )?.Name as string
-          )
-      );
+    } else {
+      this.filterFormData.companies = result.response as Company[];
+      if (this.filterFormData.companies.length === 0) {
+        AppUtilities.openDisplayMessageBox(
+          this.displayMessageBox,
+          this.tr.translate(`defaults.warning`),
+          this.tr
+            .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+            .replace(
+              '{}',
+              this.filterFormData.branches.find(
+                (b) => b.Branch_Sno.toString() === this.branch.value
+              )?.Name as string
+            )
+        );
+      }
     }
-    this.Comp.setValue('all');
+    this.Comp.setValue(0);
   }
   private requestCompaniesList(body: { branch: number | string }) {
     this.startLoading = true;
@@ -238,6 +237,26 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private assignCustomersFilterData(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      this.filterFormData.customers = [];
+    } else {
+      this.filterFormData.customers = result.response as Customer[];
+      if (this.filterFormData.customers.length === 0) {
+        AppUtilities.openDisplayMessageBox(
+          this.displayMessageBox,
+          this.tr.translate(`defaults.warning`),
+          this.tr.translate(
+            `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+          )
+        );
+      }
+    }
+    this.cusid.setValue(0);
+  }
   private companyChangedEventHandler() {
     this.startLoading = true;
     this.Comp.valueChanges.subscribe((value) => {
@@ -253,7 +272,7 @@ export class InvoiceDetailsComponent implements OnInit {
           ) {
             this.filterFormData.customers = result.response;
           } else {
-            if (this.Comp.value !== 'all') {
+            if (this.Comp.value !== 0) {
               AppUtilities.openDisplayMessageBox(
                 this.displayMessageBox,
                 this.tr.translate(`defaults.warning`),
@@ -263,8 +282,9 @@ export class InvoiceDetailsComponent implements OnInit {
               );
             }
             this.filterFormData.customers = [];
-            this.cusid.setValue('all');
+            this.cusid.setValue(0);
           }
+          //this.assignCustomersFilterData(result);
           this.startLoading = false;
           this.cdr.detectChanges();
         })
@@ -275,7 +295,7 @@ export class InvoiceDetailsComponent implements OnInit {
             this.tr
           );
           this.filterFormData.customers = [];
-          this.cusid.setValue('all');
+          this.cusid.setValue(0);
           this.startLoading = false;
           this.cdr.detectChanges();
           throw err;

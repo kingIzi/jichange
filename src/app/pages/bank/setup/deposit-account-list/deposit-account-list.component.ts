@@ -46,6 +46,7 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-deposit-account-list',
@@ -65,6 +66,7 @@ import {
     RemoveItemDialogComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   providers: [
     {

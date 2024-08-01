@@ -60,6 +60,7 @@ import {
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-branch-list',
@@ -79,6 +80,7 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

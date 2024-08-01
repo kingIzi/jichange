@@ -20,6 +20,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
@@ -81,6 +82,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatTableModule,
     MatSortModule,
     RouterLink,
+    MatTooltipModule,
   ],
   templateUrl: './created-invoice-list.component.html',
   styleUrl: './created-invoice-list.component.scss',

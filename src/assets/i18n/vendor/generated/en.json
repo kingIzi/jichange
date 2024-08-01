@@ -40,11 +40,6 @@
       "desc": "Sort by Control number"
     },
     {
-      "label": "Cancel Invoice",
-      "value": "Cancel Invoice",
-      "desc": ""
-    },
-    {
       "label": "Action(s)",
       "value": "Action",
       "desc": ""

@@ -1,30 +1,30 @@
-table {
-  width: 100%;
-  //text-align: center !important;
-}
+// table {
+//   width: 100%;
+//   //text-align: center !important;
+// }
 
-table th {
-  background-color: #f3f5fe;
-}
+// table th {
+//   background-color: #f3f5fe;
+// }
 
-table tr:nth-child(odd) {
-  background-color: #ffffffff; /* Light gray background for odd rows */
-}
+// table tr:nth-child(odd) {
+//   background-color: #ffffffff; /* Light gray background for odd rows */
+// }
 
-table tr:nth-child(even) {
-  background-color: #f9f9f9f9; /* White background for even rows */
-}
+// table tr:nth-child(even) {
+//   background-color: #f9f9f9f9; /* White background for even rows */
+// }
 
-table tr:hover {
-  background-color: rgba(250, 250, 250, 0.8);
-}
+// table tr:hover {
+//   background-color: rgba(250, 250, 250, 0.8);
+// }
 
-table td {
-  animation: my-animation 300ms ease-out;
+// table td {
+//   animation: my-animation 300ms ease-out;
 
-  @for $i from 1 through 50 {
-    &:nth-child(#{$i}) {
-      animation-delay: 100ms * $i;
-    }
-  }
-}
+//   @for $i from 1 through 50 {
+//     &:nth-child(#{$i}) {
+//       animation-delay: 100ms * $i;
+//     }
+//   }
+// }

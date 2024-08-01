@@ -68,7 +68,7 @@
               index as i;
               trackBy: PerformanceUtils.trackByIndex
             "
-            [value]="roleAct.Sno.toString()"
+            [value]="roleAct.Sno"
           >
             {{ roleAct.Description }}
           </option>
@@ -154,7 +154,7 @@
           *transloco="let t; read: 'company.companyUsersForm'"
           class="text-left text-xs"
         >
-          {{ t("emailId") }} <span class="text-red-600">*</span>
+          {{ t("emailId") }}
         </h6>
         <input
           *transloco="let t; read: 'company.companyUsersForm.placeholder'"
@@ -190,7 +190,7 @@
         [disabled]="!companyUsersForm.valid"
         type="submit"
         form="control-number-form"
-        class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}
       </button>

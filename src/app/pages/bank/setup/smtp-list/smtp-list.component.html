@@ -10,7 +10,7 @@
     </h2>
     <button
       (click)="openSmtpForm()"
-      class="flex flex-row items-center btn btn-sm bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow"
+      class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"
     >
       <span>
         <i class="bi bi-plus-circle text-xl"></i>
@@ -120,9 +120,9 @@
                   <div class="flex flex-row items-center space-x-2">
                     <button
                       *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('edit')"
                       (click)="openEditSmtpForm(element)"
-                      class="btn btn-sm btn-ghost border tooltip tooltip-bottom"
+                      class="btn btn-sm btn-ghost border"
+                      matTooltip="{{ t('edit') }}"
                     >
                       <span>
                         <i class="bi bi-pen text-lg text-info"></i>
@@ -130,9 +130,9 @@
                     </button>
                     <button
                       *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('delete')"
                       (click)="openRemoveDialog(element, removeItemDialog)"
-                      class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-bottom"
+                      class="btn btn-sm btn-ghost border-danger-600"
+                      matTooltip="{{ t('delete') }}"
                     >
                       <span>
                         <i class="bi bi-trash text-lg text-danger-600"></i>
@@ -228,9 +228,9 @@
                     >
                       <button
                         *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('edit')"
                         (click)="openEditSmtpForm(element)"
-                        class="btn btn-sm btn-ghost border tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border"
+                        matTooltip="{{ t('edit') }}"
                       >
                         <span>
                           <i class="bi bi-pen text-lg text-info"></i>
@@ -238,9 +238,9 @@
                       </button>
                       <button
                         *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('delete')"
                         (click)="openRemoveDialog(element, removeItemDialog)"
-                        class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-danger-600"
+                        matTooltip="{{ t('delete') }}"
                       >
                         <span>
                           <i class="bi bi-trash text-lg text-danger-600"></i>

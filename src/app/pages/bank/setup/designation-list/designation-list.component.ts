@@ -60,6 +60,7 @@ import { Branch } from '@langchain/core/runnables';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-designation-list',
@@ -80,6 +81,7 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   providers: [
     {

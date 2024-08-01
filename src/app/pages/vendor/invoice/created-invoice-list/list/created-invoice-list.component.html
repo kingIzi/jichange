@@ -16,7 +16,7 @@
     <div class="flex flex-row items-center space-x-2">
       <a
         [routerLink]="'/vendor/invoice/list/add'"
-        class="flex flex-row items-center btn btn-sm bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow"
+        class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"
       >
         <span>
           <i class="bi bi-plus-circle text-xl"></i>
@@ -115,59 +115,38 @@
                       tableValueStyle(element, header.get('value')?.value)
                     "
                     *ngIf="
-                      header.get('value')?.value !== 'Cancel Invoice' &&
-                        header.get('value')?.value !== 'Approve Invoice';
-                      else cancelInvoiceTemplate
+                      header.get('value')?.value !== 'Approve Invoice';
+                      else approveInvoiceTemplate
                     "
                   >
                     {{ tableValue(element, header.get("value")?.value) }}
                   </p>
                 </div>
-                <ng-template #cancelInvoiceTemplate>
+                <ng-template #approveInvoiceTemplate>
                   <ng-container
                     *ngIf="
-                      header.get('value')?.value === 'Cancel Invoice';
-                      else approveInvoiceTemplate
+                      getUserProfile().Usno.toString().toLocaleLowerCase() !==
+                      element?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
                     "
                   >
+                    <app-submit-message-box
+                      #submitMessageBox
+                    ></app-submit-message-box>
                     <button
-                      (click)="cancelInvoice(element)"
-                      *transloco="let t; read: 'defaults'"
-                      class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
+                      (click)="approveInvoice(element, submitMessageBox)"
+                      class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
                     >
-                      {{ t("cancel") }}
+                      {{ determineApprovalStatus(element.approval_status) }}
                     </button>
                   </ng-container>
-                  <ng-template #approveInvoiceTemplate>
-                    <ng-container
-                      *ngIf="
-                        getUserProfile().Usno.toString().toLocaleLowerCase() !==
-                        element?.AuditBy?.trim()
-                          ?.toString()
-                          ?.toLocaleLowerCase()
-                      "
-                    >
-                      <app-submit-message-box
-                        #submitMessageBox
-                      ></app-submit-message-box>
-                      <button
-                        (click)="approveInvoice(element, submitMessageBox)"
-                        class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
-                      >
-                        {{ determineApprovalStatus(element.approval_status) }}
-                      </button>
-                    </ng-container>
-                    <ng-container
-                      *ngIf="
-                        getUserProfile().Usno.toString().toLocaleLowerCase() ===
-                        element?.AuditBy?.trim()
-                          ?.toString()
-                          ?.toLocaleLowerCase()
-                      "
-                    >
-                      <mark class="p-1">No Access</mark>
-                    </ng-container>
-                  </ng-template>
+                  <ng-container
+                    *ngIf="
+                      getUserProfile().Usno.toString().toLocaleLowerCase() ===
+                      element?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
+                    "
+                  >
+                    <mark class="p-1">No Access</mark>
+                  </ng-container>
                 </ng-template>
               </ng-container>
               <ng-template #actionButtons>
@@ -180,9 +159,29 @@
                   <div class="flex flex-row items-center space-x-2">
                     <button
                       *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('view')"
-                      class="btn btn-sm btn-ghost border-warning tooltip tooltip-bottom"
+                      class="btn btn-sm btn-ghost border-info"
+                      (click)="openEditInvoiceDialog(element)"
+                      matTooltip="{{ t('edit') }}"
+                    >
+                      <span class="text-info">
+                        <i class="bi bi-pen text-lg"></i>
+                      </span>
+                    </button>
+                    <button
+                      *transloco="let t; read: 'defaults'"
+                      class="btn btn-sm btn-ghost border-danger-600"
+                      (click)="cancelInvoice(element)"
+                      matTooltip="{{ t('cancel') }}"
+                    >
+                      <span class="text-danger-600">
+                        <i class="bi bi-x-circle"></i>
+                      </span>
+                    </button>
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      class="btn btn-sm btn-ghost border-warning"
                       (click)="openInvoiceReportView(element)"
+                      matTooltip="{{ t('view') }}"
                     >
                       <span class="text-warning">
                         <i class="bi bi-eye text-lg"></i>
@@ -190,19 +189,10 @@
                     </button>
                     <button
                       *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('edit')"
-                      class="btn btn-sm btn-ghost tooltip border-info tooltip-bottom"
-                      (click)="openEditInvoiceDialog(element)"
-                    >
-                      <span class="text-info">
-                        <i class="bi bi-pen text-lg"></i>
-                      </span>
-                    </button>
-                    <button
-                      *transloco="let t; read: 'actions'"
                       [attr.data-tip]="t('download')"
-                      class="btn btn-sm btn-ghost tooltip border border-black tooltip-left"
+                      class="btn btn-sm btn-ghost border border-black"
                       (click)="downloadInvoice(element)"
+                      matTooltip="{{ t('view') }}"
                     >
                       <span class="material-symbols-outlined text-linkBlue">
                         <i class="bi bi-download text-lg"></i>
@@ -287,51 +277,32 @@
                   >
                     <p
                       *ngIf="
-                        column.value !== 'Cancel Invoice' &&
-                          column.value !== 'Approve Invoice';
-                        else cancelInvoiceTemplate
+                        column.value !== 'Approve Invoice';
+                        else approveInvoiceTemplate
                       "
                       [class]="tableValueStyle(element, column.value)"
                     >
                       {{ tableValue(element, column.value) }}
                     </p>
-                    <ng-template #cancelInvoiceTemplate>
-                      <ng-container
+                    <ng-template #approveInvoiceTemplate>
+                      <div
                         *ngIf="
-                          column.value === 'Cancel Invoice';
-                          else approveInvoiceTemplate
+                          isApprovedInvoice(element);
+                          else noAccessToApproveTemplate
                         "
                       >
+                        <app-submit-message-box
+                          #submitMessageBox
+                        ></app-submit-message-box>
                         <button
-                          (click)="cancelInvoice(element)"
-                          *transloco="let t; read: 'defaults'"
-                          class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
+                          (click)="approveInvoice(element, submitMessageBox)"
+                          class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
                         >
-                          {{ t("cancel") }}
+                          {{ determineApprovalStatus(element.approval_status) }}
                         </button>
-                      </ng-container>
-                      <ng-template #approveInvoiceTemplate>
-                        <div
-                          *ngIf="
-                            isApprovedInvoice(element);
-                            else noAccessToApproveTemplate
-                          "
-                        >
-                          <app-submit-message-box
-                            #submitMessageBox
-                          ></app-submit-message-box>
-                          <button
-                            (click)="approveInvoice(element, submitMessageBox)"
-                            class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
-                          >
-                            {{
-                              determineApprovalStatus(element.approval_status)
-                            }}
-                          </button>
-                        </div>
-                        <ng-template #noAccessToApproveTemplate>
-                          <mark class="p-1">No Access</mark>
-                        </ng-template>
+                      </div>
+                      <ng-template #noAccessToApproveTemplate>
+                        <mark class="p-1">No Access</mark>
                       </ng-template>
                     </ng-template>
                   </ng-container>
@@ -341,9 +312,29 @@
                     >
                       <button
                         *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('view')"
-                        class="btn btn-sm btn-ghost tooltip border-warning tooltip-left"
+                        class="btn btn-sm btn-ghost border-info"
+                        (click)="openEditInvoiceDialog(element)"
+                        matTooltip="{{ t('edit') }}"
+                      >
+                        <span class="text-info">
+                          <i class="bi bi-pen text-lg"></i>
+                        </span>
+                      </button>
+                      <button
+                        *transloco="let t; read: 'defaults'"
+                        class="btn btn-sm btn-ghost border-danger-600"
+                        (click)="cancelInvoice(element)"
+                        matTooltip="{{ t('cancel') }}"
+                      >
+                        <span class="text-danger-600">
+                          <i class="bi bi-x-circle"></i>
+                        </span>
+                      </button>
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        class="btn btn-sm btn-ghost border-warning"
                         (click)="openInvoiceReportView(element)"
+                        matTooltip="{{ t('view') }}"
                       >
                         <span class="text-warning">
                           <i class="bi bi-eye text-lg"></i>
@@ -351,19 +342,10 @@
                       </button>
                       <button
                         *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('edit')"
-                        class="btn btn-sm btn-ghost border-info tooltip tooltip-left"
-                        (click)="openEditInvoiceDialog(element)"
-                      >
-                        <span class="text-info">
-                          <i class="bi bi-pen text-lg"></i>
-                        </span>
-                      </button>
-                      <button
-                        *transloco="let t; read: 'actions'"
                         [attr.data-tip]="t('download')"
-                        class="btn btn-sm btn-ghost tooltip border border-black tooltip-left"
+                        class="btn btn-sm btn-ghost border border-black"
                         (click)="downloadInvoice(element)"
+                        matTooltip="{{ t('view') }}"
                       >
                         <span class="material-symbols-outlined text-linkBlue">
                           <i class="bi bi-download text-lg"></i>

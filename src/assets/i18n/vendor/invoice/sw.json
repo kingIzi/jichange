@@ -149,6 +149,11 @@
       "desc": ""
     },
     {
+      "label": "Aina ya Malipo",
+      "value": "Payment_Type",
+      "desc": ""
+    },
+    {
       "label": "Kiasi cha Jumla",
       "value": "Invoice_Amount",
       "desc": ""
@@ -192,11 +197,6 @@
       {
         "label": "Idhinisha",
         "value": "Approve Invoice",
-        "desc": ""
-      },
-      {
-        "label": "Futa Ankara",
-        "value": "Cancel Invoice",
         "desc": ""
       },
       {

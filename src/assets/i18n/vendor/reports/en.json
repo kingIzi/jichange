@@ -119,7 +119,7 @@
       },
       {
         "label": "Customer",
-        "value": "Chus_Name",
+        "value": "Customer_Name",
         "desc": ""
       },
       {
@@ -143,6 +143,7 @@
     "searchBy": "Search by Invoice number, control number, vendor or customer",
     "invoiceDetails": "Invoice details",
     "noInvoicesFound": "No invoice found for {}",
+
     "form": {
       "company": "Vendor",
       "customer": "Customer",

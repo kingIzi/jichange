@@ -55,6 +55,7 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-bank-user-list',
@@ -74,6 +75,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     DisplayMessageBoxComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   providers: [
     {

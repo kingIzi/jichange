@@ -14,7 +14,7 @@ export class CancelledService {
     const data = await lastValueFrom(
       this.client.performPost<
         CancelledInvoiceForm,
-        HttpDataResponse<CancelledInvoice[] | string | number>
+        HttpDataResponse<CancelledInvoice[] | number>
       >(`/api/Invoice/GetCancelReport`, body)
     );
     return data;

@@ -71,6 +71,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-summary',
@@ -93,6 +94,7 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     MatSortModule,
     MatListModule,
     MatTableExporterModule,
+    MatTooltipModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [

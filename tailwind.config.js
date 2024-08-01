@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         inter: ["Inter", "sans-serif"],
+        //inter: ["Space Grotesk", "sans-serif"],
       },
       theme: "light",
       // colors: {
@@ -34,8 +35,8 @@ module.exports = {
         light: {
           primary: "#0B6587",
           secondary: "#F6F8FC",
-          accent: "#37cdbe",
-          neutral: "#3d4451",
+          accent: "#00BCD4",
+          neutral: "#ffffff",
           "base-100": "#F6F8FC",
           "base-200": "#e1f5fd",
         },

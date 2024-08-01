@@ -117,8 +117,8 @@
                   <button
                     *transloco="let t; read: 'company.inboxApproval'"
                     (click)="approveCompany(element)"
-                    class="btn btn-sm border-success bg-transparent tooltip tooltip-bottom"
-                    [attr.data-tip]="t('approve')"
+                    class="btn btn-sm border-success bg-transparent tooltip"
+                    matTooltip="{{ t('approve') }}"
                   >
                     <span>
                       <i class="bi bi-check2-circle text-lg text-success"></i>
@@ -209,8 +209,8 @@
                       <button
                         *transloco="let t; read: 'company.inboxApproval'"
                         (click)="approveCompany(element)"
-                        class="btn btn-sm border-success bg-transparent tooltip tooltip-left"
-                        [attr.data-tip]="t('approve')"
+                        class="btn btn-sm border-success bg-transparent tooltip"
+                        matTooltip="{{ t('approve') }}"
                       >
                         <span>
                           <i

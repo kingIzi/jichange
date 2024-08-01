@@ -16,8 +16,8 @@
       "desc": ""
     },
     {
-      "label": "User type",
-      "value": "Usertype",
+      "label": "Role",
+      "value": "Userpos",
       "desc": ""
     },
     {
@@ -70,10 +70,10 @@
         "username": "You must enter a User name",
         "mobileNo": "You must enter a valid phone number",
         "emailId": "You must enter email address",
-        "userPosition": "You must enter user position",
+        "userPosition": "Please select a position.",
         "fullName": "You must enter a Full name",
         "noRoleActFound": "No Roles found for this institution.",
-        "FailedToAddCompany": "Failed to add a vendor because {}"
+        "FailedToAddCompany": "Failed to add a vendor"
       }
     }
   }

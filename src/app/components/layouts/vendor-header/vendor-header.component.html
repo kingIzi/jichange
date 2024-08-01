@@ -56,7 +56,7 @@
               <a
                 #ahref
                 [routerLink]="dropdown.get('routerLink')?.value"
-                [routerLinkActive]="'text-primary'"
+                [routerLinkActive]="'text-secondary font-bold bg-primary'"
                 (click)="routerClicked(ahref, header.get('rootLink')?.value)"
                 class="capitalize"
                 >{{ dropdown.get("label")?.value }}</a
@@ -147,7 +147,7 @@
             <a
               #ahref
               [routerLink]="dropdown.get('routerLink')?.value"
-              [routerLinkActive]="'text-primary'"
+              [routerLinkActive]="'text-secondary font-bold bg-primary'"
               (click)="routerClicked(ahref, header.get('rootLink')?.value)"
               class="capitalize hover:bg-primary hover:text-white"
               >{{ dropdown.get("label")?.value }}</a

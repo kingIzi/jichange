@@ -16,7 +16,7 @@
       "desc": ""
     },
     {
-      "label": "Aina ya Mtumiaji",
+      "label": "Jukumu",
       "value": "Usertype",
       "desc": ""
     },
@@ -70,10 +70,10 @@
         "username": "Lazima uingize jina la mtumiaji",
         "mobileNo": "Lazima uingize namba ya simu sahihi",
         "emailId": "Lazima uingize anwani ya barua pepe",
-        "userPosition": "Lazima uingize nafasi ya mtumiaji",
+        "userPosition": "Tafadhali chagua nafasi.",
         "fullName": "Lazima uingize jina kamili",
         "noRoleActFound": "Hakuna majukumu yaliyopatikana kwenye taasisi yako.",
-        "FailedToAddCompany": "Kushindwa kuongeza muuzaji kwa sababu ya {}"
+        "FailedToAddCompany": "Kushindwa kuongeza muuzaji."
       }
     }
   }

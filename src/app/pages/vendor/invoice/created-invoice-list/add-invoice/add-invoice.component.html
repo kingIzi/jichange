@@ -1,5 +1,3 @@
-add invoice
-
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
@@ -543,7 +541,7 @@ add invoice
         type="submit"
         form="add-invoice-form"
         [disabled]="!invoiceDetailsForm.valid"
-        class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}
       </button>

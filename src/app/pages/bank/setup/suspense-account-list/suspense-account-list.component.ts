@@ -50,6 +50,7 @@ import { DeleteSuspenseAccountForm } from 'src/app/core/models/bank/forms/setup/
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-suspense-account-list',
@@ -69,6 +70,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     MatTableModule,
     MatSortModule,
     RemoveItemDialogComponent,
+    MatTooltipModule,
   ],
   providers: [
     {

@@ -36,6 +36,7 @@ import { catchError, from, lastValueFrom, map, zip } from 'rxjs';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-company-users-dialog',
@@ -64,7 +65,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
   public roleActs: RoleAct[] = [];
   public companyUsersForm!: FormGroup;
   public companyUser!: CompanyUser;
-  public addedUser = new EventEmitter<any>();
+  public addedUser = new EventEmitter<CompanyUser>();
   PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -132,7 +133,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
-      mail: this.fb.control('', [Validators.required, Validators.email]),
+      mail: this.fb.control('', [Validators.email]),
       userid: this.fb.control(this.getUserProfile().Usno, [
         Validators.required,
       ]),
@@ -202,21 +203,30 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         throw err;
       });
   }
+  private assignRolesAct(result: HttpDataResponse<number | RoleAct[]>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      this.roleActs = [];
+      let message = this.tr.translate(
+        `company.companyUsersForm.errors.dialog.noRoleActFound`
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    } else {
+      this.roleActs = result.response as RoleAct[];
+    }
+  }
   private requestRolesAct() {
+    let vendor = this.appConfig.getLoginResponse() as VendorLoginResponse;
     this.startLoading = true;
     this.companyUserService
-      .requestRolesAct({ compid: 67 }) //permanently at 67
-      .then((results: any) => {
-        this.roleActs = results.response === 0 ? [] : results.response;
-        if (this.roleActs.length === 0) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(
-              `company.companyUsersForm.errors.dialog.noRoleActFound`
-            )
-          );
-        }
+      .requestRolesAct({ compid: vendor.InstID }) //permanently at 67
+      .then((results) => {
+        console.log(results);
+        this.assignRolesAct(results);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -230,27 +240,55 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       });
   }
+  private switchAddCompanyUserErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.uname.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    let errorStringPrefix = 'company.companyUsersForm.errors.dialog';
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing pos'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.userPosition`);
+      case 'Missing auname'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.username`);
+      case 'Missing mob'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.mobileNo`);
+      case 'Missing uname'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.fullName`);
+      case 'Missing mail'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.emailId`);
+      default:
+        return this.tr.translate(`${errorStringPrefix}.FailedToAddCompany`);
+    }
+  }
+  private parseAddCompanyUserResponse(
+    result: HttpDataResponse<number | CompanyUser>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let errorMessage = this.switchAddCompanyUserErrorMessage(
+        result.message[0]
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`company.companyUsersForm.successMessage`)
+      );
+      this.addedUser.emit(result.response as CompanyUser);
+    }
+  }
   private requestAddCompanyUser(form: any) {
     this.startLoading = true;
     this.companyUserService
       .requestAddCompanyUser(form)
-      .then((results: any) => {
-        if (typeof results.response === 'number' && results.response > 0) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`company.companyUsersForm.successMessage`)
-          );
-          this.addedUser.emit();
-        } else if (typeof results.response === 'string') {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr
-              .translate(
-                `company.companyUsersForm.errors.dialog.FailedToAddCompany`
-              )
-              .replace('{}', results.response)
-          );
-        }
+      .then((result) => {
+        this.parseAddCompanyUserResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

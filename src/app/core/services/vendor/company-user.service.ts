@@ -4,6 +4,8 @@ import { lastValueFrom } from 'rxjs';
 import { HttpDataResponse } from '../../models/http-data-response';
 import { CompanyUser } from '../../models/vendors/company-user';
 import { GetCompanyByIdForm } from '../../models/vendors/forms/get-company-user-by-id-form';
+import { RoleAct } from '../../models/vendors/role-act';
+import { AddCompanyUserForm } from '../../models/vendors/forms/add-company-user';
 
 @Injectable({
   providedIn: 'root',
@@ -12,22 +14,18 @@ export class CompanyUserService {
   constructor(private client: RequestClientService) {}
   public async requestRolesAct(body: { compid: number }) {
     const data = await lastValueFrom(
-      this.client.performPost(`/api/Role/GetRolesAct`, body)
+      this.client.performGet<HttpDataResponse<number | RoleAct[]>>(
+        `/api/Role/GetRolesAct`
+      )
     );
     return data;
   }
-  public async requestAddCompanyUser(body: {
-    pos: string;
-    auname: string;
-    uname: string;
-    mob: string;
-    mail: string;
-    userid: number;
-    sno: string;
-    compid: string;
-  }) {
+  public async requestAddCompanyUser(body: AddCompanyUserForm) {
     const data = await lastValueFrom(
-      this.client.performPost(`/api/CompanyUsers/AddCompanyUser`, body)
+      this.client.performPost<
+        AddCompanyUserForm,
+        HttpDataResponse<CompanyUser | number>
+      >(`/api/CompanyUsers/AddCompanyUser`, body)
     );
     return data;
   }

@@ -65,6 +65,7 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-generated-invoice-list',
@@ -99,6 +100,7 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
     MatTableModule,
     MatSortModule,
     SubmitMessageBoxComponent,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],

@@ -18,6 +18,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -65,6 +66,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     DisplayMessageBoxComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

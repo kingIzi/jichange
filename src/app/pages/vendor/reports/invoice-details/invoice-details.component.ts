@@ -54,6 +54,9 @@ import {
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-invoice-details',
@@ -78,6 +81,10 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/reports', alias: 'reports' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -88,19 +95,19 @@ export class InvoiceDetailsComponent implements OnInit {
   public tableFormGroup!: FormGroup;
   public filterFormGroup!: FormGroup;
   private queryData: string = '';
-  public tableData: {
-    invoiceReports: InvoiceReport[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<InvoiceReport>;
-  } = {
-    invoiceReports: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<InvoiceReport>([]),
-  };
+  // public tableData: {
+  //   invoiceReports: InvoiceReport[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<InvoiceReport>;
+  // } = {
+  //   invoiceReports: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<InvoiceReport>([]),
+  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public filterFormData: {
     companies: Company[];
@@ -123,6 +130,8 @@ export class InvoiceDetailsComponent implements OnInit {
     private invoiceReportService: InvoiceReportServiceService,
     private activatedRoute: ActivatedRoute,
     private appConfig: AppConfigService,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeaderGroup() {
@@ -134,29 +143,32 @@ export class InvoiceDetailsComponent implements OnInit {
     this.tr
       .selectTranslate(`invoiceDetails.invoiceDetailsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -165,7 +177,9 @@ export class InvoiceDetailsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private invoiceReportKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -212,16 +226,16 @@ export class InvoiceDetailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.invoiceReportKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   private createFilterFormGroup() {
     this.filterFormGroup = this.fb.group({
       Comp: this.fb.control(this.getUserProfile().InstID, []),
-      cusid: this.fb.control('', [Validators.required]),
+      cusid: this.fb.control(0, [Validators.required]),
       stdate: this.fb.control('', []),
       enddate: this.fb.control('', []),
     });
@@ -268,33 +282,50 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private parseInvoiceDetails(
+    result: HttpDataResponse<number | InvoiceReport[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as InvoiceReport[]);
+    }
+  }
+  private assignInvoiceDetailsResponse(
+    result: HttpDataResponse<number | InvoiceReport[]>
+  ) {
+    this.parseInvoiceDetails(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
+  }
   private requestInvoiceDetails(body: InvoiceReportFormVendor) {
-    this.tableData.invoiceReports = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number' &&
-          result.response.length == 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.invoiceReports = [];
-          this.prepareDataSource();
-        } else if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number' &&
-          result.response.length > 0
-        ) {
-          this.tableData.invoiceReports = result.response;
-          this.prepareDataSource();
-        }
+        // if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number' &&
+        //   result.response.length == 0
+        // ) {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.warning`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        //   this.tableData.invoiceReports = [];
+        //   this.prepareDataSource();
+        // } else if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number' &&
+        //   result.response.length > 0
+        // ) {
+        //   this.tableData.invoiceReports = result.response;
+        //   this.prepareDataSource();
+        // }
+        this.assignInvoiceDetailsResponse(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -310,10 +341,7 @@ export class InvoiceDetailsComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: InvoiceReport,
-      filter: string
-    ) => {
+    let filterPredicate = (data: InvoiceReport, filter: string) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -336,12 +364,10 @@ export class InvoiceDetailsComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'p_date':
           return new Date(item['p_date']);
@@ -355,33 +381,41 @@ export class InvoiceDetailsComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<InvoiceReport>(
-      this.tableData.invoiceReports
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
-  }
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<InvoiceReport>(
+  //     this.tableData.invoiceReports
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
   private determineDueExpiredInvoices(q: string) {
     if (q.toLocaleLowerCase() === 'Due'.toLocaleLowerCase()) {
-      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
-        (r) => {
-          return new Date(r.Due_Date) < new Date();
-        }
-      );
+      // this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
+      //   (r) => {
+      //     return new Date(r.Due_Date) < new Date();
+      //   }
+      // );
+      let invoices = this.tableDataService.getData();
+      invoices = invoices.filter((r) => {
+        return new Date(r.Due_Date) < new Date();
+      });
+      this.tableDataService.setData(invoices);
+      this.tableDataService.getDataSource()._updateChangeSubscription();
       this.headers.controls
         .at(InvoiceDetailsReportTable.DUE_DATE)
         ?.get('included')
         ?.setValue(true);
     } else if (q.toLocaleLowerCase() === 'Expired'.toLocaleLowerCase()) {
-      this.tableData.invoiceReports = this.tableData.invoiceReports.filter(
-        (r) => {
-          return new Date(r.Invoice_Expired_Date) < new Date();
-        }
-      );
+      let invoices = this.tableDataService.getData();
+      invoices = invoices.filter((r) => {
+        return new Date(r.Invoice_Expired_Date) < new Date();
+      });
+      this.tableDataService.setData(invoices);
+      this.tableDataService.getDataSource()._updateChangeSubscription();
       this.headers.controls
         .at(InvoiceDetailsReportTable.EXPIRY_DATE)
         ?.get('included')
@@ -390,7 +424,7 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   private initialFormSubmission(q: string) {
     let form = { ...this.filterFormGroup.value };
-    this.cusid.setValue('all');
+    this.cusid.setValue(0);
     form.Comp = this.getUserProfile().InstID;
     if (form.stdate) {
       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
@@ -398,32 +432,33 @@ export class InvoiceDetailsComponent implements OnInit {
     if (form.enddate) {
       form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
     }
-    this.tableData.invoiceReports = [];
+    //this.tableData.invoiceReports = [];
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(form)
       .then((result) => {
-        if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number' &&
-          result.response.length == 0
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.warning`),
-            this.tr.translate(`errors.noDataFound`)
-          );
-          this.tableData.invoiceReports = [];
-          this.prepareDataSource();
-        } else if (
-          typeof result.response !== 'string' &&
-          typeof result.response !== 'number' &&
-          result.response.length > 0
-        ) {
-          this.tableData.invoiceReports = result.response;
-          this.determineDueExpiredInvoices(q);
-          this.prepareDataSource();
-        }
+        // if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number' &&
+        //   result.response.length == 0
+        // ) {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.warning`),
+        //     this.tr.translate(`errors.noDataFound`)
+        //   );
+        //   this.tableData.invoiceReports = [];
+        //   this.prepareDataSource();
+        // } else if (
+        //   typeof result.response !== 'string' &&
+        //   typeof result.response !== 'number' &&
+        //   result.response.length > 0
+        // ) {
+        //   this.tableData.invoiceReports = result.response;
+        //   this.determineDueExpiredInvoices(q);
+        //   this.prepareDataSource();
+        // }
+        this.assignInvoiceDetailsResponse(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
       })
@@ -521,7 +556,7 @@ export class InvoiceDetailsComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.invoiceReports,
+          this.tableDataService.getData(),
           element
         );
       case 'p_date':
@@ -544,9 +579,9 @@ export class InvoiceDetailsComponent implements OnInit {
     }
   }
   downloadSheet() {
-    if (this.tableData.invoiceReports.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.tableData.invoiceReports,
+        this.tableDataService.getData(),
         this.getActiveKeys(),
         'invoice_details_report',
         ['Payment_Date']
@@ -576,6 +611,18 @@ export class InvoiceDetailsComponent implements OnInit {
     } else {
       this.filterFormGroup.markAllAsTouched();
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableFormGroup.get(`headers`) as FormArray;

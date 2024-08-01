@@ -15,6 +15,9 @@ import { Customer as VendorCustomer } from 'src/app/core/models/vendors/customer
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { GeneratedInvoice } from '../models/vendors/generated-invoice';
 import { Company as BankCompany } from 'src/app/core/models/bank/company/company';
+import { CancelledInvoice } from '../models/vendors/cancelled-invoice';
+import { PaymentDetail } from '../models/vendors/payment-detail';
+import { CompanyUser } from '../models/vendors/company-user';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -34,5 +37,12 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
 >('TABLE_DATA_SERVICE');
 
 export const VENDOR_TABLE_DATA_SERVICE = new InjectionToken<
-  TableDataService<VendorCustomer | InvoiceReport | GeneratedInvoice>
+  TableDataService<
+    | VendorCustomer
+    | InvoiceReport
+    | GeneratedInvoice
+    | CancelledInvoice
+    | PaymentDetail
+    | CompanyUser
+  >
 >('VENDOR_TABLE_DATA_SERVICE');

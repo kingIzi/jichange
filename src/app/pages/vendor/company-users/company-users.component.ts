@@ -40,8 +40,12 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+import { RoleAct } from 'src/app/core/models/vendors/role-act';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -70,6 +74,10 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/company', alias: 'company' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -77,19 +85,20 @@ export class CompanyUsersComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  public tableData: {
-    companUsers: CompanyUser[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<CompanyUser>;
-  } = {
-    companUsers: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<CompanyUser>([]),
-  };
+  public roleActs: RoleAct[] = [];
+  // public tableData: {
+  //   companUsers: CompanyUser[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<CompanyUser>;
+  // } = {
+  //   companUsers: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<CompanyUser>([]),
+  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -102,21 +111,21 @@ export class CompanyUsersComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private companyService: CompanyService,
+    private companyUserService: CompanyUserService,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<CompanyUser>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<CompanyUser>(
-      this.tableData.companUsers
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-  }
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<CompanyUser>(
+  //     this.tableData.companUsers
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  // }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: CompanyUser,
-      filter: string
-    ) => {
+    let filterPredicate = (data: CompanyUser, filter: string) => {
       return data.Username.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -131,26 +140,42 @@ export class CompanyUsersComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
+  }
+  private parseCompanyUsersDataList(
+    result: HttpDataResponse<string | number | CompanyUser[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as CompanyUser[]);
+    }
   }
   private assignCompanyUsersDataList(
     result: HttpDataResponse<string | number | CompanyUser[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.companUsers = result.response;
-    } else {
-      this.tableData.companUsers = [];
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`company.noUsersFound`)
-      );
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.companUsers = result.response;
+    // } else {
+    //   this.tableData.companUsers = [];
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`company.noUsersFound`)
+    //   );
+    // }
+    // this.prepareDataSource();
+    this.parseCompanyUsersDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.tableLoading = false;
+    this.cdr.detectChanges();
   }
   private requestCompanyUsers() {
     this.tableLoading = true;
@@ -181,34 +206,37 @@ export class CompanyUsersComponent implements OnInit {
     this.tr
       .selectTranslate(`companyTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -217,19 +245,58 @@ export class CompanyUsersComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+  }
+  private assignRolesAct(result: HttpDataResponse<number | RoleAct[]>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      this.roleActs = [];
+      let message = this.tr.translate(
+        `company.companyUsersForm.errors.dialog.noRoleActFound`
+      );
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    } else {
+      this.roleActs = result.response as RoleAct[];
+    }
+  }
+  private requestRolesAct() {
+    let vendor = this.appConfig.getLoginResponse() as VendorLoginResponse;
+    this.startLoading = true;
+    this.companyUserService
+      .requestRolesAct({ compid: vendor.InstID }) //permanently at 67
+      .then((results) => {
+        this.assignRolesAct(results);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      });
   }
   //returns a form control given a name
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   ngOnInit(): void {
+    this.requestRolesAct();
     this.createHeadersFormGroup();
     this.requestCompanyUsers();
   }
@@ -273,9 +340,14 @@ export class CompanyUsersComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.companUsers,
+          this.tableDataService.getData(),
           element
         );
+      case 'Userpos':
+        return element[key]
+          ? this.roleActs.find((role) => role.Sno === Number(element[key]))
+              ?.Description
+          : '-';
       default:
         return element[key];
     }
@@ -292,10 +364,13 @@ export class CompanyUsersComponent implements OnInit {
         companyUser: null,
       },
     });
-    dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestCompanyUsers();
-    });
+    dialogRef.componentInstance.addedUser
+      .asObservable()
+      .subscribe((companyUser) => {
+        dialogRef.close();
+        this.tableDataService.addedData(companyUser);
+        //this.requestCompanyUsers();
+      });
   }
   openEditCompanyUserDialog(companyUser: CompanyUser) {
     let dialogRef = this.dialog.open(CompanyUsersDialogComponent, {
@@ -305,10 +380,30 @@ export class CompanyUsersComponent implements OnInit {
         companyUserId: companyUser.CompuserSno,
       },
     });
-    dialogRef.componentInstance.addedUser.asObservable().subscribe(() => {
-      dialogRef.close();
-      this.requestCompanyUsers();
-    });
+    dialogRef.componentInstance.addedUser
+      .asObservable()
+      .subscribe((companyUser) => {
+        dialogRef.close();
+        let index = this.tableDataService
+          .getDataSource()
+          .data.findIndex(
+            (item) => item.CompuserSno === companyUser.CompuserSno
+          );
+        this.tableDataService.editedData(companyUser, index);
+        //this.requestCompanyUsers();
+      });
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

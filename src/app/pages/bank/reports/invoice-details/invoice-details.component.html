@@ -81,7 +81,7 @@
           <option
             *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
             selected
-            [value]="'all'"
+            [value]="'0'"
           >
             {{ t("all") }}
           </option>
@@ -121,7 +121,7 @@
           <option
             *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
             selected
-            [value]="'all'"
+            [value]="0"
           >
             {{ t("all") }}
           </option>
@@ -190,7 +190,7 @@
         <button
           (click)="submitForm()"
           *transloco="let t; read: 'actions'"
-          class="flex flex-row items-center btn btn-sm bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow"
+          class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"
         >
           {{ t("submit") }}
         </button>

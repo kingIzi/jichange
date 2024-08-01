@@ -95,27 +95,7 @@
                   <p class="text-xs font-semibold">
                     {{ header.get("label")?.value }}
                   </p>
-                  <p
-                    [class]="
-                      tableValueStyle(element, header.get('value')?.value)
-                    "
-                    *ngIf="
-                      header.get('value')?.value !== 'Cancel Invoice';
-                      else cancelInvoiceTemplate
-                    "
-                  >
-                    {{ tableValue(element, header.get("value")?.value) }}
-                  </p>
                 </div>
-                <ng-template #cancelInvoiceTemplate>
-                  <button
-                    (click)="cancelInvoice(element)"
-                    *transloco="let t; read: 'defaults'"
-                    class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
-                  >
-                    {{ t("cancel") }}
-                  </button>
-                </ng-template>
               </ng-container>
               <ng-template #actionButtons>
                 <app-submit-message-box
@@ -129,20 +109,11 @@
                   </p>
                   <div class="flex flex-row items-center space-x-2">
                     <button
-                      *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('view')"
-                      class="btn btn-sm btn-ghost border-warning tooltip tooltip-left"
-                      (click)="openGeneratedInvoiceView(element)"
-                    >
-                      <span class="text-warning">
-                        <i class="bi bi-eye text-lg"></i>
-                      </span>
-                    </button>
-                    <button
                       *transloco="let t; read: 'generated'"
                       [attr.data-tip]="t('amend')"
                       (click)="openAmmendInvoiceDialog(element)"
-                      class="btn btn-sm btn-ghost border-black tooltip tooltip-left"
+                      class="btn btn-sm btn-ghost border-purple-600 text-purple-600"
+                      matTooltip="{{ t('amend') }}"
                     >
                       <span class="material-symbols-outlined">
                         <i class="bi bi-arrow-repeat text-lg"></i>
@@ -150,20 +121,40 @@
                     </button>
                     <button
                       *transloco="let t; read: 'generated.deliver'"
-                      [attr.data-tip]="t('deliver')"
-                      class="btn btn-sm btn-ghost border-green-600 tooltip tooltip-left"
+                      class="btn btn-sm btn-ghost border-green-600"
                       (click)="
                         makeInvoiceDelivery(deliverInvoiceMessageBox, element)
                       "
+                      matTooltip="{{ t('deliver') }}"
                     >
                       <span class="text-green-600">
                         <i class="bi bi-truck text-lg"></i>
                       </span>
                     </button>
                     <button
+                      *transloco="let t; read: 'defaults'"
+                      class="btn btn-sm btn-ghost border-danger-600"
+                      (click)="cancelInvoice(element)"
+                      matTooltip="{{ t('cancel') }}"
+                    >
+                      <span class="text-danger-600">
+                        <i class="bi bi-x-circle"></i>
+                      </span>
+                    </button>
+                    <button
                       *transloco="let t; read: 'actions'"
-                      [attr.data-tip]="t('download')"
-                      class="btn btn-sm btn-ghost tooltip border border-black tooltip-left"
+                      class="btn btn-sm btn-ghost border-warning"
+                      (click)="openGeneratedInvoiceView(element)"
+                      matTooltip="{{ t('view') }}"
+                    >
+                      <span class="text-warning">
+                        <i class="bi bi-eye text-lg"></i>
+                      </span>
+                    </button>
+                    <button
+                      *transloco="let t; read: 'actions'"
+                      class="btn btn-sm btn-ghost border border-black"
+                      matTooltip="{{ t('download') }}"
                       (click)="downloadInvoice(element)"
                     >
                       <span class="material-symbols-outlined text-linkBlue">
@@ -247,21 +238,10 @@
                       else actionTemplate
                     "
                   >
-                    <p
-                      *ngIf="
-                        column.value !== 'Cancel Invoice';
-                        else cancelInvoiceTemplate
-                      "
-                      [class]="tableValueStyle(element, column.value)"
-                    >
+                    <p [class]="tableValueStyle(element, column.value)">
                       {{ tableValue(element, column.value) }}
                     </p>
-                    <ng-template #cancelInvoiceTemplate>
-                      <!-- <app-cancel-generated-invoice
-                        [invoiceId]="element.Inv_Mas_Sno"
-                        [userId]="getUserProfile().Usno"
-                        #cancelGeneratedInvoice
-                      ></app-cancel-generated-invoice> -->
+                    <!-- <ng-template #cancelInvoiceTemplate>
                       <button
                         (click)="cancelInvoice(element)"
                         *transloco="let t; read: 'defaults'"
@@ -269,7 +249,7 @@
                       >
                         {{ t("cancel") }}
                       </button>
-                    </ng-template>
+                    </ng-template> -->
                   </ng-container>
                   <ng-template #actionTemplate>
                     <app-submit-message-box
@@ -279,20 +259,11 @@
                       class="flex flex-row items-center justify-end space-x-2"
                     >
                       <button
-                        *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('view')"
-                        class="btn btn-sm btn-ghost border-warning tooltip tooltip-left"
-                        (click)="openGeneratedInvoiceView(element)"
-                      >
-                        <span class="text-warning">
-                          <i class="bi bi-eye text-lg"></i>
-                        </span>
-                      </button>
-                      <button
                         *transloco="let t; read: 'generated'"
                         [attr.data-tip]="t('amend')"
                         (click)="openAmmendInvoiceDialog(element)"
-                        class="btn btn-sm btn-ghost border-black tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-purple-600 text-purple-600"
+                        matTooltip="{{ t('amend') }}"
                       >
                         <span class="material-symbols-outlined">
                           <i class="bi bi-arrow-repeat text-lg"></i>
@@ -300,20 +271,40 @@
                       </button>
                       <button
                         *transloco="let t; read: 'generated.deliver'"
-                        [attr.data-tip]="t('deliver')"
-                        class="btn btn-sm btn-ghost border-green-600 tooltip tooltip-left"
+                        class="btn btn-sm btn-ghost border-green-600"
                         (click)="
                           makeInvoiceDelivery(deliverInvoiceMessageBox, element)
                         "
+                        matTooltip="{{ t('deliver') }}"
                       >
                         <span class="text-green-600">
                           <i class="bi bi-truck text-lg"></i>
                         </span>
                       </button>
                       <button
+                        *transloco="let t; read: 'defaults'"
+                        class="btn btn-sm btn-ghost border-danger-600"
+                        (click)="cancelInvoice(element)"
+                        matTooltip="{{ t('cancel') }}"
+                      >
+                        <span class="text-danger-600">
+                          <i class="bi bi-x-circle"></i>
+                        </span>
+                      </button>
+                      <button
                         *transloco="let t; read: 'actions'"
-                        [attr.data-tip]="t('download')"
-                        class="btn btn-sm btn-ghost tooltip border border-black tooltip-left"
+                        class="btn btn-sm btn-ghost border-warning"
+                        (click)="openGeneratedInvoiceView(element)"
+                        matTooltip="{{ t('view') }}"
+                      >
+                        <span class="text-warning">
+                          <i class="bi bi-eye text-lg"></i>
+                        </span>
+                      </button>
+                      <button
+                        *transloco="let t; read: 'actions'"
+                        class="btn btn-sm btn-ghost border border-black"
+                        matTooltip="{{ t('download') }}"
                         (click)="downloadInvoice(element)"
                       >
                         <span class="material-symbols-outlined text-linkBlue">

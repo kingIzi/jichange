@@ -28,8 +28,8 @@ export class PerformanceUtils {
     excludedText: string
   ) {
     return status?.toLocaleLowerCase() === target?.toLocaleLowerCase()
-      ? `${includedBg} ${includedText} px-4 py-1 rounded-lg shadow`
-      : `${excludedBg} ${excludedText} px-4 py-1 rounded-lg shadow`;
+      ? `${includedBg} ${includedText} px-4 py-1 rounded-lg shadow-sm`
+      : `${excludedBg} ${excludedText} px-4 py-1 rounded-lg shadow-sm`;
   }
   static convertDateStringToDate(date: string) {
     return new Date(date);

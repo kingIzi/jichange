@@ -64,6 +64,7 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -84,6 +85,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
