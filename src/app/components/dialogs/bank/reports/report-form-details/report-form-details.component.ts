@@ -89,7 +89,8 @@ export class ReportFormDetailsComponent implements OnInit {
   private initializeFormGroup() {
     let profile: BankLoginResponse | VendorLoginResponse =
       this.appConfig.getLoginResponse();
-    if (profile instanceof BankLoginResponse) {
+    if (profile.userType.toLocaleLowerCase() === 'BNk'.toLocaleLowerCase()) {
+      profile = profile as BankLoginResponse;
       this.formGroup = this.fb.group({
         Comp: this.fb.control(0, [Validators.required]),
         cusid: this.fb.control(0, [Validators.required]),
@@ -98,6 +99,7 @@ export class ReportFormDetailsComponent implements OnInit {
         enddate: this.fb.control('', []),
       });
     } else {
+      profile = profile as VendorLoginResponse;
       this.formGroup = this.fb.group({
         Comp: this.fb.control(profile.InstID, [Validators.required]),
         cusid: this.fb.control(0, [Validators.required]),
@@ -114,10 +116,12 @@ export class ReportFormDetailsComponent implements OnInit {
     if (Number(profile.braid) > 0) {
       this.branch.disable();
     }
+    if (profile.userType.toLocaleLowerCase() === 'Comp'.toLocaleLowerCase()) {
+      this.Comp.disable();
+    }
     if (Number(profile.braid) === 0) {
       this.branchChangedEventHandler();
     }
-    console.log(profile);
     this.companyChangedEventHandler();
   }
   private branchChangedEventHandler() {
@@ -166,19 +170,22 @@ export class ReportFormDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private handleCompanyChanged(compid: number) {
+    if (compid > 0) {
+      this.requestCustomerDetailsList({ companyIds: [compid] });
+    } else if (compid === 0 && this.filterFormData.companies.length === 0) {
+      this.filterFormData.customers = [];
+    } else if (compid === 0 && this.filterFormData.companies.length > 0) {
+      let companyIds = this.filterFormData.companies.map((c) => {
+        return c.CompSno;
+      });
+      this.requestCustomerDetailsList({ companyIds: companyIds });
+    }
+  }
   private companyChangedEventHandler() {
     this.Comp.valueChanges.subscribe((value) => {
       let compid = Number(value);
-      if (compid > 0) {
-        this.requestCustomerDetailsList({ companyIds: [value] });
-      } else if (compid === 0 && this.filterFormData.companies.length === 0) {
-        this.filterFormData.customers = [];
-      } else if (compid === 0 && this.filterFormData.companies.length > 0) {
-        let companyIds = this.filterFormData.companies.map((c) => {
-          return c.CompSno;
-        });
-        this.requestCustomerDetailsList({ companyIds: companyIds });
-      }
+      this.handleCompanyChanged(compid);
     });
   }
   private assignBranchesFilterData(
@@ -214,7 +221,11 @@ export class ReportFormDetailsComponent implements OnInit {
         );
       }
     }
-    this.Comp.setValue(0);
+    if (this.Comp.enabled) {
+      this.Comp.setValue(0);
+    } else {
+      this.handleCompanyChanged(Number(this.Comp.value));
+    }
   }
   private requestCompaniesList(body: { branch: number | string }) {
     this.startLoading = true;
@@ -316,6 +327,11 @@ export class ReportFormDetailsComponent implements OnInit {
     } else {
       this.formGroup.markAllAsTouched();
     }
+  }
+  isBankUser() {
+    let profile: BankLoginResponse | VendorLoginResponse =
+      this.appConfig.getLoginResponse();
+    return profile.userType.toLocaleLowerCase() === 'BNk'.toLocaleLowerCase();
   }
   get Comp() {
     return this.formGroup.get('Comp') as FormControl;

@@ -336,7 +336,7 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.createRequestFormGroup();
     this.createHeadersFormGroup();
-    this.buildPage();
+    //this.buildPage();
     //this.initialFormSubmission();
   }
   requestTransactionDetailsList(

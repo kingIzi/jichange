@@ -69,7 +69,7 @@
         "role": "You must select a role",
         "username": "You must enter a User name",
         "mobileNo": "You must enter a valid phone number",
-        "emailId": "You must enter email address",
+        "emailId": "You must enter a valid email address",
         "userPosition": "Please select a position.",
         "fullName": "You must enter a Full name",
         "noRoleActFound": "No Roles found for this institution.",

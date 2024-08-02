@@ -22,7 +22,7 @@ export class VendorLoginResponse {
   braid!: number;
   Usno!: number;
   desig!: string;
-  sessComp!: string;
+  userType!: string;
   userid!: number;
   Uname!: string;
 }
@@ -34,7 +34,7 @@ export class BankLoginResponse {
   desig!: string;
   braid!: string;
   Usno!: number;
-  sessB!: string;
+  userType!: string;
   role!: string;
   Uname!: string;
   fulname!: string;

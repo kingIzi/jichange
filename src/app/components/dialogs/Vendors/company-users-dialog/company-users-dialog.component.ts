@@ -258,6 +258,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       case 'Missing uname'.toLocaleLowerCase():
         return this.tr.translate(`${errorStringPrefix}.fullName`);
       case 'Missing mail'.toLocaleLowerCase():
+      case 'Invalid mail'.toLocaleLowerCase():
         return this.tr.translate(`${errorStringPrefix}.emailId`);
       default:
         return this.tr.translate(`${errorStringPrefix}.FailedToAddCompany`);

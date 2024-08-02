@@ -27,7 +27,7 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { Observable, TimeoutError, of } from 'rxjs';
+import { Observable, TimeoutError, from, of, zip } from 'rxjs';
 import { CompanyUsersDialogComponent } from 'src/app/components/dialogs/Vendors/company-users-dialog/company-users-dialog.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import {
@@ -295,10 +295,40 @@ export class CompanyUsersComponent implements OnInit {
   //     this.tableData.dataSource.paginator.firstPage();
   //   }
   // }
+  private buildPage() {
+    let vendor = this.appConfig.getLoginResponse() as VendorLoginResponse;
+    this.tableLoading = true;
+    let roleActsObs = from(
+      this.companyUserService.requestRolesAct({ compid: vendor.InstID })
+    );
+    let companyUsersObs = from(
+      this.companyService.postCompanyUsersList({ compid: vendor.InstID })
+    );
+    let res = AppUtilities.pipedObservables(zip(roleActsObs, companyUsersObs));
+    res
+      .then((results) => {
+        let [roleActs, companyUsers] = results;
+        this.assignRolesAct(roleActs);
+        this.assignCompanyUsersDataList(companyUsers);
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
-    this.requestRolesAct();
+    //this.requestRolesAct();
     this.createHeadersFormGroup();
-    this.requestCompanyUsers();
+    //this.requestCompanyUsers();
+    this.buildPage();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;
