@@ -365,6 +365,16 @@
         "desc": ""
       },
       {
+        "label": "Vendor",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
         "label": "Invoice N°",
         "value": "Invoice_No",
         "desc": ""
@@ -387,16 +397,6 @@
       {
         "label": "Status",
         "value": "goods_status",
-        "desc": ""
-      },
-      {
-        "label": "Vendor",
-        "value": "Company_Name",
-        "desc": ""
-      },
-      {
-        "label": "Customer",
-        "value": "Chus_Name",
         "desc": ""
       },
       {

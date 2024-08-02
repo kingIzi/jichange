@@ -45,10 +45,10 @@ export class ReportsService {
   }
   public async getBranchedCompanyList(body: { branch: number | string }) {
     let data = await lastValueFrom(
-      this.client.performPost<
-        {},
-        HttpDataResponse<Company[] | string | number>
-      >(`/api/InvoiceRep/CompListB`, body)
+      this.client.performPost<{}, HttpDataResponse<Company[] | number>>(
+        `/api/InvoiceRep/CompListB`,
+        body
+      )
     );
     return data;
   }

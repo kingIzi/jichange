@@ -359,7 +359,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.breadcrumbService.set('@dashboard', 'Child One');
-    //this.buildPage();
+    this.buildPage();
   }
   getUserProfile() {
     return this.appconfig.getLoginResponse() as BankLoginResponse;

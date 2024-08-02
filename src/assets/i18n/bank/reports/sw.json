@@ -350,6 +350,16 @@
         "desc": ""
       },
       {
+        "label": "Muuzaji",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Mteja",
+        "value": "Chus_Name",
+        "desc": ""
+      },
+      {
         "label": "Nambari ya Ankara",
         "value": "Invoice_No",
         "desc": ""
@@ -372,16 +382,6 @@
       {
         "label": "Hali",
         "value": "goods_status",
-        "desc": ""
-      },
-      {
-        "label": "Muuzaji",
-        "value": "Company_Name",
-        "desc": ""
-      },
-      {
-        "label": "Mteja",
-        "value": "Chus_Name",
         "desc": ""
       },
       {

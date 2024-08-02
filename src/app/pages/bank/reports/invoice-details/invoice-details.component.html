@@ -23,7 +23,10 @@
     </div> -->
   </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2 divide-y">
-    <form
+    <app-report-form-details
+      (formData)="requestInvoiceDetails($event)"
+    ></app-report-form-details>
+    <!-- <form
       [formGroup]="formGroup"
       class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3"
     >
@@ -195,7 +198,7 @@
           {{ t("submit") }}
         </button>
       </div>
-    </form>
+    </form> -->
     <div [formGroup]="headerFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
         <div>

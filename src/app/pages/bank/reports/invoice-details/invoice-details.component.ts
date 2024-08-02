@@ -59,6 +59,7 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
 
 @Component({
   selector: 'app-invoice-details',
@@ -77,6 +78,7 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    ReportFormDetailsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -303,7 +305,7 @@ export class InvoiceDetailsComponent implements OnInit {
     });
   }
   private createHeaderGroup() {
-    let TABLE_SHOWING = 6;
+    let TABLE_SHOWING = 8;
     this.headerFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -489,7 +491,13 @@ export class InvoiceDetailsComponent implements OnInit {
     }
     this.prepareDataSource();
   }
-  private requestInvoiceDetails(body: InvoiceReportFormBanker) {
+  ngOnInit(): void {
+    initTE({ Datepicker, Input });
+    this.createRequestFormGroup();
+    this.createHeaderGroup();
+    this.buildPage();
+  }
+  requestInvoiceDetails(body: InvoiceReportFormBanker) {
     this.tableData.invoiceReports = [];
     this.prepareDataSource();
     this.tableLoading = true;
@@ -511,29 +519,8 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
-  ngOnInit(): void {
-    initTE({ Datepicker, Input });
-    this.createRequestFormGroup();
-    this.createHeaderGroup();
-    this.buildPage();
-  }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
-  }
-  submitForm() {
-    if (this.formGroup.valid) {
-      let form = { ...this.formGroup.value } as InvoiceReportFormBanker;
-      if (form.stdate) {
-        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-      }
-      if (form.enddate) {
-        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-      }
-      form.branch = this.branch.value;
-      this.requestInvoiceDetails(form);
-    } else {
-      this.formGroup.markAllAsTouched();
-    }
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
