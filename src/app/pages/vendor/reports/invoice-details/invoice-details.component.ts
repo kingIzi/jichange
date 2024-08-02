@@ -34,7 +34,10 @@ import { InvoiceDetailsReportTable } from 'src/app/core/enums/vendor/reports/inv
 import { Customer } from 'src/app/core/models/bank/customer';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
-import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import {
+  InvoiceReportForm,
+  InvoiceReportFormVendor,
+} from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
@@ -57,6 +60,7 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
 
 @Component({
   selector: 'app-invoice-details',
@@ -72,6 +76,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    ReportFormDetailsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-details.component.html',
@@ -300,46 +305,6 @@ export class InvoiceDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private requestInvoiceDetails(body: InvoiceReportFormVendor) {
-    this.tableLoading = true;
-    this.invoiceReportService
-      .getInvoiceReport(body)
-      .then((result) => {
-        // if (
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number' &&
-        //   result.response.length == 0
-        // ) {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.warning`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        //   this.tableData.invoiceReports = [];
-        //   this.prepareDataSource();
-        // } else if (
-        //   typeof result.response !== 'string' &&
-        //   typeof result.response !== 'number' &&
-        //   result.response.length > 0
-        // ) {
-        //   this.tableData.invoiceReports = result.response;
-        //   this.prepareDataSource();
-        // }
-        this.assignInvoiceDetailsResponse(result);
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
-  }
   private dataSourceFilter() {
     let filterPredicate = (data: InvoiceReport, filter: string) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
@@ -485,6 +450,26 @@ export class InvoiceDetailsComponent implements OnInit {
       }
     });
   }
+  requestInvoiceDetails(body: InvoiceReportForm) {
+    this.tableLoading = true;
+    this.invoiceReportService
+      .getInvoiceReport(body)
+      .then((result) => {
+        this.assignInvoiceDetailsResponse(result);
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;
   }
@@ -597,21 +582,21 @@ export class InvoiceDetailsComponent implements OnInit {
   isCashAmountColumn(index: number) {
     return index === InvoiceDetailsTable.TOTAL;
   }
-  submitFilterForm() {
-    if (this.filterFormGroup.valid) {
-      let form = { ...this.filterFormGroup.value } as InvoiceReportFormVendor;
-      form.Comp = this.getUserProfile().InstID;
-      if (form.stdate) {
-        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-      }
-      if (form.enddate) {
-        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-      }
-      this.requestInvoiceDetails(form);
-    } else {
-      this.filterFormGroup.markAllAsTouched();
-    }
-  }
+  // submitFilterForm() {
+  //   if (this.filterFormGroup.valid) {
+  //     let form = { ...this.filterFormGroup.value } as InvoiceReportFormVendor;
+  //     form.Comp = this.getUserProfile().InstID;
+  //     if (form.stdate) {
+  //       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+  //     }
+  //     if (form.enddate) {
+  //       form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+  //     }
+  //     this.requestInvoiceDetails(form);
+  //   } else {
+  //     this.filterFormGroup.markAllAsTouched();
+  //   }
+  // }
   getTableDataSource() {
     return this.tableDataService.getDataSource();
   }

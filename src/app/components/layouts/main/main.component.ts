@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   NO_ERRORS_SCHEMA,
@@ -54,19 +55,22 @@ export class MainComponent implements OnInit, AfterViewInit {
   constructor(
     private breadcrumbService: BreadcrumbService,
     private router: Router,
-    private tr: TranslocoService
+    private tr: TranslocoService,
+    private cdr: ChangeDetectorRef
   ) {}
   private routeLoaderListener() {
     this.router.events.subscribe((event) => {
       switch (true) {
         case event instanceof NavigationStart: {
           this.routeLoading = true;
+          this.cdr.detectChanges();
           break;
         }
         case event instanceof NavigationEnd:
         case event instanceof NavigationCancel:
         case event instanceof NavigationError: {
           this.routeLoading = false;
+          this.cdr.detectChanges();
           break;
         }
         default: {

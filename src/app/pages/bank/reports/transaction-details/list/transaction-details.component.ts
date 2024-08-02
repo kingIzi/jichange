@@ -72,6 +72,10 @@ import autoTable from 'jspdf-autotable';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { TableDataService } from 'src/app/core/services/table-data.service';
 
 @Component({
   selector: 'app-transaction-details',
@@ -95,12 +99,17 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSortModule,
     MatTableExporterModule,
     MatTooltipModule,
+    ReportFormDetailsComponent,
   ],
   providers: [
     DatePipe,
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
+    },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
     },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
@@ -110,19 +119,6 @@ export class TransactionDetailsComponent implements OnInit {
   public filterTableFormGroup!: FormGroup;
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
-  public tableData: {
-    transactions: TransactionDetail[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<TransactionDetail>;
-  } = {
-    transactions: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<TransactionDetail>([]),
-  };
   public filterFormData: {
     companies: Company[];
     customers: Customer[];
@@ -154,6 +150,8 @@ export class TransactionDetailsComponent implements OnInit {
     private datePipe: DatePipe,
     private cdr: ChangeDetectorRef,
     private activatedRoute: ActivatedRoute,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<TransactionDetail>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createRequestFormGroup() {
@@ -287,34 +285,37 @@ export class TransactionDetailsComponent implements OnInit {
         this.scope
       )
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this, this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -323,7 +324,9 @@ export class TransactionDetailsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private buildPage() {
     this.startLoading = true;
@@ -365,20 +368,15 @@ export class TransactionDetailsComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: TransactionDetail,
-      filter: string
-    ) => {
+    let filterPredicate = (data: TransactionDetail, filter: string) => {
       return data.Invoice_Sno.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Payment_Date':
           return new Date(item['Payment_Date']);
@@ -386,55 +384,25 @@ export class TransactionDetailsComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<TransactionDetail>(
-      this.tableData.transactions
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  private parseTransactionsDataList(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as TransactionDetail[]);
+    }
   }
   private assignTransactionsDataList(
     result: HttpDataResponse<string | number | TransactionDetail[]>
   ) {
-    if (
-      typeof result.response !== 'number' &&
-      typeof result.response !== 'string'
-    ) {
-      this.tableData.transactions = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.transactionDetails.noTransactionsFound`)
-      );
-      this.tableData.transactions = [];
-    }
-    this.prepareDataSource();
-  }
-  private requestTransactionDetailsList(form: TransactionDetailsReportForm) {
-    this.tableData.transactions = [];
-    this.prepareDataSource();
-    this.tableLoading = true;
-    this.reportsService
-      .getTransactionsReport(form)
-      .then((result) => {
-        this.assignTransactionsDataList(result);
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
+    this.parseTransactionsDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private transactionKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -480,12 +448,6 @@ export class TransactionDetailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.transactionKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
   private initialSubmission() {
     this.activatedRoute.queryParams.subscribe((params) => {
       if (
@@ -493,9 +455,10 @@ export class TransactionDetailsComponent implements OnInit {
         atob(params['q']).toLocaleLowerCase() ===
           'Transaction'.toLocaleLowerCase()
       ) {
-        this.compid.setValue('all');
-        this.cusid.setValue('all');
-        this.submitForm();
+        alert('Send request');
+        //this.compid.setValue('all');
+        //this.cusid.setValue('all');
+        //this.submitForm();
       }
     });
   }
@@ -619,6 +582,28 @@ export class TransactionDetailsComponent implements OnInit {
     this.buildPage();
     this.initialSubmission();
   }
+  requestTransactionDetailsList(
+    form: TransactionDetailsReportForm | InvoiceReportForm
+  ) {
+    this.tableLoading = true;
+    this.reportsService
+      .getTransactionsReport(form)
+      .then((result) => {
+        this.assignTransactionsDataList(result);
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
@@ -680,7 +665,7 @@ export class TransactionDetailsComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.transactions,
+          this.tableDataService.getData(),
           element
         );
       case 'Payment_Date':
@@ -709,13 +694,15 @@ export class TransactionDetailsComponent implements OnInit {
       data: {
         //headersMap: this.headersMap,
         headers: this.headers.controls.map((c) => c.get('label')?.value),
-        transactions: this.tableData.transactions,
+        transactions: this.tableDataService.getData(),
       },
     });
   }
   downloadSheet() {
-    if (this.tableData.transactions.length > 0) {
-      this.exporter.hiddenColumns = [this.tableData.tableColumns.length - 1];
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length - 1,
+      ];
       this.exporter.exportTable(ExportType.XLSX, {
         fileName: 'transactions_details_report',
         Props: {
@@ -732,7 +719,7 @@ export class TransactionDetailsComponent implements OnInit {
   }
 
   downloadPdf() {
-    if (this.tableData.transactions.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       let table =
         this.summaryTableContainer.nativeElement.querySelector('table');
       this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
@@ -750,24 +737,6 @@ export class TransactionDetailsComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  submitForm() {
-    if (this.filterTableFormGroup.valid) {
-      let form = {
-        ...this.filterTableFormGroup.value,
-      } as TransactionDetailsReportForm;
-      if (form.stdate) {
-        console.log(this.datePipe.transform(this.stdate.value, 'dd/MM/yyyy'));
-        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-      }
-      if (form.enddate) {
-        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-      }
-      form.branch = this.branch.value;
-      this.requestTransactionDetailsList(form);
-    } else {
-      this.filterTableFormGroup.markAllAsTouched();
-    }
-  }
   isCashAmountColumn(index: number) {
     return (
       index === TransactionDetailsTableHeadersMap.TOTAL_AMOUNT ||
@@ -777,6 +746,18 @@ export class TransactionDetailsComponent implements OnInit {
   }
   invoiceNumberToBase64(invoice_number: string) {
     return btoa(invoice_number);
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

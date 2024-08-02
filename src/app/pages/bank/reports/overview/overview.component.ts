@@ -344,7 +344,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     );
     let bankerInvoiceStatsObs = from(
       this.reportsService.getBankerInvoiceStats({
-        sessB: this.getUserProfile().sessB,
+        branch: Number(this.getUserProfile().braid),
       })
     );
     let invoiceObs = from(

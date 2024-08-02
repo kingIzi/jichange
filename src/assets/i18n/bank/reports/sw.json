@@ -102,6 +102,16 @@
         "desc": ""
       },
       {
+        "label": "Muuzaji",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Mteja",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
         "label": "Nambari ya Ankara",
         "value": "Invoice_Sno",
         "desc": ""
@@ -377,11 +387,6 @@
       {
         "label": "Jumla ya Kiasi",
         "value": "Total",
-        "desc": ""
-      },
-      {
-        "label": "Hali",
-        "value": "goods_status",
         "desc": ""
       },
       {

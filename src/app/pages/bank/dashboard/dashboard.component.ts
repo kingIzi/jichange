@@ -290,7 +290,7 @@ export class DashboardComponent implements OnInit {
     );
     let bankerInvoiceStatsObs = from(
       this.reportsService.getBankerInvoiceStats({
-        sessB: this.getUserProfile().sessB,
+        branch: Number(this.getUserProfile().braid),
       })
     );
     let compListObs = from(

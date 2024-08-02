@@ -10,6 +10,7 @@ import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/rep
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { UserLog } from 'src/app/core/models/bank/reports/user-log';
 import { InvoiceConsolidatedReport } from 'src/app/core/models/bank/reports/invoice-consolidated-report';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Injectable({
   providedIn: 'root',
@@ -29,6 +30,15 @@ export class ReportsService {
     let data = await lastValueFrom(
       this.client.performPost<
         { Sno: string | number },
+        HttpDataResponse<Customer[] | number | string>
+      >(`/api/InvoiceRep/getcustdetails`, body)
+    );
+    return data;
+  }
+  public async getCustomerDetailsByCompany(body: { companyIds: number[] }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { companyIds: number[] },
         HttpDataResponse<Customer[] | number | string>
       >(`/api/InvoiceRep/getcustdetails`, body)
     );
@@ -72,19 +82,21 @@ export class ReportsService {
     );
     return data;
   }
-  public async getBankerInvoiceStats(body: { sessB: string }) {
+  public async getBankerInvoiceStats(body: { branch: number }) {
     let data = await lastValueFrom(
       this.client.performPost<
-        { sessB: string },
+        { branch: number },
         HttpDataResponse<DashboardOverviewStatistic[] | number | string>
       >(`/api/Setup/Overview`, body)
     );
     return data;
   }
-  public async getTransactionsReport(body: TransactionDetailsReportForm) {
+  public async getTransactionsReport(
+    body: TransactionDetailsReportForm | InvoiceReportForm
+  ) {
     let data = await lastValueFrom(
       this.client.performPost<
-        TransactionDetailsReportForm,
+        TransactionDetailsReportForm | InvoiceReportForm,
         HttpDataResponse<TransactionDetail[] | number | string>
       >(`/api/Invoice/GetchTransact_B`, body)
     );

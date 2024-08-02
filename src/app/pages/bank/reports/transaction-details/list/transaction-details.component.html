@@ -13,180 +13,10 @@
       {{ t("transactionDetails") }}
     </h2>
   </div>
-  <div
-    [formGroup]="headersFormGroup"
-    class="flex flex-col bg-white shadow px-2 py-4 space-y-4 divide-y"
-  >
-    <form class="w-full grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3">
-      <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("branch") }}
-        </p>
-        <select
-          [formControl]="branch"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-            selected
-            [value]="'0'"
-          >
-            {{ t("all") }}
-          </option>
-          <ng-container *ngIf="filterFormData.branches.length > 0">
-            <option
-              *ngFor="
-                let branch of filterFormData.branches;
-                index as i;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-              [value]="branch.Branch_Sno.toString()"
-            >
-              {{ branch.Name }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="branch && branch.invalid && branch.touched">
-          <p
-            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-            class="text-danger-700 text-xs"
-          >
-            {{ t("branch") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("company") }}
-        </p>
-        <select
-          [formControl]="compid"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-            selected
-            [value]="'all'"
-          >
-            {{ t("all") }}
-          </option>
-          <ng-container *ngIf="filterFormData.companies.length > 0">
-            <option
-              *ngFor="
-                let company of filterFormData.companies;
-                index as i;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-              [value]="company.CompSno"
-            >
-              {{ company.CompName }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="compid && compid.invalid && compid.touched">
-          <p
-            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-            class="text-danger-700 text-xs"
-          >
-            {{ t("company") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1 col-span-full lg:col-span-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("customer") }}
-        </p>
-        <select
-          [formControl]="cusid"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-            selected
-            [value]="'all'"
-          >
-            {{ t("all") }}
-          </option>
-          <ng-container *ngIf="filterFormData.customers.length > 0">
-            <option
-              *ngFor="
-                let customer of filterFormData.customers;
-                index as i;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-              [value]="customer.Cust_Sno"
-            >
-              {{ customer.Cust_Name }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="cusid && cusid.invalid && cusid.touched">
-          <p
-            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-            class="text-danger-700 text-xs"
-          >
-            {{ t("customer") }}
-          </p>
-        </span>
-      </div>
-      <div class="col-span-full grid grid-cols-2 gap-x-2">
-        <div class="flex flex-col space-y-1">
-          <p *transloco="let t; read: 'forms'" class="text-xs">
-            {{ t("from") }}
-          </p>
-          <input
-            type="date"
-            [formControl]="stdate"
-            class="input input-sm input-bordered"
-          />
-          <span *ngIf="stdate && stdate.invalid && stdate.touched">
-            <p
-              *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-              class="text-danger-700 text-xs"
-            >
-              {{ t("startDate") }}
-            </p>
-          </span>
-        </div>
-        <div class="flex flex-col space-y-1">
-          <p *transloco="let t; read: 'forms'" class="text-xs">
-            {{ t("to") }}
-          </p>
-          <input
-            type="date"
-            [formControl]="enddate"
-            class="input input-sm input-bordered"
-            [min]="stdate.value"
-          />
-          <span *ngIf="enddate && enddate.invalid && enddate.touched">
-            <p
-              *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-              class="text-danger-700 text-xs"
-            >
-              {{ t("endDate") }}
-            </p>
-          </span>
-        </div>
-      </div>
-      <div class="col-span-full flex flex-row items-center justify-end">
-        <button
-          (click)="submitForm()"
-          *transloco="let t; read: 'actions'"
-          class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"
-        >
-          {{ t("submit") }}
-        </button>
-      </div>
-    </form>
+  <div class="flex flex-col bg-white shadow px-2 py-4 space-y-4 divide-y">
+    <app-report-form-details
+      (formData)="requestTransactionDetailsList($event)"
+    ></app-report-form-details>
     <div [formGroup]="headersFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
         <div class="flex flex-row items-center space-x-4">
@@ -262,7 +92,7 @@
         <ul class="flex flex-col space-y-4">
           <li
             *ngFor="
-              let element of tableData.dataSource.filteredData
+              let element of getTableDataSource().filteredData
                 | slice
                   : 1 + paginator.pageSize * paginator.pageIndex - 1
                   : 1 +
@@ -271,7 +101,7 @@
                       1;
               index as i
             "
-            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
+            [@listAnimationDesktop]="getTableDataSource().filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -330,7 +160,7 @@
             *transloco="let t; read: 'errors'"
           >
             <p
-              *ngIf="tableData.transactions.length <= 0"
+              *ngIf="getTableDataList().length <= 0"
               class="text-center text-sm tracking-wide p-3"
             >
               {{ t("noDataFound") }}
@@ -349,12 +179,12 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div #summaryTableContainer class="overflow-y-auto shadow">
             <ng-container
-              *ngIf="tableData.tableColumns$ | async as displayedColumns"
+              *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
             >
               <table
                 mat-table
                 matSort
-                [dataSource]="tableData.dataSource"
+                [dataSource]="getTableDataSource()"
                 matTableExporter
                 #exporter="matTableExporter"
                 class="mat-elevation-z2 w-full"
@@ -428,7 +258,7 @@
                 <tr
                   mat-row
                   [@listAnimationDesktop]="
-                    tableData.dataSource.filteredData.length
+                    getTableDataSource().filteredData.length
                   "
                   *matRowDef="
                     let row;
@@ -440,12 +270,12 @@
                   <td
                     *transloco="let t; read: 'errors'"
                     class="mat-cell"
-                    [attr.colspan]="tableData.tableColumns.length"
+                    [attr.colspan]="getTableDataColumns().length"
                   >
                     <p
                       *ngIf="
                         tableSearch.value &&
-                        tableData.dataSource.data.length > 0 &&
+                        getTableDataList().length > 0 &&
                         !tableLoading
                       "
                       class="text-xs lg:text-sm py-2 px-4"
@@ -453,9 +283,7 @@
                       {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                     </p>
                     <p
-                      *ngIf="
-                        tableData.dataSource.data.length <= 0 && !tableLoading
-                      "
+                      *ngIf="getTableDataList().length <= 0 && !tableLoading"
                       class="text-center text-sm tracking-wide pt-3 pb-1"
                     >
                       {{ t("noDataFound") }}

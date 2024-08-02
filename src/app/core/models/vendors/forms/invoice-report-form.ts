@@ -12,3 +12,10 @@ export class InvoiceReportFormVendor {
   stdate!: string | null;
   enddate!: string | null;
 }
+
+export class InvoiceReportForm {
+  companyIds!: number[];
+  customerIds!: number[];
+  stdate!: string;
+  enddate!: string;
+}

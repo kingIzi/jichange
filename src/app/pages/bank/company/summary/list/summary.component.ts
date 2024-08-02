@@ -72,6 +72,8 @@ import autoTable from 'jspdf-autotable';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-summary',
@@ -102,6 +104,10 @@ import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/company', alias: 'company' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -109,19 +115,6 @@ export class SummaryComponent implements OnInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
-  public tableData: {
-    companies: Company[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Company>;
-  } = {
-    companies: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Company>([]),
-  };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
@@ -141,6 +134,8 @@ export class SummaryComponent implements OnInit {
     private fb: FormBuilder,
     private tr: TranslocoService,
     private fileHandler: FileHandlerService,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Company>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersFormGroup() {
@@ -152,34 +147,37 @@ export class SummaryComponent implements OnInit {
     this.tr
       .selectTranslate(`summary.companySummary`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -188,7 +186,9 @@ export class SummaryComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private companyKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -225,10 +225,7 @@ export class SummaryComponent implements OnInit {
     return keys;
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Company,
-      filter: string
-    ) => {
+    let filterPredicate = (data: Company, filter: string) => {
       return data.CompName.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -237,38 +234,26 @@ export class SummaryComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Company>(
-      this.tableData.companies
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  private parseVendorDataList(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Company[]);
+    }
   }
   private assignVendorsDataList(
     result: HttpDataResponse<string | number | Company[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.companies = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`company.summary.noVendorsFoundInBranch`)
-      );
-      this.tableData.companies = [];
-    }
-    this.prepareDataSource();
+    this.parseVendorDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
   }
   private requestList() {
-    this.tableData.companies = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .getBranchedCompanyList({ branch: this.getUserProfile().braid })
@@ -295,12 +280,6 @@ export class SummaryComponent implements OnInit {
       })
       .filter((num) => num !== -1);
     return this.companyKeys(indexes);
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
   }
   private parsePdf(table: HTMLTableElement, filename: string) {
     let doc = new jsPDF();
@@ -382,7 +361,7 @@ export class SummaryComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.companies,
+          this.tableDataService.getData(),
           element
         );
       case 'AccountNo':
@@ -437,8 +416,10 @@ export class SummaryComponent implements OnInit {
     });
   }
   downloadSheet() {
-    if (this.tableData.companies.length > 0) {
-      this.exporter.hiddenColumns = [this.tableData.tableColumns.length - 1];
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length - 1,
+      ];
       this.exporter.exportTable(ExportType.XLSX, {
         fileName: 'vendors_summary',
         Props: {
@@ -454,7 +435,7 @@ export class SummaryComponent implements OnInit {
     }
   }
   downloadPdf() {
-    if (this.tableData.companies.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       let table =
         this.summaryTableContainer.nativeElement.querySelector('table');
       this.parsePdf(table as HTMLTableElement, `vendors_summary`);
@@ -465,6 +446,18 @@ export class SummaryComponent implements OnInit {
         this.tr.translate(`errors.noDataFound`)
       );
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers(): FormArray {
     return this.headersFormGroup.get('headers') as FormArray;

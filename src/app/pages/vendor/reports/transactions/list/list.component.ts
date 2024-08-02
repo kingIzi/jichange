@@ -57,6 +57,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
+import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Component({
   selector: 'app-list',
@@ -78,6 +80,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    ReportFormDetailsComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -318,7 +321,27 @@ export class ListComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private requestTransactionDetailsList(form: TransactionDetailsReportForm) {
+  private initialFormSubmission() {
+    this.cusid.setValue('all');
+    let form = { ...this.filterTableFormGroup.value };
+    form.compid = this.getUserProfile().InstID;
+    if (form.stdate) {
+      form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+    }
+    if (form.enddate) {
+      form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+    }
+    this.requestTransactionDetailsList(form);
+  }
+  ngOnInit(): void {
+    this.createRequestFormGroup();
+    this.createHeadersFormGroup();
+    this.buildPage();
+    //this.initialFormSubmission();
+  }
+  requestTransactionDetailsList(
+    form: TransactionDetailsReportForm | InvoiceReportForm
+  ) {
     this.tableData.transactions = [];
     this.prepareDataSource();
     this.tableLoading = true;
@@ -353,24 +376,6 @@ export class ListComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  private initialFormSubmission() {
-    this.cusid.setValue('all');
-    let form = { ...this.filterTableFormGroup.value };
-    form.compid = this.getUserProfile().InstID;
-    if (form.stdate) {
-      form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-    }
-    if (form.enddate) {
-      form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-    }
-    this.requestTransactionDetailsList(form);
-  }
-  ngOnInit(): void {
-    this.createRequestFormGroup();
-    this.createHeadersFormGroup();
-    this.buildPage();
-    this.initialFormSubmission();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;
@@ -480,21 +485,21 @@ export class ListComponent implements OnInit {
   invoiceNumberToBase64(invoice_number: string) {
     return btoa(invoice_number);
   }
-  submitForm() {
-    if (this.filterTableFormGroup.valid) {
-      let form = { ...this.filterTableFormGroup.value };
-      form.compid = this.getUserProfile().InstID;
-      if (form.stdate) {
-        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-      }
-      if (form.enddate) {
-        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-      }
-      this.requestTransactionDetailsList(form);
-    } else {
-      this.filterTableFormGroup.markAllAsTouched();
-    }
-  }
+  // submitForm() {
+  //   if (this.filterTableFormGroup.valid) {
+  //     let form = { ...this.filterTableFormGroup.value };
+  //     form.compid = this.getUserProfile().InstID;
+  //     if (form.stdate) {
+  //       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+  //     }
+  //     if (form.enddate) {
+  //       form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+  //     }
+  //     this.requestTransactionDetailsList(form);
+  //   } else {
+  //     this.filterTableFormGroup.markAllAsTouched();
+  //   }
+  // }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;
   }

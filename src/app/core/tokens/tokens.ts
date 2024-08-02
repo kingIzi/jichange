@@ -18,6 +18,7 @@ import { Company as BankCompany } from 'src/app/core/models/bank/company/company
 import { CancelledInvoice } from '../models/vendors/cancelled-invoice';
 import { PaymentDetail } from '../models/vendors/payment-detail';
 import { CompanyUser } from '../models/vendors/company-user';
+import { TransactionDetail } from '../models/bank/reports/transaction-detail';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -33,6 +34,8 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | EmployeeDetail
     | SuspenseAccount
     | BankCompany
+    | InvoiceReport
+    | TransactionDetail
   >
 >('TABLE_DATA_SERVICE');
 

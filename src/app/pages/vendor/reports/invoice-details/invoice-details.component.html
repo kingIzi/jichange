@@ -21,7 +21,7 @@
     </a> -->
   </div>
   <div class="flex flex-col space-y-4 divide-y w-full bg-white shadow p-2">
-    <form
+    <!-- <form
       [formGroup]="filterFormGroup"
       class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
     >
@@ -149,7 +149,10 @@
           {{ t("submit") }}
         </button>
       </div>
-    </form>
+    </form> -->
+    <app-report-form-details
+      (formData)="requestInvoiceDetails($event)"
+    ></app-report-form-details>
     <div [formGroup]="tableFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
         <div>

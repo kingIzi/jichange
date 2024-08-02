@@ -103,6 +103,16 @@
         "desc": ""
       },
       {
+        "label": "Vendor",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
         "label": "Invoice N°",
         "value": "Invoice_Sno",
         "desc": ""
@@ -392,11 +402,6 @@
       {
         "label": "Total Amount",
         "value": "Total",
-        "desc": ""
-      },
-      {
-        "label": "Status",
-        "value": "goods_status",
         "desc": ""
       },
       {

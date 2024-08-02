@@ -17,15 +17,25 @@ import {
 import { Company } from 'src/app/core/models/bank/company/company';
 import { Customer } from 'src/app/core/models/bank/customer';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
-import { BankLoginResponse } from 'src/app/core/models/login-response';
+import {
+  BankLoginResponse,
+  VendorLoginResponse,
+} from 'src/app/core/models/login-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
+import {
+  TRANSLOCO_SCOPE,
+  TranslocoModule,
+  TranslocoService,
+} from '@ngneat/transloco';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
-import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import {
+  InvoiceReportForm,
+  InvoiceReportFormBanker,
+} from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { CommonModule } from '@angular/common';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { from, zip } from 'rxjs';
@@ -44,6 +54,12 @@ import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.se
   templateUrl: './report-form-details.component.html',
   styleUrl: './report-form-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: TRANSLOCO_SCOPE,
+      useValue: { scope: 'bank/reports', alias: 'reports' },
+    },
+  ],
 })
 export class ReportFormDetailsComponent implements OnInit {
   public startLoading: boolean = false;
@@ -58,8 +74,8 @@ export class ReportFormDetailsComponent implements OnInit {
     branches: [],
   };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  @Output() public formData: EventEmitter<InvoiceReportFormBanker> =
-    new EventEmitter<InvoiceReportFormBanker>();
+  @Output() public formData: EventEmitter<InvoiceReportForm> =
+    new EventEmitter<InvoiceReportForm>();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   constructor(
@@ -70,20 +86,38 @@ export class ReportFormDetailsComponent implements OnInit {
     private branchService: BranchService,
     private cdr: ChangeDetectorRef
   ) {}
+  private initializeFormGroup() {
+    let profile: BankLoginResponse | VendorLoginResponse =
+      this.appConfig.getLoginResponse();
+    if (profile instanceof BankLoginResponse) {
+      this.formGroup = this.fb.group({
+        Comp: this.fb.control(0, [Validators.required]),
+        cusid: this.fb.control(0, [Validators.required]),
+        branch: this.fb.control(profile.braid, []),
+        stdate: this.fb.control('', []),
+        enddate: this.fb.control('', []),
+      });
+    } else {
+      this.formGroup = this.fb.group({
+        Comp: this.fb.control(profile.InstID, [Validators.required]),
+        cusid: this.fb.control(0, [Validators.required]),
+        branch: this.fb.control(profile.braid, []),
+        stdate: this.fb.control('', []),
+        enddate: this.fb.control('', []),
+      });
+    }
+    return profile;
+  }
   private createRequestFormGroup() {
-    this.formGroup = this.fb.group({
-      Comp: this.fb.control(0, [Validators.required]),
-      cusid: this.fb.control(0, [Validators.required]),
-      branch: this.fb.control(this.getUserProfile().braid, []),
-      stdate: this.fb.control('', []),
-      enddate: this.fb.control('', []),
-    });
-    if (Number(this.getUserProfile().braid) > 0) {
+    let profile: BankLoginResponse | VendorLoginResponse =
+      this.initializeFormGroup();
+    if (Number(profile.braid) > 0) {
       this.branch.disable();
     }
-    if (Number(this.getUserProfile().braid) === 0) {
+    if (Number(profile.braid) === 0) {
       this.branchChangedEventHandler();
     }
+    console.log(profile);
     this.companyChangedEventHandler();
   }
   private branchChangedEventHandler() {
@@ -111,28 +145,10 @@ export class ReportFormDetailsComponent implements OnInit {
     }
     this.cusid.setValue(0);
   }
-  private requestCustomerDetailsList(body: { Sno: number }) {
+  private requestCustomerDetailsList(body: { companyIds: number[] }) {
     this.reportsService
-      .getCustomerDetailsList(body)
+      .getCustomerDetailsByCompany(body)
       .then((result) => {
-        // if (
-        //   typeof result.response !== 'number' &&
-        //   typeof result.response !== 'string'
-        // ) {
-        //   this.filterFormData.customers = result.response;
-        // } else {
-        //   if (this.Comp.value !== 0) {
-        //     AppUtilities.openDisplayMessageBox(
-        //       this.displayMessageBox,
-        //       this.tr.translate(`defaults.warning`),
-        //       this.tr.translate(
-        //         `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-        //       )
-        //     );
-        //   }
-        //   this.filterFormData.customers = [];
-        //   this.cusid.setValue(0);
-        // }
         this.assignCustomersFilterData(result);
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -152,7 +168,17 @@ export class ReportFormDetailsComponent implements OnInit {
   }
   private companyChangedEventHandler() {
     this.Comp.valueChanges.subscribe((value) => {
-      this.requestCustomerDetailsList({ Sno: value });
+      let compid = Number(value);
+      if (compid > 0) {
+        this.requestCustomerDetailsList({ companyIds: [value] });
+      } else if (compid === 0 && this.filterFormData.companies.length === 0) {
+        this.filterFormData.customers = [];
+      } else if (compid === 0 && this.filterFormData.companies.length > 0) {
+        let companyIds = this.filterFormData.companies.map((c) => {
+          return c.CompSno;
+        });
+        this.requestCustomerDetailsList({ companyIds: companyIds });
+      }
     });
   }
   private assignBranchesFilterData(
@@ -247,15 +273,46 @@ export class ReportFormDetailsComponent implements OnInit {
   }
   submitForm() {
     if (this.formGroup.valid) {
-      let form = { ...this.formGroup.value } as InvoiceReportFormBanker;
+      let form = { ...this.formGroup.value }; //as InvoiceReportFormBanker;
       if (form.stdate) {
-        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
+        form.stdate = new Date(form.stdate).toISOString(); //AppUtilities.reformatDate(this.stdate.value.split('-'));
       }
       if (form.enddate) {
-        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
+        form.enddate = new Date(form.enddate).toISOString(); //AppUtilities.reformatDate(this.enddate.value.split('-'));
       }
       form.branch = this.branch.value;
-      this.formData.emit(form);
+      form.Comp = this.Comp.value;
+      let compid = Number(form.Comp);
+      let companyIds: number[] = [];
+      if (compid > 0) {
+        companyIds = [compid];
+      } else if (compid === 0 && this.filterFormData.companies.length > 0) {
+        companyIds = this.filterFormData.companies.map((c) => {
+          return c.CompSno;
+        });
+      } else {
+        companyIds = [0];
+      }
+      let cusid = Number(form.cusid);
+      let customersIds: number[] = [];
+      if (cusid > 0) {
+        customersIds = [cusid];
+      } else if (cusid === 0 && this.filterFormData.customers.length > 0) {
+        customersIds = this.filterFormData.customers.map((c) => {
+          return c.Cust_Sno;
+        });
+      } else {
+        customersIds = [0];
+      }
+
+      let body = {
+        companyIds: companyIds,
+        customerIds: customersIds,
+        stdate: form.stdate,
+        enddate: form.enddate,
+      } as InvoiceReportForm;
+
+      this.formData.emit(body);
     } else {
       this.formGroup.markAllAsTouched();
     }
