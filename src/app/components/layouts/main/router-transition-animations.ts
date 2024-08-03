@@ -223,7 +223,7 @@ function generateModuleRoutes(inputStr: string, arr: string[], delim: string) {
 }
 
 let COMPANY_MODULES = 2;
-let REPORTS_MODULES = 11;
+let REPORTS_MODULES = 12;
 let SETUP_MODULES = 14;
 let LEFT_MODULES = 2;
 let RIGHT_MODULES = 2;

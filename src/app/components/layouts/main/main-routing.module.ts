@@ -349,6 +349,18 @@ const routes: Routes = [
             },
           },
           {
+            path: 'cancelled',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/reports/cancelled-invoice-report/cancelled-invoice-report.component'
+              ).then((c) => c.CancelledInvoiceReportComponent),
+            data: {
+              breadcrumb: { alias: 'cancelled', skip: false },
+              animationState: 'reports-module-5',
+              reuseRoute: true,
+            },
+          },
+          {
             path: 'amendment',
             loadComponent: () =>
               import(
@@ -356,7 +368,7 @@ const routes: Routes = [
               ).then((a) => a.AmendmentComponent),
             data: {
               breadcrumb: { alias: 'amendment', skip: false },
-              animationState: 'reports-module-5',
+              animationState: 'reports-module-6',
               reuseRoute: true,
             },
           },
@@ -368,7 +380,7 @@ const routes: Routes = [
               ).then((m) => m.CustomerDetailReportComponent),
             data: {
               breadcrumb: { alias: 'customer', skip: false },
-              animationState: 'reports-module-6',
+              animationState: 'reports-module-7',
               reuseRoute: true,
             },
           },
@@ -380,7 +392,7 @@ const routes: Routes = [
               ).then((s) => s.VendorDetailReportComponent),
             data: {
               breadcrumb: { alias: 'vendors', skip: false },
-              animationState: 'reports-module-7',
+              animationState: 'reports-module-8',
             },
           },
           {
@@ -391,7 +403,7 @@ const routes: Routes = [
               ).then((c) => c.ConsolidatedReportComponent),
             data: {
               breadcrumb: { alias: 'invoice-consolidated', skip: false },
-              animationState: 'reports-module-8',
+              animationState: 'reports-module-9',
             },
           },
           {
@@ -402,7 +414,7 @@ const routes: Routes = [
               ).then((p) => p.PaymentConsolidatedComponent),
             data: {
               breadcrumb: { alias: 'payment-consolidated', skip: false },
-              animationState: 'reports-module-9',
+              animationState: 'reports-module-10',
             },
           },
           {
@@ -413,7 +425,7 @@ const routes: Routes = [
               ).then((m) => m.UserLogReportComponent),
             data: {
               breadcrumb: { alias: 'userLog', skip: false },
-              animationState: 'reports-module-10',
+              animationState: 'reports-module-11',
             },
           },
           {
@@ -424,7 +436,7 @@ const routes: Routes = [
               ).then((m) => m.AuditTrailsComponent),
             data: {
               breadcrumb: { alias: 'audit', skip: false },
-              animationState: 'reports-module-11',
+              animationState: 'reports-module-12',
               reuseRoute: true,
             },
           },

@@ -18,4 +18,5 @@ export class InvoiceReportForm {
   customerIds!: number[];
   stdate!: string;
   enddate!: string;
+  allowCancelInvoice!: boolean;
 }

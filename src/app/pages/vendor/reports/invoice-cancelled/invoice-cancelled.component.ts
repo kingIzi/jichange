@@ -55,7 +55,10 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { CancelledInvoice } from 'src/app/core/models/vendors/cancelled-invoice';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { CancelledInvoiceTable } from 'src/app/core/enums/vendor/reports/cancelled-invoice-table';
-import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import {
+  InvoiceReportForm,
+  InvoiceReportFormVendor,
+} from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -72,6 +75,8 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
+import { ReportFormInvoiceDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -90,6 +95,7 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    ReportFormInvoiceDetailsComponent,
   ],
   templateUrl: './invoice-cancelled.component.html',
   styleUrl: './invoice-cancelled.component.scss',
@@ -434,37 +440,16 @@ export class InvoiceCancelledComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private requestCancelledInvoice(value: any) {
+  ngOnInit(): void {
+    this.createTableHeadersFormGroup();
+    this.createFilterForm();
+    //this.buildPage();
+  }
+  requestCancelledInvoice(value: InvoiceDetailsForm) {
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(value)
       .then((result) => {
-        // if (
-        //   typeof result.response === 'string' &&
-        //   typeof result.response === 'number'
-        // ) {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        //   this.tableData.invoicesList = [];
-        //   this.prepareDataSource();
-        // } else if (
-        //   result.response instanceof Array &&
-        //   result.response.length === 0
-        // ) {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        //   this.tableData.invoicesList = [];
-        //   this.prepareDataSource();
-        // } else {
-        //   this.tableData.invoicesList = result.response as CancelledInvoice[];
-        //   this.prepareDataSource();
-        // }
         this.assignCancelledInvoiceResponse(result);
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -479,11 +464,6 @@ export class InvoiceCancelledComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  ngOnInit(): void {
-    this.createTableHeadersFormGroup();
-    this.createFilterForm();
-    this.buildPage();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;

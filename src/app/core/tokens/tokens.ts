@@ -36,6 +36,7 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | BankCompany
     | InvoiceReport
     | TransactionDetail
+    | CancelledInvoice
   >
 >('TABLE_DATA_SERVICE');
 

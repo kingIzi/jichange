@@ -5,3 +5,11 @@ export class PaymentDetailReportForm {
   enddate!: string;
   invno!: string;
 }
+
+export class InvoiceDetailsForm {
+  companyIds!: number[];
+  customerIds!: number[];
+  invoiceIds!: number[];
+  stdate!: string;
+  enddate!: string;
+}

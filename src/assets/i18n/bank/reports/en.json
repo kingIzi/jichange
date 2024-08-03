@@ -276,6 +276,57 @@
       }
     ]
   },
+  "cancelledInvoice": {
+    "title": "Cancelled Invoice(s)",
+    "searchBy": "Search",
+    "cancelledInvoiceTable": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Posted",
+        "value": "p_date",
+        "desc": ""
+      },
+      {
+        "label": "Invoice N°",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Vendor",
+        "value": "Cmpny_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer name",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Total Amount",
+        "value": "Invoice_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Control N°",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Reason",
+        "value": "Reason",
+        "desc": ""
+      }
+    ]
+  },
   "amendmentDetails": {
     "amendment": "Amendment(s)",
     "searchBy": "Search by invoice or control number",

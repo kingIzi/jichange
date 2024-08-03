@@ -70,6 +70,57 @@
       "customers": "Wateja"
     }
   },
+  "cancelledInvoice": {
+    "title": "Ankara iliyokatishwa",
+    "searchBy": "Tafuta",
+    "cancelledInvoiceTable": [
+      {
+        "label": "Nambari",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Imetumwa",
+        "value": "p_date",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Ankara",
+        "value": "Invoice_No",
+        "desc": ""
+      },
+      {
+        "label": "Muuzaji",
+        "value": "Cmpny_Name",
+        "desc": ""
+      },
+      {
+        "label": "Jina la Mteja",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Kiasi cha Jumla",
+        "value": "Invoice_Amount",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Kudhibiti",
+        "value": "Control_No",
+        "desc": ""
+      },
+      {
+        "label": "Sababu",
+        "value": "Reason",
+        "desc": ""
+      }
+    ]
+  },
   "transactionDetails": {
     "noTransactionsFound": "Hakukuwa na shughuli zozote zilizofanyika.",
     "searchBy": "Tafuta kwa nambari ya ankara",

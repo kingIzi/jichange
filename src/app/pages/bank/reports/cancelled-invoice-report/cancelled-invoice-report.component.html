@@ -1,19 +1,18 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
-<app-loader-infinite-spinner
-  [show]="startLoading"
-></app-loader-infinite-spinner>
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
-    <h2 *transloco="let t; read: 'invoice'" class="text-lg font-bold">
-      {{ t("invoiceDetails") }}
+    <h2
+      *transloco="let t; read: 'reports.cancelledInvoice'"
+      class="text-lg font-bold"
+    >
+      {{ t("title") }}
     </h2>
   </div>
-  <div class="flex flex-col bg-white shadow px-2 py-4 space-y-4 divide-y">
+  <div class="flex flex-col bg-neutral shadow px-2 py-4 space-y-4 divide-y">
     <app-report-form-invoice-details
       [allowCancelledInvoices]="true"
-      (formData)="requestCancelledInvoice($event)"
+      (formData)="requestCancelledInvoiceReport($event)"
     ></app-report-form-invoice-details>
     <div
       [formGroup]="tableHeadersFormGroup"
@@ -56,12 +55,12 @@
           </div>
           <div class="relative">
             <input
-              *transloco="let t; read: 'invoice.createdInvoice'"
+              *transloco="let t; read: 'reports.cancelledInvoice'"
               type="search"
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
               [formControl]="tableSearch"
-              [placeholder]="t('searchTableBy')"
+              [placeholder]="t('searchBy')"
             />
             <span class="absolute top-1/2 left-2 -translate-y-1/2">
               <i class="bi bi-search text-lg text-neutral-500"></i>

@@ -11,19 +11,12 @@
     >
       {{ t("amendment") }}
     </h2>
-    <!-- <div class="flex flex-row items-center space-x-2">
-      <a
-        (click)="downloadSheet()"
-        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
-      >
-        <span>
-          <i class="bi bi-download text-success text-lg"></i>
-        </span>
-      </a>
-    </div> -->
   </div>
   <div class="flex flex-col bg-white shadow px-2 py-4 space-y-4 divide-y">
-    <form
+    <app-report-form-invoice-details
+      (formData)="requestAmendmentsReport($event)"
+    ></app-report-form-invoice-details>
+    <!-- <form
       [formGroup]="filterForm"
       class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
     >
@@ -235,7 +228,7 @@
           {{ t("submit") }}
         </button>
       </div>
-    </form>
+    </form> -->
     <div [formGroup]="tableFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
         <div>

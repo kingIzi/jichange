@@ -56,6 +56,8 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Component({
   selector: 'app-amendment',
@@ -69,6 +71,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    ReportFormInvoiceDetailsComponent,
   ],
   templateUrl: './amendment.component.html',
   styleUrl: './amendment.component.scss',
@@ -449,28 +452,6 @@ export class AmendmentComponent implements OnInit {
     }
     this.prepareDataSource();
   }
-  private requestAmendmentsReport(value: any) {
-    this.tableData.amendments = [];
-    this.prepareDataSource();
-    this.tableLoading = true;
-    this.amendmentService
-      .getAmendmentsReport(value)
-      .then((result) => {
-        this.assignAmendmentsDataList(result);
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
-  }
   private buildPage() {
     this.startLoading = true;
     let companiesObs = from(
@@ -552,6 +533,28 @@ export class AmendmentComponent implements OnInit {
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
+  }
+  requestAmendmentsReport(value: InvoiceDetailsForm) {
+    this.tableData.amendments = [];
+    this.prepareDataSource();
+    this.tableLoading = true;
+    this.amendmentService
+      .getAmendmentsReport(value)
+      .then((result) => {
+        this.assignAmendmentsDataList(result);
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;

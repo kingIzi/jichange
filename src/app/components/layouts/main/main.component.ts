@@ -125,6 +125,10 @@ export class MainComponent implements OnInit, AfterViewInit {
       '@vendors',
       this.tr.translate(`bankRoutes.reports.vendorReport`)
     );
+    this.breadcrumbService.set(
+      '@cancelled',
+      this.tr.translate(`bankRoutes.reports.cancelled`)
+    );
     this.breadcrumbService.set('@transactions', {
       label: this.tr.translate(`bankRoutes.reports.transaction`),
       routeInterceptor(routeLink: any, breadcrumb: any) {
@@ -234,13 +238,6 @@ export class MainComponent implements OnInit, AfterViewInit {
     let found = this.themes.find((val) => {
       return val.label.localeCompare(theme);
     });
-    console.log(found);
-    // let foundIndex = this.themes.findIndex((val) =>
-    //   val.label.localeCompare(theme)
-    // );
-    // if (foundIndex != -1) {
-    //   this.selectedThemeIndex = foundIndex;
-    // }
   }
   ngOnInit(): void {
     this.prepareBankBreadcrumbs();

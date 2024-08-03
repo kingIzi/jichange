@@ -38,6 +38,7 @@ import {
   of,
   zip,
 } from 'rxjs';
+import { ReportFormInvoiceDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import {
   listAnimationMobile,
@@ -81,6 +82,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    ReportFormInvoiceDetailsComponent,
   ],
   templateUrl: './amendments.component.html',
   styleUrl: './amendments.component.scss',
@@ -383,37 +385,16 @@ export class AmendmentsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private requestAmendmentsReport(value: any) {
+  ngOnInit(): void {
+    this.createFilterForm();
+    this.createHeaderGroup();
+    this.buildPage();
+  }
+  requestAmendmentsReport(value: any) {
     this.tableLoading = true;
     this.amendmentService
       .getAmendmentsReport(value)
       .then((results) => {
-        // if (
-        //   typeof results.response === 'string' &&
-        //   typeof results.response === 'number'
-        // ) {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.warning`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        //   this.tableData.amendments = [];
-        //   this.prepareDataSource();
-        // } else if (
-        //   results.response instanceof Array &&
-        //   results.response.length === 0
-        // ) {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.warning`),
-        //     this.tr.translate(`errors.noDataFound`)
-        //   );
-        //   this.tableData.amendments = [];
-        //   this.prepareDataSource();
-        // } else {
-        //   this.tableData.amendments = results.response as GeneratedInvoice[];
-        //   this.prepareDataSource();
-        // }
         this.assignAmendmentReport(results);
         this.tableLoading = false;
         this.cdr.detectChanges();
@@ -428,17 +409,6 @@ export class AmendmentsComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
-  ngOnInit(): void {
-    this.createFilterForm();
-    this.createHeaderGroup();
-    this.buildPage();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;

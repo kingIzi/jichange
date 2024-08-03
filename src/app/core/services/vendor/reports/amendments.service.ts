@@ -4,16 +4,19 @@ import { lastValueFrom } from 'rxjs';
 import { AmendmentReportForm } from 'src/app/core/models/vendors/forms/amendment-report-form';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AmendmentsService {
   constructor(private client: RequestClientService) {}
-  public async getAmendmentsReport(body: AmendmentReportForm) {
+  public async getAmendmentsReport(
+    body: AmendmentReportForm | InvoiceDetailsForm
+  ) {
     const data = await lastValueFrom(
       this.client.performPost<
-        AmendmentReportForm,
+        AmendmentReportForm | InvoiceDetailsForm,
         HttpDataResponse<GeneratedInvoice[] | number>
       >(`/api/Invoice/GetAmendReport`, body)
     );

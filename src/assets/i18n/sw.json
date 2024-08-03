@@ -87,7 +87,8 @@
       "transaction": "Miamala",
       "vendorReport": "Ripoti ya Vendor",
       "invoiceConsolidated": "Ankara iliyojumuishwa",
-      "paymentConsolidated": "Malipo ya Kuunganishwa"
+      "paymentConsolidated": "Malipo ya Kuunganishwa",
+      "cancelled": "Ankara iliyokatishwa"
     }
   },
   "vendorRoutes": {
@@ -435,6 +436,21 @@
         {
           "label": "Maelezo ya Anuani",
           "routerLink": "/main/reports/invoice",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
+          "label": "Ankara iliyokatishwa",
+          "routerLink": "/main/reports/cancelled",
           "access": [
             "Administrator",
             "Sales Expertise",

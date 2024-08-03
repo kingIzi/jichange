@@ -363,6 +363,21 @@
           ]
         },
         {
+          "label": "Cancelled Invoice",
+          "routerLink": "/main/reports/cancelled",
+          "access": [
+            "Administrator",
+            "Sales Expertise",
+            "Digital Marketing",
+            "Mobile Banking",
+            "Customer Service",
+            "Cashier Support",
+            "Support Service",
+            "Cashier",
+            "Customer Support"
+          ]
+        },
+        {
           "label": "Amendments Details",
           "routerLink": "/main/reports/amendment",
           "access": [
@@ -525,7 +540,8 @@
       "transaction": "Transaction(s)",
       "vendorReport": "Vendor report",
       "invoiceConsolidated": "Invoice Consolidated",
-      "paymentConsolidated": "Payment Consolidated"
+      "paymentConsolidated": "Payment Consolidated",
+      "cancelled": "Cancelled Invoice(s)"
     }
   },
   "vendorRoutes": {
