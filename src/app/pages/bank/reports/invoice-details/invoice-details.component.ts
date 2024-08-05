@@ -476,7 +476,7 @@ export class InvoiceDetailsComponent implements OnInit {
     initTE({ Datepicker, Input });
     this.createRequestFormGroup();
     this.createHeaderGroup();
-    this.buildPage();
+    //this.buildPage();
   }
   requestInvoiceDetails(body: InvoiceReportForm) {
     this.tableLoading = true;

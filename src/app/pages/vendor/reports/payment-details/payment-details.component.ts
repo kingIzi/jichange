@@ -52,7 +52,10 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
 import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
-import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import {
+  InvoiceDetailsForm,
+  PaymentDetailReportForm,
+} from 'src/app/core/models/vendors/forms/payment-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
@@ -68,6 +71,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 
 @Component({
   selector: 'app-payment-details',
@@ -82,6 +86,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    ReportFormInvoiceDetailsComponent,
   ],
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
@@ -431,26 +436,6 @@ export class PaymentDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private requestPaymentReport(value: PaymentDetailReportForm) {
-    this.tableLoading = true;
-    this.paymentService
-      .getPaymentReport(value)
-      .then((result) => {
-        this.assignPaymentsDataList(result);
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.tableLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
-  }
   private reformatDate(values: string[]) {
     let [year, month, date] = values;
     return `${date}/${month}/${year}`;
@@ -512,7 +497,27 @@ export class PaymentDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
-    this.buildPage();
+    //this.buildPage();
+  }
+  requestPaymentReport(value: PaymentDetailReportForm | InvoiceDetailsForm) {
+    this.tableLoading = true;
+    this.paymentService
+      .getPaymentReport(value)
+      .then((result) => {
+        this.assignPaymentsDataList(result);
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.tableLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;

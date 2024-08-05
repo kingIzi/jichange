@@ -707,6 +707,11 @@
         "desc": ""
       },
       {
+        "label": "Customer",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
         "label": "N° of invoices",
         "value": "no_of_invoices",
         "desc": ""

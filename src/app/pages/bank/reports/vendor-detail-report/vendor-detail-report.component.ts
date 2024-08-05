@@ -40,6 +40,8 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
@@ -66,6 +68,10 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -75,19 +81,19 @@ export class VendorDetailReportComponent implements OnInit {
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public tableData: {
-    companies: Company[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Company>;
-  } = {
-    companies: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Company>([]),
-  };
+  // public tableData: {
+  //   companies: Company[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<Company>;
+  // } = {
+  //   companies: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<Company>([]),
+  // };
   public filterFormData: {
     branches: Branch[];
   } = {
@@ -106,6 +112,8 @@ export class VendorDetailReportComponent implements OnInit {
     private reportsService: ReportsService,
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Company>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableFilterForm() {
@@ -125,29 +133,32 @@ export class VendorDetailReportComponent implements OnInit {
     this.tr
       .selectTranslate(`vendorReport.vendorReportTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -156,7 +167,9 @@ export class VendorDetailReportComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private buildPage() {
     this.startLoading = true;
@@ -187,49 +200,58 @@ export class VendorDetailReportComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Company,
-      filter: string
-    ) => {
+    let filterPredicate = (data: Company, filter: string) => {
       return data.CompName.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Company>(
-      this.tableData.companies
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<Company>(
+  //     this.tableData.companies
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  // }
+  private parseVendorDataList(
+    result: HttpDataResponse<string | number | Company[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Company[]);
+    }
   }
   private assignVendorsDataList(
     result: HttpDataResponse<string | number | Company[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.companies = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.vendorReport.noVendorsFound`)
-      );
-      this.tableData.companies = [];
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.companies = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`reports.vendorReport.noVendorsFound`)
+    //   );
+    //   this.tableData.companies = [];
+    // }
+    // this.prepareDataSource();
+    this.parseVendorDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
   }
   private requestCompaniesList(body: { branch: number | string }) {
-    this.tableData.companies = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
-      .getBranchedCompanyList(body)
+      .getAllCompaniesByBranch(body)
       .then((result) => {
         this.assignVendorsDataList(result);
         this.tableLoading = false;
@@ -276,12 +298,12 @@ export class VendorDetailReportComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.companyKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   ngOnInit(): void {
     this.createTableFilterForm();
     this.createTableHeadersFormGroup();
@@ -349,7 +371,7 @@ export class VendorDetailReportComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.companies,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -362,9 +384,9 @@ export class VendorDetailReportComponent implements OnInit {
     this.requestCompaniesList(form);
   }
   downloadSheet() {
-    if (this.tableData.companies.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.tableData.companies,
+        this.tableDataService.getData(),
         this.getTableActiveKeys(),
         'vendors_summary',
         ['Posteddate']
@@ -376,6 +398,18 @@ export class VendorDetailReportComponent implements OnInit {
         this.tr.translate(`errors.noDataFound`)
       );
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get branch() {
     return this.tableFilterFormGroup.get(`branch`) as FormControl;

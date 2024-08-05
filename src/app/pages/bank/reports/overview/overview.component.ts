@@ -351,7 +351,9 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       this.invoiceReportService.getInvoiceReport(invoiceForm)
     );
     let latestTransactionsObs = from(
-      this.reportsService.getLatestTransactionsList({})
+      this.reportsService.getLatestTransactionsList({
+        branch: this.appConfig.getLoginResponse().braid,
+      })
     );
     let merged = zip(
       transactionsObs,

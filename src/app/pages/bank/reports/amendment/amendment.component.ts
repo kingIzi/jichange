@@ -58,6 +58,8 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-amendment',
@@ -81,6 +83,10 @@ import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-re
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -89,19 +95,19 @@ export class AmendmentComponent implements OnInit {
   public tableLoading: boolean = false;
   public filterForm!: FormGroup;
   public tableFormGroup!: FormGroup;
-  public tableData: {
-    amendments: GeneratedInvoice[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<GeneratedInvoice>;
-  } = {
-    amendments: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
-  };
+  // public tableData: {
+  //   amendments: GeneratedInvoice[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<GeneratedInvoice>;
+  // } = {
+  //   amendments: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  // };
   public filterFormData: {
     companies: Company[];
     customers: Customer[];
@@ -132,6 +138,8 @@ export class AmendmentComponent implements OnInit {
     private branchService: BranchService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<GeneratedInvoice>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createFilterForm() {
@@ -329,29 +337,32 @@ export class AmendmentComponent implements OnInit {
     this.tr
       .selectTranslate(`amendmentDetails.amendmentTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.tableHeaders.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.tableHeaders.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.tableHeaders.controls
+    let tableColumns = this.tableHeaders.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -360,7 +371,9 @@ export class AmendmentComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
     if (this.compid.invalid) {
@@ -393,10 +406,7 @@ export class AmendmentComponent implements OnInit {
     }
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: GeneratedInvoice,
-      filter: string
-    ) => {
+    let filterPredicate = (data: GeneratedInvoice, filter: string) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -407,12 +417,10 @@ export class AmendmentComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Due_Date':
           return new Date(item['Due_Date']);
@@ -422,35 +430,50 @@ export class AmendmentComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.tableData.amendments
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
+  //     this.tableData.amendments
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private parseAmendmentsDataList(
+    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as GeneratedInvoice[]);
+    }
   }
   private assignAmendmentsDataList(
     result: HttpDataResponse<string | number | GeneratedInvoice[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.amendments = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.amendmentDetails.noReportsFound`)
-      );
-      this.tableData.amendments = [];
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.amendments = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`reports.amendmentDetails.noReportsFound`)
+    //   );
+    //   this.tableData.amendments = [];
+    // }
+    // this.prepareDataSource();
+    this.parseAmendmentsDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private buildPage() {
     this.startLoading = true;
@@ -523,20 +546,18 @@ export class AmendmentComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.amendmentReportTableKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
     this.buildPage();
   }
   requestAmendmentsReport(value: InvoiceDetailsForm) {
-    this.tableData.amendments = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.amendmentService
       .getAmendmentsReport(value)
@@ -605,7 +626,7 @@ export class AmendmentComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.amendments,
+          this.tableDataService.getData(),
           element
         );
       case 'Due_Date':
@@ -639,9 +660,9 @@ export class AmendmentComponent implements OnInit {
     }
   }
   downloadSheet() {
-    if (this.tableData.amendments.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.tableData.amendments,
+        this.tableDataService.getData(),
         this.getTableActiveKeys(),
         'amendment_reports',
         ['Due_Date', 'Invoice_Expired_Date']
@@ -656,6 +677,18 @@ export class AmendmentComponent implements OnInit {
   }
   isCashAmountColumn(index: number) {
     return false;
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get compid() {
     return this.filterForm.get('compid') as FormControl;

@@ -40,13 +40,13 @@
         >
           {{ t(statistic.Name.toLocaleLowerCase()) }}
         </h4>
-        <a
+        <!-- <a
           (click)="dashboardStatisticRouterLink(statistic.Name)"
           *transloco="let t; read: 'dashboard.dashboard.overview'"
           class="text-xs text-primary font-inter hover:underline cursor-pointer"
         >
           {{ t("viewMore") }}
-        </a>
+        </a> -->
       </div>
     </ng-container>
     <ng-template #statisticsLoadingTemplate>

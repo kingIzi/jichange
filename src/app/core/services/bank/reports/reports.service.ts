@@ -55,10 +55,19 @@ export class ReportsService {
   }
   public async getBranchedCompanyList(body: { branch: number | string }) {
     let data = await lastValueFrom(
-      this.client.performPost<{}, HttpDataResponse<Company[] | number>>(
-        `/api/InvoiceRep/CompListB`,
-        body
-      )
+      this.client.performPost<
+        { branch: number | string },
+        HttpDataResponse<Company[] | number>
+      >(`/api/InvoiceRep/CompListB`, body)
+    );
+    return data;
+  }
+  public async getAllCompaniesByBranch(body: { branch: number | string }) {
+    let data = await lastValueFrom(
+      this.client.performPost<
+        { branch: number | string },
+        HttpDataResponse<Company[] | number>
+      >(`/api/InvoiceRep/GetCompaniesByBranch`, body)
     );
     return data;
   }
@@ -111,10 +120,10 @@ export class ReportsService {
     );
     return data;
   }
-  public async getLatestTransactionsList(body: {}) {
+  public async getLatestTransactionsList(body: { branch: number | string }) {
     let data = await lastValueFrom(
       this.client.performPost<
-        {},
+        { branch: number | string },
         HttpDataResponse<string | number | TransactionDetail[]>
       >(`/api/Setup/LatTransList`, body)
     );

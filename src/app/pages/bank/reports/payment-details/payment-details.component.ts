@@ -46,7 +46,10 @@ import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { PaymentsService } from 'src/app/core/services/vendor/reports/payments.service';
 import { PaymentDetail } from 'src/app/core/models/vendors/payment-detail';
-import { PaymentDetailReportForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import {
+  InvoiceDetailsForm,
+  PaymentDetailReportForm,
+} from 'src/app/core/models/vendors/forms/payment-report-form';
 import { FileHandlerService } from 'src/app/core/services/file-handler.service';
 import { BranchService } from 'src/app/core/services/bank/setup/branch/branch.service';
 import { Branch } from 'src/app/core/models/bank/setup/branch';
@@ -62,6 +65,9 @@ import {
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-payment-details',
@@ -77,6 +83,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTableModule,
     MatSortModule,
     MatTooltipModule,
+    ReportFormInvoiceDetailsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payment-details.component.html',
@@ -86,6 +93,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
+    },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
     },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
@@ -102,19 +113,19 @@ export class PaymentDetailsComponent implements OnInit {
     invoiceReports: [],
     branches: [],
   };
-  public tableData: {
-    payments: PaymentDetail[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<PaymentDetail>;
-  } = {
-    payments: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<PaymentDetail>([]),
-  };
+  // public tableData: {
+  //   payments: PaymentDetail[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<PaymentDetail>;
+  // } = {
+  //   payments: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<PaymentDetail>([]),
+  // };
   public filterForm!: FormGroup;
   public tableFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
@@ -137,6 +148,8 @@ export class PaymentDetailsComponent implements OnInit {
     private paymentService: PaymentsService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<PaymentDetail>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private formErrors(errorsPath = 'reports.invoiceDetails.form.errors.dialog') {
@@ -363,29 +376,32 @@ export class PaymentDetailsComponent implements OnInit {
     this.tr
       .selectTranslate(`paymentDetails.paymentsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.tableHeaders.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.tableHeaders.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.tableHeaders.controls
+    let tableColumns = this.tableHeaders.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -394,7 +410,9 @@ export class PaymentDetailsComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private paymentKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -441,12 +459,12 @@ export class PaymentDetailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.paymentKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   private assignBranchList(
     result: HttpDataResponse<string | number | Branch[]>
   ) {
@@ -499,10 +517,7 @@ export class PaymentDetailsComponent implements OnInit {
       });
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: PaymentDetail,
-      filter: string
-    ) => {
+    let filterPredicate = (data: PaymentDetail, filter: string) => {
       return data.Invoice_Sno.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -519,12 +534,10 @@ export class PaymentDetailsComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Payment_Date':
           return new Date(item['Payment_Date']);
@@ -533,38 +546,55 @@ export class PaymentDetailsComponent implements OnInit {
       }
     };
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<PaymentDetail>(
-      this.tableData.payments
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<PaymentDetail>(
+  //     this.tableData.payments
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private parsePaymentDataList(
+    result: HttpDataResponse<string | number | PaymentDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as PaymentDetail[]);
+    }
   }
   private assignPaymentsDataList(
     result: HttpDataResponse<string | number | PaymentDetail[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.payments = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.paymentDetails.noPaymentsFound`)
-      );
-      this.tableData.payments = [];
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.payments = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`reports.paymentDetails.noPaymentsFound`)
+    //   );
+    //   this.tableData.payments = [];
+    // }
+    // this.prepareDataSource();
+    this.parsePaymentDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
-  private requestPaymentReport(value: PaymentDetailReportForm) {
-    this.tableData.payments = [];
-    this.prepareDataSource();
+  ngOnInit(): void {
+    this.createFilterForm();
+    this.createHeaderGroup();
+    //this.buildPage();
+  }
+  requestPaymentReport(value: PaymentDetailReportForm | InvoiceDetailsForm) {
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)
@@ -583,11 +613,6 @@ export class PaymentDetailsComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
-  }
-  ngOnInit(): void {
-    this.createFilterForm();
-    this.createHeaderGroup();
-    this.buildPage();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
@@ -674,7 +699,7 @@ export class PaymentDetailsComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.payments,
+          this.tableDataService.getData(),
           element
         );
       case 'Payment_Date':
@@ -698,9 +723,9 @@ export class PaymentDetailsComponent implements OnInit {
     }
   }
   downloadSheet() {
-    if (this.tableData.payments.length > 0) {
+    if (this.tableDataService.getData().length > 0) {
       this.fileHandler.downloadExcelTable(
-        this.tableData.payments,
+        this.tableDataService.getData(),
         this.getActiveTableKeys(),
         'payment_details_report',
         ['Payment_Date']
@@ -712,6 +737,18 @@ export class PaymentDetailsComponent implements OnInit {
         this.tr.translate(`errors.noDataFound`)
       );
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get compid() {
     return this.filterForm.get('compid') as FormControl;

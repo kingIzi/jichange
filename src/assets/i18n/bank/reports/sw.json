@@ -692,6 +692,11 @@
         "desc": ""
       },
       {
+        "label": "Wateja",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
         "label": "Idadi ya ankara",
         "value": "no_of_invoices",
         "desc": ""

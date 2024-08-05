@@ -299,7 +299,9 @@ export class DashboardComponent implements OnInit {
       })
     );
     let latestTransactionsObs = from(
-      this.reportsService.getLatestTransactionsList({})
+      this.reportsService.getLatestTransactionsList({
+        branch: this.appconfig.getLoginResponse().braid,
+      })
     );
     let merged = zip(
       approvalsObs,
