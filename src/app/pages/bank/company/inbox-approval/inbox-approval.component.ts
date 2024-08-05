@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   NO_ERRORS_SCHEMA,
   OnInit,
@@ -65,6 +66,13 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
 
 @Component({
   selector: 'app-inbox-approval',
@@ -86,6 +94,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTableModule,
     MatSortModule,
     MatTooltipModule,
+    MatTableExporterModule,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   providers: [
@@ -112,6 +121,9 @@ export class InboxApprovalComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('inboxApprovalTableContainer')
+  inboxApprovalTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -248,6 +260,22 @@ export class InboxApprovalComponent implements OnInit {
         throw err;
       });
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let doc = new jsPDF();
+    doc.text('Approval Companies Table', 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.tableDataService.getTableColumns().map((t) => {
+        return t.label;
+      }),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.requestCompanyInbox();
@@ -304,12 +332,36 @@ export class InboxApprovalComponent implements OnInit {
     return columns.map((col) => col.label);
   }
   downloadSheet() {
-    this.fileHandler.downloadExcelTable(
-      this.tableDataService.getData(),
-      this.getTableActiveKeys(),
-      'pending_approval_companies',
-      []
-    );
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length - 1,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'pending_approval_companies',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.inboxApprovalTableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `pending_approval_companies`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   approveCompany(company: Company) {
     let dialogRef = this.dialog.open(ApproveCompanyInboxComponent, {

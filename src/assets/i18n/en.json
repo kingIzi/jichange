@@ -270,21 +270,6 @@
             "Cashier",
             "Customer Support"
           ]
-        },
-        {
-          "label": "Vendor account",
-          "routerLink": "/main/setup/deposit",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
         }
       ]
     },

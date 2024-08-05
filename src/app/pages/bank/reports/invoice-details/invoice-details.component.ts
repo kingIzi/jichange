@@ -3,8 +3,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
+  viewChild,
   ViewChild,
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -65,6 +67,13 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
 
 @Component({
   selector: 'app-invoice-details',
@@ -84,6 +93,7 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
     MatTableModule,
     MatSortModule,
     ReportFormDetailsComponent,
+    MatTableExporterModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -114,10 +124,13 @@ export class InvoiceDetailsComponent implements OnInit {
   public tableLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public InvoiceDetailsTable: typeof InvoiceDetailsTable = InvoiceDetailsTable;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('invoiceDetailsTable')
+  invoiceDetailsTable!: ElementRef<HTMLDivElement>;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -132,45 +145,45 @@ export class InvoiceDetailsComponent implements OnInit {
     private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  private async buildPage() {
-    this.startLoading = true;
-    let companiesObs = from(
-      this.reportsService.getBranchedCompanyList({
-        branch: this.getUserProfile().braid,
-      })
-    );
-    let branchObs = from(this.branchService.postBranchList({}));
-    let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
-    res
-      .then((results) => {
-        let [companiesList, branchList] = results;
-        if (
-          typeof companiesList.response !== 'number' &&
-          typeof companiesList.response !== 'string'
-        ) {
-          this.filterFormData.companies = companiesList.response as Company[];
-        }
-        if (
-          typeof branchList.response !== 'number' &&
-          typeof branchList.response !== 'string'
-        ) {
-          this.filterFormData.branches = branchList.response;
-        }
-        this.startLoading = false;
-        this.cdr.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.filterFormData.companies = [];
-        this.startLoading = false;
-        this.cdr.detectChanges();
-        throw err;
-      });
-  }
+  // private async buildPage() {
+  //   this.startLoading = true;
+  //   let companiesObs = from(
+  //     this.reportsService.getBranchedCompanyList({
+  //       branch: this.getUserProfile().braid,
+  //     })
+  //   );
+  //   let branchObs = from(this.branchService.postBranchList({}));
+  //   let res = AppUtilities.pipedObservables(zip(companiesObs, branchObs));
+  //   res
+  //     .then((results) => {
+  //       let [companiesList, branchList] = results;
+  //       if (
+  //         typeof companiesList.response !== 'number' &&
+  //         typeof companiesList.response !== 'string'
+  //       ) {
+  //         this.filterFormData.companies = companiesList.response as Company[];
+  //       }
+  //       if (
+  //         typeof branchList.response !== 'number' &&
+  //         typeof branchList.response !== 'string'
+  //       ) {
+  //         this.filterFormData.branches = branchList.response;
+  //       }
+  //       this.startLoading = false;
+  //       this.cdr.detectChanges();
+  //     })
+  //     .catch((err) => {
+  //       AppUtilities.requestFailedCatchError(
+  //         err,
+  //         this.displayMessageBox,
+  //         this.tr
+  //       );
+  //       this.filterFormData.companies = [];
+  //       this.startLoading = false;
+  //       this.cdr.detectChanges();
+  //       throw err;
+  //     });
+  // }
   private createRequestFormGroup() {
     this.formGroup = this.fb.group({
       Comp: this.fb.control(0, [Validators.required]),
@@ -472,6 +485,25 @@ export class InvoiceDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.invoiceDetails.invoiceDetails');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     initTE({ Datepicker, Input });
     this.createRequestFormGroup();
@@ -588,12 +620,27 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   downloadSheet() {
     if (this.tableDataService.getData().length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableDataService.getData(),
-        this.getTableActiveKeys(),
-        'invoice_reports',
-        ['Due_Date', 'Invoice_Expired_Date', 'Invoice_Date', 'p_date']
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'Invoice Details Table',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
       );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table = this.invoiceDetailsTable.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `Invoice Details Table`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

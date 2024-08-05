@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -66,6 +67,15 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -84,11 +94,16 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTableExporterModule,
   ],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
+    },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
     },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
@@ -109,19 +124,19 @@ export class CustomerDetailReportComponent implements OnInit {
     districts: [],
     branches: [],
   };
-  public tableData: {
-    customers: Customer[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Customer>;
-  } = {
-    customers: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Customer>([]),
-  };
+  // public tableData: {
+  //   customers: Customer[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<Customer>;
+  // } = {
+  //   customers: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<Customer>([]),
+  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public VendorDetailsReportTable: typeof VendorDetailsReportTable =
     VendorDetailsReportTable;
@@ -129,6 +144,9 @@ export class CustomerDetailReportComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('customerDetailReport')
+  customerDetailReport!: ElementRef<HTMLDivElement>;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
   constructor(
     private appConfig: AppConfigService,
     private fb: FormBuilder,
@@ -139,14 +157,16 @@ export class CustomerDetailReportComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private tr: TranslocoService,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Customer>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableFilterForm() {
     this.tableFilterFormGroup = this.fb.group({
-      Comp: this.fb.control('', [Validators.required]),
+      Comp: this.fb.control('0', [Validators.required]),
       branch: this.fb.control(this.getUserProfile().braid, []),
-      reg: this.fb.control('', [Validators.required]),
-      dist: this.fb.control('', [Validators.required]),
+      reg: this.fb.control('0', [Validators.required]),
+      dist: this.fb.control('0', [Validators.required]),
     });
     if (Number(this.getUserProfile().braid) > 0) {
       this.branch.disable();
@@ -169,29 +189,32 @@ export class CustomerDetailReportComponent implements OnInit {
         this.scope
       )
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -200,7 +223,9 @@ export class CustomerDetailReportComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private fetchDistricts(body: { Sno: string }) {
     this.startLoading = true;
@@ -362,10 +387,7 @@ export class CustomerDetailReportComponent implements OnInit {
     }
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Customer,
-      filter: string
-    ) => {
+    let filterPredicate = (data: Customer, filter: string) => {
       return data.Cust_Name.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -374,12 +396,10 @@ export class CustomerDetailReportComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Posted_Date':
           return new Date(item['Due_Date']);
@@ -387,41 +407,54 @@ export class CustomerDetailReportComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Customer>(
-      this.tableData.customers
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<Customer>(
+  //     this.tableData.customers
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private parseCustomersDataList(
+    result: HttpDataResponse<string | number | Customer[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Customer[]);
+    }
   }
   private assignCustomersDataList(
     result: HttpDataResponse<string | number | Customer[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.customers = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(
-          `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-        )
-      );
-      this.tableData.customers = [];
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.customers = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(
+    //       `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
+    //     )
+    //   );
+    //   this.tableData.customers = [];
+    // }
+    // this.prepareDataSource();
+    this.parseCustomersDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private requestCustomerDetails(form: any) {
-    this.tableData.customers = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
@@ -465,12 +498,6 @@ export class CustomerDetailReportComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.customerKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
   private initData(q: string) {
     if (q.toLocaleLowerCase() === 'Customers'.toLocaleLowerCase()) {
       this.Comp.setValue('0');
@@ -478,6 +505,30 @@ export class CustomerDetailReportComponent implements OnInit {
       this.dist.setValue('0');
       this.submitTableFilterForm();
     }
+  }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate(
+      'reports.customerDetailReport.customerDetailReport'
+    );
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      // columns: this.tableDataService.getTableColumns().map((t,index) => {
+      //   return t.label;
+      // }),
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
   }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
@@ -528,7 +579,7 @@ export class CustomerDetailReportComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.customers,
+          this.tableDataService.getData(),
           element
         );
       case 'Posted_Date':
@@ -559,13 +610,16 @@ export class CustomerDetailReportComponent implements OnInit {
     return control.get(name) as FormControl;
   }
   downloadSheet() {
-    if (this.tableData.customers.length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableData.customers,
-        this.getActiveTableKeys(),
-        'vendors_report',
-        ['Posted_Date']
-      );
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'customer_detail_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
@@ -573,6 +627,31 @@ export class CustomerDetailReportComponent implements OnInit {
         this.tr.translate(`errors.noDataFound`)
       );
     }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.customerDetailReport.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `customer_detail_report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get Comp() {
     return this.tableFilterFormGroup.get('Comp') as FormControl;

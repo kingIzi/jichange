@@ -356,21 +356,6 @@
             "Cashier",
             "Customer Support"
           ]
-        },
-        {
-          "label": "Akaunti ya Muuzaji",
-          "routerLink": "/main/setup/deposit",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
         }
       ]
     },

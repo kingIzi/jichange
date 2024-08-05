@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -51,6 +52,15 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-user-log-report',
@@ -69,30 +79,35 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTableExporterModule,
   ],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class UserLogReportComponent implements OnInit {
   public startLoading: boolean = false;
-  public tableData: {
-    userReportLogs: UserLog[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<UserLog>;
-  } = {
-    userReportLogs: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<UserLog>([]),
-  };
+  // public tableData: {
+  //   userReportLogs: UserLog[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<UserLog>;
+  // } = {
+  //   userReportLogs: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<UserLog>([]),
+  // };
   public branches: Branch[] = [];
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
@@ -102,6 +117,9 @@ export class UserLogReportComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('userLogReportContainer')
+  userLogReportContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private appConfig: AppConfigService,
     private fb: FormBuilder,
@@ -110,6 +128,8 @@ export class UserLogReportComponent implements OnInit {
     private branchService: BranchService,
     private fileHandler: FileHandlerService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<UserLog>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableFilterFormGroup() {
@@ -131,29 +151,32 @@ export class UserLogReportComponent implements OnInit {
     this.tr
       .selectTranslate(`userLogReport.userLogReportTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -162,7 +185,9 @@ export class UserLogReportComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private formErrors(
     errorsPath: string = 'reports.userLogReport.form.errors.dialog'
@@ -190,17 +215,14 @@ export class UserLogReportComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.userLogKeys(indexes);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: UserLog,
-      filter: string
-    ) => {
+    let filterPredicate = (data: UserLog, filter: string) => {
       return data.Full_Name.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -209,12 +231,10 @@ export class UserLogReportComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Login_Time':
           return new Date(item['Login_Time']);
@@ -224,39 +244,52 @@ export class UserLogReportComponent implements OnInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<UserLog>(
-      this.tableData.userReportLogs
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<UserLog>(
+  //     this.tableData.userReportLogs
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private parseUserLogDataList(
+    result: HttpDataResponse<string | number | UserLog[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as UserLog[]);
+    }
   }
   private assignUserLogDataList(
     result: HttpDataResponse<string | number | UserLog[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.userReportLogs = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.userLogReport.noUserLogReportFound`)
-      );
-      this.tableData.userReportLogs = [];
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.userReportLogs = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`reports.userLogReport.noUserLogReportFound`)
+    //   );
+    //   this.tableData.userReportLogs = [];
+    // }
+    // this.prepareDataSource();
+    this.parseUserLogDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
   }
   private requestUserLog(value: any) {
-    this.tableData.userReportLogs = [];
-    this.prepareDataSource();
     this.tableLoading = true;
     this.reportsService
       .getUserLogTimes(value)
@@ -322,6 +355,28 @@ export class UserLogReportComponent implements OnInit {
     }
     return keys;
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.userLogReport.userLogReport');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      // columns: this.tableDataService.getTableColumns().map((t,index) => {
+      //   return t.label;
+      // }),
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.buildPage();
     this.createTableFilterFormGroup();
@@ -370,7 +425,7 @@ export class UserLogReportComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.userReportLogs,
+          this.tableDataService.getData(),
           element
         );
       case 'Login_Time':
@@ -392,7 +447,7 @@ export class UserLogReportComponent implements OnInit {
         this.tableFilterFormGroup.value.enddate.split('-')
       );
       value.branch = this.branch.value;
-      this.tableData.userReportLogs = [];
+      //this.tableData.userReportLogs = [];
       this.requestUserLog(value);
     }
   }
@@ -407,13 +462,16 @@ export class UserLogReportComponent implements OnInit {
     return new Date(date);
   }
   downloadSheet() {
-    if (this.tableData.userReportLogs.length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableData.userReportLogs,
-        this.getActiveTableKeys(),
-        'user_log_report',
-        ['Login_Time', 'Logout_Time']
-      );
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'user_log_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
@@ -421,6 +479,31 @@ export class UserLogReportComponent implements OnInit {
         this.tr.translate(`errors.noDataFound`)
       );
     }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.userLogReportContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `user_log_report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get stdate() {
     return this.tableFilterFormGroup.get('stdate') as FormControl;

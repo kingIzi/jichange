@@ -19,6 +19,7 @@ import { CancelledInvoice } from '../models/vendors/cancelled-invoice';
 import { PaymentDetail } from '../models/vendors/payment-detail';
 import { CompanyUser } from '../models/vendors/company-user';
 import { TransactionDetail } from '../models/bank/reports/transaction-detail';
+import { InvoiceConsolidatedReport } from '../models/bank/reports/invoice-consolidated-report';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -37,6 +38,7 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | InvoiceReport
     | TransactionDetail
     | CancelledInvoice
+    | InvoiceConsolidatedReport
   >
 >('TABLE_DATA_SERVICE');
 

@@ -34,7 +34,10 @@ import { Observable, from, of, zip } from 'rxjs';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
-import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import {
+  InvoiceReportForm,
+  InvoiceReportFormBanker,
+} from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { InvoiceReport } from 'src/app/core/models/bank/reports/invoice-report';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
@@ -324,20 +327,27 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     this.dataSourceSortingAccessor();
   }
   private buildPage() {
+    // let transactionsForm = {
+    //   branch: this.getUserProfile().braid,
+    //   compid: 'all',
+    //   cusid: 'all',
+    //   stdate: '',
+    //   enddate: '',
+    // } as TransactionDetailsReportForm;
     let transactionsForm = {
-      branch: this.getUserProfile().braid,
-      compid: 'all',
-      cusid: 'all',
+      companyIds: [0],
+      customerIds: [0],
       stdate: '',
       enddate: '',
-    } as TransactionDetailsReportForm;
+    } as InvoiceReportForm;
     let invoiceForm = {
-      branch: this.getUserProfile().braid,
-      Comp: 'all',
-      cusid: 'all',
+      // branch: this.getUserProfile().braid,
+      branch: Number(this.getUserProfile().braid),
+      companyIds: [0],
+      customerIds: [0],
       stdate: '',
       enddate: '',
-    } as InvoiceReportFormBanker;
+    } as InvoiceReportForm;
     this.buildPageLoading = true;
     let transactionsObs = from(
       this.reportsService.getTransactionsReport(transactionsForm)

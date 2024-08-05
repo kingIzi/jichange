@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -36,6 +37,15 @@ import { ReportsService } from 'src/app/core/services/bank/reports/reports.servi
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-payment-consolidated',
@@ -49,6 +59,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
+    MatTableExporterModule,
   ],
   templateUrl: './payment-consolidated.component.html',
   styleUrl: './payment-consolidated.component.scss',
@@ -58,23 +69,27 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class PaymentConsolidatedComponent implements OnInit {
-  public tableData: {
-    paymentsReports: InvoiceConsolidatedReport[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<InvoiceConsolidatedReport>;
-  } = {
-    paymentsReports: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<InvoiceConsolidatedReport>([]),
-  };
+  // public tableData: {
+  //   paymentsReports: InvoiceConsolidatedReport[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<InvoiceConsolidatedReport>;
+  // } = {
+  //   paymentsReports: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<InvoiceConsolidatedReport>([]),
+  // };
   public tableLoading: boolean = false;
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
@@ -83,12 +98,17 @@ export class PaymentConsolidatedComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('paymentConsolidatedReportContainer')
+  paymentConsolidatedReportContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private datePipe: DatePipe,
     private fb: FormBuilder,
     private reportsService: ReportsService,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<InvoiceConsolidatedReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableFilterFormGroup() {
@@ -106,26 +126,29 @@ export class PaymentConsolidatedComponent implements OnInit {
     this.tr
       .selectTranslate(`invoicePayments.invoicePaymentsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(index < TABLE_SHOWING, []),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -134,19 +157,17 @@ export class PaymentConsolidatedComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private searchTable(searchText: string) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: InvoiceConsolidatedReport,
-      filter: string
-    ) => {
+    let filterPredicate = (data: InvoiceConsolidatedReport, filter: string) => {
       return data.vendor &&
         data.vendor.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
         ? true
@@ -158,36 +179,52 @@ export class PaymentConsolidatedComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource =
-      new MatTableDataSource<InvoiceConsolidatedReport>(
-        this.tableData.paymentsReports
+  // private prepareDataSource() {
+  //   this.tableData.dataSource =
+  //     new MatTableDataSource<InvoiceConsolidatedReport>(
+  //       this.tableData.paymentsReports
+  //     );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   //this.dataSourceSortingAccessor();
+  // }
+  private parsePaymentsConsolidatedDataList(
+    result: HttpDataResponse<string | number | InvoiceConsolidatedReport[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(
+        result.response as InvoiceConsolidatedReport[]
       );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    //this.dataSourceSortingAccessor();
+    }
   }
   private assignPaymentsConsolidatedDataList(
     result: HttpDataResponse<string | number | InvoiceConsolidatedReport[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.paymentsReports = result.response;
-    } else {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`reports.invoiceDetails.noInvoiceFound`)
-      );
-      this.tableData.paymentsReports = [];
-    }
-    this.prepareDataSource();
+    // if (
+    //   result.response &&
+    //   typeof result.response !== 'string' &&
+    //   typeof result.response !== 'number' &&
+    //   result.response.length > 0
+    // ) {
+    //   this.tableData.paymentsReports = result.response;
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`reports.invoiceDetails.noInvoiceFound`)
+    //   );
+    //   this.tableData.paymentsReports = [];
+    // }
+    // this.prepareDataSource();
+    this.parsePaymentsConsolidatedDataList(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
   }
   private requestPaymentConsolidated(body: {
     stdate: string;
@@ -211,6 +248,25 @@ export class PaymentConsolidatedComponent implements OnInit {
         this.cdr.detectChanges();
         throw err;
       });
+  }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.invoicePayments.label');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
   }
   ngOnInit(): void {
     this.createTableFilterFormGroup();
@@ -254,7 +310,7 @@ export class PaymentConsolidatedComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.paymentsReports,
+          this.tableDataService.getData(),
           element
         );
       case 'invoice_amount':
@@ -272,6 +328,52 @@ export class PaymentConsolidatedComponent implements OnInit {
     } else {
       this.tableFilterFormGroup.markAllAsTouched();
     }
+  }
+  downloadSheet() {
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length - 1,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'payment_consolidated_details_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.paymentConsolidatedReportContainer.nativeElement.querySelector(
+          'table'
+        );
+      this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get stdate() {
     return this.tableFilterFormGroup.get('stdate') as FormControl;

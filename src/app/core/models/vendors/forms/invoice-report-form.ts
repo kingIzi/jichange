@@ -14,6 +14,7 @@ export class InvoiceReportFormVendor {
 }
 
 export class InvoiceReportForm {
+  branch!: number;
   companyIds!: number[];
   customerIds!: number[];
   stdate!: string;

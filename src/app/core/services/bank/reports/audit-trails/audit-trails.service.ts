@@ -15,7 +15,7 @@ export class AuditTrailsService {
       this.client.performPost<
         AuditTrailsReportForm,
         HttpDataResponse<number | string | AuditTrail[]>
-      >(`/api/AuditTrail/getdet`, body)
+      >(`/api/AuditTrail/report`, body) //(`/api/AuditTrail/getdet`, body)
     );
     return data;
   }

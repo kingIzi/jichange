@@ -1,6 +1,4 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-
-<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -19,46 +17,6 @@
       [formGroup]="formGroup"
       class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
     >
-      <div class="flex flex-col space-y-1 col-span-full">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
-          {{ t("branch") }}
-        </p>
-        <select
-          [formControl]="branch"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-            selected
-            [value]="'0'"
-          >
-            {{ t("all") }}
-          </option>
-          <ng-container *ngIf="branches.length > 0">
-            <option
-              *ngFor="
-                let branch of branches;
-                index as i;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-              [value]="branch.Branch_Sno.toString()"
-            >
-              {{ branch.Name }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="branch && branch.invalid && branch.touched">
-          <p
-            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-            class="text-danger-700 text-xs"
-          >
-            {{ t("branch") }}
-          </p>
-        </span>
-      </div>
       <div class="flex flex-col space-y-1">
         <p
           *transloco="let t; read: 'reports.auditTrails.form'"
@@ -163,15 +121,25 @@
     </form>
     <div [formGroup]="headersFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
-        <div>
+        <div class="flex flex-row items-center space-x-4">
           <button
             (click)="downloadSheet()"
             *transloco="let t; read: 'reports.overview'"
-            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-600 hover:bg-green-600 hover:text-green-950"
           >
             <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
             <span>
               <i class="bi bi-file-earmark-spreadsheet"></i>
+            </span>
+          </button>
+          <button
+            (click)="downloadPdf()"
+            *transloco="let t; read: 'reports.overview'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-red-600 hover:bg-danger-600 hover:text-red-950"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToPdf") }}</p>
+            <span>
+              <i class="bi bi-filetype-pdf"></i>
             </span>
           </button>
         </div>
@@ -228,7 +196,7 @@
         <ul class="flex flex-col space-y-4">
           <li
             *ngFor="
-              let element of tableData.dataSource.filteredData
+              let element of getTableDataSource().filteredData
                 | slice
                   : 1 + paginator.pageSize * paginator.pageIndex - 1
                   : 1 +
@@ -237,7 +205,7 @@
                       1;
               index as i
             "
-            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
+            [@listAnimationDesktop]="getTableDataSource().filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -268,7 +236,7 @@
             *transloco="let t; read: 'errors'"
           >
             <p
-              *ngIf="tableData.auditTrails.length <= 0"
+              *ngIf="getTableDataList().length <= 0"
               class="text-center text-sm tracking-wide p-3"
             >
               {{ t("noDataFound") }}
@@ -285,14 +253,14 @@
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
       >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto shadow">
+          <div #auditTrailTableContainer class="overflow-y-auto shadow">
             <ng-container
-              *ngIf="tableData.tableColumns$ | async as displayedColumns"
+              *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
             >
               <table
                 mat-table
                 matSort
-                [dataSource]="tableData.dataSource"
+                [dataSource]="getTableDataSource()"
                 class="mat-elevation-z2 w-full"
               >
                 <ng-container
@@ -338,7 +306,7 @@
                 <tr
                   mat-row
                   [@listAnimationDesktop]="
-                    tableData.dataSource.filteredData.length
+                    getTableDataSource().filteredData.length
                   "
                   *matRowDef="
                     let row;
@@ -350,12 +318,12 @@
                   <td
                     *transloco="let t; read: 'errors'"
                     class="mat-cell"
-                    [attr.colspan]="tableData.tableColumns.length"
+                    [attr.colspan]="getTableDataColumns().length"
                   >
                     <p
                       *ngIf="
                         tableSearch.value &&
-                        tableData.dataSource.data.length > 0 &&
+                        getTableDataList().length > 0 &&
                         !tableLoading
                       "
                       class="text-xs lg:text-sm py-2 px-4"
@@ -363,9 +331,7 @@
                       {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                     </p>
                     <p
-                      *ngIf="
-                        tableData.dataSource.data.length <= 0 && !tableLoading
-                      "
+                      *ngIf="getTableDataList().length <= 0 && !tableLoading"
                       class="text-center text-sm tracking-wide pt-3 pb-1"
                     >
                       {{ t("noDataFound") }}

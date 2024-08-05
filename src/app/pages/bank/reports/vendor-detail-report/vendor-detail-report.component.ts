@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -45,7 +46,13 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import { TableUtilities } from 'src/app/utilities/table-utilities';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
 
 @Component({
   selector: 'app-vendor-detail-report',
@@ -62,6 +69,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
+    MatTableExporterModule,
   ],
   providers: [
     {
@@ -103,6 +111,9 @@ export class VendorDetailReportComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('vendorDetailReportContainer')
+  vendorDetailReportContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private appConfig: AppConfigService,
     private fb: FormBuilder,
@@ -304,6 +315,25 @@ export class VendorDetailReportComponent implements OnInit {
   //     this.tableData.dataSource.paginator.firstPage();
   //   }
   // }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.vendorReport.vendorReport');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createTableFilterForm();
     this.createTableHeadersFormGroup();
@@ -314,6 +344,7 @@ export class VendorDetailReportComponent implements OnInit {
         this.submitTableFilterForm();
       }
     });
+    this.submitTableFilterForm();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
@@ -385,12 +416,28 @@ export class VendorDetailReportComponent implements OnInit {
   }
   downloadSheet() {
     if (this.tableDataService.getData().length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableDataService.getData(),
-        this.getTableActiveKeys(),
-        'vendors_summary',
-        ['Posteddate']
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'vendors_summary',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
       );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.vendorDetailReportContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

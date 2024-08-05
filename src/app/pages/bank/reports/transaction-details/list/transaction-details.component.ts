@@ -557,23 +557,24 @@ export class TransactionDetailsComponent implements OnInit {
     let titleText = this.tr.translate(
       'reports.transactionDetails.transactionDetails'
     );
-    let branchText = this.tr.translate(`reports.invoiceDetails.form.branch`);
-    let vendorText = this.tr.translate(`reports.invoiceDetails.form.company`);
-    let customerText = this.tr.translate(
-      `reports.invoiceDetails.form.customer`
-    );
-    let fromText = this.tr.translate(`forms.from`);
-    let toText = this.tr.translate(`forms.to`);
     let doc = new jsPDF();
-    this.writePdfTitleLabels(
-      doc,
-      titleText,
-      branchText,
-      vendorText,
-      customerText,
-      fromText,
-      toText
-    );
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      // columns: this.tableDataService.getTableColumns().map((t,index) => {
+      //   return t.label;
+      // }),
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
     doc.save(`${filename}.pdf`);
   }
   ngOnInit(): void {
@@ -717,7 +718,6 @@ export class TransactionDetailsComponent implements OnInit {
       );
     }
   }
-
   downloadPdf() {
     if (this.tableDataService.getData().length > 0) {
       let table =

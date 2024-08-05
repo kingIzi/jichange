@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -39,6 +40,13 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-consolidated-report',
@@ -53,6 +61,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     MatPaginatorModule,
     MatTableModule,
     MatSortModule,
+    MatTableExporterModule,
   ],
   templateUrl: './consolidated-report.component.html',
   styleUrl: './consolidated-report.component.scss',
@@ -91,6 +100,9 @@ export class ConsolidatedReportComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('consolidatedInvoiceTableContainer')
+  consolidatedInvoiceTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private datePipe: DatePipe,
     private fb: FormBuilder,
@@ -244,6 +256,25 @@ export class ConsolidatedReportComponent implements OnInit {
         throw err;
       });
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.invoiceConsolidated.label');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createTableFilterFormGroup();
     this.createTableHeadersFormGroup();
@@ -307,6 +338,40 @@ export class ConsolidatedReportComponent implements OnInit {
       this.requestInvoiceConsolidated(form);
     } else {
       this.tableFilterFormGroup.markAllAsTouched();
+    }
+  }
+  downloadSheet() {
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'consolidated_details_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.consolidatedInvoiceTableContainer.nativeElement.querySelector(
+          'table'
+        );
+      this.parsePdf(table as HTMLTableElement, `consolidated_details_report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
     }
   }
   getTableDataSource() {

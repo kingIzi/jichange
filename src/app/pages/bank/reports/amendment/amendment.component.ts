@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   NO_ERRORS_SCHEMA,
   OnInit,
@@ -60,6 +61,13 @@ import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialog
 import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-amendment',
@@ -74,6 +82,7 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
     MatTableModule,
     MatSortModule,
     ReportFormInvoiceDetailsComponent,
+    MatTableExporterModule,
   ],
   templateUrl: './amendment.component.html',
   styleUrl: './amendment.component.scss',
@@ -128,6 +137,8 @@ export class AmendmentComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('amendmentsTable') amendmentsTable!: ElementRef<HTMLDivElement>;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -552,6 +563,25 @@ export class AmendmentComponent implements OnInit {
   //     this.tableData.dataSource.paginator.firstPage();
   //   }
   // }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.amendmentDetails.amendment');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.tableHeaders.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
@@ -661,12 +691,29 @@ export class AmendmentComponent implements OnInit {
   }
   downloadSheet() {
     if (this.tableDataService.getData().length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableDataService.getData(),
-        this.getTableActiveKeys(),
-        'amendment_reports',
-        ['Due_Date', 'Invoice_Expired_Date']
+      if (this.tableDataService.getData().length > 0) {
+        this.exporter.hiddenColumns = [
+          this.tableDataService.getTableColumns().length,
+        ];
+        this.exporter.exportTable(ExportType.XLSX, {
+          fileName: 'amendment_report_table',
+          Props: {
+            Author: 'Biz logic solutions',
+          },
+        });
+      }
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
       );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table = this.amendmentsTable.nativeElement.querySelector('query');
+      this.parsePdf(table as HTMLTableElement, `amendment_report_table`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

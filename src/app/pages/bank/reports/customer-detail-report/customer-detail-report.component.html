@@ -11,16 +11,6 @@
     >
       {{ t("customerDetailReport") }}
     </h2>
-    <!-- <div class="flex flex-row items-center space-x-2">
-      <a
-        (click)="downloadSheet()"
-        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
-      >
-        <span>
-          <i class="bi bi-download text-success text-lg"></i>
-        </span>
-      </a>
-    </div> -->
   </div>
   <div class="flex flex-col space-y-4 divide-y w-full bg-white shadow p-2">
     <form class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3">
@@ -196,15 +186,25 @@
     </form>
     <div class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
-        <div>
+        <div class="flex flex-row items-center space-x-4">
           <button
             (click)="downloadSheet()"
             *transloco="let t; read: 'reports.overview'"
-            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-600 hover:bg-green-600 hover:text-green-950"
           >
             <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
             <span>
               <i class="bi bi-file-earmark-spreadsheet"></i>
+            </span>
+          </button>
+          <button
+            (click)="downloadPdf()"
+            *transloco="let t; read: 'reports.overview'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-red-600 hover:bg-danger-600 hover:text-red-950"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToPdf") }}</p>
+            <span>
+              <i class="bi bi-filetype-pdf"></i>
             </span>
           </button>
         </div>
@@ -259,7 +259,7 @@
         <ul class="flex flex-col space-y-4">
           <li
             *ngFor="
-              let element of tableData.dataSource.filteredData
+              let element of getTableDataSource().filteredData
                 | slice
                   : 1 + paginator.pageSize * paginator.pageIndex - 1
                   : 1 +
@@ -268,7 +268,7 @@
                       1;
               index as i
             "
-            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
+            [@listAnimationDesktop]="getTableDataSource().filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -299,7 +299,7 @@
             *transloco="let t; read: 'errors'"
           >
             <p
-              *ngIf="tableData.customers.length <= 0"
+              *ngIf="getTableDataList().length <= 0"
               class="text-center text-sm tracking-wide p-3"
             >
               {{ t("noDataFound") }}
@@ -316,15 +316,17 @@
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
       >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto shadow">
+          <div #customerDetailReport class="overflow-y-auto shadow">
             <ng-container
-              *ngIf="tableData.tableColumns$ | async as displayedColumns"
+              *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
             >
               <table
                 mat-table
                 matSort
-                [dataSource]="tableData.dataSource"
+                [dataSource]="getTableDataSource()"
                 class="mat-elevation-z2 w-full"
+                matTableExporter
+                #exporter="matTableExporter"
               >
                 <ng-container
                   *ngFor="
@@ -369,7 +371,7 @@
                 <tr
                   mat-row
                   [@listAnimationDesktop]="
-                    tableData.dataSource.filteredData.length
+                    getTableDataSource().filteredData.length
                   "
                   *matRowDef="
                     let row;
@@ -381,12 +383,12 @@
                   <td
                     *transloco="let t; read: 'errors'"
                     class="mat-cell"
-                    [attr.colspan]="tableData.tableColumns.length"
+                    [attr.colspan]="getTableDataColumns().length"
                   >
                     <p
                       *ngIf="
                         tableSearch.value &&
-                        tableData.dataSource.data.length > 0 &&
+                        getTableDataList().length > 0 &&
                         !tableLoading
                       "
                       class="text-xs lg:text-sm py-2 px-4"
@@ -394,9 +396,7 @@
                       {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                     </p>
                     <p
-                      *ngIf="
-                        tableData.dataSource.data.length <= 0 && !tableLoading
-                      "
+                      *ngIf="getTableDataList().length <= 0 && !tableLoading"
                       class="text-center text-sm tracking-wide pt-3 pb-1"
                     >
                       {{ t("noDataFound") }}

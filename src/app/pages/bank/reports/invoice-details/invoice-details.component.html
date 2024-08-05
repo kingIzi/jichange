@@ -1,7 +1,7 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<app-loader-infinite-spinner
+<!-- <app-loader-infinite-spinner
   [show]="startLoading"
-></app-loader-infinite-spinner>
+></app-loader-infinite-spinner> -->
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
@@ -18,15 +18,25 @@
     ></app-report-form-details>
     <div [formGroup]="headerFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
-        <div>
+        <div class="flex flex-row items-center space-x-4">
           <button
             (click)="downloadSheet()"
             *transloco="let t; read: 'reports.overview'"
-            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-600 hover:bg-green-600 hover:text-green-950"
           >
             <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
             <span>
               <i class="bi bi-file-earmark-spreadsheet"></i>
+            </span>
+          </button>
+          <button
+            (click)="downloadPdf()"
+            *transloco="let t; read: 'reports.overview'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-red-600 hover:bg-danger-600 hover:text-red-950"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToPdf") }}</p>
+            <span>
+              <i class="bi bi-filetype-pdf"></i>
             </span>
           </button>
         </div>
@@ -138,7 +148,7 @@
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
       >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto shadow">
+          <div #invoiceDetailsTable class="overflow-y-auto shadow">
             <ng-container
               *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
             >
@@ -146,6 +156,8 @@
                 mat-table
                 matSort
                 [dataSource]="getTableDataSource()"
+                matTableExporter
+                #exporter="matTableExporter"
                 class="mat-elevation-z2 w-full"
               >
                 <ng-container

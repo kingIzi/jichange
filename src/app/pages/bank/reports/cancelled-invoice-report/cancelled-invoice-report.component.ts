@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -38,10 +39,17 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { DisplayMessageBoxComponent } from '../../../../components/dialogs/display-message-box/display-message-box.component';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import {
+  ExportType,
+  MatTableExporterDirective,
+  MatTableExporterModule,
+} from 'mat-table-exporter';
+import {
   listAnimationMobile,
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-cancelled-invoice-report',
@@ -56,6 +64,7 @@ import {
     MatTableModule,
     MatSortModule,
     DisplayMessageBoxComponent,
+    MatTableExporterModule,
   ],
   templateUrl: './cancelled-invoice-report.component.html',
   styleUrl: './cancelled-invoice-report.component.scss',
@@ -81,6 +90,9 @@ export class CancelledInvoiceReportComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('cancelledInvoiceTable')
+  cancelledInvoiceTable!: ElementRef<HTMLDivElement>;
   constructor(
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -190,6 +202,25 @@ export class CancelledInvoiceReportComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.cancelledInvoice.title');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
   }
@@ -285,6 +316,38 @@ export class CancelledInvoiceReportComponent implements OnInit {
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
+  }
+  downloadSheet() {
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'Cancelled Onvoice Report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table =
+        this.cancelledInvoiceTable.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `Cancelled Onvoice Report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
   }
   getTableDataSource() {
     return this.tableDataService.getDataSource();
