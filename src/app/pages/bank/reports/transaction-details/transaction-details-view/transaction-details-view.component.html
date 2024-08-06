@@ -12,18 +12,252 @@
     >
       {{ t("transaction") }}
     </h2>
-    <div class="flex flex-row items-center space-x-2">
-      <a
-        (click)="downloadPdf(payments)"
-        class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
+  </div>
+  <ng-template #noDataFound>
+    <div class="w-full h-screen grid place-items-center">
+      <p
+        *transloco="let t; read: 'errors'"
+        class="text-center text-2xl tracking-wide"
       >
-        <span>
-          <i class="bi bi-download text-success text-lg"></i>
-        </span>
-      </a>
+        {{ t("noDataFound") }}
+      </p>
+    </div>
+  </ng-template>
+  <div
+    *ngIf="payments.length > 0; else noDataFound"
+    class="flex flex-col space-y-2"
+  >
+    <div
+      *ngFor="
+        let payment of payments;
+        index as i;
+        trackBy: PerformanceUtils.trackByIndex
+      "
+      class="collapse collapse-arrow bg-neutral"
+    >
+      <input type="radio" name="my-accordion-1" checked="checked" />
+      <div class="collapse-title text-xl font-medium">
+        {{ payment.Payment_Trans_No }}
+      </div>
+      <div class="collapse-content">
+        <div
+          class="px-5 py-4 grid grid-cols-3 lg:grid-cols-5 w-full gap-y-4 gap-x-3"
+        >
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("company") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Company_Name }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("customer") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Customer_Name }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("description") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Payment_Desc }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("transactionType") }}
+            </p>
+            <button
+              class="lg:w-1/2"
+              [class]="
+                PerformanceUtils.getActiveStatusStyles(
+                  payment.Payment_Type,
+                  'Fixed',
+                  'bg-purple-100',
+                  'text-black',
+                  'bg-teal-100',
+                  'text-black'
+                )
+              "
+            >
+              {{ payment.Payment_Type }}
+            </button>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("payer") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Payer_Name }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("method") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Trans_Channel }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("method") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Trans_Channel }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("amount") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ moneyFormat(payment.PaidAmount.toString()) }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("balance") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ PerformanceUtils.moneyFormat(payment.Balance.toString()) }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("currency") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Currency_Code }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("status") }}
+            </p>
+            <button class="flex flex-row items-center space-x-0.5">
+              <div class="w-2 h-2 rounded-full bg-success"></div>
+              <p class="text-success text-sm">{{ payment.Status }}</p>
+            </button>
+          </div>
+          <div class="flex flex-col col-span-full space-y-2">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase col-span-full"
+            >
+              {{ t("attachment") }}
+            </p>
+            <div
+              class="flex flex-row items-center justify-between space-x-4 border border-neutral-500 max-w-full lg:max-w-fit p-2"
+            >
+              <div class="flex flex-col">
+                <p class="text-sm font-semibold">{{ payment.Receipt_No }}</p>
+                <p class="text-sm">
+                  {{
+                    PerformanceUtils.convertDateStringToDate(
+                      payment.Payment_Date
+                    ).toLocaleDateString()
+                  }}
+                  {{
+                    PerformanceUtils.convertDateStringToDate(
+                      payment.Payment_Time
+                    ).toLocaleTimeString()
+                  }}
+                </p>
+              </div>
+              <div class="flex flex-row items-center space-x-1">
+                <button
+                  (click)="openReceipt(payment)"
+                  *transloco="let t; read: 'actions'"
+                  class="btn btn-sm bg-transparent tooltip lg:block hidden"
+                  [attr.data-tip]="t('view')"
+                >
+                  <span>
+                    <i class="bi bi-eye text-lg text-warning"></i>
+                  </span>
+                </button>
+                <button
+                  (click)="downloadReceipt(payment)"
+                  *transloco="let t; read: 'actions'"
+                  class="btn btn-sm bg-transparent tooltip"
+                  [attr.data-tip]="t('download')"
+                >
+                  <span>
+                    <i class="bi bi-download text-lg text-purple-600"></i>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div id="accordionExample">
+</div>
+
+<!-- <app-display-message-box #displayMessageBox></app-display-message-box>
+<app-display-message-box #messageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<div #rootElement class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.transactionDetails'"
+      class="text-lg font-bold"
+    >
+      {{ t("transaction") }}
+    </h2>
+  </div>
+  <ng-template #noDataFound>
+    <div class="w-full h-screen grid place-items-center">
+      <p
+        *transloco="let t; read: 'errors'"
+        class="text-center text-2xl tracking-wide"
+      >
+        {{ t("noDataFound") }}
+      </p>
+    </div>
+  </ng-template>
+  <div *ngIf="payments.length > 0; else noDataFound" id="accordionExample">
     <div
       *ngFor="
         let payment of payments;
@@ -133,28 +367,6 @@
               *transloco="let t; read: 'reports.transactionDetails'"
               class="text-neutral-500 text-xs uppercase"
             >
-              {{ t("amount") }}
-            </p>
-            <p class="text-black text-sm capitalize font-semibold">
-              {{ moneyFormat(payment.PaidAmount.toString()) }}
-            </p>
-          </div>
-          <div class="flex flex-col">
-            <p
-              *transloco="let t; read: 'reports.transactionDetails'"
-              class="text-neutral-500 text-xs uppercase"
-            >
-              {{ t("currency") }}
-            </p>
-            <p class="text-black text-sm capitalize font-semibold">
-              {{ payment.Currency_Code }}
-            </p>
-          </div>
-          <div class="flex flex-col">
-            <p
-              *transloco="let t; read: 'reports.transactionDetails'"
-              class="text-neutral-500 text-xs uppercase"
-            >
               {{ t("payer") }}
             </p>
             <p class="text-black text-sm capitalize font-semibold">
@@ -177,10 +389,32 @@
               *transloco="let t; read: 'reports.transactionDetails'"
               class="text-neutral-500 text-xs uppercase"
             >
+              {{ t("amount") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ moneyFormat(payment.PaidAmount.toString()) }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
               {{ t("balance") }}
             </p>
             <p class="text-black text-sm capitalize font-semibold">
               {{ PerformanceUtils.moneyFormat(payment.Balance.toString()) }}
+            </p>
+          </div>
+          <div class="flex flex-col">
+            <p
+              *transloco="let t; read: 'reports.transactionDetails'"
+              class="text-neutral-500 text-xs uppercase"
+            >
+              {{ t("currency") }}
+            </p>
+            <p class="text-black text-sm capitalize font-semibold">
+              {{ payment.Currency_Code }}
             </p>
           </div>
           <div class="flex flex-col">
@@ -283,4 +517,4 @@
       </h2>
     </div>
   </div>
-</div>
+</div> -->

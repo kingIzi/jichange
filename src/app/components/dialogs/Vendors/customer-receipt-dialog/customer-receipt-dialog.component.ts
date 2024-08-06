@@ -39,7 +39,7 @@ import { from } from 'rxjs';
 export class CustomerReceiptDialogComponent implements OnInit {
   public formGroups: FormGroup[] = [];
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  @ViewChild('receiptView') receiptView!: ElementRef;
+  @ViewChild('receiptView') receiptView!: ElementRef<HTMLDivElement>;
   constructor(
     private fb: FormBuilder,
     @Inject(MAT_DIALOG_DATA)
@@ -58,14 +58,18 @@ export class CustomerReceiptDialogComponent implements OnInit {
         ),
         to: this.fb.control(payment.Customer_Name, []),
         amount: this.fb.control(
-          payment.PaidAmount.toString() + ' ' + payment.Currency_Code,
+          AppUtilities.moneyFormat(payment.PaidAmount.toString()) +
+            ' ' +
+            payment.Currency_Code,
           []
         ),
         from: this.fb.control(payment.Payer_Name, []),
         for: this.fb.control(payment.Payment_Desc, []),
         method: this.fb.control(payment.Trans_Channel, []),
         balance: this.fb.control(
-          payment.Balance.toString() + ' ' + payment.Currency_Code,
+          AppUtilities.moneyFormat(payment.Balance.toString()) +
+            ' ' +
+            payment.Currency_Code,
           []
         ),
         currencyCode: this.fb.control(payment.Currency_Code, []),

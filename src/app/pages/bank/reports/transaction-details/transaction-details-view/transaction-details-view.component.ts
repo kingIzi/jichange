@@ -29,6 +29,8 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import * as json from 'src/assets/temp/data.json';
 import { Collapse, initTE } from 'tw-elements';
 import { BreadcrumbService } from 'xng-breadcrumb';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-transaction-details-view',
@@ -157,19 +159,23 @@ export class TransactionDetailsViewComponent implements OnInit {
   downloadReceipt(payment: TransactionDetail) {
     let dialogRef = this.dialog.open(CustomerReceiptDialogComponent, {
       width: '800px',
-      height: '500px',
       data: {
         payments: [payment],
       },
     });
     dialogRef.afterOpened().subscribe(() => {
-      let element = dialogRef.componentInstance.receiptView
-        .nativeElement as HTMLDivElement;
-      this.fileHandler.downloadPdfRemoveLastPage(
-        element,
-        `receipt-${payment.Receipt_No}.pdf`
+      let element = dialogRef.componentInstance.receiptView.nativeElement;
+      let doc = new jsPDF(
+        element.clientWidth > element.clientHeight ? 'l' : 'p',
+        'mm',
+        [element.clientWidth, element.clientHeight]
       );
-      dialogRef.close();
+      doc.html(element, {
+        callback: (pdf: jsPDF) => {
+          pdf.deletePage(pdf.getNumberOfPages());
+          pdf.save(`receipt-${payment.Receipt_No}.pdf`);
+        },
+      });
     });
   }
 }
