@@ -33,6 +33,7 @@ import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-mes
 import { SuccessMessageBoxComponent } from 'src/app/components/dialogs/success-message-box/success-message-box.component';
 import { ChangePasswordForm } from 'src/app/core/models/auth/change-password-form';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { CompanyUser } from 'src/app/core/models/vendors/company-user';
 import { GetCompanyByIdForm } from 'src/app/core/models/vendors/forms/get-company-user-by-id-form';
@@ -194,28 +195,47 @@ export class ProfileComponent implements OnInit {
         throw err;
       });
   }
+  private parseChangePasswordResponse(
+    result: HttpDataResponse<string | number>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`auth.profile.failedToUpdatePassword`)
+      );
+    } else {
+      let message = this.tr.translate(
+        `auth.profile.passowordChangedSuccessfully`
+      );
+      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      this.changePasswordFormGroup.reset();
+    }
+  }
   private requestChangePassword(form: ChangePasswordForm) {
     this.startLoading = true;
     this.loginService
       .changePassword(form)
       .then((result) => {
-        if (
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase() //newly updated
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.success`),
-            this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
-          );
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`auth.profile.failedToUpdatePassword`)
-          );
-        }
-        this.changePasswordFormGroup.reset();
+        // if (
+        //   typeof result.message === 'string' &&
+        //   result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase() //newly updated
+        // ) {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.success`),
+        //     this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
+        //   );
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`auth.profile.failedToUpdatePassword`)
+        //   );
+        // }
+        // this.changePasswordFormGroup.reset();
+        this.parseChangePasswordResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
