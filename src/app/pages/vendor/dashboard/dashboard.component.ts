@@ -346,11 +346,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.tableData.generatedInvoices = result.response;
     } else {
       this.tableData.generatedInvoices = [];
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
-        this.tr.translate(`invoice.noGeneratedInvoicesFound`)
-      );
+      // AppUtilities.openDisplayMessageBox(
+      //   this.displayMessageBox,
+      //   this.tr.translate(`defaults.warning`),
+      //   this.tr.translate(`panel.dashboard.noInvoiceFound`)
+      // );
     }
     this.prepareDataSource();
     this.createInvoiceTypePieChart(this.tableData.generatedInvoices);

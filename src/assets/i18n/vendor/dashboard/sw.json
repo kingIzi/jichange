@@ -1,6 +1,7 @@
 {
   "dashboard": {
     "searchBy": "Tafuta kwa nambari ya ankara au mteja",
+    "noInvoiceFound": "Hakuna ankara iliyopatikana.",
     "overview": {
       "overview": "Muhtasari",
       "paidInvoice": "Bili Iliyolipwa",

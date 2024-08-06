@@ -46,6 +46,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 
 @Component({
   selector: 'app-payment-consolidated',
@@ -60,6 +61,7 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
     MatTableModule,
     MatSortModule,
     MatTableExporterModule,
+    ReportFormInvoiceDetailsComponent,
   ],
   templateUrl: './payment-consolidated.component.html',
   styleUrl: './payment-consolidated.component.scss',

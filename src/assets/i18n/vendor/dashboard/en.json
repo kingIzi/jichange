@@ -1,6 +1,7 @@
 {
   "dashboard": {
     "searchBy": "Search by invoice number or customer",
+    "noInvoiceFound": "No invoice found.",
     "overview": {
       "overview": "Overview",
       "paidInvoice": "Paid",

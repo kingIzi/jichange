@@ -57,6 +57,7 @@ import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Component({
   selector: 'app-customer-view',
@@ -225,12 +226,16 @@ export class CustomerViewComponent implements OnInit {
     );
     let invoiceReportObs = from(
       this.invoiceReportService.getInvoiceReport({
-        branch: '',
-        Comp: this.getUserProfile().InstID,
-        cusid: customerId,
+        branch: this.getUserProfile().braid,
+        companyIds: [Number(this.getUserProfile().InstID)],
+        customerIds: [Number(customerId)],
         stdate: '',
         enddate: '',
-      })
+        // Comp: this.getUserProfile().InstID,
+        // cusid: customerId,
+        // stdate: '',
+        // enddate: '',
+      } as InvoiceReportForm)
     );
     let merged = zip(customerObs, invoiceReportObs);
     let res = AppUtilities.pipedObservables(merged);
