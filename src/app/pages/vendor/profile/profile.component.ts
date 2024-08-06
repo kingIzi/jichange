@@ -195,15 +195,24 @@ export class ProfileComponent implements OnInit {
         throw err;
       });
   }
+  private switchChangePasswordErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Password does not match.'.toLocaleLowerCase():
+        return this.tr.translate('auth.changePassword.passwordsDoNotMatch');
+      default:
+        return this.tr.translate(`auth.profile.failedToUpdatePassword`);
+    }
+  }
   private parseChangePasswordResponse(
     result: HttpDataResponse<string | number>
   ) {
     let hasErrors = AppUtilities.hasErrorResult(result);
     if (hasErrors) {
+      let message = this.switchChangePasswordErrorMessage(result.message[0]);
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`defaults.failed`),
-        this.tr.translate(`auth.profile.failedToUpdatePassword`)
+        message
       );
     } else {
       let message = this.tr.translate(
