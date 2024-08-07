@@ -78,6 +78,9 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-dashboard',
@@ -107,6 +110,10 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/dashboard', alias: 'dashboard' },
     },
+    {
+      provide: TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -120,19 +127,6 @@ export class DashboardComponent implements OnInit {
   public invoiceStatistics: DashboardOverviewStatistic[] = [];
   public inboxApprovals: Company[] = [];
   public latestTransactions: TransactionDetail[] = [];
-  public tableData: {
-    tableCompanies: Company[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<Company>;
-  } = {
-    tableCompanies: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<Company>([]),
-  };
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('paginator') paginator!: MatPaginator;
@@ -152,6 +146,8 @@ export class DashboardComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private router: Router,
+    @Inject(TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<Company>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableHeadersFormGroup() {
@@ -167,29 +163,32 @@ export class DashboardComponent implements OnInit {
         this.scope
       )
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -198,7 +197,9 @@ export class DashboardComponent implements OnInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private requestInboxApprovals() {
     this.inboxApprovalLoading = true;
@@ -250,10 +251,7 @@ export class DashboardComponent implements OnInit {
     return keys;
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: Company,
-      filter: string
-    ) => {
+    let filterPredicate = (data: Company, filter: string) => {
       return data.CompName.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -262,26 +260,23 @@ export class DashboardComponent implements OnInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<Company>(
-      this.tableData.tableCompanies
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-  }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
-  public buildPage() {
-    this.transactionsLoading = true;
-    this.inboxApprovalLoading = true;
-    this.overviewLoading = true;
-    this.tableLoading = true;
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<Company>(
+  //     this.tableData.tableCompanies
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  // }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
+  private getBuildPageRequests() {
     let approvalsObs = from(
       this.approvalService.postCompanyInboxList({
         design: this.getUserProfile().desig,
@@ -309,39 +304,64 @@ export class DashboardComponent implements OnInit {
       compListObs,
       latestTransactionsObs
     );
+    return merged;
+  }
+  private parseInboxApprovalResponse(
+    result: HttpDataResponse<number | Company[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.inboxApprovals = [];
+    } else {
+      this.inboxApprovals = result.response as Company[];
+    }
+  }
+  private parseOverviewStatisticsResponse(
+    result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.invoiceStatistics = [];
+    } else {
+      this.invoiceStatistics = result.response as DashboardOverviewStatistic[];
+    }
+  }
+  private parseCompanyListResponse(
+    result: HttpDataResponse<number | Company[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as Company[]);
+      this.tableDataService.prepareDataSource(this.paginator, this.sort);
+      this.dataSourceFilter();
+    }
+  }
+  private parseLatestTransactionsResponse(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.latestTransactions = [];
+    } else {
+      this.latestTransactions = result.response as TransactionDetail[];
+    }
+  }
+  public buildPage() {
+    this.startLoading = true;
+    this.tableLoading = true;
+    let merged = this.getBuildPageRequests();
     let res = AppUtilities.pipedObservables(merged);
     res
       .then((results) => {
         let [approvals, stats, compList, latestTransactions] = results;
-        if (
-          typeof approvals.response !== 'string' &&
-          typeof approvals.response !== 'number'
-        ) {
-          this.inboxApprovals = approvals.response;
-        }
-        if (
-          typeof stats.response !== 'string' &&
-          typeof stats.response !== 'number'
-        ) {
-          this.invoiceStatistics = stats.response;
-        }
-        if (
-          typeof compList.response !== 'string' &&
-          typeof compList.response !== 'number'
-        ) {
-          this.tableData.tableCompanies = compList.response;
-          this.prepareDataSource();
-        }
-        if (
-          typeof latestTransactions.response !== 'string' &&
-          typeof latestTransactions.response !== 'number'
-        ) {
-          this.latestTransactions = latestTransactions.response;
-        }
-        this.inboxApprovalLoading = false;
-        this.overviewLoading = false;
+        this.parseInboxApprovalResponse(approvals);
+        this.parseOverviewStatisticsResponse(stats);
+        this.parseCompanyListResponse(compList);
+        this.parseLatestTransactionsResponse(latestTransactions);
+        this.startLoading = false;
         this.tableLoading = false;
-        this.transactionsLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -350,10 +370,8 @@ export class DashboardComponent implements OnInit {
           this.displayMessageBox,
           this.tr
         );
-        this.inboxApprovalLoading = false;
-        this.overviewLoading = false;
+        this.startLoading = false;
         this.tableLoading = false;
-        this.transactionsLoading = false;
         this.cdr.detectChanges();
         throw err;
       });
@@ -445,7 +463,7 @@ export class DashboardComponent implements OnInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.tableCompanies,
+          this.tableDataService.getData(),
           element
         );
       default:
@@ -534,6 +552,18 @@ export class DashboardComponent implements OnInit {
   }
   invoiceNumberToBase64(invoice_number: string) {
     return btoa(invoice_number);
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

@@ -244,28 +244,39 @@ export class ProfileComponent implements OnInit {
         throw err;
       });
   }
+  private switchChangePasswordErrorMessage(message: string) {
+    switch (message.toLocaleLowerCase()) {
+      case 'Password does not match.'.toLocaleLowerCase():
+        return this.tr.translate('auth.changePassword.passwordsDoNotMatch');
+      default:
+        return this.tr.translate(`auth.profile.failedToUpdatePassword`);
+    }
+  }
+  private parseChangePasswordResponse(
+    result: HttpDataResponse<string | number>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      let message = this.switchChangePasswordErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        message
+      );
+    } else {
+      let message = this.tr.translate(
+        `auth.profile.passowordChangedSuccessfully`
+      );
+      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      this.changePasswordFormGroup.reset();
+    }
+  }
   private requestChangePassword(form: ChangePasswordForm) {
     this.startLoading = true;
     this.loginService
       .changePassword(form)
       .then((result) => {
-        if (
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase()
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.success`),
-            this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
-          );
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`auth.profile.failedToUpdatePassword`)
-          );
-        }
-        this.changePasswordFormGroup.reset();
+        this.parseChangePasswordResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

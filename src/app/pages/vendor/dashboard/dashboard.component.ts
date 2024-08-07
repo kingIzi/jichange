@@ -56,6 +56,11 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import {
+  TABLE_DATA_SERVICE,
+  VENDOR_TABLE_DATA_SERVICE,
+} from 'src/app/core/tokens/tokens';
 
 @Component({
   selector: 'app-dashboard',
@@ -82,6 +87,10 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/dashboard', alias: 'panel' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -92,19 +101,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   public inboxApprovals: any[] = [];
   public transactions: any[] = [];
   public tableHeadersFormGroup!: FormGroup;
-  public tableData: {
-    generatedInvoices: GeneratedInvoice[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<GeneratedInvoice>;
-  } = {
-    generatedInvoices: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<GeneratedInvoice>([]),
-  };
+  // public tableData: {
+  //   generatedInvoices: GeneratedInvoice[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<GeneratedInvoice>;
+  // } = {
+  //   generatedInvoices: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<GeneratedInvoice>([]),
+  // };
   public graphData: {
     invoicePieChartData: number[];
     invoicePieChartLabels: string[];
@@ -134,6 +143,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private invoiceService: InvoiceService,
     private cdr: ChangeDetectorRef,
     private router: Router,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<GeneratedInvoice>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   //create formGroup for each header item in table
@@ -146,29 +157,32 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.tr
       .selectTranslate(`dashboard.latestTransactionsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0 ? false : index < TABLE_SHOWING,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0 ? false : index < TABLE_SHOWING,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -177,7 +191,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
   private invoicePieChartDataset(invoices: GeneratedInvoice[]) {
     let aggregatedData = invoices.reduce((acc, item) => {
@@ -274,27 +290,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       },
     });
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
   private assignInvoiceStatistics(
     result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
   ) {
-    if (typeof result === 'string' && typeof result === 'number') {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
       this.invoiceStatistics = [];
     } else {
       this.invoiceStatistics = result.response as DashboardOverviewStatistic[];
+      this.createTransactionsPieChart(this.invoiceStatistics);
     }
-    this.createTransactionsPieChart(this.invoiceStatistics);
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: GeneratedInvoice,
-      filter: string
-    ) => {
+    let filterPredicate = (data: GeneratedInvoice, filter: string) => {
       return data.Invoice_No.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       ) ||
@@ -311,12 +319,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         ? true
         : false;
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
@@ -324,40 +330,28 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<GeneratedInvoice>(
-      this.tableData.generatedInvoices
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
+  private parseGeneratedInvoiceResponse(
+    result: HttpDataResponse<string | number | GeneratedInvoice[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as GeneratedInvoice[]);
+    }
   }
   private assignGeneratedInvoice(
     result: HttpDataResponse<string | number | GeneratedInvoice[]>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number' &&
-      result.response.length > 0
-    ) {
-      this.tableData.generatedInvoices = result.response;
-    } else {
-      this.tableData.generatedInvoices = [];
-      // AppUtilities.openDisplayMessageBox(
-      //   this.displayMessageBox,
-      //   this.tr.translate(`defaults.warning`),
-      //   this.tr.translate(`panel.dashboard.noInvoiceFound`)
-      // );
-    }
-    this.prepareDataSource();
-    this.createInvoiceTypePieChart(this.tableData.generatedInvoices);
+    this.parseGeneratedInvoiceResponse(result);
+    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.dataSourceFilter();
+    this.dataSourceSortingAccessor();
+    this.createInvoiceTypePieChart(this.tableDataService.getData());
   }
-  private buildPage() {
-    this.startLoading = true;
-    this.overviewLoading = true;
+  private getBuildPageRequests() {
     let generatedInvoiceObs = from(
       this.invoiceService.postSignedDetails({
         compid: this.getUserProfile().InstID,
@@ -369,6 +363,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       })
     );
     let mergedObs = zip(generatedInvoiceObs, invoiceStatisticsObs);
+    return mergedObs;
+  }
+  private buildPage() {
+    this.startLoading = true;
+    this.overviewLoading = true;
+    let mergedObs = this.getBuildPageRequests();
     let res = AppUtilities.pipedObservables(mergedObs);
     res
       .then((results) => {
@@ -386,7 +386,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           this.tr
         );
         this.overviewLoading = false;
-        // this.tableLoading = false;
         this.startLoading = false;
         this.cdr.detectChanges();
         throw err;
@@ -451,7 +450,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.generatedInvoices,
+          this.tableDataService.getData(),
           element
         );
       case 'Invoice_Date':
@@ -522,6 +521,18 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
   moneyFormat(value: string) {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.tableHeadersFormGroup.get('headers') as FormArray;

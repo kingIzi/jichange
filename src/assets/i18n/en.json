@@ -58,409 +58,144 @@
   "bankHeaders": [
     {
       "name": "Vendor",
-      "access": [
-        "Administrator",
-        "Sales Expertise",
-        "Digital Marketing",
-        "Mobile Banking",
-        "Customer Service",
-        "Cashier Support",
-        "Support Service",
-        "Cashier",
-        "Customer Support"
-      ],
+      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
       "dropdowns": [
         {
           "label": "Summary",
           "routerLink": "/main/company/summary",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Approvals",
           "routerLink": "/main/company/inbox",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         }
       ]
     },
     {
       "name": "Setup",
-      "access": ["Administrator"],
+      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
       "dropdowns": [
         {
           "label": "country",
           "routerLink": "/main/setup/country",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "region",
           "routerLink": "/main/setup/region",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "district",
           "routerLink": "/main/setup/district",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "ward",
           "routerLink": "/main/setup/ward",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "currency",
           "routerLink": "/main/setup/currency",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "designation",
           "routerLink": "/main/setup/designation",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "branch",
           "routerLink": "/main/setup/branch",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "smtp",
           "routerLink": "/main/setup/smtp",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "emailText",
           "routerLink": "/main/setup/email",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "bankUser",
           "routerLink": "/main/setup/user",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Suspense account",
           "routerLink": "/main/setup/suspense",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         }
       ]
     },
     {
       "name": "Reports",
-      "access": [
-        "Administrator",
-        "Sales Expertise",
-        "Digital Marketing",
-        "Mobile Banking",
-        "Customer Service",
-        "Cashier Support",
-        "Support Service",
-        "Cashier",
-        "Customer Support"
-      ],
+      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
       "dropdowns": [
         {
           "label": "Overview",
           "routerLink": "/main/reports/overview",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Transaction Details",
           "routerLink": "/main/reports/transactions",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Payment Details",
           "routerLink": "/main/reports/payment",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Invoice Details",
           "routerLink": "/main/reports/invoice",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Cancelled Invoice",
           "routerLink": "/main/reports/cancelled",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Amendments Details",
           "routerLink": "/main/reports/amendment",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Customers Report",
           "routerLink": "/main/reports/customer",
-          "access": [
-            "Administrator",
-            "Sales Expertise",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Vendors Report",
           "routerLink": "/main/reports/vendors",
-          "access": [
-            "Administrator",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Invoice Consolidated",
           "routerLink": "/main/reports/invoice-consolidated",
-          "access": [
-            "Administrator",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Payment Consolidated",
           "routerLink": "/main/reports/payment-consolidated",
-          "access": [
-            "Administrator",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "User Log Report",
           "routerLink": "/main/reports/userlog",
-          "access": [
-            "Administrator",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Audit Trails",
           "routerLink": "/main/reports/audit",
-          "access": [
-            "Administrator",
-            "Digital Marketing",
-            "Mobile Banking",
-            "Customer Service",
-            "Cashier Support",
-            "Support Service",
-            "Cashier",
-            "Customer Support"
-          ]
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         }
       ]
     }

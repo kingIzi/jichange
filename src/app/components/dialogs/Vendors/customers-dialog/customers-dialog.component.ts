@@ -106,7 +106,7 @@ export class CustomersDialogComponent implements OnInit {
       compid: this.fb.control(this.getUserProfile().InstID, []),
       userid: this.fb.control(this.getUserProfile().Usno, []),
       CSno: this.fb.control(0, []),
-      CName: this.fb.control('', [Validators.required]),
+      CName: this.fb.control('', []),
       PostboxNo: this.fb.control('', []),
       Address: this.fb.control('', []),
       regid: this.fb.control(0, []),
@@ -117,7 +117,7 @@ export class CustomersDialogComponent implements OnInit {
       CoPerson: this.fb.control('', []),
       Mail: this.fb.control('', [Validators.email]),
       Mobile_Number: this.fb.control('', [
-        Validators.required,
+        //Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       dummy: this.fb.control(true, []),

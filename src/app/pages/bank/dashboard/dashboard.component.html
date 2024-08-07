@@ -25,7 +25,7 @@
           trackBy: PerformanceUtils.trackByIndex;
           index as i
         "
-        [@listAnimationMobile]="tableData.dataSource.filteredData.length"
+        [@listAnimationMobile]="getTableDataSource().filteredData.length"
         class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
       >
         <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
@@ -40,18 +40,11 @@
         >
           {{ t(statistic.Name.toLocaleLowerCase()) }}
         </h4>
-        <!-- <a
-          (click)="dashboardStatisticRouterLink(statistic.Name)"
-          *transloco="let t; read: 'dashboard.dashboard.overview'"
-          class="text-xs text-primary font-inter hover:underline cursor-pointer"
-        >
-          {{ t("viewMore") }}
-        </a> -->
       </div>
     </ng-container>
     <ng-template #statisticsLoadingTemplate>
       <div
-        *ngIf="overviewLoading"
+        *ngIf="startLoading"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <span class="loading loading-spinner loading-lg bg-primary"></span>
@@ -93,13 +86,13 @@
       class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
     >
       <p
-        [class]="inboxApprovalLoading ? 'hidden' : ''"
+        [class]="startLoading ? 'hidden' : ''"
         class="text-lg text-center"
         *transloco="let t; read: 'dashboard.dashboard.inboxApproval.errors'"
       >
         {{ t("emptyInbox") }}
       </p>
-      <ng-container *ngIf="inboxApprovalLoading">
+      <ng-container *ngIf="startLoading">
         <div class="w-full grid place-items-center mt-6">
           <span class="loading loading-spinner loading-lg bg-primary"></span>
         </div>
@@ -113,7 +106,7 @@
       >
         <li
           class="py-2"
-          [@listAnimationMobile]="tableData.dataSource.filteredData.length"
+          [@listAnimationMobile]="getTableDataSource().filteredData.length"
           *ngFor="let info of inboxApprovals; index as i"
         >
           <a class="flex flex-row items-center justify-between">
@@ -153,85 +146,88 @@
         </p>
       </div>
     </div>
-    <ng-template #latestTransactionsNotFound>
-      <div
-        *ngIf="transactionsLoading; else notFoundTransactionsMessage"
-        class="w-full h-full shadow bg-white grid place-items-center"
-      >
-        <div class="w-full grid place-items-center mt-6">
-          <span class="loading loading-spinner loading-lg bg-primary"></span>
-        </div>
+    <div
+      *ngIf="startLoading; else notFoundTransactionsMessage"
+      class="w-full h-full shadow bg-white grid place-items-center"
+    >
+      <div class="w-full grid place-items-center mt-6">
+        <span class="loading loading-spinner loading-lg bg-primary"></span>
       </div>
-      <ng-template #notFoundTransactionsMessage>
-        <div
-          *ngIf="latestTransactions.length === 0 && !transactionsLoading"
-          class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+    </div>
+    <ng-template #notFoundTransactionsMessage>
+      <div
+        *ngIf="
+          !startLoading && latestTransactions?.length === 0;
+          else transactionsFound
+        "
+        class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+      >
+        <p
+          class="text-lg text-center"
+          *transloco="let t; read: 'dashboard.dashboard.transaction.errors'"
         >
-          <p
-            class="text-lg text-center"
-            *transloco="let t; read: 'dashboard.dashboard.transaction.errors'"
+          {{ t("noDataFound") }}
+        </p>
+      </div>
+      <ng-template #transactionsFound>
+        <div
+          class="w-full max-h-96 overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
+        >
+          <ul
+            *ngFor="let arr of transactionsLatest(); index as i"
+            class="flex flex-col space-y-2 py-2"
           >
-            {{ t("noDataFound") }}
-          </p>
+            <li>
+              <div class="flex flex-col space-y-2">
+                <h6 class="font-semibold">
+                  {{
+                    PerformanceUtils.convertDateStringToDate(
+                      arr.at(0).Payment_Date
+                    ).toDateString()
+                  }}
+                </h6>
+                <div
+                  class="flex flex-col space-y-1 px-4"
+                  *ngFor="let trans of arr; index as ind"
+                >
+                  <button
+                    [routerLink]="
+                      '/main/' + invoiceNumberToBase64(trans.Invoice_Sno)
+                    "
+                    class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
+                  >
+                    <div class="flex flex-row items-center space-x-1">
+                      <div
+                        class="w-14 h-14 bg-success relative spiky-invoice-number"
+                      >
+                        <p
+                          class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                        >
+                          {{ trans.Status }}
+                        </p>
+                      </div>
+                      <div class="flex flex-col">
+                        <p class="text-sm text-left">{{ trans.Payer_Name }}</p>
+                        <p class="text-xs text-neutral-500 text-left">
+                          {{ trans.Control_No }}
+                        </p>
+                      </div>
+                    </div>
+                    <p class="text-xs text-success">
+                      {{
+                        PerformanceUtils.moneyFormat(
+                          trans.PaidAmount.toString()
+                        ) + " TZS"
+                      }}
+                    </p>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
       </ng-template>
     </ng-template>
-    <div
-      *ngIf="latestTransactions.length > 0; else latestTransactionsNotFound"
-      class="w-full max-h-96 overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
-    >
-      <ul
-        *ngFor="let arr of transactionsLatest(); index as i"
-        class="flex flex-col space-y-2 py-2"
-      >
-        <li>
-          <div class="flex flex-col space-y-2">
-            <h6 class="font-semibold">
-              {{
-                PerformanceUtils.convertDateStringToDate(
-                  arr.at(0).Payment_Date
-                ).toDateString()
-              }}
-            </h6>
-            <div
-              class="flex flex-col space-y-1 px-4"
-              *ngFor="let trans of arr; index as ind"
-            >
-              <button
-                [routerLink]="
-                  '/main/' + invoiceNumberToBase64(trans.Invoice_Sno)
-                "
-                class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
-              >
-                <div class="flex flex-row items-center space-x-1">
-                  <div
-                    class="w-14 h-14 bg-success relative spiky-invoice-number"
-                  >
-                    <p
-                      class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                    >
-                      {{ trans.Status }}
-                    </p>
-                  </div>
-                  <div class="flex flex-col">
-                    <p class="text-sm text-left">{{ trans.Payer_Name }}</p>
-                    <p class="text-xs text-neutral-500 text-left">
-                      {{ trans.Control_No }}
-                    </p>
-                  </div>
-                </div>
-                <p class="text-xs text-success">
-                  {{
-                    PerformanceUtils.moneyFormat(trans.PaidAmount.toString()) +
-                      " TZS"
-                  }}
-                </p>
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
   </div>
   <div
     [formGroup]="tableHeadersFormGroup"
@@ -272,7 +268,7 @@
         <ul class="flex flex-col space-y-4">
           <li
             *ngFor="
-              let company of tableData.dataSource.filteredData
+              let company of getTableDataSource().filteredData
                 | slice
                   : 1 + paginator.pageSize * paginator.pageIndex - 1
                   : 1 +
@@ -281,7 +277,7 @@
                       1;
               index as i
             "
-            [@listAnimationDesktop]="tableData.dataSource.filteredData.length"
+            [@listAnimationDesktop]="getTableDataSource().filteredData.length"
           >
             <div
               class="flex flex-col space-y-1 rounded"
@@ -314,7 +310,7 @@
             *transloco="let t; read: 'errors'"
           >
             <p
-              *ngIf="tableData.tableCompanies.length <= 0"
+              *ngIf="getTableDataList().length <= 0"
               class="text-center text-sm tracking-wide p-3"
             >
               {{ t("noDataFound") }}
@@ -333,12 +329,12 @@
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
           <div class="overflow-y-auto shadow">
             <ng-container
-              *ngIf="tableData.tableColumns$ | async as displayedColumns"
+              *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
             >
               <table
                 mat-table
                 matSort
-                [dataSource]="tableData.dataSource"
+                [dataSource]="getTableDataSource()"
                 class="mat-elevation-z2 w-full"
               >
                 <ng-container
@@ -386,7 +382,7 @@
                 <tr
                   mat-row
                   [@listAnimationDesktop]="
-                    tableData.dataSource.filteredData.length
+                    getTableDataSource().filteredData.length
                   "
                   *matRowDef="
                     let row;
@@ -398,12 +394,12 @@
                   <td
                     *transloco="let t; read: 'errors'"
                     class="mat-cell"
-                    [attr.colspan]="tableData.tableColumns.length"
+                    [attr.colspan]="getTableDataColumns().length"
                   >
                     <p
                       *ngIf="
                         tableSearch.value &&
-                        tableData.dataSource.data.length > 0 &&
+                        getTableDataList().length > 0 &&
                         !tableLoading
                       "
                       class="text-xs lg:text-sm py-2 px-4"
@@ -411,9 +407,7 @@
                       {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
                     </p>
                     <p
-                      *ngIf="
-                        tableData.dataSource.data.length <= 0 && !tableLoading
-                      "
+                      *ngIf="getTableDataList().length <= 0 && !tableLoading"
                       class="text-center text-sm tracking-wide pt-3 pb-1"
                     >
                       {{ t("noDataFound") }}
@@ -437,11 +431,9 @@
       <div class="flex flex-row-reverse items-center justify-between">
         <mat-paginator
           #paginator
-          [length]="tableData.tableCompanies.length"
           [pageSize]="3"
           [pageSizeOptions]="[3]"
           aria-label="Select page"
-          [showFirstLastButtons]="tableData.tableCompanies.length > 20"
         >
         </mat-paginator>
       </div>

@@ -302,7 +302,7 @@ export class ReportFormDetailsComponent implements OnInit {
           return c.CompSno;
         });
       } else {
-        companyIds = [0];
+        companyIds = [];
       }
       let cusid = Number(form.cusid);
       let customersIds: number[] = [];
@@ -313,7 +313,7 @@ export class ReportFormDetailsComponent implements OnInit {
           return c.Cust_Sno;
         });
       } else {
-        customersIds = [0];
+        customersIds = [];
       }
 
       let body = {

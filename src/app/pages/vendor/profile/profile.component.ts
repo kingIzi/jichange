@@ -227,23 +227,6 @@ export class ProfileComponent implements OnInit {
     this.loginService
       .changePassword(form)
       .then((result) => {
-        // if (
-        //   typeof result.message === 'string' &&
-        //   result.message.toLocaleLowerCase() == 'Success'.toLocaleLowerCase() //newly updated
-        // ) {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.success`),
-        //     this.tr.translate(`auth.profile.passowordChangedSuccessfully`)
-        //   );
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`auth.profile.failedToUpdatePassword`)
-        //   );
-        // }
-        // this.changePasswordFormGroup.reset();
         this.parseChangePasswordResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();

@@ -396,7 +396,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
           return c.CompSno;
         });
       } else {
-        companyIds = [0];
+        companyIds = [];
       }
 
       let cusid = Number(form.cusid);
@@ -408,7 +408,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
           return c.Cust_Sno;
         });
       } else {
-        customersIds = [0];
+        customersIds = [];
       }
 
       let invno = Number(form.invno);
@@ -420,7 +420,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
           return c.Inv_Mas_Sno;
         });
       } else {
-        invoiceIds = [0];
+        invoiceIds = [];
       }
 
       let body = {
