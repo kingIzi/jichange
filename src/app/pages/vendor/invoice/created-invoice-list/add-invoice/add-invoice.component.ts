@@ -236,6 +236,10 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         return this.tr.translate('invoice.form.dialog.customer');
       case 'Comp ID is missing'.toLocaleLowerCase():
         return this.tr.translate('invoice.form.dialog.customer');
+      case 'Invoice number exists'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.invoiceNumberExists');
+      case 'Control number exists'.toLocaleLowerCase():
+        return this.tr.translate('invoice.form.dialog.controlNumberExists');
       default:
         return this.tr.translate('invoice.form.dialog.failedToCreateInvoice');
     }

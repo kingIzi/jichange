@@ -30,6 +30,7 @@ import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { Customer } from 'src/app/core/models/vendors/customer';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { ReportsService } from 'src/app/core/services/bank/reports/reports.service';
@@ -261,20 +262,19 @@ export class OverviewComponent {
       this.invoices = result.response;
     }
   }
-  private buildPage() {
-    this.buildPageLoading = true;
-    this.startLoading = true;
+  private getBuildPageRequests() {
     let invoiceStatisticsObs = from(
       this.invoiceService.getCompanysInvoiceStats({
         compid: this.getUserProfile().InstID,
       })
     );
     let form = {
-      compid: 'all',
-      cusid: 'all',
+      branch: this.getUserProfile().braid,
+      companyIds: [this.getUserProfile().InstID],
+      customerIds: [0],
       stdate: '',
       enddate: '',
-    } as TransactionDetailsReportForm;
+    } as InvoiceReportForm;
     let transactionsObs = from(this.reportsService.getTransactionsReport(form));
     let customersObs = from(
       this.customerService.getCustomersList({
@@ -294,7 +294,14 @@ export class OverviewComponent {
       customersObs,
       createdInvoicesObs
     );
-    let res = AppUtilities.pipedObservables(mergedObs)
+    return mergedObs;
+  }
+  private buildPage() {
+    this.buildPageLoading = true;
+    this.startLoading = true;
+    let mergedObs = this.getBuildPageRequests();
+    let res = AppUtilities.pipedObservables(mergedObs);
+    res
       .then((results) => {
         let [invoiceStatistics, transactionsList, customersList, invoiceList] =
           results;

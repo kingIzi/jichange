@@ -82,7 +82,9 @@
       "modifiedSuccessfully": "Ankara imebadilika kwa mafanikio!",
       "failedToApproveInvoice": "Imeshindwa kuidhinisha ankara",
       "invoiceApprovedSuccessfully": "Ankara imeidhinishwa kwa mafanikio",
-      "failedToCreateInvoice": "Imeshindwa kuunda ankara."
+      "failedToCreateInvoice": "Imeshindwa kuunda ankara.",
+      "invoiceNumberExists": "Nambari ya ankara tayari ipo.",
+      "controlNumberExists": "Nambari ya kudhibiti tayari ipo."
     }
   },
   "invoiceDetailsTable": [

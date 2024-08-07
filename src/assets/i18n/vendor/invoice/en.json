@@ -89,7 +89,9 @@
       "modifiedSuccessfully": "Invoice modified successfully!",
       "failedToApproveInvoice": "Failed to approve invoice",
       "invoiceApprovedSuccessfully": "Invoice successfully approved",
-      "failedToCreateInvoice": "Failed to create invoice."
+      "failedToCreateInvoice": "Failed to create invoice.",
+      "invoiceNumberExists": "Invoice number already exists.",
+      "controlNumberExists": "Control number already exists."
     }
   },
   "cancelledInvoiceTable": [

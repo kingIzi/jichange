@@ -38,6 +38,7 @@
   "vendorRegistration": {
     "title": "Usajili wa Vendor",
     "failedToRetrieveBranchList": "Imeshindwa kupata orodha ya tawi.",
+    "failedToAddVendor": "Usajili umeshindwa, tafadhali jaribu tena.",
     "form": {
       "vendorName": "Jina la Vendor",
       "mobileNo": "Nambari ya Simu ya Mkononi",
@@ -50,7 +51,7 @@
         "no": "Apana"
       },
       "placeholders": {
-        "vendorName": "Ingiza nambari ya muuzaji",
+        "vendorName": "Ingiza jina ya muuzaji",
         "branch": "Chagua maelezo ya Tawi",
         "accountNo": "Ingiza nambari ya Akaunti",
         "email": "Ingiza barua pepe"
@@ -64,14 +65,18 @@
         "email": "Tafadhali ingiza barua pepe",
         "dialogs": {
           "invalidFormError": "Fomu batili",
-          "missingVendorName": "Tafadhali toa jina la muuzaji",
-          "missingPhoneNo": "Tafadhali toa nambari halali ya simu",
-          "missingBranchName": "Tafadhali toa jina la Tawi",
-          "missingAccountNo": "Tafadhali toa namba ya akaunti",
-          "makerChecker": "Tafadhali, taja hitaji la idhini ya ombi lako",
+          "missingEmail": "Tafadhali toa anwani halali ya barua pepe.",
+          "missingVendorName": "Tafadhali toa jina la muuzaji.",
+          "missingPhoneNo": "Tafadhali toa nambari halali ya simu.",
+          "missingBranchName": "Tafadhali toa jina la Tawi.",
+          "missingAccountNo": "Tafadhali toa namba ya akaunti.",
+          "makerChecker": "Tafadhali, taja hitaji la idhini ya ombi lako.",
           "invalidAccounntNo": "Nambari ya akaunti uliyoingiza tayari inatumika.",
           "mobileNumberExists": "Nambari ya simu uliyoweka tayari ipo.",
-          "vendorExists": "Jina la mchuuzi ambalo umeingiza tayari lipo."
+          "vendorExists": "Jina la mchuuzi ambalo umeingiza tayari lipo.",
+          "vendorNameExists": "Jina la muuzaji uliloingiza tayari lipo.",
+          "tinNumberExists": "Nambari ya TIN uliyoingiza tayari ipo.",
+          "mobileExists": "Nambari ya simu ipo."
         }
       },
       "success": {

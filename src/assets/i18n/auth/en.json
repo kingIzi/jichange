@@ -41,6 +41,7 @@
   "vendorRegistration": {
     "title": "Vendor Registration",
     "failedToRetrieveBranchList": "Failed to retrieve branch list.",
+    "failedToAddVendor": "Registration failed, please try again.",
     "form": {
       "vendorName": "Vendor name",
       "mobileNo": "Mobile Number",
@@ -53,28 +54,32 @@
         "no": "No"
       },
       "placeholders": {
-        "vendorName": "Enter vendor number",
+        "vendorName": "Enter vendor name",
         "branch": "Select branch detail",
         "accountNo": "Enter account number",
         "email": "Enter email address"
       },
       "errors": {
-        "vendorName": "Please specify a name",
-        "mobileNo": "Please add a valid phone number",
-        "branch": "Please specify",
-        "accountNo": "Enter valid account number",
+        "vendorName": "Please specify a name.",
+        "mobileNo": "Please add a valid phone number.",
+        "branch": "Please specify.",
+        "accountNo": "Enter valid account number.",
         "invalidAccountNo": "Invalid account number. Must start with 015, 012, or 01J and be 13 characters.",
-        "email": "Please enter email address",
+        "email": "Please enter email address.",
         "dialogs": {
           "invalidFormError": "Invalid form",
-          "missingVendorName": "Please provide a vendor name",
-          "missingPhoneNo": "Please provide a valid mobile number",
-          "missingBranchName": "Please provide a Branch name",
-          "missingAccountNo": "Please provide an account number",
-          "makerChecker": "Please, specify a need for your request's approval",
+          "missingEmail": "Please provide a valid email address.",
+          "missingVendorName": "Please provide a vendor name.",
+          "missingPhoneNo": "Please provide a valid mobile number.",
+          "missingBranchName": "Please provide a Branch name.",
+          "missingAccountNo": "Please provide an account number.",
+          "makerChecker": "Please, specify a need for your request's approval.",
           "invalidAccounntNo": "The account number you have entered is already in use.",
           "mobileNumberExists": "The mobile number you have entered already exists.",
-          "vendorExists": "The vendor name you have entered already exists."
+          "vendorExists": "The vendor name you have entered already exists.",
+          "vendorNameExists": "The vendor name you have entered already exists.",
+          "tinNumberExists": "The TIN number you have entered already exists.",
+          "mobileExists": "Mobile number exists."
         }
       },
       "success": {

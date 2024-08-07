@@ -156,43 +156,79 @@ export class VendorRegistrationComponent implements OnInit {
       );
     }
   }
-
+  private switchAddCompanyLErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      this.compname.value
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      case 'Missing email'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.missingEmail'
+        );
+      case 'Missing Company Name'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.missingVendorName'
+        );
+      case 'Missing Mobile number'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.missingPhoneNo'
+        );
+      case 'Missing Account Number'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.missingAccountNo'
+        );
+      case 'Missing Branch'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.missingBranchName'
+        );
+      case 'Missing Checker Status'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.makerChecker'
+        );
+      case 'Company name exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.vendorNameExists'
+        );
+      case 'Tin number exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.tinNumberExists'
+        );
+      case 'Mobile number exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.mobileExists'
+        );
+      default:
+        return this.tr.translate('auth.vendorRegistration.failedToAddVendor');
+    }
+  }
+  private assignAddCompanyLResponse(
+    result: HttpDataResponse<string | number | boolean>
+  ) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      let message = this.switchAddCompanyLErrorMessage(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        message
+      );
+    } else {
+      let message = this.tr.translate(
+        `auth.vendorRegistration.form.success.vendorAddedSuccessfully`
+      );
+      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      this.addedVendor.emit();
+    }
+  }
   private requestAddCompanyL(form: AddCompanyL) {
     this.startLoading = true;
     this.companyService
       .addCompanyL(form)
-      .then((results) => {
-        if (
-          typeof results.response === 'string' &&
-          results.response.toLocaleLowerCase() ==
-            'Mobile number already exist'.toLocaleLowerCase()
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(
-              `auth.vendorRegistration.form.errors.dialogs.mobileNumberExists`
-            )
-          );
-        } else if (
-          typeof results.response === 'string' &&
-          results.response.toLocaleLowerCase() == 'EXIST'.toLocaleLowerCase()
-        ) {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(
-              `auth.vendorRegistration.form.errors.dialogs.vendorExists`
-            )
-          );
-        } else {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(
-              `auth.vendorRegistration.form.success.vendorAddedSuccessfully`
-            )
-          );
-          this.addedVendor.emit();
-        }
+      .then((result) => {
+        this.assignAddCompanyLResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -228,6 +264,7 @@ export class VendorRegistrationComponent implements OnInit {
     let isErrorResult = AppUtilities.hasErrorResult(result);
     if (isErrorResult) {
       let errorMessage = this.switchCheckAccountErrorMessage(result.message[0]);
+      this.startLoading = false;
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`defaults.failed`),
@@ -236,6 +273,7 @@ export class VendorRegistrationComponent implements OnInit {
     }
     let isInValid = result.response;
     if (isInValid) {
+      this.startLoading = false;
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(
@@ -269,7 +307,7 @@ export class VendorRegistrationComponent implements OnInit {
       .checkAccount({ acc: this.accno.value })
       .then((result) => {
         this.parseCheckAccountResponse(result);
-        this.startLoading = false;
+        //this.startLoading = false;
         this.cdr.detectChanges();
       })
       .catch((err) => {
@@ -288,6 +326,7 @@ export class VendorRegistrationComponent implements OnInit {
     this.vendorFormGroup = this.fb.group({
       compsno: this.fb.control('0', [Validators.required]),
       compname: this.fb.control('', [Validators.required]),
+      userid: this.fb.control('0', []),
       mob: this.fb.control('', [
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
