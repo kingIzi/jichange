@@ -120,6 +120,10 @@ export class VendorComponent implements OnInit, AfterViewInit {
       '@customer',
       this.tr.translate(`vendorRoutes.customerReport`)
     );
+    this.breadcrumbService.set(
+      '@addInvoice',
+      this.tr.translate(`vendorRoutes.addInvoice`)
+    );
   }
   private routeLoaderListener() {
     this.router.events.subscribe((event) => {

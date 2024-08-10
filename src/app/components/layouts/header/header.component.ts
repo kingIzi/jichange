@@ -176,7 +176,10 @@ export class HeaderComponent implements OnInit {
               routerLink: this.fb.control(dropdown.routerLink, []),
               isActive: this.fb.control(false, []),
             });
-            (header.get('dropdowns') as FormArray).push(dropdownGroup);
+            if (dropdownIndex !== 2) {
+              (header.get('dropdowns') as FormArray).push(dropdownGroup);
+            }
+            //(header.get('dropdowns') as FormArray).push(dropdownGroup);
           }
         });
         this.headers.push(header);

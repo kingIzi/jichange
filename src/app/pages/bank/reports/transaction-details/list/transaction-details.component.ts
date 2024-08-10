@@ -77,6 +77,7 @@ import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-rep
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
+import { ReportFormInvoiceDetailsComponent } from '../../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 
 @Component({
   selector: 'app-transaction-details',
@@ -101,6 +102,7 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
     MatTableExporterModule,
     MatTooltipModule,
     ReportFormDetailsComponent,
+    ReportFormInvoiceDetailsComponent,
   ],
   providers: [
     DatePipe,

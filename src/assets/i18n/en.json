@@ -280,7 +280,8 @@
     "invoiceReport": "Invoice Report",
     "paymentReport": "Payment Report",
     "amendmentReport": "Amendment Report",
-    "customerReport": "Customer Report"
+    "customerReport": "Customer Report",
+    "addInvoice": "Add Invoice"
   },
   "roles": {
     "role": "Role",

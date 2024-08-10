@@ -10,6 +10,7 @@ export class GeneratedInvoice {
   Chus_Name!: string;
   Com_Mas_Sno!: number;
   Cmpny_Name!: string;
+  Company_Name!: string;
   Inv_Remarks!: string | null;
   Remarks!: string;
   vat_category!: string | null;

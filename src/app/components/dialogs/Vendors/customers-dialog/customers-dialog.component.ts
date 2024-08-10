@@ -171,10 +171,6 @@ export class CustomersDialogComponent implements OnInit {
         return this.tr.translate('customer.form.dialog.existsTin');
       case 'Exists email'.toLocaleLowerCase():
         return this.tr.translate('customer.form.dialog.existsEmail');
-      case 'Customer has invoice'.toLocaleLowerCase():
-        return this.tr.translate(
-          `customer.form.dialog.addFailedCustomerMappedToInvoice`
-        );
       default:
         return this.tr.translate(`customer.form.dialog.failedToAddCustomer`);
     }

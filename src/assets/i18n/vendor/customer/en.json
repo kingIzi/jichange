@@ -1,6 +1,7 @@
 {
   "customer": "Customer(s)",
   "addCustomer": "Add Customer",
+  "addInvoice": "Add invoice",
   "noCustomersFound": "There were no customers found.",
   "searchBy": "Search by name or email",
   "customersTable": [

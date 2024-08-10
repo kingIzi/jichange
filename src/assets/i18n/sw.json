@@ -107,7 +107,8 @@
     "invoiceReport": "Ripoti ya ankara",
     "paymentReport": "Ripoti ya Malipo",
     "amendmentReport": "Ripoti ya Marekebisho",
-    "customerReport": "Ripoti ya Wateja"
+    "customerReport": "Ripoti ya Wateja",
+    "addInvoice": "Ongeza ankra"
   },
   "roles": {
     "role": "Jukumu",

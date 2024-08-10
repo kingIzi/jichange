@@ -136,13 +136,6 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     });
     this.addItemDetail();
   }
-  private invoiceFormExistsMessage() {
-    AppUtilities.openDisplayMessageBox(
-      this.displayMessageBox,
-      this.tr.translate(`defaults.failed`),
-      this.tr.translate(`invoice.form.dialog.invoiceExists`)
-    );
-  }
   private retrieveQueryParams() {
     this.activatedRoute.queryParams.subscribe((params) => {
       if (params && params['invno']) {
@@ -433,6 +426,20 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         throw err;
       });
   }
+  private checkExistsCustomer() {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params && params['customerId']) {
+        let customerId = atob(params['customerId']);
+        let found = this.formData.customers.find((c) => {
+          return c.Cus_Mas_Sno === Number(customerId);
+        });
+        if (found) {
+          this.customerName.setValue(found.Customer_Name);
+          this.customerName.disable();
+        }
+      }
+    });
+  }
   private buildPage() {
     this.startLoading = true;
     let requests = this.getBuildPageRequests();
@@ -442,6 +449,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         let [customers, currencies] = results;
         this.assignCustomersFormData(customers);
         this.assignCurrenciesFormData(currencies);
+        this.checkExistsCustomer();
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -545,6 +553,8 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
       this.retrieveQueryParams();
     } else {
       this.createForm();
+      this.checkExistsCustomer();
+      this.buildPage();
     }
   }
   openCustomersDialog() {

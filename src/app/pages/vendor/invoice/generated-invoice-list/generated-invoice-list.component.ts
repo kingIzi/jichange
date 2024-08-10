@@ -146,7 +146,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
   ) {}
   //create formGroup for each header item in table
   private createHeadersForm() {
-    let TABLE_SHOWING = 7;
+    let TABLE_SHOWING = 8;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -350,6 +350,15 @@ export class GeneratedInvoiceListComponent implements OnInit {
           `bg-teal-100`,
           `text-teal-700`
         )} text-center w-fit`;
+      case 'goods_status':
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Approved',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
+        )} text-center w-fit`;
       case 'Total':
         return `${style} text-right`;
       default:
@@ -374,6 +383,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       case 'Payment_Type':
       case 'Control_No':
       case 'Invoice_Date':
+      case 'goods_status':
         return column.value;
       default:
         return '';

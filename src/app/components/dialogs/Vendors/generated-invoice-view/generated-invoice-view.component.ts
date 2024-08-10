@@ -142,7 +142,7 @@ export class GeneratedInvoiceViewComponent implements OnInit {
       this.generatedInvoice.Chus_Name
     );
     (this.issuedBy.get('fullName') as FormControl).setValue(
-      this.generatedInvoice.Cmpny_Name
+      this.generatedInvoice.Company_Name
     );
     this.discount.setValue('0%');
     this.remark.setValue(this.generatedInvoice.Remarks);

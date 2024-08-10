@@ -40,6 +40,11 @@
       "desc": "Sort by Control number"
     },
     {
+      "label": "Status",
+      "value": "goods_status",
+      "desc": ""
+    },
+    {
       "label": "Action(s)",
       "value": "Action",
       "desc": ""

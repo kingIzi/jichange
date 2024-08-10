@@ -65,6 +65,7 @@ const routes: Routes = [
                       reuseRoute: true,
                     },
                   },
+
                   {
                     path: ':id',
                     loadComponent: () =>
@@ -75,9 +76,22 @@ const routes: Routes = [
                       breadcrumb: {
                         alias: 'view-customer-transactions',
                         skip: false,
-                        reuseRoute: true,
                       },
                       animationState: 'isRight-3',
+                    },
+                  },
+                  {
+                    path: 'add/add',
+                    loadComponent: () =>
+                      import(
+                        '../../../pages/vendor/invoice/created-invoice-list/add-invoice/add-invoice.component'
+                      ).then((m) => m.AddInvoiceComponent),
+                    data: {
+                      breadcrumb: {
+                        alias: 'addInvoice',
+                        skip: false,
+                      },
+                      animationState: 'isRight-4',
                     },
                   },
                 ],

@@ -15,7 +15,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -58,6 +58,8 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-customer-view',
@@ -88,6 +90,7 @@ import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-rep
     DisplayMessageBoxComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -103,6 +106,7 @@ export class CustomerViewComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private appConfig: AppConfigService,
+    private router: Router,
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -419,6 +423,40 @@ export class CustomerViewComponent implements OnInit {
   }
   geTableDataColumnsObservable() {
     return this.tableDataService.getTableColumnsObservable();
+  }
+  openInvoiceDetailsDialog() {
+    // let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
+    //   width: '800px',
+    //   disableClose: true,
+    //   data: {
+    //     invid: null,
+    //     userProfile: this.getUserProfile(),
+    //     customerId: null,
+    //   },
+    // });
+    // dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
+    //   dialogRef.close();
+    //   //this.requestCreatedInvoiceList();
+    // });
+    // if (this.customer) {
+    //   let custid = btoa(this.customer.Cust_Sno.toString());
+    //   this.router.navigate([`/vendor/customers/${custid}`], {
+    //     queryParams: { customerId: btoa(this.customer.Cust_Sno.toString()) },
+    //   });
+    // }
+    let custid = btoa(this.customer.Cust_Sno.toString());
+    this.router.navigate([`/vendor/customers/${custid}/add/add`], {
+      queryParams: { customerId: btoa(this.customer.Cust_Sno.toString()) },
+    });
+  }
+  getAddInvoiceUrl() {
+    let baseUrl = '/vendor/customers';
+    if (this.customer) {
+      let sno = this.customer.Cust_Sno.toString();
+      return `${baseUrl}/${btoa(sno)}/transaction/add`;
+    } else {
+      return '';
+    }
   }
   get headers() {
     return this.headerFormGroup.get('headers') as FormArray;
