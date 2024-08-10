@@ -65,6 +65,22 @@ export class ConfirmDeliveryCodeComponent implements OnInit {
       mobile_no: this.fb.control('', [Validators.required]),
     });
   }
+  private parseConfirmDeliveryCodeResponse(result: any) {
+    let hasError = AppUtilities.hasErrorResult(result);
+    if (hasError) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`auth.deliveryCode.failedToConfirmDeliveryCode`)
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`auth.deliveryCode.confirmedSuccessfully`),
+        5000
+      );
+      this.router.navigate(['/auth']);
+    }
+  }
   private requestConfirmDeliveryCode(body: {
     code: number | string;
     mobile_no: string;
@@ -73,22 +89,7 @@ export class ConfirmDeliveryCodeComponent implements OnInit {
     this.invoiceService
       .confirmDeliveryCode(body)
       .then((result) => {
-        if (
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() === 'success'.toLocaleLowerCase()
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`auth.deliveryCode.confirmedSuccessfully`),
-            5000
-          );
-          this.router.navigate(['/auth']);
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`auth.deliveryCode.failedToConfirmDeliveryCode`)
-          );
-        }
+        this.parseConfirmDeliveryCodeResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
