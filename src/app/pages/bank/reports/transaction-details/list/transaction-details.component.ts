@@ -76,6 +76,7 @@ import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/repo
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
+import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 
 @Component({
   selector: 'app-transaction-details',
@@ -273,7 +274,7 @@ export class TransactionDetailsComponent implements OnInit {
       });
   }
   private createHeadersFormGroup() {
-    let TABLE_SHOWING = 7;
+    let TABLE_SHOWING = 8;
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -737,6 +738,14 @@ export class TransactionDetailsComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
+  getViewTransactionUrl(transaction: TransactionDetail) {
+    // '/main/reports/transactions/' +
+    //                         invoiceNumberToBase64(element.Invoice_Sno)
+    let baseUrl = '/main/reports/transactions';
+    let invoiceSno = btoa(transaction.Invoice_Sno);
+    let transactionId = btoa(transaction.Payment_Trans_No);
+    return `${baseUrl}/${invoiceSno}/${transactionId}`;
+  }
   isCashAmountColumn(index: number) {
     return (
       index === TransactionDetailsTableHeadersMap.TOTAL_AMOUNT ||
@@ -744,9 +753,9 @@ export class TransactionDetailsComponent implements OnInit {
       index === TransactionDetailsTableHeadersMap.BALANCE
     );
   }
-  invoiceNumberToBase64(invoice_number: string) {
-    return btoa(invoice_number);
-  }
+  // invoiceNumberToBase64(invoice_number: string) {
+  //   return btoa(invoice_number);
+  // }
   getTableDataSource() {
     return this.tableDataService.getDataSource();
   }

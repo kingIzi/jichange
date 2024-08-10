@@ -56,6 +56,9 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { TableDataService } from 'src/app/core/services/table-data.service';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-overview',
@@ -80,6 +83,10 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'bank/reports', alias: 'reports' },
     },
+    {
+      provide: VENDOR_TABLE_DATA_SERVICE,
+      useClass: TableDataService,
+    },
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
@@ -99,19 +106,19 @@ export class OverviewComponent implements OnInit, AfterViewInit {
   // public invoicePieChartLoading: boolean = false;
   public buildPageLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  public tableData: {
-    latestTransactions: TransactionDetail[];
-    originalTableColumns: TableColumnsData[];
-    tableColumns: TableColumnsData[];
-    tableColumns$: Observable<TableColumnsData[]>;
-    dataSource: MatTableDataSource<TransactionDetail>;
-  } = {
-    latestTransactions: [],
-    originalTableColumns: [],
-    tableColumns: [],
-    tableColumns$: of([]),
-    dataSource: new MatTableDataSource<TransactionDetail>([]),
-  };
+  // public tableData: {
+  //   latestTransactions: TransactionDetail[];
+  //   originalTableColumns: TableColumnsData[];
+  //   tableColumns: TableColumnsData[];
+  //   tableColumns$: Observable<TableColumnsData[]>;
+  //   dataSource: MatTableDataSource<TransactionDetail>;
+  // } = {
+  //   latestTransactions: [],
+  //   originalTableColumns: [],
+  //   tableColumns: [],
+  //   tableColumns$: of([]),
+  //   dataSource: new MatTableDataSource<TransactionDetail>([]),
+  // };
   public graphData: {
     transactions: TransactionDetail[];
     invoiceStatistics: DashboardOverviewStatistic[];
@@ -129,6 +136,8 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     private tr: TranslocoService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
+    @Inject(VENDOR_TABLE_DATA_SERVICE)
+    private tableDataService: TableDataService<TransactionDetail>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersFormGroup() {
@@ -140,34 +149,37 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     this.tr
       .selectTranslate(`overview.vendorsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        this.tableData.originalTableColumns = labels;
-        this.tableData.originalTableColumns.forEach((column, index) => {
-          let col = this.fb.group({
-            included: this.fb.control(
-              index === 0
-                ? false
-                : index < TABLE_SHOWING || index === labels.length - 1,
-              []
-            ),
-            label: this.fb.control(column.label, []),
-            value: this.fb.control(column.value, []),
+        //this.tableData.originalTableColumns = labels;
+        this.tableDataService.setOriginalTableColumns(labels);
+        this.tableDataService
+          .getOriginalTableColumns()
+          .forEach((column, index) => {
+            let col = this.fb.group({
+              included: this.fb.control(
+                index === 0
+                  ? false
+                  : index < TABLE_SHOWING || index === labels.length - 1,
+                []
+              ),
+              label: this.fb.control(column.label, []),
+              value: this.fb.control(column.value, []),
+            });
+            col.get(`included`)?.valueChanges.subscribe((included) => {
+              this.resetTableColumns();
+            });
+            if (index === labels.length - 1) {
+              col.disable();
+            }
+            this.headers.push(col);
           });
-          col.get(`included`)?.valueChanges.subscribe((included) => {
-            this.resetTableColumns();
-          });
-          if (index === labels.length - 1) {
-            col.disable();
-          }
-          this.headers.push(col);
-        });
         this.resetTableColumns();
       });
     this.tableSearch.valueChanges.subscribe((value) => {
-      this.searchTable(value, this.paginator);
+      this.tableDataService.searchTable(value);
     });
   }
   private resetTableColumns() {
-    this.tableData.tableColumns = this.headers.controls
+    let tableColumns = this.headers.controls
       .filter((header) => header.get('included')?.value)
       .map((header) => {
         return {
@@ -176,14 +188,16 @@ export class OverviewComponent implements OnInit, AfterViewInit {
           desc: header.get('desc')?.value,
         } as TableColumnsData;
       });
-    this.tableData.tableColumns$ = of(this.tableData.tableColumns);
+    this.tableDataService.setTableColumns(tableColumns);
+    this.tableDataService.setTableColumnsObservable(tableColumns);
+    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private searchTable(searchText: string, paginator: MatPaginator) {
-    this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-    if (this.tableData.dataSource.paginator) {
-      this.tableData.dataSource.paginator.firstPage();
-    }
-  }
+  // private searchTable(searchText: string, paginator: MatPaginator) {
+  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
+  //   if (this.tableData.dataSource.paginator) {
+  //     this.tableData.dataSource.paginator.firstPage();
+  //   }
+  // }
   private transactionsLineChartDataset(transactions: TransactionDetail[]) {
     let labels = [];
     let paymentAmounts = [];
@@ -295,20 +309,15 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     });
   }
   private dataSourceFilter() {
-    this.tableData.dataSource.filterPredicate = (
-      data: TransactionDetail,
-      filter: string
-    ) => {
+    let filterPredicate = (data: TransactionDetail, filter: string) => {
       return data.Invoice_Sno.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
       );
     };
+    this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
   private dataSourceSortingAccessor() {
-    this.tableData.dataSource.sortingDataAccessor = (
-      item: any,
-      property: string
-    ) => {
+    let sortingDataAccessor = (item: any, property: string) => {
       switch (property) {
         case 'Payment_Date':
           return new Date(item['Payment_Date']);
@@ -316,24 +325,18 @@ export class OverviewComponent implements OnInit, AfterViewInit {
           return item[property];
       }
     };
+    this.tableDataService.setDataSourceFilterPredicate(sortingDataAccessor);
   }
-  private prepareDataSource() {
-    this.tableData.dataSource = new MatTableDataSource<TransactionDetail>(
-      this.tableData.latestTransactions
-    );
-    this.tableData.dataSource.paginator = this.paginator;
-    this.tableData.dataSource.sort = this.sort;
-    this.dataSourceFilter();
-    this.dataSourceSortingAccessor();
-  }
-  private buildPage() {
-    // let transactionsForm = {
-    //   branch: this.getUserProfile().braid,
-    //   compid: 'all',
-    //   cusid: 'all',
-    //   stdate: '',
-    //   enddate: '',
-    // } as TransactionDetailsReportForm;
+  // private prepareDataSource() {
+  //   this.tableData.dataSource = new MatTableDataSource<TransactionDetail>(
+  //     this.tableData.latestTransactions
+  //   );
+  //   this.tableData.dataSource.paginator = this.paginator;
+  //   this.tableData.dataSource.sort = this.sort;
+  //   this.dataSourceFilter();
+  //   this.dataSourceSortingAccessor();
+  // }
+  private getBuildPageRequests() {
     let transactionsForm = {
       companyIds: [0],
       customerIds: [0],
@@ -341,7 +344,6 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       enddate: '',
     } as InvoiceReportForm;
     let invoiceForm = {
-      // branch: this.getUserProfile().braid,
       branch: Number(this.getUserProfile().braid),
       companyIds: [0],
       customerIds: [0],
@@ -371,6 +373,51 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       invoiceObs,
       latestTransactionsObs
     );
+    return merged;
+  }
+  private parseTransactionsListResponse(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.graphData.transactions = [];
+    } else {
+      this.graphData.transactions = result.response as TransactionDetail[];
+    }
+  }
+  private parseInvoiceStatisticsResponse(
+    result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.graphData.invoiceStatistics = [];
+    } else {
+      this.graphData.invoiceStatistics =
+        result.response as DashboardOverviewStatistic[];
+    }
+  }
+  private parseInvoiceListResponse(
+    result: HttpDataResponse<number | InvoiceReport[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.graphData.invoices = [];
+    } else {
+      this.graphData.invoices = result.response as InvoiceReport[];
+    }
+  }
+  private parseLatestTransactionsResponse(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      this.tableDataService.setData([]);
+    } else {
+      this.tableDataService.setData(result.response as TransactionDetail[]);
+    }
+  }
+  private buildPage() {
+    let merged = this.getBuildPageRequests();
     let res = AppUtilities.pipedObservables(merged);
     res
       .then((results) => {
@@ -380,33 +427,43 @@ export class OverviewComponent implements OnInit, AfterViewInit {
           invoiceList,
           latestTransactionsList,
         ] = results;
-        if (
-          typeof transactionsList.response !== 'number' &&
-          typeof transactionsList.response !== 'string'
-        ) {
-          this.graphData.transactions = transactionsList.response;
-        }
-        if (
-          typeof invoiceStats.response !== 'string' &&
-          typeof invoiceStats.response !== 'number'
-        ) {
-          this.graphData.invoiceStatistics = invoiceStats.response;
-        }
-        if (
-          typeof invoiceList.response !== 'string' &&
-          typeof invoiceList.response !== 'number'
-        ) {
-          this.graphData.invoices = invoiceList.response;
-        }
-        if (
-          typeof latestTransactionsList.response !== 'string' &&
-          typeof latestTransactionsList.response !== 'number'
-        ) {
-          this.tableData.latestTransactions = latestTransactionsList.response;
-        }
+        // if (
+        //   typeof transactionsList.response !== 'number' &&
+        //   typeof transactionsList.response !== 'string'
+        // ) {
+        //   this.graphData.transactions = transactionsList.response;
+        // }
+        // if (
+        //   typeof invoiceStats.response !== 'string' &&
+        //   typeof invoiceStats.response !== 'number'
+        // ) {
+        //   this.graphData.invoiceStatistics = invoiceStats.response;
+        // }
+        // if (
+        //   typeof invoiceList.response !== 'string' &&
+        //   typeof invoiceList.response !== 'number'
+        // ) {
+        //   this.graphData.invoices = invoiceList.response;
+        // }
+        // if (
+        //   typeof latestTransactionsList.response !== 'string' &&
+        //   typeof latestTransactionsList.response !== 'number'
+        // ) {
+        //   this.tableData.latestTransactions = latestTransactionsList.response;
+        // }
+        // this.createTransactionsChart(this.graphData.transactions);
+        // this.createInvoiceTypePieChart(this.graphData.invoices);
+        // this.prepareDataSource();
+        this.parseTransactionsListResponse(transactionsList);
+        this.parseInvoiceStatisticsResponse(invoiceStats);
+        this.parseInvoiceListResponse(invoiceList);
+        this.parseLatestTransactionsResponse(latestTransactionsList);
         this.createTransactionsChart(this.graphData.transactions);
         this.createInvoiceTypePieChart(this.graphData.invoices);
-        this.prepareDataSource();
+        this.tableDataService.prepareDataSource(this.paginator, this.sort);
+        this.dataSourceFilter();
+        this.dataSourceSortingAccessor();
+
         this.buildPageLoading = false;
         this.cdr.detectChanges();
       })
@@ -477,7 +534,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     switch (key) {
       case 'No.':
         return PerformanceUtils.getIndexOfItem(
-          this.tableData.latestTransactions,
+          this.tableDataService.getData(),
           element
         );
       case 'Payment_Date':
@@ -526,6 +583,18 @@ export class OverviewComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/main']);
         break;
     }
+  }
+  getTableDataSource() {
+    return this.tableDataService.getDataSource();
+  }
+  getTableDataList() {
+    return this.tableDataService.getData();
+  }
+  getTableDataColumns() {
+    return this.tableDataService.getTableColumns();
+  }
+  geTableDataColumnsObservable() {
+    return this.tableDataService.getTableColumnsObservable();
   }
   get headers() {
     return this.headersFormGroup.get(`headers`) as FormArray;

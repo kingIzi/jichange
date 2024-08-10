@@ -149,11 +149,17 @@
           </option>
         </ng-container>
         <ng-container *ngIf="selectDepositAccountList.length > 0">
-          <option
+          <!-- <option
             *ngFor="let depositAccount of selectDepositAccountList"
             [value]="depositAccount.Deposit_Acc_No"
           >
             {{ depositAccount.Deposit_Acc_No }}
+          </option> -->
+          <option
+            *ngFor="let depositAccount of selectDepositAccountList"
+            [value]="depositAccount.AccountNo"
+          >
+            {{ depositAccount.AccountNo }}
           </option>
         </ng-container>
       </select>

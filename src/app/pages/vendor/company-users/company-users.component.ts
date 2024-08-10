@@ -22,6 +22,7 @@ import {
 } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -66,6 +67,7 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   templateUrl: './company-users.component.html',
   styleUrl: './company-users.component.scss',

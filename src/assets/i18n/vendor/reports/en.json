@@ -15,7 +15,9 @@
       "users": "Users",
       "pendings": "Pendings",
       "due": "Due",
-      "expired": "Expired"
+      "expired": "Expired",
+      "vendor": "Vendor",
+      "customers": "Customer"
     }
   },
   "transactionDetails": {

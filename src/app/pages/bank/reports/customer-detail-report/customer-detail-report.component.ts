@@ -76,6 +76,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-details-form';
 
 @Component({
   selector: 'app-customer-detail-report',
@@ -454,7 +455,7 @@ export class CustomerDetailReportComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
-  private requestCustomerDetails(form: any) {
+  private requestCustomerDetails(form: CustomerDetailsForm) {
     this.tableLoading = true;
     this.reportsService
       .postCustomerDetailsReport(form)
@@ -594,7 +595,47 @@ export class CustomerDetailReportComponent implements OnInit {
     if (this.tableFilterFormGroup.valid) {
       let form = { ...this.tableFilterFormGroup.value };
       form.branch = this.branch.value;
-      this.requestCustomerDetails(form);
+      let compid = Number(this.Comp.value);
+      let vendors: number[] = [];
+      if (compid > 0) {
+        vendors = [compid];
+      } else if (compid === 0 && this.filterFormData.companies.length > 0) {
+        vendors = this.filterFormData.companies.map((c) => {
+          return c.CompSno;
+        });
+      } else {
+        vendors = [];
+      }
+
+      // let reg = Number(this.reg.value);
+      // let regions: number[] = [];
+      // if (reg > 0) {
+      //   regions = [reg];
+      // } else if (reg === 0 && this.filterFormData.regions.length > 0) {
+      //   regions = this.filterFormData.regions.map((r) => {
+      //     return r.Region_SNO;
+      //   });
+      // } else {
+      //   regions = [];
+      // }
+
+      // let dist = Number(this.reg.value);
+      // let districts: number[] = [];
+      // if (dist > 0) {
+      //   districts = [dist];
+      // } else if (dist === 0 && this.filterFormData.districts.length > 0) {
+      //   districts = this.filterFormData.districts.map((r) => {
+      //     return r.SNO;
+      //   });
+      // } else {
+      //   districts = [];
+      // }
+
+      let body = {
+        vendors: vendors,
+      } as CustomerDetailsForm;
+
+      this.requestCustomerDetails(body);
     } else {
       this.tableFilterFormGroup.markAllAsTouched();
     }

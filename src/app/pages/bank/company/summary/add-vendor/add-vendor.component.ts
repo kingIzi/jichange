@@ -406,28 +406,31 @@ export class AddVendorComponent implements OnInit {
       this.resetForm();
     }
   }
+  private switchCompanyInforErrorMessage(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'User'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate(`company.summary.noVendorFound`);
+    }
+  }
   private assignCompanyInfo(
     result: HttpDataResponse<string | number | Company>
   ) {
-    if (
-      result.response &&
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number'
-    ) {
-      this.company = of(result.response);
-      this.company.subscribe((company) => {
-        this.createEditForm(company);
-      });
-    } else {
-      let dialog = this.companyNotFound.displayMessageDialog.nativeElement;
-      dialog.addEventListener('close', () => {
-        this.location.back();
-      });
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult || !result.response) {
+      let message = this.switchCompanyInforErrorMessage(result.message[0]);
       AppUtilities.openDisplayMessageBox(
         this.companyNotFound,
         this.tr.translate(`defaults.failed`),
-        this.tr.translate(`company.summary.noVendorFound`)
+        message
       );
+    } else {
+      this.createEditForm(result.response as Company);
     }
   }
   private buildPage() {

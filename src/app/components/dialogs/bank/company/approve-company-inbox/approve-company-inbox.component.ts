@@ -34,7 +34,7 @@ import { Company } from 'src/app/core/models/bank/company/company';
 import { DisplayMessageBoxComponent } from '../../../display-message-box/display-message-box.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { SuspenseAccountService } from 'src/app/core/services/bank/setup/suspense-account/suspense-account.service';
-import { TimeoutError, tap } from 'rxjs';
+import { Observable, TimeoutError, of, tap } from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { SuspenseAccount } from 'src/app/core/models/bank/setup/suspense-account';
 import { CompanyApprovalForm } from 'src/app/core/models/bank/forms/company/inbox-approval/company-approval-form';
@@ -42,12 +42,16 @@ import { ApprovalService } from 'src/app/core/services/bank/company/inbox-approv
 import { SuccessMessageBoxComponent } from '../../../success-message-box/success-message-box.component';
 import { SubmitMessageBoxComponent } from '../../../submit-message-box/submit-message-box.component';
 import { SuspenseAccountDialogComponent } from '../../setup/suspense-account-dialog/suspense-account-dialog.component';
-import { DepositAccount } from 'src/app/core/models/bank/setup/deposit-account';
+import {
+  BankAccount,
+  DepositAccount,
+} from 'src/app/core/models/bank/setup/deposit-account';
 import { DepositAccountService } from 'src/app/core/services/bank/setup/deposit-account/deposit-account.service';
 import { DepositAccountDialogComponent } from '../../setup/deposit-account-dialog/deposit-account-dialog.component';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 
 @Component({
   selector: 'app-approve-company-inbox',
@@ -79,8 +83,9 @@ export class ApproveCompanyInboxComponent implements OnInit {
   public formGroup!: FormGroup;
   public accountPool: FormControl = this.fb.control('', []);
   public selectAccountList: SuspenseAccount[] = [];
-  public selectDepositAccountList: DepositAccount[] = [];
+  public selectDepositAccountList: Company[] = [];
   public approved = new EventEmitter<any>();
+  public company$: Observable<Company> = of();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -99,6 +104,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
     private suspenseAccountService: SuspenseAccountService,
     private depositAccountService: DepositAccountService,
     private approvalService: ApprovalService,
+    private companyService: CompanyService,
     private dialogRef: MatDialogRef<ApproveCompanyInboxComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { company: Company }
   ) {}
@@ -126,10 +132,13 @@ export class ApproveCompanyInboxComponent implements OnInit {
         );
       } else {
         let foundIndex = this.selectDepositAccountList.findIndex((account) =>
-          account.Deposit_Acc_No.localeCompare(value)
+          //account.Deposit_Acc_No.localeCompare(value)
+          {
+            return account.CompSno === Number(value);
+          }
         );
         this.suspenseAccSno.setValue(
-          this.selectDepositAccountList.at(foundIndex)?.Comp_Dep_Acc_Sno
+          this.selectDepositAccountList.at(foundIndex)?.BankSno
         );
       }
     });
@@ -174,7 +183,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
       });
   }
   private parseActiveDepositAccountsListResponse(
-    result: HttpDataResponse<number | DepositAccount[]>
+    result: HttpDataResponse<number | Company[]>
   ) {
     let hasErrors = AppUtilities.hasErrorResult(result);
     if (hasErrors) {
@@ -185,28 +194,48 @@ export class ApproveCompanyInboxComponent implements OnInit {
           'company.inboxApproval.failedToRetrieveSuspenseAccount'
         )
       );
-    } else if ((result.response as DepositAccount[]).length === 0) {
+    } else if ((result.response as Company[]).length === 0) {
       this.selectDepositAccountList = [];
       this.noDepositAccountFound.nativeElement.showModal();
     } else {
-      this.selectDepositAccountList = result.response as DepositAccount[];
+      this.selectDepositAccountList = result.response as Company[];
     }
   }
   private requestActiveDepositAccountsList() {
+    // this.startLoading = true;
+    // this.depositAccountService
+    //   .getDepositAccountList({})
+    //   .then((result) => {
+    //     // if (
+    //     //   (typeof result.message === 'string' &&
+    //     //     result.message.toLocaleLowerCase() ==
+    //     //       'failed'.toLocaleLowerCase()) ||
+    //     //   typeof result.response === 'number'
+    //     // ) {
+    //     //   this.noDepositAccountFound.nativeElement.showModal();
+    //     // } else {
+    //     //   this.selectDepositAccountList = result.response;
+    //     // }
+    //     this.parseActiveDepositAccountsListResponse(result);
+    //     this.startLoading = false;
+    //     this.cdr.detectChanges();
+    //   })
+    //   .catch((err) => {
+    //     AppUtilities.requestFailedCatchError(
+    //       err,
+    //       this.displayMessageBox,
+    //       this.tr
+    //     );
+    //     this.startLoading = false;
+    //     this.cdr.detectChanges();
+    //     throw err;
+    //   });
     this.startLoading = true;
     this.depositAccountService
-      .getDepositAccountList({})
+      .getBankAccountsByCompany({
+        compid: this.formGroup.get('compsno')?.value,
+      })
       .then((result) => {
-        // if (
-        //   (typeof result.message === 'string' &&
-        //     result.message.toLocaleLowerCase() ==
-        //       'failed'.toLocaleLowerCase()) ||
-        //   typeof result.response === 'number'
-        // ) {
-        //   this.noDepositAccountFound.nativeElement.showModal();
-        // } else {
-        //   this.selectDepositAccountList = result.response;
-        // }
         this.parseActiveDepositAccountsListResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -302,9 +331,45 @@ export class ApproveCompanyInboxComponent implements OnInit {
         throw err;
       });
   }
+  private parseCompanyByIdResponse(
+    result: HttpDataResponse<string | number | Company>
+  ) {
+    let hasError = AppUtilities.hasErrorResult(result);
+    if (hasError) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate('defaults.failed'),
+        this.tr.translate('errors.notFound')
+      );
+    } else {
+      this.company$ = of(result.response as Company);
+    }
+  }
+  private requestCompanyById(compsno: number) {
+    this.startLoading = true;
+    this.companyService
+      .getCompanyById({ Sno: compsno })
+      .then((result) => {
+        this.parseCompanyByIdResponse(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      })
+      .catch((err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      });
+  }
   ngOnInit(): void {
     if (this.data.company) {
       this.createFormGroup(this.data.company);
+      let compsno = this.formGroup.get('compsno')?.value;
+      this.requestCompanyById(Number(compsno));
     }
     this.accountPoolChangeEventListener();
     this.depositAccNoChangedEventListener();

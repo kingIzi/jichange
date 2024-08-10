@@ -205,8 +205,13 @@
         "desc": ""
       },
       {
-        "label": "Kitendo",
+        "label": "Hali",
         "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Kitendo",
+        "value": "",
         "desc": ""
       }
     ]

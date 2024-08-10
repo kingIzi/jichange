@@ -50,5 +50,6 @@ export const VENDOR_TABLE_DATA_SERVICE = new InjectionToken<
     | CancelledInvoice
     | PaymentDetail
     | CompanyUser
+    | TransactionDetail
   >
 >('VENDOR_TABLE_DATA_SERVICE');

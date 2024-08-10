@@ -95,8 +95,8 @@
                         '/vendor/customers/' +
                         encodeCustomerId(element.Cust_Sno)
                       "
-                      class="btn btn-sm btn-ghost border-warning tooltip tooltip-bottom"
-                      [attr.data-tip]="t('view')"
+                      class="btn btn-sm btn-ghost border-warning"
+                      matTooltip="{{ t('view') }}"
                     >
                       <span class="text-warning">
                         <i class="bi bi-eye text-lg"></i>
@@ -105,8 +105,8 @@
                     <button
                       *transloco="let t; read: 'actions'"
                       (click)="openCustomerEditDialog(element)"
-                      class="btn btn-sm btn-ghost border-info tooltip tooltip-bottom"
-                      [attr.data-tip]="t('edit')"
+                      class="btn btn-sm btn-ghost border-info"
+                      matTooltip="{{ t('edit') }}"
                     >
                       <span class="text-lg text-info">
                         <i class="bi bi-pen text-lg"></i>
@@ -118,7 +118,7 @@
                         openRemoveDialog(element.Cust_Sno, removeItemDialog)
                       "
                       class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-left"
-                      [attr.data-tip]="t('delete')"
+                      matTooltip="{{ t('delete') }}"
                     >
                       <span class="text-lg text-danger-600">
                         <i class="bi bi-trash text-lg"></i>
@@ -218,8 +218,8 @@
                           '/vendor/customers/' +
                           encodeCustomerId(element.Cust_Sno)
                         "
-                        class="btn btn-sm btn-ghost border-warning tooltip tooltip-left"
-                        [attr.data-tip]="t('view')"
+                        class="btn btn-sm btn-ghost border-warning"
+                        matTooltip="{{ t('view') }}"
                       >
                         <span class="text-warning">
                           <i class="bi bi-eye text-lg"></i>
@@ -228,8 +228,8 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         (click)="openCustomerEditDialog(element)"
-                        class="btn btn-sm btn-ghost border-info tooltip tooltip-left"
-                        [attr.data-tip]="t('edit')"
+                        class="btn btn-sm btn-ghost border-info"
+                        matTooltip="{{ t('edit') }}"
                       >
                         <span class="text-lg text-info">
                           <i class="bi bi-pen text-lg"></i>
@@ -240,8 +240,8 @@
                         (click)="
                           openRemoveDialog(element.Cust_Sno, removeItemDialog)
                         "
-                        class="btn btn-sm btn-ghost border-danger-600 tooltip tooltip-left"
-                        [attr.data-tip]="t('delete')"
+                        class="btn btn-sm btn-ghost border-danger-600"
+                        matTooltip="{{ t('delete') }}"
                       >
                         <span class="text-lg text-danger-600">
                           <i class="bi bi-trash text-lg"></i>

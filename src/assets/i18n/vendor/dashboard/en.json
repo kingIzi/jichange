@@ -12,11 +12,12 @@
       "createInvoice": "Create invoice",
       "statisticsData": {
         "transaction": "Transaction(s)",
-        "customer": "Customer(s)",
+        "customers": "Customer(s)",
         "users": "User(s)",
         "pendings": "Pending(s)",
         "due": "Due",
-        "expired": "Expired"
+        "expired": "Expired",
+        "vendor": "Vendor(s)"
       }
     },
     "transaction": {

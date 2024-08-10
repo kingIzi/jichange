@@ -76,7 +76,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   public invoiceItems: Observable<GeneratedInvoice[]> = of([]);
   public filteredCustomers: Observable<CustomerName[]> = of([]);
   public itemDetailQuantities: number[] = Array.from(
-    { length: 19 - 1 + 1 },
+    { length: 999 - 1 + 1 },
     (_, i) => 1 + i
   );
   public formData: {

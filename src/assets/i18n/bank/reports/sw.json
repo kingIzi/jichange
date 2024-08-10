@@ -246,6 +246,16 @@
         "desc": ""
       },
       {
+        "label": "Muuzaji",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Mteja",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
         "label": "Nambari ya Ankara",
         "value": "Invoice_Sno",
         "desc": ""
@@ -253,11 +263,6 @@
       {
         "label": "Kutoka",
         "value": "Payer_Name",
-        "desc": ""
-      },
-      {
-        "label": "Kwenda",
-        "value": "Customer_Name",
         "desc": ""
       },
       {

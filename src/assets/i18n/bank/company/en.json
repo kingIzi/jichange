@@ -205,8 +205,13 @@
         "desc": ""
       },
       {
-        "label": "Action",
+        "label": "Status",
         "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "",
         "desc": ""
       }
     ]

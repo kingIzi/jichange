@@ -13,16 +13,17 @@
       "Nambari ya Simu",
       "Hali"
     ],
-    "invoiceChart": "Muhtasari wa Invoice(s)",
+    "invoiceChart": "Muhtasari wa Invoice",
     "statistics": "Takwimu",
-    "salesSummary": "Muhtasari wa Uuzaji(s)",
+    "salesSummary": "Muhtasari wa Uuzaji",
     "statisticsData": {
       "transaction": "Muamala/Miamala",
-      "customer": "Mteja/Wateja",
+      "customers": "Mteja/Wateja",
       "users": "Mtumiaji/Watumiaji",
       "pendings": "Inayosubiri/Inazosubiri",
       "due": "Inayostahili",
-      "expired": "Imeisha Muda"
+      "expired": "Imeisha Muda",
+      "vendor": "Wauzaji"
     }
   },
   "transactionDetails": {

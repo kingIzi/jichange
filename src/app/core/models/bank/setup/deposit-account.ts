@@ -7,3 +7,13 @@ export class DepositAccount {
   Company!: string;
   Audit_Date!: string | null;
 }
+
+export class BankAccount {
+  AuditBy!: number | string;
+  Audit_Date!: number | string;
+  Comp_Dep_Acc_Sno!: number | string;
+  Comp_Mas_Sno!: number | string;
+  Company!: number | string;
+  Deposit_Acc_No!: number | string;
+  Reason!: number | string;
+}

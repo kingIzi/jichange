@@ -118,8 +118,8 @@
                     <button
                       *transloco="let t; read: 'actions'"
                       class="btn btn-sm btn-ghost tooltip border-info tooltip-bottom"
-                      [attr.data-tip]="t('edit')"
                       (click)="openEditCompanyUserDialog(element)"
+                      matTooltip="{{ t('edit') }}"
                     >
                       <span class="text-lg text-info">
                         <i class="bi bi-pen text-lg"></i>
@@ -213,8 +213,8 @@
                       <button
                         *transloco="let t; read: 'actions'"
                         class="btn btn-sm btn-ghost tooltip border-info tooltip-left"
-                        [attr.data-tip]="t('edit')"
                         (click)="openEditCompanyUserDialog(element)"
+                        matTooltip="{{ t('edit') }}"
                       >
                         <span class="text-lg text-info">
                           <i class="bi bi-pen text-lg"></i>

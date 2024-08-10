@@ -80,7 +80,8 @@
       "dueDate": "Tafadhali toa tarehe ya kulipwa.",
       "paymentType": "Tafadhali toa aina ya malipo.",
       "details": "Tafadhali ongeza angalau kipengee kimoja cha ankara.",
-      "reason": "Tafadhali toa sababu."
+      "reason": "Tafadhali toa sababu.",
+      "modifyItems": "Tafadhali rekebisha vipengee vya ankara ili kurekebisha ankara."
     }
   },
   "errors": {

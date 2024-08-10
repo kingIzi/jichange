@@ -80,7 +80,8 @@
       "dueDate": "Please provide a due date.",
       "paymentType": "Please provide a payment type.",
       "details": "Please add at least one invoice item.",
-      "reason": "Please provide a reason."
+      "reason": "Please provide a reason.",
+      "modifyItems": "Please modify invoice items to amend invoice."
     }
   },
   "errors": {

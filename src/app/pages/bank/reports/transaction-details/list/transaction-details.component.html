@@ -136,10 +136,7 @@
                     <div class="flex flex-row items-center space-x-2">
                       <button
                         *transloco="let t; read: 'actions'"
-                        [routerLink]="
-                          '/main/reports/transactions/' +
-                          invoiceNumberToBase64(element.Invoice_Sno)
-                        "
+                        [routerLink]="getViewTransactionUrl(element)"
                         class="btn btn-sm bg-transparent border-warning"
                         matTooltip="{{ t('view') }}"
                       >
@@ -236,10 +233,7 @@
                       >
                         <button
                           *transloco="let t; read: 'actions'"
-                          [routerLink]="
-                            '/main/reports/transactions/' +
-                            invoiceNumberToBase64(element.Invoice_Sno)
-                          "
+                          [routerLink]="getViewTransactionUrl(element)"
                           class="btn btn-sm bg-transparent border-warning"
                           matTooltip="{{ t('view') }}"
                         >

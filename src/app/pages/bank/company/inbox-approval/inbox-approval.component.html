@@ -212,9 +212,11 @@
                       else actionTemplate
                     "
                   >
-                    <p [class]="tableValueStyle(element, column.value)">
-                      {{ tableValue(element, column.value) }}
-                    </p>
+                    <ng-container>
+                      <p [class]="tableValueStyle(element, column.value)">
+                        {{ tableValue(element, column.value) }}
+                      </p>
+                    </ng-container>
                   </ng-container>
                   <ng-template #actionTemplate>
                     <div class="flex flex-row items-center justify-end">

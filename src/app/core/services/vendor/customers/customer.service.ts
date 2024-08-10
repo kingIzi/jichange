@@ -6,6 +6,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { Customer } from 'src/app/core/models/vendors/customer';
 import { CustomerReportForm } from 'src/app/core/models/vendors/forms/customer-report-form';
 import { DeleteBankUserForm as DeleteCustomerForm } from 'src/app/core/models/bank/forms/setup/bank-user/delete-bank-user-form';
+import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-details-form';
 
 @Injectable({
   providedIn: 'root',
@@ -30,11 +31,13 @@ export class CustomerService {
     );
     return data;
   }
-  public async getCustomersList(body: CustomerReportForm) {
+  public async getCustomersList(
+    body: CustomerReportForm | CustomerDetailsForm
+  ) {
     let data = await lastValueFrom(
       this.client.performPost<
-        CustomerReportForm,
-        HttpDataResponse<Customer[] | string | number>
+        CustomerReportForm | CustomerDetailsForm,
+        HttpDataResponse<Customer[] | number>
       >(`/api/RepCustomer/getcustdetreport`, body)
     );
     return data;

@@ -210,6 +210,16 @@
         "desc": ""
       },
       {
+        "label": "Vendor",
+        "value": "Company_Name",
+        "desc": ""
+      },
+      {
+        "label": "Customer",
+        "value": "Customer_Name",
+        "desc": ""
+      },
+      {
         "label": "Invoice N°",
         "value": "Invoice_Sno",
         "desc": ""
@@ -217,11 +227,6 @@
       {
         "label": "From",
         "value": "Payer_Name",
-        "desc": ""
-      },
-      {
-        "label": "To",
-        "value": "Customer_Name",
         "desc": ""
       },
       {

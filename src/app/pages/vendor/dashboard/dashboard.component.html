@@ -36,13 +36,13 @@
         >
           {{ t(statistic.Name.toLocaleLowerCase()) }}
         </h4>
-        <a
+        <!-- <a
           (click)="dashboardStatisticRouterLink(statistic.Name)"
           *transloco="let t; read: 'panel.dashboard.overview'"
           class="text-xs text-primary font-inter hover:underline cursor-pointer"
         >
           {{ t("viewMore") }}
-        </a>
+        </a> -->
       </div>
     </ng-container>
     <ng-template #noInvoiceStatisticsFound>
@@ -137,7 +137,8 @@
         <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
           <div class="grid place-items-center">
             <p class="text-sm font-bold text-purple-700">
-              {{ graphData.invoicePieChartLabels[0] }}
+              <!-- {{ graphData.invoicePieChartLabels[0] }} -->
+              Fixed
             </p>
             <p class="text-lg lg:text-xl font-normal text-purple-700">
               {{
@@ -149,7 +150,8 @@
           </div>
           <div class="grid place-items-center">
             <p class="text-sm font-semibold text-teal-700">
-              {{ graphData.invoicePieChartLabels[1] }}
+              <!-- {{ graphData.invoicePieChartLabels[1] }} -->
+              Flexible
             </p>
             <p class="text-lg lg:text-xl font-normal text-teal-700">
               {{

@@ -292,6 +292,7 @@ export class InboxApprovalComponent implements OnInit {
       case 'Email':
       case 'MobNo':
       case 'Address':
+      case 'Status':
         return column.value;
       default:
         return '';
@@ -312,7 +313,14 @@ export class InboxApprovalComponent implements OnInit {
       case 'CompName':
         return `${style} text-black font-semibold`;
       case 'Status':
-        return `right-0 absolute`;
+        return `${PerformanceUtils.getActiveStatusStyles(
+          element[key],
+          'Approved',
+          'bg-green-100',
+          'text-green-700',
+          'bg-orange-100',
+          'text-orange-700'
+        )} text-center w-fit`;
       default:
         return `${style} text-black font-normal`;
     }

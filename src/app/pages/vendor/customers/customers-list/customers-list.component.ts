@@ -60,6 +60,8 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { DeleteBankUserForm as DeleteCustomerForm } from 'src/app/core/models/bank/forms/setup/bank-user/delete-bank-user-form';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-details-form';
 
 @Component({
   selector: 'app-customers-list',
@@ -83,6 +85,7 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   providers: [
     {
@@ -140,13 +143,10 @@ export class CustomersListComponent implements OnInit {
     }
   }
   private requestCustomerNames() {
+    let compid = this.getUserProfile().InstID;
     this.tableLoading = true;
     this.customerService
-      .getCustomersList({
-        Comp: this.getUserProfile().InstID.toString(),
-        reg: '0',
-        dist: '0',
-      })
+      .getCustomersList({ vendors: [compid] } as CustomerDetailsForm)
       .then((result) => {
         this.parseRequestCustomerNamesResponse(result);
         this.tableDataService.prepareDataSource(this.paginator, this.sort);
@@ -281,7 +281,6 @@ export class CustomersListComponent implements OnInit {
     });
   }
   ngOnInit(): void {
-    //this.parseUserProfile();
     this.buildHeadersForm();
     this.requestCustomerNames();
     this.activatedRoute.params.subscribe((params) => {

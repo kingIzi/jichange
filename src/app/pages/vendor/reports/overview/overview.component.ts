@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
   NO_ERRORS_SCHEMA,
+  OnInit,
   ViewChild,
 } from '@angular/core';
 import {
@@ -62,15 +64,11 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     },
   ],
 })
-export class OverviewComponent {
-  // public overviewLoading: boolean = false;
-  // public tableLoading: boolean = false;
+export class OverviewComponent implements OnInit, AfterViewInit {
   public buildPageLoading: boolean = false;
   public startLoading: boolean = false;
   public customers: Customer[] = [];
   public invoices: GeneratedInvoice[] = [];
-  public overviewChartData: any;
-  public invoiceSummaryData: any;
   public transactions: TransactionDetail[] = [];
   public headersFormGroup!: FormGroup;
   public graphData: {
@@ -162,8 +160,6 @@ export class OverviewComponent {
                 return value.toLocaleString();
               },
             },
-            //min: 1, // Set minimum value for y-axis to avoid log(0)
-            //max: Math.max(...(paymentAmounts as any)) * 1.1,
           },
         },
         plugins: {
@@ -217,7 +213,8 @@ export class OverviewComponent {
   private assignInvoiceStatistics(
     result: HttpDataResponse<string | number | DashboardOverviewStatistic[]>
   ) {
-    if (typeof result === 'string' && typeof result === 'number') {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
     } else {
       this.invoiceStatisticsData =
         result.response as DashboardOverviewStatistic[];
@@ -234,32 +231,29 @@ export class OverviewComponent {
   private assignTransactionsReport(
     result: HttpDataResponse<string | number | TransactionDetail[]>
   ) {
-    if (
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number'
-    ) {
-      this.transactions = result.response;
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+    } else {
+      this.transactions = result.response as TransactionDetail[];
     }
     this.createTransactionsLineChart(this.transactions);
   }
   private assignCustomersList(
     result: HttpDataResponse<string | number | Customer[]>
   ) {
-    if (
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number'
-    ) {
-      this.customers = result.response;
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+    } else {
+      this.customers = result.response as Customer[];
     }
   }
   private assignCreatedInvoiceList(
     result: HttpDataResponse<string | number | GeneratedInvoice[]>
   ) {
-    if (
-      typeof result.response !== 'string' &&
-      typeof result.response !== 'number'
-    ) {
-      this.invoices = result.response;
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+    } else {
+      this.invoices = result.response as GeneratedInvoice[];
     }
   }
   private getBuildPageRequests() {
@@ -297,7 +291,6 @@ export class OverviewComponent {
     return mergedObs;
   }
   private buildPage() {
-    this.buildPageLoading = true;
     this.startLoading = true;
     let mergedObs = this.getBuildPageRequests();
     let res = AppUtilities.pipedObservables(mergedObs);
@@ -309,7 +302,6 @@ export class OverviewComponent {
         this.assignTransactionsReport(transactionsList);
         this.assignCustomersList(customersList);
         this.assignCreatedInvoiceList(invoiceList);
-        this.buildPageLoading = false;
         this.startLoading = false;
         this.cdr.detectChanges();
       })

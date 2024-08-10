@@ -1,5 +1,6 @@
 import { CommonModule, Location } from '@angular/common';
 import {
+  AfterViewChecked,
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -31,6 +32,8 @@ import { Collapse, initTE } from 'tw-elements';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-transaction-details-view',
@@ -44,6 +47,7 @@ import autoTable from 'jspdf-autotable';
     MatDialogModule,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatTooltipModule,
   ],
   providers: [
     {
@@ -52,7 +56,9 @@ import autoTable from 'jspdf-autotable';
     },
   ],
 })
-export class TransactionDetailsViewComponent implements OnInit {
+export class TransactionDetailsViewComponent
+  implements OnInit, AfterViewChecked
+{
   public startLoading: boolean = false;
   public detail: any;
   public downloading: boolean = false;
@@ -63,6 +69,8 @@ export class TransactionDetailsViewComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('messageBox') messageBox!: DisplayMessageBoxComponent;
+  @ViewChild('paymentsContainer')
+  paymentsContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private activatedRoute: ActivatedRoute,
     private reportsService: ReportsService,
@@ -72,7 +80,41 @@ export class TransactionDetailsViewComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private location: Location
   ) {}
-  private buildPage(invoice_number: string) {
+  private parsePaymentDetailsResponse(
+    result: HttpDataResponse<string | number | TransactionDetail[]>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      let res = AppUtilities.openDisplayMessageBox(
+        this.messageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`reports.transactionDetails.noTransactionsFound`)
+      );
+      res.addEventListener('close', () => {
+        this.location.back();
+      });
+    } else {
+      this.payments = result.response as TransactionDetail[];
+    }
+  }
+  private setOpenedTransactionDropdown(transactionNumber: string) {
+    let index = this.payments.findIndex((p) => {
+      return (
+        p.Payment_Trans_No.toLocaleLowerCase() ===
+        transactionNumber.toLocaleLowerCase()
+      );
+    });
+    if (index > -1) {
+      if (this.paymentsContainer) {
+        let found = this.paymentsContainer.nativeElement.querySelectorAll(
+          'input'
+        )[index] as HTMLInputElement;
+        if (!found) return;
+        found.click();
+      }
+    }
+  }
+  private buildPage(invoice_number: string, transactionNumber: string) {
     this.startLoading = true;
     let paymentsObs = from(
       this.reportsService.getInvoicePaymentDetails({
@@ -83,21 +125,8 @@ export class TransactionDetailsViewComponent implements OnInit {
     res
       .then((results) => {
         let [payments] = results;
-        if (
-          typeof payments.response !== 'number' &&
-          typeof payments.response !== 'string'
-        ) {
-          this.payments = payments.response;
-        } else {
-          let res = AppUtilities.openDisplayMessageBox(
-            this.messageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`reports.transactionDetails.noTransactionsFound`)
-          );
-          res.addEventListener('close', () => {
-            this.location.back();
-          });
-        }
+        this.parsePaymentDetailsResponse(payments);
+        this.setOpenedTransactionDropdown(transactionNumber);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -114,11 +143,18 @@ export class TransactionDetailsViewComponent implements OnInit {
   }
   ngOnInit(): void {
     initTE({ Collapse });
+  }
+  ngAfterViewChecked(): void {
     this.activatedRoute.params.subscribe((params) => {
+      let invno: string = '';
+      let paymentTransactionNumber: string = '';
       if (params['id']) {
-        let invno = atob(params['id']);
-        this.buildPage(invno);
+        invno = atob(params['id']);
       }
+      if (params['transactionId']) {
+        paymentTransactionNumber = atob(params['transactionId']);
+      }
+      this.buildPage(invno, paymentTransactionNumber);
     });
   }
   downloadPdf(payments: TransactionDetail[]) {

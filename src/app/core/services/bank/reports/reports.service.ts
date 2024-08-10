@@ -11,16 +11,19 @@ import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-
 import { UserLog } from 'src/app/core/models/bank/reports/user-log';
 import { InvoiceConsolidatedReport } from 'src/app/core/models/bank/reports/invoice-consolidated-report';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-details-form';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReportsService {
   constructor(private client: RequestClientService) {}
-  public async postCustomerDetailsReport(body: VendorDetailsReportForm) {
+  public async postCustomerDetailsReport(
+    body: VendorDetailsReportForm | CustomerDetailsForm
+  ) {
     let data = await lastValueFrom(
       this.client.performPost<
-        VendorDetailsReportForm,
+        VendorDetailsReportForm | CustomerDetailsForm,
         HttpDataResponse<Customer[] | string | number>
       >(`/api/RepCustomer/getcustdetreport`, body)
     );

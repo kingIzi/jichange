@@ -81,6 +81,7 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard',
@@ -104,6 +105,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     TableFormHeadersComponent,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   providers: [
     {
@@ -552,6 +554,13 @@ export class DashboardComponent implements OnInit {
   }
   invoiceNumberToBase64(invoice_number: string) {
     return btoa(invoice_number);
+  }
+  getViewTransactionsUrl(transaction: TransactionDetail) {
+    //'/main/' + invoiceNumberToBase64(trans.Invoice_Sno)
+    let baseUrl = '/main/reports/transactions';
+    let transactionDetail = btoa(transaction.Invoice_Sno);
+    let paymentNumber = btoa(transaction.Payment_Trans_No);
+    return `${baseUrl}/${transactionDetail}/${paymentNumber}`;
   }
   getTableDataSource() {
     return this.tableDataService.getDataSource();

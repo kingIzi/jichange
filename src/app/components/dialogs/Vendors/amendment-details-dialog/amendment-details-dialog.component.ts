@@ -318,6 +318,8 @@ export class AmendmentDetailsDialogComponent implements OnInit {
         return this.tr.translate('generated.form.dialog.details');
       case 'Missing Reason'.toLocaleLowerCase():
         return this.tr.translate('generated.form.dialog.reason');
+      case 'Modify items for amendments'.toLocaleLowerCase():
+        return this.tr.translate('generated.form.dialog.modifyItems');
       default:
         return this.tr.translate(`generated.failedToRetrieveAmendedInvoice`);
     }

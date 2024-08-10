@@ -17,9 +17,12 @@
       </p>
     </div>
     <div
-      class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
+      class="py-2 w-full relative bg-neutral shadow max-h-64 min-h-64 h-64 chart-container"
     >
-      <canvas #overviewChart></canvas>
+      <canvas
+        [class]="transactions.length > 0 ? '' : 'hidden'"
+        #overviewChart
+      ></canvas>
     </div>
   </div>
   <div class="col-span-full lg:col-span-4 lg:row-span-12">
@@ -39,44 +42,17 @@
           <div class="w-full h-full flex-1 p-2">
             <canvas #invoiceSummary></canvas>
           </div>
-          <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
-            <div class="grid place-items-center">
-              <p class="text-sm font-bold text-purple-700">
-                {{ graphData.transactionsLineChartLabels[0] }}
-              </p>
-              <p class="text-lg lg:text-xl font-normal text-purple-700">
-                {{
-                  graphData.transactionsLineChartData[0]
-                    ? graphData.transactionsLineChartData[0]
-                    : 0
-                }}
+
+          <ng-template #statisticsNotFound>
+            <div class="absolute w-full h-full grid place-items-center">
+              <p
+                *transloco="let t; read: 'errors'"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
               </p>
             </div>
-            <div class="grid place-items-center">
-              <p class="text-sm font-semibold text-teal-700">
-                {{ graphData.transactionsLineChartLabels[1] }}
-              </p>
-              <p class="text-lg lg:text-xl font-normal text-teal-700">
-                {{
-                  graphData.transactionsLineChartData[1]
-                    ? graphData.transactionsLineChartData[1]
-                    : 0
-                }}
-              </p>
-            </div>
-            <div class="grid place-items-center">
-              <p class="text-sm text-fuchsia-700 font-semibold">
-                {{ graphData.transactionsLineChartLabels[2] }}
-              </p>
-              <p class="text-lg lg:text-xl text-fuchsia-700 font-normal">
-                {{
-                  graphData.transactionsLineChartData[2]
-                    ? graphData.transactionsLineChartData[2]
-                    : 0
-                }}
-              </p>
-            </div>
-          </div>
+          </ng-template>
         </div>
       </div>
       <div class="flex flex-col space-y-1 relative w-full h-full">
@@ -89,16 +65,17 @@
           </p>
         </div>
         <div
-          class="grid grid-cols-2 bg-white shadow w-full h-full min-h-40 py-6 px-3 gap-2"
+          class="grid grid-cols-2 bg-neutral shadow w-full h-full min-h-40 py-6 px-3 gap-2 relative"
         >
-          <ng-container
-            *ngFor="
-              let statistic of invoiceStatisticsData;
-              trackBy: PerformanceUtils.trackByIndex;
-              index as i
-            "
+          <div
+            *ngIf="invoiceStatisticsData.length > 0; else notFoundStatistics"
           >
             <a
+              *ngFor="
+                let statistic of invoiceStatisticsData;
+                trackBy: PerformanceUtils.trackByIndex;
+                index as i
+              "
               (click)="dashboardStatisticRouterLink(statistic.Name)"
               class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
             >
@@ -110,10 +87,20 @@
               </p>
               <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
             </a>
-          </ng-container>
+          </div>
+          <ng-template #notFoundStatistics>
+            <div class="absolute w-full h-full grid place-items-center">
+              <p
+                *transloco="let t; read: 'errors'"
+                class="text-center text-sm tracking-wide pt-3 pb-1"
+              >
+                {{ t("noDataFound") }}
+              </p>
+            </div>
+          </ng-template>
         </div>
         <div
-          *ngIf="buildPageLoading"
+          *ngIf="startLoading"
           class="loading loading-spinner loading-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary"
         ></div>
       </div>
@@ -157,211 +144,3 @@
     </div>
   </div>
 </div>
-
-<!-- <div class="px-6 py-2 w-full grid grid-cols-12 gap-3 lg:gap-x-3 lg:gap-y-6">
-  <div
-    id="over-view"
-    class="w-full col-span-full lg:col-span-8 flex flex-col space-y-2"
-  >
-    <div class="flex flex-row items-center justify-between">
-      <p
-        *transloco="let t; read: 'reports.overview'"
-        class="text-black font-bold tracking-wide text-lg"
-      >
-        {{ t("salesSummary") }}
-      </p>
-    </div>
-    <div
-      class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
-    >
-      <canvas #overviewChart></canvas>
-    </div>
-  </div>
-  <div class="col-span-full lg:col-span-4 lg:row-span-12">
-    <div class="flex flex-col space-y-4">
-      <div class="flex flex-col space-y-1">
-        <div class="flex flex-row justify-between w-full">
-          <p
-            *transloco="let t; read: 'reports.overview'"
-            class="text-black font-bold tracking-wide text-lg"
-          >
-            {{ t("invoiceChart") }}
-          </p>
-        </div>
-        <div
-          class="py-2 w-full relative bg-white shadow max-h-64 flex flex-col min-h-64 h-64 chart-container"
-        >
-          <div class="w-full h-full flex-1 p-2">
-            <canvas #invoiceSummary></canvas>
-          </div>
-          <div class="p-8 flex-none w-full max-h-fit grid grid-cols-3">
-            <div class="grid place-items-center">
-              <p class="text-sm font-bold text-purple-700">
-                {{ graphData.transactionsLineChartLabels[0] }}
-              </p>
-              <p class="text-lg lg:text-xl font-normal text-purple-700">
-                {{
-                  graphData.transactionsLineChartData[0]
-                    ? graphData.transactionsLineChartData[0]
-                    : 0
-                }}
-              </p>
-            </div>
-            <div class="grid place-items-center">
-              <p class="text-sm font-semibold text-teal-700">
-                {{ graphData.transactionsLineChartLabels[1] }}
-              </p>
-              <p class="text-lg lg:text-xl font-normal text-teal-700">
-                {{
-                  graphData.transactionsLineChartData[1]
-                    ? graphData.transactionsLineChartData[1]
-                    : 0
-                }}
-              </p>
-            </div>
-            <div class="grid place-items-center">
-              <p class="text-sm text-fuchsia-700 font-semibold">
-                {{ graphData.transactionsLineChartLabels[2] }}
-              </p>
-              <p class="text-lg lg:text-xl text-fuchsia-700 font-normal">
-                {{
-                  graphData.transactionsLineChartData[2]
-                    ? graphData.transactionsLineChartData[2]
-                    : 0
-                }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="flex flex-col space-y-1 relative w-full">
-        <div class="flex flex-row justify-between w-full">
-          <p
-            *transloco="let t; read: 'reports.overview'"
-            class="text-black font-bold tracking-wide text-lg"
-          >
-            {{ t("statistics") }}
-          </p>
-        </div>
-        <div
-          class="grid grid-cols-2 bg-white shadow w-full h-full min-h-40 py-6 px-3 gap-2"
-        >
-          <ng-container
-            *ngFor="
-              let statistic of invoiceStatisticsData;
-              trackBy: PerformanceUtils.trackByIndex;
-              index as i
-            "
-          >
-            <a
-              (click)="dashboardStatisticRouterLink(statistic.Name)"
-              class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
-            >
-              <p
-                class="text-normal text-sm capitalize group-hover:underline"
-                *transloco="let t; read: 'reports.overview.statisticsData'"
-              >
-                {{ t(statistic.Name.toLocaleLowerCase()) }}
-              </p>
-              <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
-            </a>
-          </ng-container>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div
-    class="col-span-full lg:col-span-8 lg:row-span-12 flex flex-col space-y-2"
-  >
-    <div class="flex flex-row items-center justify-between">
-      <p
-        *transloco="let t; read: 'reports.overview'"
-        class="text-black font-bold tracking-wide text-lg"
-      >
-        {{ t("vendorsTableTitle") }}
-      </p>
-    </div>
-    <div class="flex flex-col bg-white shadow px-2 py-4">
-      <div class="flex flex-row items-center justify-end">
-        <div class="flex flex-row items-center space-x-2">
-          <div class="relative">
-            <input
-              *transloco="let t; read: 'defaults'"
-              type="search"
-              class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
-              id="exampleSearch"
-              [placeholder]="t('search')"
-              #searchInput
-            />
-            <span class="absolute left-2 top-1/2 -translate-y-1/2">
-              <i class="bi bi-search text-neutral-content text-lg"></i>
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="max-h-56 overflow-y-auto">
-            <table class="min-w-full text-left text-sm font-light">
-              <thead class="border-b font-medium">
-                <tr
-                  class="bg-lightPurple"
-                  *transloco="let t; read: 'reports.overview'"
-                >
-                  <th
-                    *ngFor="
-                      let header of t('vendorsTable') | slice : 1;
-                      index as ind
-                    "
-                    scope="col"
-                    class="px-6 font-inter text-sm"
-                    [id]="'generated-invoice-id-' + ind"
-                  >
-                    <div class="flex flex-row items-center">
-                      <p class="text-sm font-extrabold text-black">
-                        {{ header }}
-                      </p>
-                      <button>
-                        <span
-                          class="material-symbols-outlined m-1 text-xl cursor-pointer text-darkPurple"
-                        >
-                          unfold_more
-                        </span>
-                      </button>
-                    </div>
-                  </th>
-                  <th
-                    *transloco="let t; read: 'defaults'"
-                    class="px-6 py-4 font-inter text-sm font-extrabold text-black"
-                  >
-                    {{ t("action") }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-            <div *transloco="let t; read: 'errors'">
-              <p
-                *ngIf="customers.length <= 0"
-                class="text-center text-sm tracking-wide pt-3 pb-1"
-              >
-                {{ t("noDataFound") }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="flex flex-row items-center justify-end">
-        <mat-paginator
-          #paginator
-          [length]="customers.length"
-          [pageSize]="5"
-          [pageSizeOptions]="[5, 10, 20]"
-          aria-label="Select page"
-          [showFirstLastButtons]="customers.length > 20"
-        >
-        </mat-paginator>
-      </div>
-    </div>
-  </div>
-</div> -->
