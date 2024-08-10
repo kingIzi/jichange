@@ -17,7 +17,8 @@
         "pendings": "Pending(s)",
         "due": "Due",
         "expired": "Expired",
-        "vendor": "Vendor(s)"
+        "vendor": "Vendor(s)",
+        "customer": "Customer(s)"
       }
     },
     "transaction": {

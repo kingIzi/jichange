@@ -67,7 +67,7 @@
         <div
           class="grid grid-cols-2 bg-neutral shadow w-full h-full min-h-40 py-6 px-3 gap-2 relative"
         >
-          <div
+          <ng-container
             *ngIf="invoiceStatisticsData.length > 0; else notFoundStatistics"
           >
             <a
@@ -87,7 +87,28 @@
               </p>
               <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
             </a>
-          </div>
+          </ng-container>
+          <!-- <div
+            *ngIf="invoiceStatisticsData.length > 0; else notFoundStatistics"
+          >
+            <a
+              *ngFor="
+                let statistic of invoiceStatisticsData;
+                trackBy: PerformanceUtils.trackByIndex;
+                index as i
+              "
+              (click)="dashboardStatisticRouterLink(statistic.Name)"
+              class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
+            >
+              <p
+                class="text-normal text-sm capitalize group-hover:underline"
+                *transloco="let t; read: 'reports.overview.statisticsData'"
+              >
+                {{ t(statistic.Name.toLocaleLowerCase()) }}
+              </p>
+              <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
+            </a>
+          </div> -->
           <ng-template #notFoundStatistics>
             <div class="absolute w-full h-full grid place-items-center">
               <p

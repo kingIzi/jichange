@@ -27,6 +27,7 @@ import { from, zip } from 'rxjs';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { TransactionDetailsReportForm } from 'src/app/core/models/bank/forms/reports/transaction-details-report-form';
+import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-details-form';
 import { DashboardOverviewStatistic } from 'src/app/core/models/bank/reports/dashboard-overview-statistic';
 import { TransactionDetail } from 'src/app/core/models/bank/reports/transaction-detail';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
@@ -272,10 +273,8 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     let transactionsObs = from(this.reportsService.getTransactionsReport(form));
     let customersObs = from(
       this.customerService.getCustomersList({
-        Comp: this.getUserProfile().InstID.toString(),
-        reg: '0',
-        dist: '0',
-      })
+        vendors: [this.getUserProfile().InstID],
+      } as CustomerDetailsForm)
     );
     let createdInvoicesObs = from(
       this.invoiceService.getCreatedInvoiceList({
