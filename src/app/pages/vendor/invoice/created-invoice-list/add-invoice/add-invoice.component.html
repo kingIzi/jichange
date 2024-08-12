@@ -422,7 +422,7 @@
                     </td>
                     <td class="flex flex-row justify-end w-24 my-2">
                       <div class="flex flex-col w-24">
-                        <select
+                        <!-- <select
                           formControlName="item_qty"
                           class="mx-1 w-full text-right select select-sm select-bordered select-ghost"
                         >
@@ -434,7 +434,12 @@
                           >
                             {{ qty }}
                           </option>
-                        </select>
+                        </select> -->
+                        <input
+                          formControlName="item_qty"
+                          type="number"
+                          class="input-sm input-bordered input-ghost input mx-1 min-w-1/2 lg:w-full"
+                        />
                         <span class="w-full">
                           <p
                             *transloco="
