@@ -210,6 +210,10 @@ export class CreatedInvoiceListComponent implements OnInit {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
+        case 'Due_Date':
+          return new Date(item['Due_Date']);
+        case 'Invoice_Expired_Date':
+          return new Date(item['Invoice_Expired_Date']);
         default:
           return item[property];
       }
@@ -520,6 +524,8 @@ export class CreatedInvoiceListComponent implements OnInit {
           element
         );
       case 'Invoice_Date':
+      case 'Due_Date':
+      case 'Invoice_Expired_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]
         ).toDateString();
@@ -580,6 +586,8 @@ export class CreatedInvoiceListComponent implements OnInit {
       case 'Payment_Type':
       case 'Invoice_Date':
       case 'goods_status':
+      case 'Invoice_Expired_Date':
+      case 'Due_Date':
         return column.value;
       default:
         return '';

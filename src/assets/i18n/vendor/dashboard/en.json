@@ -11,14 +11,14 @@
       "viewMore": "View more",
       "createInvoice": "Create invoice",
       "statisticsData": {
-        "transaction": "Transaction(s)",
-        "customers": "Customer(s)",
-        "users": "User(s)",
-        "pendings": "Pending(s)",
+        "transaction": "Transactions",
+        "customers": "Customers",
+        "users": "User",
+        "pendings": "Pending",
         "due": "Due",
         "expired": "Expired",
-        "vendor": "Vendor(s)",
-        "customer": "Customer(s)"
+        "vendor": "Vendors",
+        "customer": "Customers"
       }
     },
     "transaction": {

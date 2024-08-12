@@ -137,7 +137,7 @@ export class InboxApprovalComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableHeadersFormGroup() {
-    let TABLE_SHOWING = 6;
+    let TABLE_SHOWING = 7;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -301,8 +301,8 @@ export class InboxApprovalComponent implements OnInit {
   tableHeaderStyle(key: string) {
     let style = 'flex flex-row items-center';
     switch (key) {
-      case 'Status':
-        return `${style} justify-end`;
+      // case 'Status':
+      //   return `${style}`;
       default:
         return `${style}`;
     }
@@ -332,6 +332,10 @@ export class InboxApprovalComponent implements OnInit {
           this.tableDataService.getData(),
           element
         );
+      case 'AccountNo':
+        return element.AccountNo
+          ? element.AccountNo.slice(-4).padStart(element.AccountNo.length, 'x')
+          : '-';
       default:
         return element[key];
     }

@@ -153,6 +153,21 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     this.sno.setValue(this.companyUser.CompuserSno);
     this.chname.setValue('00' + this.pos.value);
   }
+  private parseVendorUserByIdResponse(
+    result: HttpDataResponse<string | number | boolean | CompanyUser>
+  ) {
+    let hasError = AppUtilities.hasErrorResult(result);
+    if (hasError || !result.response) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`errors.errorOccured`),
+        this.tr.translate(`company.failedToRetrieveCompanyUser`)
+      );
+    } else {
+      this.companyUser = result.response as CompanyUser;
+      this.modifyForm();
+    }
+  }
   private buildPage() {
     this.startLoading = true;
     let companyUserObservable = from(
@@ -174,21 +189,8 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     res
       .then((results) => {
         let [companyUser] = results;
-        if (
-          companyUser.response &&
-          typeof companyUser.response !== 'string' &&
-          typeof companyUser.response !== 'number' &&
-          typeof companyUser.response !== 'boolean'
-        ) {
-          this.companyUser = companyUser.response;
-          this.modifyForm();
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`errors.errorOccured`),
-            this.tr.translate(`company.failedToRetrieveCompanyUser`)
-          );
-        }
+        this.parseVendorUserByIdResponse(companyUser);
+        this.companyUsersForm.markAllAsTouched();
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -225,7 +227,6 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     this.companyUserService
       .requestRolesAct({ compid: vendor.InstID }) //permanently at 67
       .then((results) => {
-        console.log(results);
         this.assignRolesAct(results);
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -260,6 +261,12 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       case 'Missing mail'.toLocaleLowerCase():
       case 'Invalid mail'.toLocaleLowerCase():
         return this.tr.translate(`${errorStringPrefix}.emailId`);
+      case 'Email already exist'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.existsEmail`);
+      case 'User already exist'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.existsUsername`);
+      case 'Mobile number already exist'.toLocaleLowerCase():
+        return this.tr.translate(`${errorStringPrefix}.existsMobile`);
       default:
         return this.tr.translate(`${errorStringPrefix}.FailedToAddCompany`);
     }

@@ -73,7 +73,10 @@
         "userPosition": "Tafadhali chagua nafasi.",
         "fullName": "Lazima uingize jina kamili",
         "noRoleActFound": "Hakuna majukumu yaliyopatikana kwenye taasisi yako.",
-        "FailedToAddCompany": "Kushindwa kuongeza muuzaji."
+        "FailedToAddCompany": "Kushindwa kuongeza muuzaji.",
+        "existsEmail": "Anwani ya barua pepe iliyotolewa tayari inatumika.",
+        "existsUsername": "Jina la mtumiaji uliloingiza tayari linatumika.",
+        "existsMobile": "Nambari ya rununu uliyoingiza tayari inatumika."
       }
     }
   }

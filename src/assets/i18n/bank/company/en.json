@@ -190,16 +190,6 @@
         "desc": ""
       },
       {
-        "label": "Residential Address",
-        "value": "Address",
-        "desc": ""
-      },
-      {
-        "label": "Email Address",
-        "value": "Email",
-        "desc": ""
-      },
-      {
         "label": "Mobile N°",
         "value": "MobNo",
         "desc": ""
@@ -207,6 +197,21 @@
       {
         "label": "Status",
         "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Account N°",
+        "value": "AccountNo",
+        "desc": ""
+      },
+      {
+        "label": "Residential Address",
+        "value": "Address",
+        "desc": ""
+      },
+      {
+        "label": "Email Address",
+        "value": "Email",
         "desc": ""
       },
       {

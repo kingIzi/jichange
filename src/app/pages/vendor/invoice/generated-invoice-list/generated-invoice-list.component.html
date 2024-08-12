@@ -276,18 +276,52 @@
                           <i class="bi bi-arrow-repeat text-lg"></i>
                         </span>
                       </button>
-                      <button
+                      <!-- <button
                         *transloco="let t; read: 'generated.deliver'"
                         class="btn btn-sm btn-ghost border-green-600"
                         (click)="
                           makeInvoiceDelivery(deliverInvoiceMessageBox, element)
                         "
                         matTooltip="{{ t('deliver') }}"
+                        [disabled]="
+                          element.delivery_status &&
+                          element.delivery_status === 'Pending'
+                        "
                       >
                         <span class="text-green-600">
                           <i class="bi bi-truck text-lg"></i>
                         </span>
+                      </button> -->
+                      <button
+                        *ngIf="
+                          element.delivery_status &&
+                            element.delivery_status === 'Pending';
+                          else deliverButton
+                        "
+                        class="btn btn-sm btn-ghost border-green-600"
+                        [disabled]="true"
+                      >
+                        <span class="text-green-600">
+                          <i class="bi bi-box text-lg"></i>
+                        </span>
                       </button>
+                      <ng-template #deliverButton>
+                        <button
+                          *transloco="let t; read: 'generated.deliver'"
+                          class="btn btn-sm btn-ghost border-green-600"
+                          (click)="
+                            makeInvoiceDelivery(
+                              deliverInvoiceMessageBox,
+                              element
+                            )
+                          "
+                          matTooltip="{{ t('deliver') }}"
+                        >
+                          <span class="text-green-600">
+                            <i class="bi bi-truck text-lg"></i>
+                          </span>
+                        </button>
+                      </ng-template>
                       <button
                         *transloco="let t; read: 'defaults'"
                         class="btn btn-sm btn-ghost border-danger-600"

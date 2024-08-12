@@ -45,6 +45,16 @@
       "desc": ""
     },
     {
+      "label": "Tarehe ya Kulipwa",
+      "value": "Due_Date",
+      "desc": ""
+    },
+    {
+      "label": "Tarehe ya Kukamilisha",
+      "value": "Invoice_Expired_Date",
+      "desc": ""
+    },
+    {
       "label": "Kitendo",
       "value": "Action",
       "desc": ""

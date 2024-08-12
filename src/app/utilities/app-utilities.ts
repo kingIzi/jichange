@@ -24,7 +24,7 @@ export class AppUtilities {
     return dialog.openDialog();
   }
 
-  static sweetAlertSuccessMessage(message: string, timeout: number = 3000) {
+  static sweetAlertSuccessMessage(message: string, timeout: number = 5000) {
     let toastMixin = Swal.mixin({
       toast: true,
       icon: 'success',

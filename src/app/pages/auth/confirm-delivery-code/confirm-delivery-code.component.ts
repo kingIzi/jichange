@@ -19,6 +19,7 @@ import { TranslocoModule, TranslocoService } from '@ngneat/transloco';
 import { Observable, of } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { SubmitMessageBoxComponent } from 'src/app/components/dialogs/submit-message-box/submit-message-box.component';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -65,13 +66,32 @@ export class ConfirmDeliveryCodeComponent implements OnInit {
       mobile_no: this.fb.control('', [Validators.required]),
     });
   }
-  private parseConfirmDeliveryCodeResponse(result: any) {
+  private switchConfirmDeliveryCodeResponse(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Invoice'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate(
+          `auth.deliveryCode.failedToConfirmDeliveryCode`
+        );
+    }
+  }
+  private parseConfirmDeliveryCodeResponse(
+    result: HttpDataResponse<string | number>
+  ) {
     let hasError = AppUtilities.hasErrorResult(result);
     if (hasError) {
+      let errorMessage = this.switchConfirmDeliveryCodeResponse(
+        result.message[0]
+      );
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
         this.tr.translate(`defaults.failed`),
-        this.tr.translate(`auth.deliveryCode.failedToConfirmDeliveryCode`)
+        errorMessage
       );
     } else {
       let sal = AppUtilities.sweetAlertSuccessMessage(

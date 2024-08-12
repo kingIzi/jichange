@@ -219,6 +219,16 @@
         "desc": ""
       },
       {
+        "label": "Due Date",
+        "value": "Due_Date",
+        "desc": ""
+      },
+      {
+        "label": "Expiry Date",
+        "value": "Invoice_Expired_Date",
+        "desc": ""
+      },
+      {
         "label": "Action(s)",
         "value": "Action",
         "desc": ""

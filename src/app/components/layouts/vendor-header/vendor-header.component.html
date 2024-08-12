@@ -40,9 +40,7 @@
             "
             formGroupName="{{ ind }}"
             #navItem
-            (click)="
-              navItemClicked(navItem, header.get('rootLink')?.value, ind)
-            "
+            (click)="navItemClicked(header.get('rootLink')?.value, ind)"
           >
             {{ header.get("label")?.value }}
           </a>

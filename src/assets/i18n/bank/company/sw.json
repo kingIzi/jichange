@@ -190,16 +190,6 @@
         "desc": ""
       },
       {
-        "label": "Anwani ya Makazi",
-        "value": "Address",
-        "desc": ""
-      },
-      {
-        "label": "Anwani ya Barua Pepe",
-        "value": "Email",
-        "desc": ""
-      },
-      {
         "label": "Nambari ya Simu",
         "value": "MobNo",
         "desc": ""
@@ -207,6 +197,21 @@
       {
         "label": "Hali",
         "value": "Status",
+        "desc": ""
+      },
+      {
+        "label": "Nambari ya Akaunti",
+        "value": "AccountNo",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Makazi",
+        "value": "Address",
+        "desc": ""
+      },
+      {
+        "label": "Anwani ya Barua Pepe",
+        "value": "Email",
         "desc": ""
       },
       {

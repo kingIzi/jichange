@@ -213,6 +213,10 @@ export class GeneratedInvoiceListComponent implements OnInit {
       switch (property) {
         case 'Invoice_Date':
           return new Date(item['Invoice_Date']);
+        case 'Due_Date':
+          return new Date(item['Due_Date']);
+        case 'Invoice_Expired_Date':
+          return new Date(item['Invoice_Expired_Date']);
         default:
           return item[property];
       }
@@ -265,6 +269,41 @@ export class GeneratedInvoiceListComponent implements OnInit {
         this.cdr.detectChanges();
       });
   }
+  private switchSendInvoiceDeliveryCode(message: string) {
+    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+      message,
+      this.tr,
+      'Invoice'
+    );
+    if (errorMessage.length > 0) return errorMessage;
+    switch (message.toLocaleLowerCase()) {
+      default:
+        return this.tr.translate(`generated.deliver.failedToSendDeliveryCode`);
+    }
+  }
+  private parseSendInvoiceDeliveryCodeResponse(
+    result: HttpDataResponse<number | GeneratedInvoice>
+  ) {
+    let hasErrors = AppUtilities.hasErrorResult(result);
+    if (hasErrors || !result.response) {
+      let errorMessage = this.switchSendInvoiceDeliveryCode(result.message[0]);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        errorMessage
+      );
+    } else {
+      let sal = AppUtilities.sweetAlertSuccessMessage(
+        this.tr.translate(`generated.deliver.deliveryCodeSentSuccessfully`),
+        5000
+      );
+      let invoice = result.response as GeneratedInvoice;
+      let index = this.tableDataService
+        .getDataSource()
+        .data.findIndex((item) => item.Inv_Mas_Sno === invoice.Inv_Mas_Sno);
+      this.tableDataService.editedData(invoice, index);
+    }
+  }
   //send delivery code to customer
   private requestSendAddDeliveryCode(body: {
     sno: number | string;
@@ -274,22 +313,23 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.invoiceService
       .addDeliveryCode(body)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          result.response.toLocaleLowerCase() ===
-            'Delivery Code created Successful & sent to customer'.toLocaleLowerCase()
-        ) {
-          let sal = AppUtilities.sweetAlertSuccessMessage(
-            this.tr.translate(`generated.deliver.deliveryCodeSentSuccessfully`),
-            5000
-          );
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`generated.deliver.failedToSendDeliveryCode`)
-          );
-        }
+        // if (
+        //   typeof result.response === 'string' &&
+        //   result.response.toLocaleLowerCase() ===
+        //     'Delivery Code created Successful & sent to customer'.toLocaleLowerCase()
+        // ) {
+        //   let sal = AppUtilities.sweetAlertSuccessMessage(
+        //     this.tr.translate(`generated.deliver.deliveryCodeSentSuccessfully`),
+        //     5000
+        //   );
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`generated.deliver.failedToSendDeliveryCode`)
+        //   );
+        // }
+        this.parseSendInvoiceDeliveryCodeResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -321,6 +361,8 @@ export class GeneratedInvoiceListComponent implements OnInit {
           element
         );
       case 'Invoice_Date':
+      case 'Due_Date':
+      case 'Invoice_Expired_Date':
         return PerformanceUtils.convertDateStringToDate(
           element[key]
         ).toDateString();
@@ -384,6 +426,8 @@ export class GeneratedInvoiceListComponent implements OnInit {
       case 'Control_No':
       case 'Invoice_Date':
       case 'goods_status':
+      case 'Invoice_Expired_Date':
+      case 'Due_Date':
         return column.value;
       default:
         return '';

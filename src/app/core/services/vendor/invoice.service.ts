@@ -134,7 +134,7 @@ export class InvoiceService {
     let data = await lastValueFrom(
       this.client.performPost<
         { sno: number | string; user_id: number | string },
-        HttpDataResponse<string | number>
+        HttpDataResponse<GeneratedInvoice | number>
       >(`/api/Invoice/AddDCode`, body)
     );
     return data;

@@ -295,11 +295,9 @@ export class VendorHeaderComponent implements OnInit {
   routerClicked(ahref: HTMLAnchorElement, value: string) {
     ahref.blur();
   }
-  navItemClicked(ahref: HTMLAnchorElement, path: string, index: number) {
+  navItemClicked(path: string, index: number) {
     if (index === 0 || index === 1) {
       this.router.navigate([path]);
-      console.log(ahref);
-      ahref.blur();
     }
   }
   verifyCurrentRoute(path: string) {
