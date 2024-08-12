@@ -369,7 +369,7 @@ export class CustomersListComponent implements OnInit {
     removeClient.remove.asObservable().subscribe((event) => {
       let deleteCustomerForm = {
         sno: id,
-        userid: this.appConfigService.getUserIdFromLocalStorage(),
+        userid: this.appConfigService.getUserIdFromSessionStorage(),
       };
       this.deleteCustomer(deleteCustomerForm);
     });

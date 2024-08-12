@@ -144,7 +144,7 @@ export class WardDialogComponent implements OnInit {
       ward_name: this.fb.control('', [Validators.required]),
       ward_status: this.fb.control('', [Validators.required]),
       dummy: this.fb.control(true, []),
-      userid: this.fb.control(this.appConfig.getUserIdFromLocalStorage(), [
+      userid: this.fb.control(this.appConfig.getUserIdFromSessionStorage(), [
         Validators.required,
       ]),
     });
@@ -158,7 +158,7 @@ export class WardDialogComponent implements OnInit {
       ward_name: this.fb.control(ward.Ward_Name, [Validators.required]),
       ward_status: this.fb.control(ward.Ward_Status, [Validators.required]),
       dummy: this.fb.control(true, []),
-      userid: this.fb.control(this.appConfig.getUserIdFromLocalStorage(), [
+      userid: this.fb.control(this.appConfig.getUserIdFromSessionStorage(), [
         Validators.required,
       ]),
     });

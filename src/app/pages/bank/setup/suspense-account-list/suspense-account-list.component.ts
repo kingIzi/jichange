@@ -344,7 +344,7 @@ export class SuspenseAccountListComponent implements OnInit {
     dialog.remove.asObservable().subscribe((e) => {
       let body = {
         sno: suspenseAccount.Sus_Acc_Sno,
-        userid: this.appConfig.getUserIdFromLocalStorage(),
+        userid: this.appConfig.getUserIdFromSessionStorage(),
       };
       this.requestDeleteSuspenseAccount(body);
     });

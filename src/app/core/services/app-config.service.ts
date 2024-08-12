@@ -16,7 +16,7 @@ export class AppConfigService {
     this.parseUserProfile();
   }
   private parseUserProfile() {
-    let userProfile = localStorage.getItem('userProfile');
+    let userProfile = sessionStorage.getItem('userProfile');
     if (userProfile) {
       this.userProfile = JSON.parse(userProfile) as
         | VendorLoginResponse
@@ -39,12 +39,18 @@ export class AppConfigService {
     });
     return dialogRef;
   }
-  getJwtTokenFromLocalStorage() {
+  getJwtTokenFromSessionStorage() {
     this.parseUserProfile();
     return this.userProfile ? this.userProfile.Token : '';
   }
-  getUserIdFromLocalStorage() {
+  getUserIdFromSessionStorage() {
     this.parseUserProfile();
     return this.userProfile ? this.userProfile.Usno : 0;
+  }
+  setItem(key: string, value: any) {
+    sessionStorage.setItem(key, value);
+  }
+  clearSessionStorage() {
+    sessionStorage.clear();
   }
 }

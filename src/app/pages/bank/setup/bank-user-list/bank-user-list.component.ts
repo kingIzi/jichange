@@ -380,7 +380,7 @@ export class BankUserListComponent implements OnInit {
     dialog.remove.asObservable().subscribe((e) => {
       let body = {
         sno: employeeDetail.Detail_Id,
-        userid: this.appConfig.getUserIdFromLocalStorage(),
+        userid: this.appConfig.getUserIdFromSessionStorage(),
       };
       this.requestDeleteBankUser(body);
     });

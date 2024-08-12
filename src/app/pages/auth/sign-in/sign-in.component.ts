@@ -36,6 +36,7 @@ import {
   BankLoginResponse,
   VendorLoginResponse,
 } from 'src/app/core/models/login-response';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -65,6 +66,7 @@ export class SignInComponent implements OnInit {
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -97,7 +99,8 @@ export class SignInComponent implements OnInit {
     response: VendorLoginResponse | BankLoginResponse,
     route: string
   ) {
-    localStorage.setItem('userProfile', JSON.stringify(response));
+    //localStorage.setItem('userProfile', JSON.stringify(response));
+    this.appConfig.setItem('userProfile', JSON.stringify(response));
     this.cdr.detectChanges();
     this.router.navigate([route]);
   }

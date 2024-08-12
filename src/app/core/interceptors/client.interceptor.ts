@@ -52,7 +52,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.url.includes('AddLogins') || req.url.includes('/assets/i18n/')) {
     return next(req);
   }
-  let token = appConfig.getJwtTokenFromLocalStorage();
+  let token = appConfig.getJwtTokenFromSessionStorage();
   let authReq = req.clone({
     headers: req.headers.set('Authorization', `Bearer ${token}`),
   });
@@ -71,7 +71,7 @@ export const timeoutInterceptor: HttpInterceptorFn = (req, next) => {
       if (err instanceof HttpErrorResponse) {
         if (err.status === 401 && appConfig.getLoginResponse()) {
           login
-            .logout({ userid: appConfig.getUserIdFromLocalStorage() })
+            .logout({ userid: appConfig.getUserIdFromSessionStorage() })
             .then((result) => {
               handleUnauthorizedUser(appConfig, router, tr);
             })

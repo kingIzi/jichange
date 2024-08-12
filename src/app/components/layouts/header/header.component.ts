@@ -282,7 +282,8 @@ export class HeaderComponent implements OnInit {
       .logout({ userid: this.getUserProfile().Usno })
       .then((result) => {
         this.routeLoading = false;
-        localStorage.clear();
+        //localStorage.clear();
+        this.appConfig.clearSessionStorage();
         this.cdr.detectChanges();
         this.router.navigate(['/auth']);
         location.reload();
