@@ -2,6 +2,7 @@
   "invoiceDetails": "Maelezo ya Bili",
   "noInvoices": "Bado hujatengeneza ankara.",
   "exportToExcel": "Pakua Excel",
+  "exportToPdf": "Pakua Pdf",
   "noGeneratedInvoicesFound": "Hakukuwa na ankara zilizopatikana.",
   "noInvoicesFound": "Hakuna ankara inayopatikana kwa {}",
   "addInvoice": "Ongeza Bili",

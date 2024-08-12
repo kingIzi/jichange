@@ -203,10 +203,10 @@ export class VendorHeaderComponent implements OnInit {
             ),
             isActive: this.fb.control(false, []),
           });
-          // (group.get('dropdowns') as FormArray).push(dropdown);
-          if (dropdownIndex !== 3) {
-            (group.get('dropdowns') as FormArray).push(dropdown);
-          }
+          (group.get('dropdowns') as FormArray).push(dropdown);
+          // if (dropdownIndex !== 3) {
+          //   (group.get('dropdowns') as FormArray).push(dropdown);
+          // }
         });
         this.headers.push(group);
       });

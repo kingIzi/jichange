@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -77,6 +78,13 @@ import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { ReportFormInvoiceDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import {
+  MatTableExporterModule,
+  ExportType,
+  MatTableExporterDirective,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-invoice-cancelled',
@@ -96,6 +104,7 @@ import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-re
     MatTableModule,
     MatSortModule,
     ReportFormInvoiceDetailsComponent,
+    MatTableExporterModule,
   ],
   templateUrl: './invoice-cancelled.component.html',
   styleUrl: './invoice-cancelled.component.scss',
@@ -144,6 +153,9 @@ export class InvoiceCancelledComponent implements OnInit {
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('tableContainer', { static: false })
+  tableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private appConfig: AppConfigService,
     private dialog: MatDialog,
@@ -440,6 +452,28 @@ export class InvoiceCancelledComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('invoice.invoiceDetails');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      // columns: this.tableDataService.getTableColumns().map((t,index) => {
+      //   return t.label;
+      // }),
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.createFilterForm();
@@ -560,6 +594,37 @@ export class InvoiceCancelledComponent implements OnInit {
       this.requestCancelledInvoice(form);
     } else {
       this.filterFormGroup.markAllAsTouched();
+    }
+  }
+  downloadSheet() {
+    if (this.tableDataService.getData().length > 0) {
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'cancelled_invoices',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table = this.tableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `cancelled_invoices`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
     }
   }
   getTableDataSource() {

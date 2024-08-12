@@ -2,6 +2,7 @@
   "overview": {
     "overview": "Overview",
     "exportToExcel": "Export to excel",
+    "exportToPdf": "Export to pdf",
     "summary": "Summary",
     "vendorsTableTitle": "Latest added Vendors",
     "transactions": "Transactions",
@@ -21,7 +22,7 @@
     }
   },
   "transactionDetails": {
-    "transactionDetails": "Transaction Details",
+    "transactionDetails": "Payment Details",
     "noTransactionsFound": "There were no transactions found.",
     "searchBy": "Search by invoice number",
     "transactionDetailsTable": [
@@ -240,7 +241,7 @@
     ]
   },
   "paymentDetails": {
-    "payment": "Payment(s)",
+    "payment": "Settled Payments",
     "searchBy": "Search by Invoice number, control number, vendor or customer",
     "noPaymentsFound": "No Payments found.",
     "paymentsTable": [
@@ -285,6 +286,11 @@
         "desc": ""
       },
       {
+        "label": "Balance",
+        "value": "Balance",
+        "desc": ""
+      },
+      {
         "label": "Receipt N°",
         "value": "Receipt_No",
         "desc": ""
@@ -297,11 +303,6 @@
       {
         "label": "Paid Amount",
         "value": "PaidAmount",
-        "desc": ""
-      },
-      {
-        "label": "Balance",
-        "value": "Balance",
         "desc": ""
       },
       {

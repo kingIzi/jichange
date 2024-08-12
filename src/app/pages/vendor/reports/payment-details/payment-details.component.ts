@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -72,6 +73,13 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
+import {
+  MatTableExporterModule,
+  ExportType,
+  MatTableExporterDirective,
+} from 'mat-table-exporter';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-payment-details',
@@ -87,6 +95,7 @@ import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialog
     MatTableModule,
     MatSortModule,
     ReportFormInvoiceDetailsComponent,
+    MatTableExporterModule,
   ],
   templateUrl: './payment-details.component.html',
   styleUrl: './payment-details.component.scss',
@@ -135,6 +144,9 @@ export class PaymentDetailsComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('tableContainer', { static: false })
+  tableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -173,7 +185,7 @@ export class PaymentDetailsComponent implements OnInit {
     this.customerChanged();
   }
   private async createHeaderGroup() {
-    let TABLE_SHOWING = 8;
+    let TABLE_SHOWING = 9;
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -488,12 +500,25 @@ export class PaymentDetailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.paymentKeys(indexes);
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.paymentDetails.payment');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      columns: this.tableHeaders.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     this.createFilterForm();
     this.createHeaderGroup();
@@ -613,17 +638,46 @@ export class PaymentDetailsComponent implements OnInit {
     return columns.map((col) => col.label);
   }
   downloadSheet() {
+    // if (this.tableDataService.getData().length > 0) {
+    //   this.fileHandler.downloadExcelTable(
+    //     this.tableDataService.getData(),
+    //     this.getActiveTableKeys(),
+    //     'payments_report',
+    //     ['Payment_Date']
+    //   );
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.warning`),
+    //     this.tr.translate(`errors.noDataFound`)
+    //   );
+    // }
     if (this.tableDataService.getData().length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableDataService.getData(),
-        this.getActiveTableKeys(),
-        'payments_report',
-        ['Payment_Date']
-      );
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'payments_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table = this.tableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `payments_report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
         this.tr.translate(`errors.noDataFound`)
       );
     }

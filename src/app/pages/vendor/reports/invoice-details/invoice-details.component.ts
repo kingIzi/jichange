@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -56,11 +57,18 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
+import {
+  MatTableExporterModule,
+  ExportType,
+  MatTableExporterDirective,
+} from 'mat-table-exporter';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-invoice-details',
@@ -77,6 +85,7 @@ import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/repo
     MatTableModule,
     MatSortModule,
     ReportFormDetailsComponent,
+    MatTableExporterModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-details.component.html',
@@ -125,6 +134,9 @@ export class InvoiceDetailsComponent implements OnInit {
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('tableContainer', { static: false })
+  tableContainer!: ElementRef<HTMLDivElement>;
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -438,6 +450,28 @@ export class InvoiceDetailsComponent implements OnInit {
         throw err;
       });
   }
+  private parsePdf(table: HTMLTableElement, filename: string) {
+    let titleText = this.tr.translate('reports.invoiceDetails.invoiceDetails');
+    let doc = new jsPDF();
+    doc.text(titleText, 13, 15);
+    autoTable(doc, {
+      html: table,
+      margin: { top: 20 },
+      // columns: this.tableDataService.getTableColumns().map((t,index) => {
+      //   return t.label;
+      // }),
+      columns: this.headers.controls
+        .filter(
+          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+        )
+        .map((h) => h.get('label')?.value),
+      headStyles: {
+        fillColor: '#8196FE',
+        textColor: '#000000',
+      },
+    });
+    doc.save(`${filename}.pdf`);
+  }
   ngOnInit(): void {
     //this.parseUserProfile();
     this.createHeaderGroup();
@@ -565,16 +599,31 @@ export class InvoiceDetailsComponent implements OnInit {
   }
   downloadSheet() {
     if (this.tableDataService.getData().length > 0) {
-      this.fileHandler.downloadExcelTable(
-        this.tableDataService.getData(),
-        this.getActiveKeys(),
-        'invoice_details_report',
-        ['Payment_Date']
-      );
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'invoice_details_report',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
-        this.tr.translate(`defaults.warning`),
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`errors.noDataFound`)
+      );
+    }
+  }
+  downloadPdf() {
+    if (this.tableDataService.getData().length > 0) {
+      let table = this.tableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
+    } else {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
         this.tr.translate(`errors.noDataFound`)
       );
     }

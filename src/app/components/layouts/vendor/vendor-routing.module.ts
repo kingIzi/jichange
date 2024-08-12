@@ -204,7 +204,7 @@ const routes: Routes = [
                     },
                   },
                   {
-                    path: ':id',
+                    path: ':id/:transactionId',
                     loadComponent: () =>
                       import(
                         '../../../pages/bank/reports/transaction-details/transaction-details-view/transaction-details-view.component'

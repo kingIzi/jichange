@@ -7,6 +7,7 @@
   "createInvoice": "Create Invoice",
   "editInvoice": "Edit invoice",
   "exportToExcel": "Export to excel",
+  "exportToPdf": "Export to pdf",
   "form": {
     "itemDetailsTableHeaders": [
       "Description",

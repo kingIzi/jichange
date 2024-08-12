@@ -219,7 +219,7 @@
         "overview",
         "Transaction Details",
         "Invoice Details",
-        "Payment Details",
+        "Settled Details",
         "Amendments Details",
         "Cancelled invoice"
       ]
@@ -255,9 +255,9 @@
       "vendor": "Customer(s)",
       "audit": "Audit",
       "details": "Detail(s)",
-      "payments": "Payment(s)",
+      "payments": "Settled Payments",
       "amendment": "Amendment(s)",
-      "transaction": "Transaction(s)",
+      "transaction": "Payment(s)",
       "vendorReport": "Vendor report",
       "invoiceConsolidated": "Invoice Consolidated",
       "paymentConsolidated": "Payment Consolidated",
@@ -276,9 +276,9 @@
     "invoice": "Invoice(s)",
     "created": "Created Invoice(s)",
     "overview": "Overview",
-    "transactionsReport": "Transactions Report",
+    "transactionsReport": "Payment Report",
     "invoiceReport": "Invoice Report",
-    "paymentReport": "Payment Report",
+    "paymentReport": "Settled Payments Report",
     "amendmentReport": "Amendment Report",
     "customerReport": "Customer Report",
     "addInvoice": "Add Invoice"

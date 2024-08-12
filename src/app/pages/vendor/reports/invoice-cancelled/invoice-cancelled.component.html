@@ -1,5 +1,4 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<!-- <app-loader-rainbow [show]="startLoading"></app-loader-rainbow> -->
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -19,7 +18,29 @@
       [formGroup]="tableHeadersFormGroup"
       class="flex flex-col w-full h-full"
     >
-      <div class="flex flex-row items-center justify-end mt-4">
+      <div class="flex flex-row items-center justify-between mt-4">
+        <div class="flex flex-row items-center space-x-4">
+          <button
+            (click)="downloadSheet()"
+            *transloco="let t; read: 'invoice'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
+            <span>
+              <i class="bi bi-file-earmark-spreadsheet"></i>
+            </span>
+          </button>
+          <button
+            (click)="downloadPdf()"
+            *transloco="let t; read: 'invoice'"
+            class="flex flex-row items-center btn btn-sm text-xs text-white bg-red-600 hover:bg-danger-600 hover:text-red-950"
+          >
+            <p class="text-xs lg:block hidden">{{ t("exportToPdf") }}</p>
+            <span>
+              <i class="bi bi-filetype-pdf"></i>
+            </span>
+          </button>
+        </div>
         <div class="flex flex-row items-center space-x-2">
           <div class="hidden md:dropdown">
             <button
@@ -130,11 +151,13 @@
         class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
       >
         <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-          <div class="overflow-y-auto shadow">
+          <div #tableContainer class="overflow-y-auto shadow">
             <ng-container
               *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
             >
               <table
+                matTableExporter
+                #exporter="matTableExporter"
                 mat-table
                 matSort
                 [dataSource]="getTableDataSource()"

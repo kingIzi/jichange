@@ -82,9 +82,9 @@
       "vendor": "Muteja",
       "audit": "Uchunguzi",
       "details": "Maelezo",
-      "payments": "Malipo",
+      "payments": "Malipo yaliyokamilishwa",
       "amendment": "Mabadiliko",
-      "transaction": "Miamala",
+      "transaction": "Malipo",
       "vendorReport": "Ripoti ya Vendor",
       "invoiceConsolidated": "Ankara iliyojumuishwa",
       "paymentConsolidated": "Malipo ya Kuunganishwa",
@@ -103,9 +103,9 @@
     "invoice": "Ankara",
     "created": "Ankara zilizoundwa",
     "overview": "Maelezo",
-    "transactionsReport": "Ripoti ya Miamala",
+    "transactionsReport": "Ripoti ya Malipo",
     "invoiceReport": "Ripoti ya ankara",
-    "paymentReport": "Ripoti ya Malipo",
+    "paymentReport": "Ripoti ya malipo iliyokamilishwa",
     "amendmentReport": "Ripoti ya Marekebisho",
     "customerReport": "Ripoti ya Wateja",
     "addInvoice": "Ongeza ankra"
@@ -136,7 +136,7 @@
         "Muhtasari",
         "Maelezo ya Miamala",
         "Maelezo ya Makadirio",
-        "Maelezo ya Malipo",
+        "Maelezo kamili ya Malipo",
         "Maelezo ya Mageuzi",
         "Ankara iliyokatishwa"
       ]
