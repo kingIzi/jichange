@@ -577,6 +577,7 @@ export class InvoiceDetailsComponent implements OnInit {
       case 'Due_Date':
       case 'Invoice_Expired_Date':
       case 'Status':
+      case 'delivery_status':
         return column.value;
       default:
         return '';

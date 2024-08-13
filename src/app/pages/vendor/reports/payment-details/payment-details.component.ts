@@ -519,15 +519,18 @@ export class PaymentDetailsComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
-  private invoiceStatusStyle(status: string) {
-    if (status && status.toLocaleLowerCase() === 'awaiting payment') {
-      return 'invoice-overdue';
-    } else if (status && status.toLocaleLowerCase() === 'expired') {
-      return 'invoice-expired';
-    } else if (status && status.toLocaleLowerCase() === 'overdue') {
-      return 'invoice-overdue';
+  private deliveryStatusStyle(status: string) {
+    if (status && status.length > 0) {
+      return `${PerformanceUtils.getActiveStatusStyles(
+        status,
+        'Delivered',
+        'bg-green-100',
+        'text-green-700',
+        'bg-orange-100',
+        'text-orange-700'
+      )} text-center w-fit`;
     } else {
-      return 'invoice-completed';
+      return 'delivery-status';
     }
   }
   ngOnInit(): void {
@@ -614,7 +617,7 @@ export class PaymentDetailsComponent implements OnInit {
           `text-teal-700`
         )} text-center w-fit`;
       case 'Status':
-        return `${style} ${this.invoiceStatusStyle(element[key])}`;
+        return `${style} ${this.deliveryStatusStyle(element[key])}`;
       case 'Requested_Amount':
       case 'PaidAmount':
       case 'Balance':
@@ -644,6 +647,8 @@ export class PaymentDetailsComponent implements OnInit {
         );
       case 'Control_No':
         return element['Control_No'] ? element['Control_No'] : '-';
+      case 'Status':
+        return element[key] ? element[key] : 'Not sent';
       default:
         return element[key];
     }
@@ -652,20 +657,6 @@ export class PaymentDetailsComponent implements OnInit {
     return columns.map((col) => col.label);
   }
   downloadSheet() {
-    // if (this.tableDataService.getData().length > 0) {
-    //   this.fileHandler.downloadExcelTable(
-    //     this.tableDataService.getData(),
-    //     this.getActiveTableKeys(),
-    //     'payments_report',
-    //     ['Payment_Date']
-    //   );
-    // } else {
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.warning`),
-    //     this.tr.translate(`errors.noDataFound`)
-    //   );
-    // }
     if (this.tableDataService.getData().length > 0) {
       this.exporter.hiddenColumns = [
         this.tableDataService.getTableColumns().length,
@@ -700,12 +691,6 @@ export class PaymentDetailsComponent implements OnInit {
     if (this.filterFormGroup.valid) {
       let form = { ...this.filterFormGroup.value };
       form.compid = this.getUserProfile().InstID;
-      // form.stdate = this.reformatDate(
-      //   this.filterFormGroup.value.stdate.split('-')
-      // );
-      // form.enddate = this.reformatDate(
-      //   this.filterFormGroup.value.enddate.split('-')
-      // );
       form.stdate = !form.stdate
         ? form.stdate
         : new Date(form.stdate).toISOString();

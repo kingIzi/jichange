@@ -620,15 +620,18 @@ export class PaymentDetailsComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
-  private invoiceStatusStyle(status: string) {
-    if (status && status.toLocaleLowerCase() === 'awaiting payment') {
-      return 'invoice-overdue';
-    } else if (status && status.toLocaleLowerCase() === 'expired') {
-      return 'invoice-expired';
-    } else if (status && status.toLocaleLowerCase() === 'overdue') {
-      return 'invoice-overdue';
+  private deliveryStatusStyle(status: string) {
+    if (status) {
+      return `${PerformanceUtils.getActiveStatusStyles(
+        status,
+        'Delivered',
+        'bg-green-100',
+        'text-green-700',
+        'bg-orange-100',
+        'text-orange-700'
+      )} text-center w-fit`;
     } else {
-      return 'invoice-completed';
+      return 'delivery-status';
     }
   }
   ngOnInit(): void {
@@ -734,7 +737,7 @@ export class PaymentDetailsComponent implements OnInit {
       case 'Balance':
         return `${style} text-right`;
       case 'Status':
-        return `${style} ${this.invoiceStatusStyle(element[key])}`;
+        return `${style} ${this.deliveryStatusStyle(element[key])}`;
       default:
         return `${style} text-black font-normal`;
     }
@@ -762,6 +765,9 @@ export class PaymentDetailsComponent implements OnInit {
       case 'Company_Name':
       case 'Payment_Desc':
         return element[key] ? element[key] : '-';
+      case 'Status':
+        return element[key] ? element[key] : 'Not sent';
+
       default:
         return element[key];
     }

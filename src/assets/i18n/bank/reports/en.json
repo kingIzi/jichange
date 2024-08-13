@@ -117,6 +117,16 @@
         "desc": ""
       },
       {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
         "label": "Total Amount",
         "value": "Requested_Amount",
         "desc": ""
@@ -134,11 +144,6 @@
       {
         "label": "Control N°",
         "value": "Control_No",
-        "desc": ""
-      },
-      {
-        "label": "Payment type",
-        "value": "Payment_Type",
         "desc": ""
       },
       {
@@ -189,6 +194,16 @@
         "desc": ""
       },
       {
+        "label": "Payment type",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
+        "desc": ""
+      },
+      {
         "label": "Total Amount",
         "value": "Requested_Amount",
         "desc": ""
@@ -206,11 +221,6 @@
       {
         "label": "Control N°",
         "value": "Control_No",
-        "desc": ""
-      },
-      {
-        "label": "Payment type",
-        "value": "Payment_Type",
         "desc": ""
       },
       {

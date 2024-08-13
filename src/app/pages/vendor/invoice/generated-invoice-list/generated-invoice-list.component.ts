@@ -148,7 +148,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
   ) {}
   //create formGroup for each header item in table
   private createHeadersForm() {
-    let TABLE_SHOWING = 8;
+    let TABLE_SHOWING = 9;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),

@@ -1,0 +1,19 @@
+.invoice-active {
+  @apply bg-blue-100 text-blue-700 px-4 py-1 rounded-lg shadow-sm w-fit text-center;
+}
+
+.invoice-overdue {
+  @apply bg-yellow-100 text-yellow-700 px-4 py-1 rounded-lg shadow-sm w-fit text-center;
+}
+
+.invoice-expired {
+  @apply bg-danger-100 text-danger-700 px-4 py-1 rounded-lg shadow-sm w-fit text-center;
+}
+
+.invoice-completed {
+  @apply bg-fuchsia-100 text-fuchsia-700 px-4 py-1 rounded-lg shadow-sm w-fit text-center;
+}
+
+.delivery-status {
+  @apply bg-sky-100 text-sky-700 px-4 py-1 rounded-lg shadow-sm w-fit text-center;
+}

@@ -276,7 +276,7 @@ export class TransactionDetailsComponent implements OnInit {
       });
   }
   private createHeadersFormGroup() {
-    let TABLE_SHOWING = 8;
+    let TABLE_SHOWING = 11;
     this.headersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -580,6 +580,17 @@ export class TransactionDetailsComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
+  private invoiceStatusStyle(status: string) {
+    if (status && status.toLocaleLowerCase() === 'awaiting payment') {
+      return 'invoice-overdue';
+    } else if (status && status.toLocaleLowerCase() === 'expired') {
+      return 'invoice-expired';
+    } else if (status && status.toLocaleLowerCase() === 'overdue') {
+      return 'invoice-overdue';
+    } else {
+      return 'invoice-completed';
+    }
+  }
   ngOnInit(): void {
     this.createHeadersFormGroup();
     this.createRequestFormGroup();
@@ -626,6 +637,7 @@ export class TransactionDetailsComponent implements OnInit {
       case 'Trans_Channel':
       case 'Payment_Trans_No':
       case 'Receipt_No':
+      case 'Status':
         return column.value;
       default:
         return '';
@@ -661,6 +673,8 @@ export class TransactionDetailsComponent implements OnInit {
       case 'PaidAmount':
       case 'Balance':
         return `${style} text-right`;
+      case 'Status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       default:
         return `${style} text-black font-normal`;
     }

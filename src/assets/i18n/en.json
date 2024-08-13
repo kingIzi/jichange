@@ -159,12 +159,12 @@
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "Transaction Details",
+          "label": "Payment Details",
           "routerLink": "/main/reports/transactions",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "Complete Payments",
+          "label": "Completed Payments",
           "routerLink": "/main/reports/payment",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },

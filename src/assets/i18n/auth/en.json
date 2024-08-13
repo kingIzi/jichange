@@ -106,7 +106,7 @@
         "controlName": "Please enter control number",
         "dialogs": {
           "invalidFormError": "Invalid form",
-          "missingAccountNo": "Please provide the account number",
+          "missingAccountNo": "Please enter your control number.",
           "notFound": "Not found",
           "notFoundMessage": "Control number {} was not found."
         }

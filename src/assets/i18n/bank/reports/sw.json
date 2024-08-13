@@ -116,6 +116,16 @@
         "desc": ""
       },
       {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
+        "desc": ""
+      },
+      {
         "label": "Kiasi cha Jumla",
         "value": "Requested_Amount",
         "desc": ""
@@ -133,11 +143,6 @@
       {
         "label": "Nambari ya Kudhibiti",
         "value": "Control_No",
-        "desc": ""
-      },
-      {
-        "label": "Aina ya Malipo",
-        "value": "Payment_Type",
         "desc": ""
       },
       {
@@ -188,6 +193,16 @@
         "desc": ""
       },
       {
+        "label": "Aina ya Malipo",
+        "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
+        "desc": ""
+      },
+      {
         "label": "Kiasi cha Jumla",
         "value": "Requested_Amount",
         "desc": ""
@@ -205,11 +220,6 @@
       {
         "label": "Nambari ya Kudhibiti",
         "value": "Control_No",
-        "desc": ""
-      },
-      {
-        "label": "Aina ya Malipo",
-        "value": "Payment_Type",
         "desc": ""
       },
       {

@@ -246,7 +246,7 @@
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "Maelezo ya Muamala",
+          "label": "Maelezo ya Malipo",
           "routerLink": "/main/reports/transactions",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },

@@ -120,8 +120,10 @@
       {{ t("editInvoice") }}
     </h1>
   </ng-template>
-  <div class="flex flex-col space-y-8 bg-white shadow px-2 py-4 w-full">
-    <div class="flex flex-col w-full space-y-2 divide-y">
+  <div
+    class="flex flex-col space-y-8 bg-white shadow px-2 py-4 w-full divide-y"
+  >
+    <div class="flex flex-col w-full space-y-2">
       <h4
         *transloco="let t; read: 'invoice.form'"
         class="text-lg font-semibold w-full"
@@ -331,7 +333,7 @@
         </div>
       </div>
     </div>
-    <div class="flex flex-col w-full space-y-2 divide-y">
+    <div class="flex flex-col w-full space-y-2 pt-4">
       <div class="flex flex-row items-center justify-between">
         <h1
           *transloco="let t; read: 'invoice.form'"
@@ -368,7 +370,7 @@
                 <thead class="font-medium">
                   <tr
                     *transloco="let t; read: 'invoice.form'"
-                    class="bg-base-200"
+                    class="!bg-base-200"
                   >
                     <th
                       *ngFor="
@@ -422,19 +424,6 @@
                     </td>
                     <td class="flex flex-row justify-end w-24 my-2">
                       <div class="flex flex-col w-24">
-                        <!-- <select
-                          formControlName="item_qty"
-                          class="mx-1 w-full text-right select select-sm select-bordered select-ghost"
-                        >
-                          <option [value]="0" selected disabled>Qty</option>
-                          <option
-                            class="text-lg text-right w-full py-2"
-                            *ngFor="let qty of itemDetailQuantities; index as i"
-                            [value]="qty"
-                          >
-                            {{ qty }}
-                          </option>
-                        </select> -->
                         <input
                           formControlName="item_qty"
                           type="number"
