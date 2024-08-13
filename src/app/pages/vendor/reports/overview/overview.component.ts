@@ -61,7 +61,7 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'vendor/reports', alias: 'reports' },
+      useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
 })

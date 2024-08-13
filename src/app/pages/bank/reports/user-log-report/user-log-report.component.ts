@@ -134,8 +134,8 @@ export class UserLogReportComponent implements OnInit {
   ) {}
   private createTableFilterFormGroup() {
     this.tableFilterFormGroup = this.fb.group({
-      stdate: this.fb.control('', [Validators.required]),
-      enddate: this.fb.control('', [Validators.required]),
+      stdate: this.fb.control('', []),
+      enddate: this.fb.control('', []),
       branch: this.fb.control(this.getUserProfile().braid, []),
     });
     if (Number(this.getUserProfile().braid) > 0) {
@@ -439,16 +439,28 @@ export class UserLogReportComponent implements OnInit {
     if (!this.tableFilterFormGroup.valid) {
       this.tableFilterFormGroup.markAllAsTouched();
     } else {
-      let value = { ...this.tableFilterFormGroup.value };
-      value.stdate = AppUtilities.reformatDate(
-        this.tableFilterFormGroup.value.stdate.split('-')
-      );
-      value.enddate = AppUtilities.reformatDate(
-        this.tableFilterFormGroup.value.enddate.split('-')
-      );
-      value.branch = this.branch.value;
+      let form = { ...this.tableFilterFormGroup.value };
+      // value.stdate = AppUtilities.reformatDate(
+      //   this.tableFilterFormGroup.value.stdate.split('-')
+      // );
+      // value.enddate = AppUtilities.reformatDate(
+      //   this.tableFilterFormGroup.value.enddate.split('-')
+      // );
+      if (form.stdate) {
+        //form.stdate = new Date(form.stdate).toISOString();
+        let startDate = new Date(form.stdate);
+        startDate.setHours(0, 0, 0, 0);
+        form.stdate = startDate.toISOString();
+      }
+      if (form.enddate) {
+        //form.enddate = new Date(form.enddate).toISOString();
+        let endDate = new Date(form.enddate);
+        endDate.setHours(23, 59, 59, 999);
+        form.enddate = endDate.toISOString();
+      }
+      form.branch = this.branch.value;
       //this.tableData.userReportLogs = [];
-      this.requestUserLog(value);
+      this.requestUserLog(form);
     }
   }
   sortColumnClicked(ind: number) {

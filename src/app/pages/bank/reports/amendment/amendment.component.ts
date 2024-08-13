@@ -340,13 +340,13 @@ export class AmendmentComponent implements OnInit {
       });
   }
   private async createHeaderGroup() {
-    let TABLE_SHOWING = 7;
+    let TABLE_SHOWING = 8;
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
     this.tr
-      .selectTranslate(`amendmentDetails.amendmentTable`, {}, this.scope)
+      .selectTranslate(`amendmentDetails.amendmentTableBanker`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
         //this.tableData.originalTableColumns = labels;
         this.tableDataService.setOriginalTableColumns(labels);
@@ -437,6 +437,8 @@ export class AmendmentComponent implements OnInit {
           return new Date(item['Due_Date']);
         case 'Invoice_Expired_Date':
           return new Date(item['Invoice_Expired_Date']);
+        case 'Invoice_Date':
+          return new Date(item['Invoice_Date']);
         default:
           return item[property];
       }
@@ -622,6 +624,7 @@ export class AmendmentComponent implements OnInit {
       case 'Payment_Type':
       case 'Reason':
       case 'Invoice_Expired_Date':
+      case 'Invoice_Date':
         return column.value;
       default:
         return '';
@@ -659,6 +662,7 @@ export class AmendmentComponent implements OnInit {
           this.tableDataService.getData(),
           element
         );
+      case 'Invoice_Date':
       case 'Due_Date':
       case 'Invoice_Expired_Date':
         return PerformanceUtils.convertDateStringToDate(

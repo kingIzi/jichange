@@ -101,7 +101,7 @@ import autoTable from 'jspdf-autotable';
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'vendor/reports', alias: 'reports' },
+      useValue: { scope: 'bank/reports', alias: 'reports' },
     },
     {
       provide: TABLE_DATA_SERVICE,

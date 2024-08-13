@@ -134,19 +134,6 @@
                       {{ header.get("label")?.value }}
                     </p>
                     <div class="flex flex-row items-center space-x-2">
-                      <!-- <button
-                        *transloco="let t; read: 'actions'"
-                        [routerLink]="
-                          '/vendor/reports/transactions/' +
-                          invoiceNumberToBase64(element.Invoice_Sno)
-                        "
-                        class="btn btn-sm bg-transparent tooltip tooltip-bottom border-warning"
-                        [attr.data-tip]="t('view')"
-                      >
-                        <span>
-                          <i class="bi bi-eye text-lg text-warning"></i>
-                        </span>
-                      </button> -->
                       <button
                         *transloco="let t; read: 'actions'"
                         [routerLink]="transactionsViewUrl(element)"

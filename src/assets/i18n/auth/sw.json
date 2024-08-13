@@ -76,7 +76,8 @@
           "vendorExists": "Jina la mchuuzi ambalo umeingiza tayari lipo.",
           "vendorNameExists": "Jina la muuzaji uliloingiza tayari lipo.",
           "tinNumberExists": "Nambari ya TIN uliyoingiza tayari ipo.",
-          "mobileExists": "Nambari ya simu ipo."
+          "mobileExists": "Nambari ya simu ipo.",
+          "emailExists": "Anwani ya barua pepe uliyoingiza tayari ipo."
         }
       },
       "success": {

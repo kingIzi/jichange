@@ -115,8 +115,8 @@ export class PaymentConsolidatedComponent implements OnInit {
   ) {}
   private createTableFilterFormGroup() {
     this.tableFilterFormGroup = this.fb.group({
-      stdate: this.fb.control('', [Validators.required]),
-      enddate: this.fb.control('', [Validators.required]),
+      stdate: this.fb.control('', []),
+      enddate: this.fb.control('', []),
     });
   }
   private createTableHeadersFormGroup() {
@@ -273,6 +273,7 @@ export class PaymentConsolidatedComponent implements OnInit {
   ngOnInit(): void {
     this.createTableFilterFormGroup();
     this.createTableHeadersFormGroup();
+    this.submitPaymentConsolidatedReport();
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
@@ -324,8 +325,20 @@ export class PaymentConsolidatedComponent implements OnInit {
   submitPaymentConsolidatedReport() {
     if (this.tableFilterFormGroup.valid) {
       let form = { ...this.tableFilterFormGroup.value };
-      form.stdate = this.datePipe.transform(form.stdate, 'dd/MM/yyyy');
-      form.enddate = this.datePipe.transform(form.enddate, 'dd/MM/yyyy');
+      // form.stdate = this.datePipe.transform(form.stdate, 'dd/MM/yyyy');
+      // form.enddate = this.datePipe.transform(form.enddate, 'dd/MM/yyyy');
+      if (form.stdate) {
+        //form.stdate = new Date(form.stdate).toISOString();
+        let startDate = new Date(form.stdate);
+        startDate.setHours(0, 0, 0, 0);
+        form.stdate = startDate.toISOString();
+      }
+      if (form.enddate) {
+        //form.enddate = new Date(form.enddate).toISOString();
+        let endDate = new Date(form.enddate);
+        endDate.setHours(23, 59, 59, 999);
+        form.enddate = endDate.toISOString();
+      }
       this.requestPaymentConsolidated(form);
     } else {
       this.tableFilterFormGroup.markAllAsTouched();

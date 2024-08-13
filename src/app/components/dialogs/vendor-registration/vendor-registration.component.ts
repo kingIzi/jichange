@@ -168,6 +168,10 @@ export class VendorRegistrationComponent implements OnInit {
         return this.tr.translate(
           'auth.vendorRegistration.form.errors.dialogs.missingEmail'
         );
+      case 'Email exists'.toLocaleLowerCase():
+        return this.tr.translate(
+          'auth.vendorRegistration.form.errors.dialogs.emailExists'
+        );
       case 'Missing Company Name'.toLocaleLowerCase():
         return this.tr.translate(
           'auth.vendorRegistration.form.errors.dialogs.missingVendorName'

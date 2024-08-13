@@ -109,7 +109,11 @@ export class CancelledInvoiceReportComponent implements OnInit {
       tableSearch: this.fb.control('', []),
     });
     this.tr
-      .selectTranslate('cancelledInvoice.cancelledInvoiceTable', {}, this.scope)
+      .selectTranslate(
+        'cancelledInvoices.cancelledInvoiceTableBanker',
+        {},
+        this.scope
+      )
       .subscribe((labels: TableColumnsData[]) => {
         this.tableDataService.setOriginalTableColumns(labels);
         this.tableDataService
@@ -221,6 +225,9 @@ export class CancelledInvoiceReportComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
+  private invoiceStatusStyle(status: string) {
+    return 'invoice-expired';
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
   }
@@ -253,6 +260,7 @@ export class CancelledInvoiceReportComponent implements OnInit {
       case 'Chus_Name':
       case 'Invoice_Amount':
       case 'Reason':
+      case 'goods_status':
         return column.value;
       default:
         return '';
@@ -283,6 +291,8 @@ export class CancelledInvoiceReportComponent implements OnInit {
           `bg-teal-100`,
           `text-teal-700`
         )} text-center w-fit`;
+      case 'goods_status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       default:
         return `${style} text-black font-normal`;
     }
@@ -310,6 +320,10 @@ export class CancelledInvoiceReportComponent implements OnInit {
         return element['Customer_Name']
           ? element['Customer_Name']
           : element['Chus_Name'];
+      case 'goods_status':
+        return element[key].toLocaleLowerCase() === 'cancel'.toLocaleLowerCase()
+          ? 'Cancelled'
+          : element[key];
       default:
         return element[key];
     }

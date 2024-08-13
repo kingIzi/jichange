@@ -112,7 +112,7 @@ import autoTable from 'jspdf-autotable';
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'vendor/invoice', alias: 'invoice' },
+      useValue: { scope: 'bank/reports', alias: 'reports' },
     },
     {
       provide: VENDOR_TABLE_DATA_SERVICE,
@@ -178,7 +178,11 @@ export class InvoiceCancelledComponent implements OnInit {
       tableSearch: this.fb.control('', []),
     });
     this.tr
-      .selectTranslate(`cancelledInvoiceTable`, {}, this.scope)
+      .selectTranslate(
+        `cancelledInvoices.cancelledInvoiceTable`,
+        {},
+        this.scope
+      )
       .subscribe((labels: TableColumnsData[]) => {
         //this.tableData.originalTableColumns = labels;
         this.tableDataService.setOriginalTableColumns(labels);
@@ -474,6 +478,9 @@ export class InvoiceCancelledComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
+  private invoiceStatusStyle(status: string) {
+    return 'invoice-expired';
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.createFilterForm();
@@ -541,6 +548,8 @@ export class InvoiceCancelledComponent implements OnInit {
           `bg-teal-100`,
           `text-teal-700`
         )} text-center w-fit`;
+      case 'goods_status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       default:
         return `${style} text-black font-normal`;
     }
@@ -568,6 +577,10 @@ export class InvoiceCancelledComponent implements OnInit {
         return element['Customer_Name']
           ? element['Customer_Name']
           : element['Chus_Name'];
+      case 'goods_status':
+        return element[key].toLocaleLowerCase() === 'cancel'.toLocaleLowerCase()
+          ? 'Cancelled'
+          : element[key];
       default:
         return element[key];
     }

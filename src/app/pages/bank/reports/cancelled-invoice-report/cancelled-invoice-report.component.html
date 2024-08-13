@@ -3,7 +3,7 @@
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
     <h2
-      *transloco="let t; read: 'reports.cancelledInvoice'"
+      *transloco="let t; read: 'reports.cancelledInvoices'"
       class="text-lg font-bold"
     >
       {{ t("title") }}
@@ -77,12 +77,12 @@
           </div>
           <div class="relative">
             <input
-              *transloco="let t; read: 'reports.cancelledInvoice'"
+              *transloco="let t; read: 'defaults'"
               type="search"
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
               [formControl]="tableSearch"
-              [placeholder]="t('searchBy')"
+              [placeholder]="t('search')"
             />
             <span class="absolute top-1/2 left-2 -translate-y-1/2">
               <i class="bi bi-search text-lg text-neutral-500"></i>

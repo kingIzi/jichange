@@ -151,9 +151,9 @@
     }
   },
   "inboxApproval": {
-    "name": "Inbox Approval",
+    "name": "Vendor Approval(s)",
     "approve": "Approve",
-    "companyApproval": "Company Approval",
+    "companyApproval": "Vendor Approval",
     "approvedSuccessfully": "Company approved successfully!",
     "searchBy": "Search by name",
     "failedToRetrieveSuspenseAccount": "Failed to retrieve suspense accounts.",

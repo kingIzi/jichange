@@ -22,7 +22,7 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
   providers: [
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'vendor/reports', alias: 'reports' },
+      useValue: { scope: 'bank/reports', alias: 'reports' },
     },
   ],
 })

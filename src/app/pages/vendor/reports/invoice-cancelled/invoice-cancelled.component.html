@@ -5,8 +5,11 @@
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
-    <h2 *transloco="let t; read: 'invoice'" class="text-lg font-bold">
-      {{ t("invoiceDetails") }}
+    <h2
+      *transloco="let t; read: 'reports.cancelledInvoices'"
+      class="text-lg font-bold"
+    >
+      {{ t("title") }}
     </h2>
   </div>
   <div class="flex flex-col bg-white shadow px-2 py-4 space-y-4 divide-y">
@@ -22,7 +25,7 @@
         <div class="flex flex-row items-center space-x-4">
           <button
             (click)="downloadSheet()"
-            *transloco="let t; read: 'invoice'"
+            *transloco="let t; read: 'reports.overview'"
             class="flex flex-row items-center btn btn-sm text-xs text-white bg-green-800 hover:bg-green-800 hover:border-black hover:border-2"
           >
             <p class="text-xs lg:block hidden">{{ t("exportToExcel") }}</p>
@@ -32,7 +35,7 @@
           </button>
           <button
             (click)="downloadPdf()"
-            *transloco="let t; read: 'invoice'"
+            *transloco="let t; read: 'reports.overview'"
             class="flex flex-row items-center btn btn-sm text-xs text-white bg-red-600 hover:bg-danger-600 hover:text-red-950"
           >
             <p class="text-xs lg:block hidden">{{ t("exportToPdf") }}</p>
@@ -77,12 +80,12 @@
           </div>
           <div class="relative">
             <input
-              *transloco="let t; read: 'invoice.createdInvoice'"
+              *transloco="let t; read: 'defaults'"
               type="search"
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
               [formControl]="tableSearch"
-              [placeholder]="t('searchTableBy')"
+              [placeholder]="t('search')"
             />
             <span class="absolute top-1/2 left-2 -translate-y-1/2">
               <i class="bi bi-search text-lg text-neutral-500"></i>

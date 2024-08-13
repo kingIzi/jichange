@@ -15,11 +15,27 @@
     "confirm": "Thibitisha",
     "close": "Funga",
     "success": "Mafanikio",
-    "cancel": "Katisha"
+    "cancel": "Katisha",
+    "all": "Yote"
   },
   "forms": {
     "from": "Kutoka",
-    "to": "Hadi"
+    "to": "Hadi",
+    "branch": "Tawi",
+    "vendor": "Muuzaji",
+    "customer": "Muteja",
+    "invoiceNumber": "Nambari ya Ankara",
+    "errors": {
+      "branch": "Tafadhali chagua tawi",
+      "vendor": "Tafadhali chagua muuzaji",
+      "customer": "Tafadhali chagua muteja",
+      "invoiceNumber": "Tafadhali chagua nambari ya ankara",
+      "startDate": "Chagua tarehe ya kuanza",
+      "endDate": "Chagua tarehe ya mwisho"
+    },
+    "placeholders": {
+      "invoiceNumber": "Ingiza nambari ya ankara"
+    }
   },
   "actions": {
     "submit": "Wasilisha",

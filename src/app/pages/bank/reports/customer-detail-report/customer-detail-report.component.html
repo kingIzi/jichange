@@ -15,21 +15,14 @@
   <div class="flex flex-col space-y-4 divide-y w-full bg-white shadow p-2">
     <form class="w-full grid grid-cols-2 gap-x-2 gap-y-3">
       <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
+        <p *transloco="let t; read: 'forms'" class="text-xs">
           {{ t("branch") }}
         </p>
         <select
           [formControl]="branch"
           class="select select-sm select-bordered w-full"
         >
-          <option
-            *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-            selected
-            [value]="'0'"
-          >
+          <option *transloco="let t; read: 'defaults'" selected [value]="'0'">
             {{ t("all") }}
           </option>
           <ng-container *ngIf="filterFormData.branches.length > 0">
@@ -47,7 +40,7 @@
         </select>
         <span *ngIf="branch && branch.invalid && branch.touched">
           <p
-            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("branch") }}
@@ -93,86 +86,6 @@
           </p>
         </span>
       </div>
-      <!-- <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.customerDetailReport.form'"
-          class="text-xs capitalize"
-        >
-          {{ t("region") }}
-        </p>
-        <select
-          [formControl]="reg"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="
-              let t;
-              read: 'reports.customerDetailReport.form.placeholders'
-            "
-            selected
-            [value]="'0'"
-          >
-            {{ t("all") }}
-          </option>
-          <option
-            [value]="region.Region_SNO"
-            *ngFor="
-              let region of filterFormData.regions;
-              trackBy: PerformanceUtils.trackByIndex
-            "
-          >
-            {{ region.Region_Name }}
-          </option>
-        </select>
-        <span *ngIf="reg && reg.invalid && reg.touched">
-          <p
-            *transloco="let t; read: 'reports.customerDetailReport.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("region") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1">
-        <p
-          *transloco="let t; read: 'reports.customerDetailReport.form'"
-          class="text-xs capitalize"
-        >
-          {{ t("district") }}
-        </p>
-        <select
-          [formControl]="dist"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="
-              let t;
-              read: 'reports.customerDetailReport.form.placeholders'
-            "
-            selected
-            [value]="'0'"
-          >
-            {{ t("all") }}
-          </option>
-          <option
-            [value]="district.SNO"
-            *ngFor="
-              let district of filterFormData.districts;
-              trackBy: PerformanceUtils.trackByIndex
-            "
-          >
-            {{ district.District_Name }}
-          </option>
-        </select>
-        <span *ngIf="dist && dist.invalid && dist.touched">
-          <p
-            *transloco="let t; read: 'reports.customerDetailReport.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("district") }}
-          </p>
-        </span>
-      </div> -->
       <div class="col-span-full flex flex-row items-center justify-end">
         <button
           *transloco="let t; read: 'actions'"
@@ -242,11 +155,11 @@
           </div>
           <div class="relative">
             <input
-              *transloco="let t; read: 'reports.customerDetailReport'"
+              *transloco="let t; read: 'defaults'"
               type="search"
               class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
               id="exampleSearch"
-              [placeholder]="t('searchBy')"
+              [placeholder]="t('search')"
               [formControl]="tableSearch"
             />
             <span class="absolute top-1/2 left-2 -translate-y-1/2">

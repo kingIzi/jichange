@@ -25,7 +25,7 @@
         />
         <span *ngIf="stdate && stdate.invalid && stdate.touched">
           <p
-            *transloco="let t; read: 'reports.userLogReport.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("startDate") }}
@@ -44,7 +44,7 @@
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
-            *transloco="let t; read: 'reports.userLogReport.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("endDate") }}

@@ -316,13 +316,17 @@ export class InvoiceDetailsComponent implements OnInit {
     });
   }
   private createHeaderGroup() {
-    let TABLE_SHOWING = 8;
+    let TABLE_SHOWING = 10;
     this.headerFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
     });
     this.tr
-      .selectTranslate(`invoiceDetails.invoiceDetailsTable`, {}, this.scope)
+      .selectTranslate(
+        `invoiceDetails.invoiceDetailsTableBanker`,
+        {},
+        this.scope
+      )
       .subscribe((labels: TableColumnsData[]) => {
         this.tableDataService.setOriginalTableColumns(labels);
         this.tableDataService
@@ -504,6 +508,29 @@ export class InvoiceDetailsComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
+  private deliveryStatusStyle(deliveryStatus?: string) {
+    if (deliveryStatus) {
+      return `${PerformanceUtils.getActiveStatusStyles(
+        deliveryStatus,
+        'Delivered',
+        'bg-green-100',
+        'text-green-700',
+        'bg-orange-100',
+        'text-orange-700'
+      )} text-center w-fit`;
+    } else {
+      return 'delivery-status';
+    }
+  }
+  private invoiceStatusStyle(status: string) {
+    if (status && status.toLocaleLowerCase() === 'active') {
+      return 'invoice-active';
+    } else if (status.toLocaleLowerCase() === 'overdue') {
+      return 'invoice-overdue';
+    } else if (status.toLocaleLowerCase() === 'expired') {
+      return 'invoice-expired';
+    } else return 'invoice-completed';
+  }
   ngOnInit(): void {
     initTE({ Datepicker, Input });
     this.createRequestFormGroup();
@@ -549,6 +576,7 @@ export class InvoiceDetailsComponent implements OnInit {
       case 'Invoice_Date':
       case 'Due_Date':
       case 'Invoice_Expired_Date':
+      case 'Status':
         return column.value;
       default:
         return '';
@@ -586,6 +614,10 @@ export class InvoiceDetailsComponent implements OnInit {
           'bg-orange-100',
           'text-orange-700'
         )} w-fit`;
+      case 'Status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
+      case 'delivery_status':
+        return `${style} ${this.deliveryStatusStyle(element[key])}`;
       case 'Total':
         return `${style} text-right`;
       default:
@@ -614,6 +646,8 @@ export class InvoiceDetailsComponent implements OnInit {
         );
       case 'Control_No':
         return element['Control_No'] ? element['Control_No'] : '-';
+      case 'delivery_status':
+        return element[key] ? element[key] : 'Not sent';
       default:
         return element[key];
     }

@@ -8,16 +8,6 @@
     >
       {{ t("label") }}
     </h2>
-    <div class="flex flex-row items-center space-x-2">
-      <!-- <a
-            (click)="downloadSheet()"
-            class="flex flex-row items-center btn btn-sm border border-success btn-ghost"
-          >
-            <span>
-              <i class="bi bi-download text-success text-lg"></i>
-            </span>
-          </a> -->
-    </div>
   </div>
   <div class="flex flex-col space-y-4 divide-y w-full bg-white shadow p-2">
     <form
@@ -35,7 +25,7 @@
         />
         <span *ngIf="stdate && stdate.invalid && stdate.touched">
           <p
-            *transloco="let t; read: 'reports.userLogReport.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("startDate") }}
@@ -54,7 +44,7 @@
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
-            *transloco="let t; read: 'reports.userLogReport.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("endDate") }}

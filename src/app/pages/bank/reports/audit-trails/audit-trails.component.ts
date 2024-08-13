@@ -475,15 +475,27 @@ export class AuditTrailsComponent implements OnInit {
   }
   submitFilter() {
     if (this.formGroup.valid) {
-      let value = { ...this.formGroup.value };
-      value.Startdate = this.reformatDate(
-        this.formGroup.value.Startdate.split('-')
-      );
-      value.Enddate = this.reformatDate(
-        this.formGroup.value.Enddate.split('-')
-      );
-      value.branch = this.branch.value;
-      this.filterAuditTrailsRequest(value);
+      let form = { ...this.formGroup.value };
+      // value.Startdate = this.reformatDate(
+      //   this.formGroup.value.Startdate.split('-')
+      // );
+      // value.Enddate = this.reformatDate(
+      //   this.formGroup.value.Enddate.split('-')
+      // );
+      if (form.Startdate) {
+        //form.stdate = new Date(form.stdate).toISOString();
+        let startDate = new Date(form.Startdate);
+        startDate.setHours(0, 0, 0, 0);
+        form.Startdate = startDate.toISOString();
+      }
+      if (form.Enddate) {
+        //form.enddate = new Date(form.enddate).toISOString();
+        let endDate = new Date(form.Enddate);
+        endDate.setHours(23, 59, 59, 999);
+        form.Enddate = endDate.toISOString();
+      }
+      form.branch = this.branch.value;
+      this.filterAuditTrailsRequest(form);
     } else {
       this.formGroup.markAllAsTouched();
     }

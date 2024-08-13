@@ -60,7 +60,7 @@ import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-re
     DatePipe,
     {
       provide: TRANSLOCO_SCOPE,
-      useValue: { scope: 'bank/reports', alias: 'reports' },
+      useValue: { scope: 'vendor/reports', alias: 'reports' },
     },
   ],
 })
@@ -380,10 +380,16 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
     if (this.filterForm.valid) {
       let form = { ...this.filterForm.value };
       if (form.stdate) {
-        form.stdate = new Date(form.stdate).toISOString(); //AppUtilities.reformatDate(this.stdate.value.split('-'));
+        //form.stdate = new Date(form.stdate).toISOString();
+        let startDate = new Date(form.stdate);
+        startDate.setHours(0, 0, 0, 0);
+        form.stdate = startDate.toISOString();
       }
       if (form.enddate) {
-        form.enddate = new Date(form.enddate).toISOString(); //AppUtilities.reformatDate(this.enddate.value.split('-'));
+        //form.enddate = new Date(form.enddate).toISOString();
+        let endDate = new Date(form.enddate);
+        endDate.setHours(23, 59, 59, 999);
+        form.enddate = endDate.toISOString();
       }
       form.branch = this.branch.value;
       form.compid = this.compid.value;

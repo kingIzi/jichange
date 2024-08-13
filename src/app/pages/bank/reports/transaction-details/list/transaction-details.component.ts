@@ -283,7 +283,7 @@ export class TransactionDetailsComponent implements OnInit {
     });
     this.tr
       .selectTranslate(
-        `transactionDetails.transactionDetailsTable`,
+        `transactionDetails.transactionDetailsTableBanker`,
         {},
         this.scope
       )
@@ -740,14 +740,6 @@ export class TransactionDetailsComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  getViewTransactionUrl(transaction: TransactionDetail) {
-    // '/main/reports/transactions/' +
-    //                         invoiceNumberToBase64(element.Invoice_Sno)
-    let baseUrl = '/main/reports/transactions';
-    let invoiceSno = btoa(transaction.Invoice_Sno);
-    let transactionId = btoa(transaction.Payment_Trans_No);
-    return `${baseUrl}/${invoiceSno}/${transactionId}`;
-  }
   isCashAmountColumn(index: number) {
     return (
       index === TransactionDetailsTableHeadersMap.TOTAL_AMOUNT ||
@@ -758,6 +750,12 @@ export class TransactionDetailsComponent implements OnInit {
   // invoiceNumberToBase64(invoice_number: string) {
   //   return btoa(invoice_number);
   // }
+  transactionsViewUrl(transaction: TransactionDetail) {
+    let baseUrl = '/main/reports/transactions';
+    let invoiceNumber = btoa(transaction.Invoice_Sno);
+    let transactionNumber = btoa(transaction.Payment_Trans_No);
+    return `${baseUrl}/${invoiceNumber}/${transactionNumber}`;
+  }
   getTableDataSource() {
     return this.tableDataService.getDataSource();
   }

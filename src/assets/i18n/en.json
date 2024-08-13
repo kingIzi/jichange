@@ -16,11 +16,27 @@
     "confirm": "Confirm",
     "close": "Close",
     "success": "Success",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "all": "All"
   },
   "forms": {
     "from": "From",
-    "to": "To"
+    "to": "To",
+    "branch": "Branch",
+    "vendor": "Vendor",
+    "customer": "Customer",
+    "invoiceNumber": "Invoice number",
+    "errors": {
+      "branch": "Please select a branch",
+      "vendor": "Please select a vendor",
+      "customer": "Please select a customer",
+      "invoiceNumber": "Please select an invoice number",
+      "startDate": "Pick a start date",
+      "endDate": "Pick an end date"
+    },
+    "placeholders": {
+      "invoiceNumber": "Enter invoice number"
+    }
   },
   "actions": {
     "submit": "Submit",

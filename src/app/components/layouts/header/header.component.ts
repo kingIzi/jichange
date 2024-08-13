@@ -170,17 +170,15 @@ export class HeaderComponent implements OnInit {
           ),
         });
         bankHeader.dropdowns.forEach((dropdown, dropdownIndex) => {
-          if (dropdown.access.includes(this.getUserProfile().desig)) {
-            let dropdownGroup = this.fb.group({
-              label: this.fb.control(dropdown.label, []),
-              routerLink: this.fb.control(dropdown.routerLink, []),
-              isActive: this.fb.control(false, []),
-            });
-            // if (dropdownIndex !== 2) {
-            //   (header.get('dropdowns') as FormArray).push(dropdownGroup);
-            // }
-            (header.get('dropdowns') as FormArray).push(dropdownGroup);
-          }
+          let dropdownGroup = this.fb.group({
+            label: this.fb.control(dropdown.label, []),
+            routerLink: this.fb.control(dropdown.routerLink, []),
+            isActive: this.fb.control(false, []),
+          });
+          // if (dropdownIndex !== 2) {
+          //   (header.get('dropdowns') as FormArray).push(dropdownGroup);
+          // }
+          (header.get('dropdowns') as FormArray).push(dropdownGroup);
         });
         this.headers.push(header);
       });

@@ -18,10 +18,7 @@
       class="w-full grid grid-cols-2 gap-x-2 gap-y-3"
     >
       <div class="flex-col space-y-1 hidden">
-        <p
-          *transloco="let t; read: 'reports.invoiceDetails.form'"
-          class="text-xs"
-        >
+        <p *transloco="let t; read: 'forms'" class="text-xs">
           {{ t("branch") }}
         </p>
         <select
@@ -68,7 +65,7 @@
         />
         <span *ngIf="stdate && stdate.invalid && stdate.touched">
           <p
-            *transloco="let t; read: 'reports.userLogReport.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("startDate") }}
@@ -87,7 +84,7 @@
         />
         <span *ngIf="enddate && enddate.invalid && enddate.touched">
           <p
-            *transloco="let t; read: 'reports.userLogReport.form.errors'"
+            *transloco="let t; read: 'forms.errors'"
             class="text-danger-700 text-xs"
           >
             {{ t("endDate") }}

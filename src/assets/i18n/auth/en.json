@@ -79,7 +79,8 @@
           "vendorExists": "The vendor name you have entered already exists.",
           "vendorNameExists": "The vendor name you have entered already exists.",
           "tinNumberExists": "The TIN number you have entered already exists.",
-          "mobileExists": "Mobile number exists."
+          "mobileExists": "Mobile number exists.",
+          "emailExists": "The email address you have entered already exists."
         }
       },
       "success": {

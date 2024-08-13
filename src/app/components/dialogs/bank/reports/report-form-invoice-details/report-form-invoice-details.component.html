@@ -9,7 +9,7 @@
   class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3 relative"
 >
   <div class="flex flex-col space-y-1">
-    <p *transloco="let t; read: 'reports.invoiceDetails.form'" class="text-xs">
+    <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("branch") }}
     </p>
     <select
@@ -38,7 +38,7 @@
     </select>
     <span *ngIf="branch && branch.invalid && branch.touched">
       <p
-        *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+        *transloco="let t; read: 'forms.errors'"
         class="text-danger-700 text-xs"
       >
         {{ t("branch") }}
@@ -46,17 +46,14 @@
     </span>
   </div>
   <div class="flex flex-col space-y-1">
-    <p *transloco="let t; read: 'reports.invoiceDetails.form'" class="text-xs">
-      {{ t("company") }}
+    <p *transloco="let t; read: 'forms'" class="text-xs">
+      {{ t("vendor") }}
     </p>
     <select
       [formControl]="compid"
       class="select select-sm select-bordered w-full"
     >
-      <option
-        *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-        [value]="0"
-      >
+      <option *transloco="let t; read: 'defaults'" [value]="0">
         {{ t("all") }}
       </option>
       <ng-container *ngIf="filterFormData.companies.length > 0">
@@ -74,26 +71,22 @@
     </select>
     <span *ngIf="compid && compid.invalid && compid.touched">
       <p
-        *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+        *transloco="let t; read: 'forms.errors'"
         class="text-danger-700 text-xs"
       >
-        {{ t("company") }}
+        {{ t("vendor") }}
       </p>
     </span>
   </div>
   <div class="flex flex-col space-y-1">
-    <p *transloco="let t; read: 'reports.invoiceDetails.form'" class="text-xs">
+    <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("customer") }}
     </p>
     <select
       [formControl]="cusid"
       class="select select-sm select-bordered w-full"
     >
-      <option
-        *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-        selected
-        [value]="0"
-      >
+      <option *transloco="let t; read: 'defaults'" selected [value]="0">
         {{ t("all") }}
       </option>
       <ng-container *ngIf="filterFormData.customers.length > 0">
@@ -119,18 +112,14 @@
     </span>
   </div>
   <div class="flex flex-col space-y-1">
-    <p *transloco="let t; read: 'reports.invoiceDetails.form'" class="text-xs">
+    <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("invoiceNumber") }}
     </p>
     <select
       [formControl]="invno"
       class="select select-sm select-bordered w-full"
     >
-      <option
-        *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-        selected
-        [value]="''"
-      >
+      <option *transloco="let t; read: 'defaults'" selected [value]="''">
         {{ t("all") }}
       </option>
       <ng-container *ngIf="filterFormData.invoiceReports.length > 0">
@@ -148,7 +137,7 @@
     </select>
     <span *ngIf="invno && invno.invalid && invno.touched">
       <p
-        *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+        *transloco="let t; read: 'form.errors'"
         class="text-danger-700 text-xs"
       >
         {{ t("invoiceNumber") }}
