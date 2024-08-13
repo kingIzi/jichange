@@ -10,6 +10,11 @@
       "desc": ""
     },
     {
+      "label": "Tarehe ya Ankara",
+      "value": "Invoice_Date",
+      "desc": "Panga kwa Tarehe ya ankara"
+    },
+    {
       "label": "Jina la mteja",
       "value": "Chus_Name",
       "desc": "Panga kwa Jina la mteja"
@@ -20,9 +25,9 @@
       "desc": "Panga kwa Nambari ya ankara"
     },
     {
-      "label": "Tarehe ya Ankara",
-      "value": "Invoice_Date",
-      "desc": "Panga kwa Tarehe ya ankara"
+      "label": "Nambari ya kudhibiti",
+      "value": "Control_No",
+      "desc": "Sort by Control number"
     },
     {
       "label": "Aina ya Malipo",
@@ -30,19 +35,19 @@
       "desc": "Panga kwa Aina ya malipo"
     },
     {
-      "label": "Jumla ya Kiasi",
-      "value": "Total",
-      "desc": "Panga kwa Jumla ya kiasi"
-    },
-    {
-      "label": "Nambari ya Udhibiti",
-      "value": "Control_No",
-      "desc": "Panga kwa Nambari ya udhibiti"
+      "label": "Hali ya utoaji",
+      "value": "delivery_status",
+      "desc": ""
     },
     {
       "label": "Hali",
-      "value": "goods_status",
+      "value": "Status",
       "desc": ""
+    },
+    {
+      "label": "Jumla ya Kiasi",
+      "value": "Total",
+      "desc": "Panga kwa Jumla ya kiasi"
     },
     {
       "label": "Tarehe ya Kulipwa",

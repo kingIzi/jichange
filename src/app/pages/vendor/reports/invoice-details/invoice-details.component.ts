@@ -152,7 +152,7 @@ export class InvoiceDetailsComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeaderGroup() {
-    let TABLE_SHOWING = 9;
+    let TABLE_SHOWING = 10;
     this.tableFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -472,6 +472,29 @@ export class InvoiceDetailsComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
+  private deliveryStatusStyle(deliveryStatus?: string) {
+    if (deliveryStatus) {
+      return `${PerformanceUtils.getActiveStatusStyles(
+        deliveryStatus,
+        'Delivered',
+        'bg-green-100',
+        'text-green-700',
+        'bg-orange-100',
+        'text-orange-700'
+      )} text-center w-fit`;
+    } else {
+      return 'delivery-status';
+    }
+  }
+  private invoiceStatusStyle(status: string) {
+    if (status && status.toLocaleLowerCase() === 'active') {
+      return 'invoice-active';
+    } else if (status.toLocaleLowerCase() === 'overdue') {
+      return 'invoice-overdue';
+    } else if (status.toLocaleLowerCase() === 'expired') {
+      return 'invoice-expired';
+    } else return 'invoice-completed';
+  }
   ngOnInit(): void {
     //this.parseUserProfile();
     this.createHeaderGroup();
@@ -551,15 +574,11 @@ export class InvoiceDetailsComponent implements OnInit {
           `bg-teal-100`,
           `text-teal-700`
         )} text-center w-fit`;
-      case 'goods_status':
-        return `${PerformanceUtils.getActiveStatusStyles(
-          element.goods_status,
-          'Approved',
-          'bg-green-100',
-          'text-green-700',
-          'bg-orange-100',
-          'text-orange-700'
-        )} w-fit`;
+
+      case 'delivery_status':
+        return `${style} ${this.deliveryStatusStyle(element[key])}`;
+      case 'Status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       case 'Total':
         return `${style} text-right`;
       case 'Due_Date':
@@ -591,6 +610,8 @@ export class InvoiceDetailsComponent implements OnInit {
           ' ' +
           element['Currency_Code']
         );
+      case 'delivery_status':
+        return element[key] ? element[key] : 'Not sent';
       case 'Control_No':
         return element['Control_No'] ? element['Control_No'] : '-';
       default:

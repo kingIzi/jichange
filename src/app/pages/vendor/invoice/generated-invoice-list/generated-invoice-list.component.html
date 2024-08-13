@@ -239,25 +239,15 @@
                   </div>
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  <ng-container
+                  <p
                     *ngIf="
                       ind !== displayedColumns.length - 1;
                       else actionTemplate
                     "
+                    [class]="tableValueStyle(element, column.value)"
                   >
-                    <p [class]="tableValueStyle(element, column.value)">
-                      {{ tableValue(element, column.value) }}
-                    </p>
-                    <!-- <ng-template #cancelInvoiceTemplate>
-                      <button
-                        (click)="cancelInvoice(element)"
-                        *transloco="let t; read: 'defaults'"
-                        class="text-white rounded-sm px-4 py-1 shadow btn btn-error btn-xs"
-                      >
-                        {{ t("cancel") }}
-                      </button>
-                    </ng-template> -->
-                  </ng-container>
+                    {{ tableValue(element, column.value) }}
+                  </p>
                   <ng-template #actionTemplate>
                     <app-submit-message-box
                       #deliverInvoiceMessageBox
@@ -265,63 +255,65 @@
                     <div
                       class="flex flex-row items-center justify-end space-x-2"
                     >
-                      <button
-                        *transloco="let t; read: 'generated'"
-                        [attr.data-tip]="t('amend')"
-                        (click)="openAmmendInvoiceDialog(element)"
-                        class="btn btn-sm btn-ghost border-purple-600 text-purple-600"
-                        matTooltip="{{ t('amend') }}"
-                      >
-                        <span class="material-symbols-outlined">
-                          <i class="bi bi-arrow-repeat text-lg"></i>
-                        </span>
-                      </button>
-                      <!-- <button
-                        *transloco="let t; read: 'generated.deliver'"
-                        class="btn btn-sm btn-ghost border-green-600"
-                        (click)="
-                          makeInvoiceDelivery(deliverInvoiceMessageBox, element)
-                        "
-                        matTooltip="{{ t('deliver') }}"
-                        [disabled]="
-                          element.delivery_status &&
-                          element.delivery_status === 'Pending'
-                        "
-                      >
-                        <span class="text-green-600">
-                          <i class="bi bi-truck text-lg"></i>
-                        </span>
-                      </button> -->
-                      <button
-                        *ngIf="
-                          element.delivery_status &&
-                            element.delivery_status === 'Pending';
-                          else deliverButton
-                        "
-                        class="btn btn-sm btn-ghost border-green-600"
-                        [disabled]="true"
-                      >
-                        <span class="text-green-600">
-                          <i class="bi bi-box text-lg"></i>
-                        </span>
-                      </button>
-                      <ng-template #deliverButton>
+                      <ng-container>
                         <button
-                          *transloco="let t; read: 'generated.deliver'"
-                          class="btn btn-sm btn-ghost border-green-600"
-                          (click)="
-                            makeInvoiceDelivery(
-                              deliverInvoiceMessageBox,
-                              element
-                            )
+                          *ngIf="
+                            element.delivery_status &&
+                              element.delivery_status === 'Pending';
+                            else amendButton
                           "
-                          matTooltip="{{ t('deliver') }}"
+                          class="btn btn-sm btn-ghost border-green-600"
+                          [disabled]="true"
                         >
-                          <span class="text-green-600">
-                            <i class="bi bi-truck text-lg"></i>
+                          <span class="text-purple-600">
+                            <i class="bi bi-check2-all text-lg"></i>
                           </span>
                         </button>
-                      </ng-template>
+                        <ng-template #amendButton>
+                          <button
+                            *transloco="let t; read: 'generated'"
+                            (click)="openAmmendInvoiceDialog(element)"
+                            class="btn btn-sm btn-ghost border-purple-600 text-purple-600"
+                            matTooltip="{{ t('amend') }}"
+                          >
+                            <span class="material-symbols-outlined">
+                              <i class="bi bi-arrow-repeat text-lg"></i>
+                            </span>
+                          </button>
+                        </ng-template>
+                      </ng-container>
+                      <ng-container>
+                        <button
+                          *ngIf="
+                            element.delivery_status &&
+                              element.delivery_status === 'Pending';
+                            else deliverButton
+                          "
+                          class="btn btn-sm btn-ghost border-green-600"
+                          [disabled]="true"
+                        >
+                          <span class="text-green-600">
+                            <i class="bi bi-check2-all text-lg"></i>
+                          </span>
+                        </button>
+                        <ng-template #deliverButton>
+                          <button
+                            *transloco="let t; read: 'generated.deliver'"
+                            class="btn btn-sm btn-ghost border-green-600"
+                            (click)="
+                              makeInvoiceDelivery(
+                                deliverInvoiceMessageBox,
+                                element
+                              )
+                            "
+                            matTooltip="{{ t('deliver') }}"
+                          >
+                            <span class="text-green-600">
+                              <i class="bi bi-truck text-lg"></i>
+                            </span>
+                          </button>
+                        </ng-template>
+                      </ng-container>
                       <button
                         *transloco="let t; read: 'defaults'"
                         class="btn btn-sm btn-ghost border-danger-600"

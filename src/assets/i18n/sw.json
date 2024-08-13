@@ -82,7 +82,7 @@
       "vendor": "Muteja",
       "audit": "Uchunguzi",
       "details": "Maelezo",
-      "payments": "Malipo yaliyokamilishwa",
+      "payments": "Ripoti ya maelezo ya malipo iliyokamilishwa",
       "amendment": "Mabadiliko",
       "transaction": "Malipo",
       "vendorReport": "Ripoti ya Vendor",
@@ -105,7 +105,7 @@
     "overview": "Maelezo",
     "transactionsReport": "Ripoti ya Malipo",
     "invoiceReport": "Ripoti ya ankara",
-    "paymentReport": "Ripoti ya malipo iliyokamilishwa",
+    "paymentReport": "Ripoti ya maelezo ya malipo iliyokamilishwa",
     "amendmentReport": "Ripoti ya Marekebisho",
     "customerReport": "Ripoti ya Wateja",
     "addInvoice": "Ongeza ankra"

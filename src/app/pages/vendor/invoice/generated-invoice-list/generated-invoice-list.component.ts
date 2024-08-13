@@ -8,6 +8,7 @@ import {
   Inject,
   OnInit,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -82,6 +83,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     },
   ],
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [
     CommonModule,
     TranslocoModule,
@@ -343,6 +345,29 @@ export class GeneratedInvoiceListComponent implements OnInit {
         this.cdr.detectChanges();
       });
   }
+  private deliveryStatusStyle(deliveryStatus?: string) {
+    if (deliveryStatus) {
+      return `${PerformanceUtils.getActiveStatusStyles(
+        deliveryStatus,
+        'Delivered',
+        'bg-green-100',
+        'text-green-700',
+        'bg-orange-100',
+        'text-orange-700'
+      )} text-center w-fit`;
+    } else {
+      return 'delivery-status';
+    }
+  }
+  private invoiceStatusStyle(status: string) {
+    if (status && status.toLocaleLowerCase() === 'active') {
+      return 'invoice-active';
+    } else if (status.toLocaleLowerCase() === 'overdue') {
+      return 'invoice-overdue';
+    } else if (status.toLocaleLowerCase() === 'expired') {
+      return 'invoice-expired';
+    } else return 'invoice-completed';
+  }
   ngOnInit(): void {
     this.createHeadersForm();
     this.requestGeneratedInvoice();
@@ -374,6 +399,8 @@ export class GeneratedInvoiceListComponent implements OnInit {
         );
       case 'Control_No':
         return element['Control_No'] ? element['Control_No'] : '-';
+      case 'delivery_status':
+        return element[key] ?? 'Not Sent';
       default:
         return element[key];
     }
@@ -381,7 +408,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
   tableValueStyle(element: any, key: string) {
     let style = 'text-xs lg:text-sm leading-relaxed';
     switch (key) {
-      case 'Chus_Name':
+      case 'Invoice_No':
         return `${style} text-black font-semibold`;
       case 'Payment_Type':
         return `${PerformanceUtils.getActiveStatusStyles(
@@ -392,15 +419,10 @@ export class GeneratedInvoiceListComponent implements OnInit {
           `bg-teal-100`,
           `text-teal-700`
         )} text-center w-fit`;
-      case 'goods_status':
-        return `${PerformanceUtils.getActiveStatusStyles(
-          element[key],
-          'Approved',
-          'bg-green-100',
-          'text-green-700',
-          'bg-orange-100',
-          'text-orange-700'
-        )} text-center w-fit`;
+      case 'delivery_status':
+        return `${style} ${this.deliveryStatusStyle(element[key])}`;
+      case 'Status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       case 'Total':
         return `${style} text-right`;
       default:
@@ -428,6 +450,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       case 'goods_status':
       case 'Invoice_Expired_Date':
       case 'Due_Date':
+      case 'Status':
         return column.value;
       default:
         return '';

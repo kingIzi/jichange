@@ -43,11 +43,6 @@
         "desc": ""
       },
       {
-        "label": "Muuzaji",
-        "value": "Company_Name",
-        "desc": ""
-      },
-      {
         "label": "Mteja",
         "value": "Customer_Name",
         "desc": ""
@@ -199,11 +194,6 @@
         "desc": ""
       },
       {
-        "label": "Muuzaji",
-        "value": "Company_Name",
-        "desc": ""
-      },
-      {
         "label": "Mteja",
         "value": "Chus_Name",
         "desc": ""
@@ -221,6 +211,16 @@
       {
         "label": "Aina ya Malipo",
         "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Hali ya utoaji",
+        "value": "delivery_status",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
         "desc": ""
       },
       {
@@ -246,7 +246,7 @@
     ]
   },
   "paymentDetails": {
-    "payment": "Malipo ya settled",
+    "payment": "Maelezo ya malipo yaliyokamilishwa",
     "searchBy": "Search by Invoice number, control number, vendor or customer",
     "noPaymentsFound": "Hakuna malipo yaliyopatikana.",
     "paymentsTable": [
@@ -288,6 +288,11 @@
       {
         "label": "Nambari ya Muamala",
         "value": "Payment_Trans_No",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
         "desc": ""
       },
       {

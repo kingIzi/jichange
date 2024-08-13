@@ -10,6 +10,11 @@
       "desc": ""
     },
     {
+      "label": "Invoice Date",
+      "value": "Invoice_Date",
+      "desc": "Sort by Invoice date"
+    },
+    {
       "label": "Customer name",
       "value": "Chus_Name",
       "desc": "Sort by Customer name"
@@ -20,9 +25,9 @@
       "desc": "Sort by Invoice number"
     },
     {
-      "label": "Invoice Date",
-      "value": "Invoice_Date",
-      "desc": "Sort by Invoice date"
+      "label": "Control N°",
+      "value": "Control_No",
+      "desc": "Sort by Control number"
     },
     {
       "label": "Payment type",
@@ -30,19 +35,19 @@
       "desc": "Sort by Payment type"
     },
     {
-      "label": "Total Amount",
-      "value": "Total",
-      "desc": "Sort by Total Amount"
-    },
-    {
-      "label": "Control N°",
-      "value": "Control_No",
-      "desc": "Sort by Control number"
+      "label": "Delivery Status",
+      "value": "delivery_status",
+      "desc": ""
     },
     {
       "label": "Status",
-      "value": "goods_status",
+      "value": "Status",
       "desc": ""
+    },
+    {
+      "label": "Total Amount",
+      "value": "Total",
+      "desc": "Sort by Total Amount"
     },
     {
       "label": "Due Date",
