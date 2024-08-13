@@ -164,7 +164,7 @@
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "Payment Details",
+          "label": "Complete Payments",
           "routerLink": "/main/reports/payment",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },

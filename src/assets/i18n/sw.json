@@ -251,7 +251,7 @@
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "Maelezo ya Malipo",
+          "label": "malipo kamili",
           "routerLink": "/main/reports/payment",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },

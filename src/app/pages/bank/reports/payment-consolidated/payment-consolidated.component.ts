@@ -316,8 +316,12 @@ export class PaymentConsolidatedComponent implements OnInit {
           this.tableDataService.getData(),
           element
         );
-      case 'invoice_amount':
-        return PerformanceUtils.moneyFormat(element[key].toString());
+      case 'receipt_amount':
+        return (
+          PerformanceUtils.moneyFormat(element[key].toString()) +
+          ' ' +
+          element['Currency_Code']
+        );
       default:
         return element[key] ? element[key] : '-';
     }
