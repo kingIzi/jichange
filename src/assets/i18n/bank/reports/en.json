@@ -634,11 +634,6 @@
         "desc": ""
       },
       {
-        "label": "Balance",
-        "value": "Balance",
-        "desc": ""
-      },
-      {
         "label": "Receipt N°",
         "value": "Receipt_No",
         "desc": ""
@@ -708,11 +703,6 @@
       {
         "label": "Status",
         "value": "Status",
-        "desc": ""
-      },
-      {
-        "label": "Balance",
-        "value": "Balance",
         "desc": ""
       },
       {

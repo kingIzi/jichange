@@ -380,7 +380,7 @@ export class PaymentDetailsComponent implements OnInit {
       });
   }
   private async createHeaderGroup() {
-    let TABLE_SHOWING = 7;
+    let TABLE_SHOWING = 10;
     this.tableFormGroup = this.fb.group({
       tableHeaders: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
