@@ -144,9 +144,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
         AppUtilities.openDisplayMessageBox(
           this.displayMessageBox,
           this.tr.translate(`defaults.warning`),
-          this.tr.translate(
-            `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-          )
+          this.tr.translate(`reports.overview.noCustomersFound`)
         );
       }
     }
@@ -294,7 +292,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
           this.displayMessageBox,
           this.tr.translate(`defaults.warning`),
           this.tr
-            .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+            .translate(`reports.overview.noVendorsFoundInBranch`)
             .replace(
               '{}',
               this.filterFormData.branches.find(
