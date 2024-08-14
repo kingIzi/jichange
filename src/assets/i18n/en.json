@@ -233,7 +233,7 @@
       "name": "Reports",
       "dropdowns": [
         "overview",
-        "Transaction Details",
+        "Payment Details",
         "Invoice Details",
         "Completed Payments",
         "Amendments Details",

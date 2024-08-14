@@ -261,17 +261,28 @@ export class InboxApprovalComponent implements OnInit {
       });
   }
   private parsePdf(table: HTMLTableElement, filename: string) {
-    let doc = new jsPDF();
-    doc.text('Approval Companies Table', 13, 15);
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    let titleText = this.tr.translate('company.inboxApproval.name');
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      []
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      columns: this.tableDataService.getTableColumns().map((t) => {
-        return t.label;
-      }),
+      body: body,
+      margin: { top: titlePositionY * 2 },
+      columns: this.tableDataService
+        .getTableColumns()
+        .filter((e, i) => {
+          return i < this.tableDataService.getTableColumns().length - 1;
+        })
+        .map((c, i) => {
+          return c.label;
+        }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);

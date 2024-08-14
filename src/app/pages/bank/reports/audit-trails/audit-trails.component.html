@@ -79,9 +79,12 @@
           </p>
         </span>
       </div>
-      <div class="flex flex-col space-y-1">
+      <div
+        *transloco="let y; read: 'reports.overview'"
+        class="flex flex-col space-y-1"
+      >
         <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
-          {{ t("from") }}
+          {{ t("from") }} {{ "(" + y("postedDate") + ")" }}
         </p>
         <input
           [formControl]="Startdate"
@@ -94,9 +97,12 @@
           </p>
         </span>
       </div>
-      <div class="flex flex-col space-y-1">
+      <div
+        *transloco="let y; read: 'reports.overview'"
+        class="flex flex-col space-y-1"
+      >
         <p *transloco="let t; read: 'forms'" class="text-xs">
-          {{ t("to") }}
+          {{ t("to") }} {{ "(" + y("postedDate") + ")" }}
         </p>
         <input
           [formControl]="Enddate"
@@ -259,6 +265,8 @@
             >
               <table
                 mat-table
+                matTableExporter
+                #exporter="matTableExporter"
                 matSort
                 [dataSource]="getTableDataSource()"
                 class="mat-elevation-z2 w-full"

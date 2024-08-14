@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  Input,
   OnInit,
   Output,
   ViewChild,
@@ -74,6 +75,7 @@ export class ReportFormDetailsComponent implements OnInit {
     branches: [],
   };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  @Input() public dateLabel: string = '';
   @Output() public formData: EventEmitter<InvoiceReportForm> =
     new EventEmitter<InvoiceReportForm>();
   @ViewChild('displayMessageBox')
@@ -141,9 +143,7 @@ export class ReportFormDetailsComponent implements OnInit {
         AppUtilities.openDisplayMessageBox(
           this.displayMessageBox,
           this.tr.translate(`defaults.warning`),
-          this.tr.translate(
-            `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-          )
+          this.tr.translate(`reports.overview.noCustomersFound`)
         );
       }
     }
@@ -211,7 +211,7 @@ export class ReportFormDetailsComponent implements OnInit {
           this.displayMessageBox,
           this.tr.translate(`defaults.warning`),
           this.tr
-            .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+            .translate(`reports.overview.noVendorsFoundInBranch`)
             .replace(
               '{}',
               this.filterFormData.branches.find(

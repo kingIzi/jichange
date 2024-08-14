@@ -147,6 +147,8 @@ export class PaymentDetailsComponent implements OnInit {
   @ViewChild('exporter') exporter!: MatTableExporterDirective;
   @ViewChild('tableContainer', { static: false })
   tableContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('reportFormInvoiceDetails')
+  reportFormInvoiceDetails!: ReportFormInvoiceDetailsComponent;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -500,21 +502,102 @@ export class PaymentDetailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.paymentKeys(indexes);
   }
+  private getPdfHeaderLabels() {
+    let branch: string =
+        this.reportFormInvoiceDetails.filterFormData.branches.find((e) => {
+          return e.Sno === Number(this.reportFormInvoiceDetails.branch.value);
+        })?.Name || this.tr.translate('defaults.any'),
+      vendor: string =
+        this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
+          return (
+            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
+          );
+        })?.CompName || this.tr.translate('defaults.all'),
+      customer: string =
+        this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {
+          return (
+            e.Cust_Sno === Number(this.reportFormInvoiceDetails.cusid.value)
+          );
+        })?.Cust_Name || this.tr.translate('defaults.any'),
+      invoice: string =
+        this.reportFormInvoiceDetails.filterFormData.invoiceReports.find(
+          (e) => {
+            return (
+              e.Inv_Mas_Sno ===
+              Number(this.reportFormInvoiceDetails.invno.value)
+            );
+          }
+        )?.Invoice_No || this.tr.translate('defaults.any'),
+      from: string = this.reportFormInvoiceDetails.stdate.value
+        ? new Date(this.reportFormInvoiceDetails.stdate.value).toDateString()
+        : 'N/A',
+      to: string = this.reportFormInvoiceDetails.enddate.value
+        ? new Date(this.reportFormInvoiceDetails.enddate.value).toDateString()
+        : 'N/A';
+    return [branch, vendor, customer, invoice, from, to];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    let [branch, vendor, customer, invoice, from, to] =
+      this.getPdfHeaderLabels();
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate('reports.paymentDetails.payment');
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let [branchY1, branchY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.branch'),
+      branch,
+      titlePositionY * 2
+    );
+    let [vendorY1, vendorY2] = TableUtilities.writePdfTextAlignedCenter(
+      doc,
+      this.tr.translate('forms.vendor'),
+      vendor,
+      titlePositionY * 2
+    );
+    let [customerY1, customerY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      this.tr.translate('forms.customer'),
+      customer,
+      titlePositionY * 2
+    );
+    let [invoiceY1, invoiceY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.invoiceNumber'),
+      invoice,
+      branchY2 * 1.25
+    );
+    let startDateLabel = `${this.tr.translate(
+      'forms.from'
+    )} (${this.tr.translate('reports.overview.paymentDate')})`;
+    let [startDateY1, startDateY2] = TableUtilities.writePdfTextAlignedCenter(
+      doc,
+      startDateLabel,
+      from,
+      branchY2 * 1.25
+    );
+    let endDateLabel = `${this.tr.translate('forms.to')} (${this.tr.translate(
+      'reports.overview.paymentDate'
+    )})`;
+    let [endDateY1, endDateY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      endDateLabel,
+      to,
+      branchY2 * 1.25
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.tableHeaders,
+      ['Payment_Date']
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      columns: this.tableHeaders.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: endDateY2 * 1.15 },
+      columns: this.tableDataService.getTableColumns().map((c) => {
+        return c.label;
+      }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);

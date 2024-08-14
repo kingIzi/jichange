@@ -168,7 +168,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
               this.resetTableColumns();
             });
             if (index === labels.length - 1) {
-              col.disable();
+              //col.disable();
             }
             this.headers.push(col);
           });
@@ -309,10 +309,26 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     });
   }
   private dataSourceFilter() {
+    // let filterPredicate = (data: TransactionDetail, filter: string) => {
+    //   return data.Invoice_Sno.toLocaleLowerCase().includes(
+    //     filter.toLocaleLowerCase()
+    //   );
+    // };
     let filterPredicate = (data: TransactionDetail, filter: string) => {
+      // return data.Invoice_Sno.toLocaleLowerCase().includes(
+      //   filter.toLocaleLowerCase()
+      // ) ||
+      //   (data.Control_No &&
+      //     data.Control_No.toLocaleLowerCase().includes(
+      //       filter.toLocaleLowerCase()
+      //     ))
+      //   ? true
+      //   : false;
       return data.Invoice_Sno.toLocaleLowerCase().includes(
         filter.toLocaleLowerCase()
-      );
+      )
+        ? true
+        : false;
     };
     this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
@@ -478,6 +494,16 @@ export class OverviewComponent implements OnInit, AfterViewInit {
         throw err;
       });
   }
+  private invoiceStatusStyle(status: string) {
+    return `${PerformanceUtils.getActiveStatusStyles(
+      status,
+      'Passed',
+      'bg-green-100',
+      'text-green-700',
+      'bg-orange-100',
+      'text-orange-700'
+    )} text-center w-fit`;
+  }
   ngOnInit(): void {
     this.createHeadersFormGroup();
   }
@@ -526,6 +552,8 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       case 'PaidAmount':
       case 'Balance':
         return `${style} text-right`;
+      case 'Status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       default:
         return `${style} text-black font-normal`;
     }

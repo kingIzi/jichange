@@ -139,8 +139,10 @@ export class TransactionDetailsComponent implements OnInit {
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('exporter') exporter!: MatTableExporterDirective;
-  @ViewChild('summaryTableContainer', { static: false })
-  summaryTableContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('tableContainer', { static: false })
+  tableContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('transactionReport')
+  transactionReport!: ReportFormDetailsComponent;
   constructor(
     private appConfig: AppConfigService,
     private fb: FormBuilder,
@@ -200,7 +202,7 @@ export class TransactionDetailsComponent implements OnInit {
         this.displayMessageBox,
         this.tr.translate(`defaults.warning`),
         this.tr
-          .translate(`reports.customerDetailReport.noVendorsFoundInBranch`)
+          .translate(`reports.overview.noVendorsFoundInBranch`)
           .replace(
             '{}',
             this.filterFormData.branches.find(
@@ -225,9 +227,7 @@ export class TransactionDetailsComponent implements OnInit {
         AppUtilities.openDisplayMessageBox(
           this.displayMessageBox,
           this.tr.translate(`defaults.warning`),
-          this.tr.translate(
-            `reports.invoiceDetails.form.errors.dialog.noCustomersFound`
-          )
+          this.tr.translate(`reports.overview.noCustomersFound`)
         );
       }
       this.filterFormData.customers = [];
@@ -556,26 +556,92 @@ export class TransactionDetailsComponent implements OnInit {
       align: 'right',
     });
   }
+  private getPdfHeaderLabels() {
+    let branch: string =
+        this.transactionReport.filterFormData.branches.find((e) => {
+          return e.Sno === Number(this.transactionReport.branch.value);
+        })?.Name || this.tr.translate('defaults.any'),
+      vendor: string =
+        this.transactionReport.filterFormData.companies.find((e) => {
+          return e.CompSno === Number(this.transactionReport.Comp.value);
+        })?.CompName || this.tr.translate('defaults.all'),
+      customer: string =
+        this.transactionReport.filterFormData.customers.find((e) => {
+          return e.Cust_Sno === Number(this.transactionReport.cusid.value);
+        })?.Cust_Name || this.tr.translate('defaults.any'),
+      from: string = this.transactionReport.stdate.value
+        ? new Date(this.transactionReport.stdate.value).toDateString()
+        : 'N/A',
+      to: string = this.transactionReport.enddate.value
+        ? new Date(this.transactionReport.enddate.value).toDateString()
+        : 'N/A';
+    return [branch, vendor, customer, from, to];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    let [branch, vendor, customer, from, to] = this.getPdfHeaderLabels();
+
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate(
       'reports.transactionDetails.transactionDetails'
     );
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+
+    let [branchY1, branchY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.branch'),
+      branch,
+      titlePositionY * 2
+    );
+    let [vendorY1, vendorY2] = TableUtilities.writePdfTextAlignedCenter(
+      doc,
+      this.tr.translate('forms.vendor'),
+      vendor,
+      titlePositionY * 2
+    );
+    let [customerY1, customerY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      this.tr.translate('forms.customer'),
+      customer,
+      titlePositionY * 2
+    );
+    let startDateLabel = `${this.tr.translate(
+      'forms.from'
+    )} (${this.tr.translate('reports.overview.paymentDate')})`;
+    let [startDateY1, startDateY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      startDateLabel,
+      from,
+      branchY2 * 1.25
+    );
+    let endDateLabel = `${this.tr.translate('forms.to')} (${this.tr.translate(
+      'reports.overview.paymentDate'
+    )})`;
+    let [endDateY1, endDateY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      endDateLabel,
+      to,
+      branchY2 * 1.25
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      ['Payment_Date']
+    );
+
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      // columns: this.tableDataService.getTableColumns().map((t,index) => {
-      //   return t.label;
-      // }),
-      columns: this.headers.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: endDateY2 * 1.15 },
+      columns: this.tableDataService
+        .getTableColumns()
+        .filter((e, i) => {
+          return i < this.tableDataService.getTableColumns().length - 1;
+        })
+        .map((c, i) => {
+          return c.label;
+        }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);
@@ -722,7 +788,7 @@ export class TransactionDetailsComponent implements OnInit {
         this.tableDataService.getTableColumns().length - 1,
       ];
       this.exporter.exportTable(ExportType.XLSX, {
-        fileName: 'transactions_details_report',
+        fileName: 'payment_details_report',
         Props: {
           Author: 'Biz logic solutions',
         },
@@ -737,9 +803,8 @@ export class TransactionDetailsComponent implements OnInit {
   }
   downloadPdf() {
     if (this.tableDataService.getData().length > 0) {
-      let table =
-        this.summaryTableContainer.nativeElement.querySelector('table');
-      this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
+      let table = this.tableContainer.nativeElement.querySelector('table');
+      this.parsePdf(table as HTMLTableElement, `payment_details_report`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

@@ -79,6 +79,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
   public startLoading: boolean = false;
   public filterForm!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  @Input() dateLabel: string = '';
   @Input() public allowCancelledInvoices: boolean = false;
   @Output() public formData: EventEmitter<InvoiceDetailsForm> =
     new EventEmitter<InvoiceDetailsForm>();

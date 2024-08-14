@@ -14,9 +14,12 @@
       [formGroup]="tableFilterFormGroup"
       class="w-full grid grid-cols-2 gap-x-2 gap-y-3"
     >
-      <div class="flex flex-col space-y-1">
+      <div
+        *transloco="let y; read: 'reports.overview'"
+        class="flex flex-col space-y-1"
+      >
         <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
-          {{ t("from") }}
+          {{ t("from") }} {{ "(" + y("paymentDate") + ")" }}
         </p>
         <input
           [formControl]="stdate"
@@ -32,9 +35,12 @@
           </p>
         </span>
       </div>
-      <div class="flex flex-col space-y-1">
+      <div
+        class="flex flex-col space-y-1"
+        *transloco="let y; read: 'reports.overview'"
+      >
         <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
-          {{ t("to") }}
+          {{ t("to") }} {{ "(" + y("paymentDate") + ")" }}
         </p>
         <input
           [formControl]="enddate"

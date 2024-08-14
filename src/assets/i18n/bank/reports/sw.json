@@ -4,9 +4,26 @@
     "exportToExcel": "Pakua Excel",
     "exportToPdf": "Pakua PDF",
     "summary": "Muhtasari",
-    "vendorsTableTitle": "Wauzaji Wapya Walioongezwa",
+    "vendorsTableTitle": "miamala ya hivi karibuni",
     "transactions": "Miamala",
     "transactionsByDate": "Kiasi cha Malipo - Tarehe ya Malipo",
+    "paymentDate": "Tarehe ya Malipo",
+    "postedDate": "Tarehe ya kuchapishwa",
+    "loginDate": "Tarehe ya kuingia",
+    "invoiceChart": "Muhtasari wa Invoice",
+    "statistics": "Takwimu",
+    "salesSummary": "Muhtasari wa Uuzaji",
+    "noCustomersFound": "Hakuna wateja waliopatikana.",
+    "noVendorsFoundInBranch": "Hakuna wauuzaji waliopatikana.",
+    "statisticsData": {
+      "transaction": "Muamala",
+      "customers": "Mteja",
+      "users": "Mtumiaji",
+      "pendings": "Inayosubiri",
+      "due": "Inayostahili",
+      "expired": "Imeisha Muda",
+      "vendor": "Wauzaji"
+    },
     "vendorsTable": [
       {
         "label": "Namba",
@@ -34,11 +51,6 @@
         "desc": ""
       },
       {
-        "label": "Jumla ya Kiasi",
-        "value": "Requested_Amount",
-        "desc": ""
-      },
-      {
         "label": "Kiasi Kilicholipwa",
         "value": "PaidAmount",
         "desc": ""
@@ -52,25 +64,8 @@
         "label": "Hali",
         "value": "Status",
         "desc": ""
-      },
-      {
-        "label": "Kitendo/Vitendo",
-        "value": "Action",
-        "desc": ""
       }
-    ],
-    "invoiceChart": "Muhtasari wa Invoice",
-    "statistics": "Takwimu",
-    "salesSummary": "Muhtasari wa Uuzaji",
-    "statisticsData": {
-      "transaction": "Muamala/Miamala",
-      "customers": "Mteja/Wateja",
-      "users": "Mtumiaji/Watumiaji",
-      "pendings": "Inayosubiri/Inazosubiri",
-      "due": "Inayostahili",
-      "expired": "Imeisha Muda",
-      "vendor": "Wauzaji"
-    }
+    ]
   },
   "transactionDetails": {
     "transactionDetails": "Maelezo ya Malipo",
@@ -436,6 +431,7 @@
     "invoiceDetails": "Maelezo ya Bili",
     "noInvoicesFound": "Hakuna ankara inayopatikana kwa {}",
     "searchBy": "Search by Invoice number, control number, vendor or customer",
+    "invoiceDate": "Tarehe ya Ankara",
     "form": {
       "company": "Kampuni",
       "customer": "Muuzaji",
@@ -866,7 +862,7 @@
         "desc": ""
       },
       {
-        "label": "Total Receipt Amount",
+        "label": "Jumla ya risiti",
         "value": "receipt_amount",
         "desc": ""
       }

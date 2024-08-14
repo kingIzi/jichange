@@ -139,6 +139,8 @@ export class AmendmentComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('amendmentsTable') amendmentsTable!: ElementRef<HTMLDivElement>;
   @ViewChild('exporter') exporter!: MatTableExporterDirective;
+  @ViewChild('reportFormInvoiceDetails')
+  reportFormInvoiceDetails!: ReportFormInvoiceDetailsComponent;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -565,21 +567,102 @@ export class AmendmentComponent implements OnInit {
   //     this.tableData.dataSource.paginator.firstPage();
   //   }
   // }
+  private getPdfHeaderLabels() {
+    let branch: string =
+        this.reportFormInvoiceDetails.filterFormData.branches.find((e) => {
+          return e.Sno === Number(this.reportFormInvoiceDetails.branch.value);
+        })?.Name || this.tr.translate('defaults.any'),
+      vendor: string =
+        this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
+          return (
+            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
+          );
+        })?.CompName || this.tr.translate('defaults.all'),
+      customer: string =
+        this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {
+          return (
+            e.Cust_Sno === Number(this.reportFormInvoiceDetails.cusid.value)
+          );
+        })?.Cust_Name || this.tr.translate('defaults.any'),
+      invoice: string =
+        this.reportFormInvoiceDetails.filterFormData.invoiceReports.find(
+          (e) => {
+            return (
+              e.Inv_Mas_Sno ===
+              Number(this.reportFormInvoiceDetails.invno.value)
+            );
+          }
+        )?.Invoice_No || this.tr.translate('defaults.any'),
+      from: string = this.reportFormInvoiceDetails.stdate.value
+        ? new Date(this.reportFormInvoiceDetails.stdate.value).toDateString()
+        : 'N/A',
+      to: string = this.reportFormInvoiceDetails.enddate.value
+        ? new Date(this.reportFormInvoiceDetails.enddate.value).toDateString()
+        : 'N/A';
+    return [branch, vendor, customer, invoice, from, to];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    let [branch, vendor, customer, invoice, from, to] =
+      this.getPdfHeaderLabels();
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate('reports.amendmentDetails.amendment');
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let [branchY1, branchY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.branch'),
+      branch,
+      titlePositionY * 2
+    );
+    let [vendorY1, vendorY2] = TableUtilities.writePdfTextAlignedCenter(
+      doc,
+      this.tr.translate('forms.vendor'),
+      vendor,
+      titlePositionY * 2
+    );
+    let [customerY1, customerY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      this.tr.translate('forms.customer'),
+      customer,
+      titlePositionY * 2
+    );
+    let [invoiceY1, invoiceY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.invoiceNumber'),
+      invoice,
+      branchY2 * 1.25
+    );
+    let startDateLabel = `${this.tr.translate(
+      'forms.from'
+    )} (${this.tr.translate('reports.overview.postedDate')})`;
+    let [startDateY1, startDateY2] = TableUtilities.writePdfTextAlignedCenter(
+      doc,
+      startDateLabel,
+      from,
+      branchY2 * 1.25
+    );
+    let endDateLabel = `${this.tr.translate('forms.to')} (${this.tr.translate(
+      'reports.overview.postedDate'
+    )})`;
+    let [endDateY1, endDateY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      endDateLabel,
+      to,
+      branchY2 * 1.25
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.tableHeaders,
+      ['Invoice_Date', 'Invoice_Expired_Date']
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      columns: this.tableHeaders.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: endDateY2 * 1.15 },
+      columns: this.tableDataService.getTableColumns().map((c) => {
+        return c.label;
+      }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);
@@ -678,34 +761,34 @@ export class AmendmentComponent implements OnInit {
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  submitFilterForm() {
-    if (this.filterForm.valid) {
-      let form = { ...this.filterForm.value };
-      if (form.stdate) {
-        form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-      }
-      if (form.enddate) {
-        form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-      }
-      form.branch = this.branch.value;
-      this.requestAmendmentsReport(form);
-    } else {
-      this.filterForm.markAllAsTouched();
-    }
-  }
   downloadSheet() {
+    // if (this.tableDataService.getData().length > 0) {
+    //   this.exporter.hiddenColumns = [
+    //     this.tableDataService.getTableColumns().length,
+    //   ];
+    //   this.exporter.exportTable(ExportType.XLSX, {
+    //     fileName: 'amendment_report_table',
+    //     Props: {
+    //       Author: 'Biz logic solutions',
+    //     },
+    //   });
+    // } else {
+    //   AppUtilities.openDisplayMessageBox(
+    //     this.displayMessageBox,
+    //     this.tr.translate(`defaults.failed`),
+    //     this.tr.translate(`errors.noDataFound`)
+    //   );
+    // }
     if (this.tableDataService.getData().length > 0) {
-      if (this.tableDataService.getData().length > 0) {
-        this.exporter.hiddenColumns = [
-          this.tableDataService.getTableColumns().length,
-        ];
-        this.exporter.exportTable(ExportType.XLSX, {
-          fileName: 'amendment_report_table',
-          Props: {
-            Author: 'Biz logic solutions',
-          },
-        });
-      }
+      this.exporter.hiddenColumns = [
+        this.tableDataService.getTableColumns().length,
+      ];
+      this.exporter.exportTable(ExportType.XLSX, {
+        fileName: 'amendment_report_table',
+        Props: {
+          Author: 'Biz logic solutions',
+        },
+      });
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

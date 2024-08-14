@@ -131,6 +131,8 @@ export class InvoiceDetailsComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('invoiceDetailsTable')
   invoiceDetailsTable!: ElementRef<HTMLDivElement>;
+  @ViewChild('reportFormDetails')
+  reportFormDetails!: ReportFormDetailsComponent;
   constructor(
     private appConfig: AppConfigService,
     private tr: TranslocoService,
@@ -489,21 +491,99 @@ export class InvoiceDetailsComponent implements OnInit {
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
+  private getPdfHeaderLabels() {
+    let branch: string =
+        this.reportFormDetails.filterFormData.branches.find((e) => {
+          return e.Sno === Number(this.reportFormDetails.branch.value);
+        })?.Name || this.tr.translate('defaults.any'),
+      vendor: string =
+        this.reportFormDetails.filterFormData.companies.find((e) => {
+          return e.CompSno === Number(this.reportFormDetails.Comp.value);
+        })?.CompName || this.tr.translate('defaults.all'),
+      customer: string =
+        this.reportFormDetails.filterFormData.customers.find((e) => {
+          return e.Cust_Sno === Number(this.reportFormDetails.cusid.value);
+        })?.Cust_Name || this.tr.translate('defaults.any'),
+      from: string = this.reportFormDetails.stdate.value
+        ? new Date(this.reportFormDetails.stdate.value).toDateString()
+        : 'N/A',
+      to: string = this.reportFormDetails.enddate.value
+        ? new Date(this.reportFormDetails.enddate.value).toDateString()
+        : 'N/A';
+    return [branch, vendor, customer, from, to];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    // let titleText = this.tr.translate('reports.invoiceDetails.invoiceDetails');
+    // let doc = new jsPDF();
+    // doc.text(titleText, 13, 15);
+    // autoTable(doc, {
+    //   html: table,
+    //   margin: { top: 20 },
+    //   columns: this.headers.controls
+    //     .filter(
+    //       (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+    //     )
+    //     .map((h) => h.get('label')?.value),
+    //   headStyles: {
+    //     fillColor: '#8196FE',
+    //     textColor: '#000000',
+    //   },
+    // });
+    // doc.save(`${filename}.pdf`);
+    let [branch, vendor, customer, from, to] = this.getPdfHeaderLabels();
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate('reports.invoiceDetails.invoiceDetails');
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let [branchY1, branchY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.branch'),
+      branch,
+      titlePositionY * 2
+    );
+    let [vendorY1, vendorY2] = TableUtilities.writePdfTextAlignedCenter(
+      doc,
+      this.tr.translate('forms.vendor'),
+      vendor,
+      titlePositionY * 2
+    );
+    let [customerY1, customerY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      this.tr.translate('forms.customer'),
+      customer,
+      titlePositionY * 2
+    );
+    let startDateLabel = `${this.tr.translate(
+      'forms.from'
+    )} (${this.tr.translate('reports.invoiceDetails.invoiceDate')})`;
+    let [startDateY1, startDateY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      startDateLabel,
+      from,
+      branchY2 * 1.25
+    );
+    let endDateLabel = `${this.tr.translate('forms.to')} (${this.tr.translate(
+      'reports.invoiceDetails.invoiceDate'
+    )})`;
+    let [endDateY1, endDateY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      endDateLabel,
+      to,
+      branchY2 * 1.25
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      ['Invoice_Date', 'Due_Date', 'Invoice_Expired_Date']
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      columns: this.headers.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: endDateY2 * 1.15 },
+      columns: this.tableDataService.getTableColumns().map((c) => {
+        return c.label;
+      }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);
@@ -659,7 +739,7 @@ export class InvoiceDetailsComponent implements OnInit {
         this.tableDataService.getTableColumns().length,
       ];
       this.exporter.exportTable(ExportType.XLSX, {
-        fileName: 'Invoice Details Table',
+        fileName: 'invoice_details_table',
         Props: {
           Author: 'Biz logic solutions',
         },
@@ -675,7 +755,7 @@ export class InvoiceDetailsComponent implements OnInit {
   downloadPdf() {
     if (this.tableDataService.getData().length > 0) {
       let table = this.invoiceDetailsTable.nativeElement.querySelector('table');
-      this.parsePdf(table as HTMLTableElement, `Invoice Details Table`);
+      this.parsePdf(table as HTMLTableElement, `invoice_details_table`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

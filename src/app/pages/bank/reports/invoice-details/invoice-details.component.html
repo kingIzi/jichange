@@ -13,9 +13,16 @@
     </h2>
   </div>
   <div class="flex flex-col space-y-4 w-full bg-white shadow p-2 divide-y">
-    <app-report-form-details
+    <!-- <app-report-form-details
       (formData)="requestInvoiceDetails($event)"
-    ></app-report-form-details>
+    ></app-report-form-details> -->
+    <ng-container *transloco="let t; read: 'reports.invoiceDetails'">
+      <app-report-form-details
+        #reportFormDetails
+        [dateLabel]="t('invoiceDate')"
+        (formData)="requestInvoiceDetails($event)"
+      ></app-report-form-details>
+    </ng-container>
     <div [formGroup]="headerFormGroup" class="flex flex-col px-2 py-4">
       <div class="flex flex-row items-center justify-between">
         <div class="flex flex-row items-center space-x-4">

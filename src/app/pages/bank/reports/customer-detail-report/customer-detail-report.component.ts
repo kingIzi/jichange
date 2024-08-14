@@ -507,26 +507,50 @@ export class CustomerDetailReportComponent implements OnInit {
       this.submitTableFilterForm();
     }
   }
+  private getPdfHeaderLabels() {
+    let branch: string =
+        this.filterFormData.branches.find((e) => {
+          return e.Sno === Number(this.branch.value);
+        })?.Name || this.tr.translate('defaults.any'),
+      vendor: string =
+        this.filterFormData.companies.find((e) => {
+          return e.CompSno === Number(this.Comp.value);
+        })?.CompName || this.tr.translate('defaults.any');
+    return [branch, vendor];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    let [branch, vendor] = this.getPdfHeaderLabels();
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate(
       'reports.customerDetailReport.customerDetailReport'
     );
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let [branchY1, branchY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.branch'),
+      branch,
+      titlePositionY * 2
+    );
+    let [vendorY1, vendorY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      this.tr.translate('forms.vendor'),
+      vendor,
+      titlePositionY * 2
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      ['Posted_Date']
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      // columns: this.tableDataService.getTableColumns().map((t,index) => {
-      //   return t.label;
-      // }),
-      columns: this.headers.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: vendorY2 * 1.15 },
+      columns: this.tableDataService.getTableColumns().map((c) => {
+        return c.label;
+      }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);

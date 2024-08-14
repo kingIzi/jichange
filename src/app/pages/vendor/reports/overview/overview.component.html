@@ -81,7 +81,10 @@
             >
               <p
                 class="text-normal text-sm capitalize group-hover:underline"
-                *transloco="let t; read: 'reports.overview.statisticsData'"
+                *transloco="
+                  let t;
+                  read: 'reports.overview.statisticsDataBanker'
+                "
               >
                 {{ t(statistic.Name.toLocaleLowerCase()) }}
               </p>

@@ -53,6 +53,7 @@ import {
   MatTableExporterDirective,
   MatTableExporterModule,
 } from 'mat-table-exporter';
+import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-vendor-detail-report',
@@ -315,21 +316,54 @@ export class VendorDetailReportComponent implements OnInit {
   //     this.tableData.dataSource.paginator.firstPage();
   //   }
   // }
+  private getPdfHeaderLabels() {
+    let branch: string =
+      this.filterFormData.branches.find((e) => {
+        return e.Sno === Number(this.branch.value);
+      })?.Name || this.tr.translate('defaults.any');
+    return [branch];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    // let titleText = this.tr.translate('reports.vendorReport.vendorReport');
+    // let doc = new jsPDF();
+    // doc.text(titleText, 13, 15);
+    // autoTable(doc, {
+    //   html: table,
+    //   margin: { top: 20 },
+    //   columns: this.headers.controls
+    //     .filter(
+    //       (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
+    //     )
+    //     .map((h) => h.get('label')?.value),
+    //   headStyles: {
+    //     fillColor: '#8196FE',
+    //     textColor: '#000000',
+    //   },
+    // });
+    let [branch] = this.getPdfHeaderLabels();
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate('reports.vendorReport.vendorReport');
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let [branchY1, branchY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      this.tr.translate('forms.branch'),
+      branch,
+      titlePositionY * 2
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      []
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      columns: this.headers.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: branchY2 * 1.15 },
+      columns: this.tableDataService.getTableColumns().map((c) => {
+        return c.label;
+      }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);
@@ -420,7 +454,7 @@ export class VendorDetailReportComponent implements OnInit {
         this.tableDataService.getTableColumns().length,
       ];
       this.exporter.exportTable(ExportType.XLSX, {
-        fileName: 'vendors_summary',
+        fileName: 'vendors_summary_report',
         Props: {
           Author: 'Biz logic solutions',
         },
@@ -437,7 +471,7 @@ export class VendorDetailReportComponent implements OnInit {
     if (this.tableDataService.getData().length > 0) {
       let table =
         this.vendorDetailReportContainer.nativeElement.querySelector('table');
-      this.parsePdf(table as HTMLTableElement, `transactions_details_report`);
+      this.parsePdf(table as HTMLTableElement, `vendors_summary_report`);
     } else {
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,

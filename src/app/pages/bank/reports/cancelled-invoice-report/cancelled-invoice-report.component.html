@@ -10,10 +10,14 @@
     </h2>
   </div>
   <div class="flex flex-col bg-neutral shadow px-2 py-4 space-y-4 divide-y">
-    <app-report-form-invoice-details
-      [allowCancelledInvoices]="true"
-      (formData)="requestCancelledInvoiceReport($event)"
-    ></app-report-form-invoice-details>
+    <ng-container *transloco="let t; read: 'reports.overview'">
+      <app-report-form-invoice-details
+        #reportFormInvoiceDetails
+        [dateLabel]="t('postedDate')"
+        [allowCancelledInvoices]="true"
+        (formData)="requestCancelledInvoiceReport($event)"
+      ></app-report-form-invoice-details>
+    </ng-container>
     <div
       [formGroup]="tableHeadersFormGroup"
       class="flex flex-col w-full h-full"

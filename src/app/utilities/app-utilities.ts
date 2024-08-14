@@ -11,6 +11,7 @@ import { Keepalive } from '@ng-idle/keepalive';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { HttpDataResponse } from '../core/models/http-data-response';
+import jsPDF from 'jspdf';
 
 export class AppUtilities {
   static phoneNumberPrefixRegex: any = /^(?:[67]\d{8}|255\d{9})$/;

@@ -4,9 +4,27 @@
     "exportToExcel": "Export to excel",
     "exportToPdf": "Export to pdf",
     "summary": "Summary",
-    "vendorsTableTitle": "Latest added Vendors",
+    "vendorsTableTitle": "Latest transactions",
     "transactions": "Transactions",
     "transactionsByDate": "Payment Amount - Payment Date",
+    "paymentDate": "Payment date",
+    "postedDate": "Posted date",
+    "loginDate": "Login date",
+    "invoiceChart": "Invoice(s) summary",
+    "statistics": "Statistics",
+    "salesSummary": "Sale(s) Summary",
+    "noCustomersFound": "No customers found.",
+    "noVendorsFoundInBranch": "No vendors found.",
+    "statisticsDataBanker": {
+      "transaction": "Transactions",
+      "customer": "Customers",
+      "users": "Users",
+      "pendings": "Pendings",
+      "due": "Due",
+      "expired": "Expired",
+      "vendor": "Vendor",
+      "customers": "Customer"
+    },
     "vendorsTable": [
       {
         "label": "No.",
@@ -34,11 +52,6 @@
         "desc": ""
       },
       {
-        "label": "Total Amount",
-        "value": "Requested_Amount",
-        "desc": ""
-      },
-      {
         "label": "Paid Amount",
         "value": "PaidAmount",
         "desc": ""
@@ -52,26 +65,8 @@
         "label": "Status",
         "value": "Status",
         "desc": ""
-      },
-      {
-        "label": "Action(s)",
-        "value": "Action",
-        "desc": ""
       }
-    ],
-    "invoiceChart": "Invoice(s) summary",
-    "statistics": "Statistics",
-    "salesSummary": "Sale(s) Summary",
-    "statisticsData": {
-      "transaction": "Transactions",
-      "customer": "Customers",
-      "users": "Users",
-      "pendings": "Pendings",
-      "due": "Due",
-      "expired": "Expired",
-      "vendor": "Vendor",
-      "customers": "Customer"
-    }
+    ]
   },
   "transactionDetails": {
     "transactionDetails": "Payment Details",
@@ -437,7 +432,7 @@
     "searchBy": "Search by Invoice number, control number, vendor or customer",
     "invoiceDetails": "Invoice details",
     "noInvoicesFound": "No invoice found for {}",
-
+    "invoiceDate": "Invoice Date",
     "form": {
       "company": "Vendor",
       "customer": "Customer",
@@ -863,7 +858,7 @@
         "desc": ""
       },
       {
-        "label": "N° of payments",
+        "label": "N° of receipts",
         "value": "no_of_payments",
         "desc": ""
       },

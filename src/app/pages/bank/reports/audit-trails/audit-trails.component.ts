@@ -394,24 +394,52 @@ export class AuditTrailsComponent implements OnInit {
         throw err;
       });
   }
+  private getPdfHeaderLabels() {
+    let from: string = this.Startdate.value
+        ? new Date(this.Startdate.value).toDateString()
+        : 'N/A',
+      to: string = this.Enddate.value
+        ? new Date(this.Enddate.value).toDateString()
+        : 'N/A';
+    return [from, to];
+  }
   private parsePdf(table: HTMLTableElement, filename: string) {
+    let [from, to] = this.getPdfHeaderLabels();
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let titleText = this.tr.translate('reports.auditTrails.auditTrails');
-    let doc = new jsPDF();
-    doc.text(titleText, 13, 15);
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let startDateLabel = `${this.tr.translate(
+      'forms.from'
+    )} (${this.tr.translate('reports.overview.postedDate')})`;
+    let [startDateY1, startDateY2] = TableUtilities.writePdfTextAlignedLeft(
+      doc,
+      startDateLabel,
+      from,
+      titlePositionY * 2
+    );
+    let endDateLabel = `${this.tr.translate('forms.to')} (${this.tr.translate(
+      'reports.overview.postedDate'
+    )})`;
+    let [endDateY1, endDateY2] = TableUtilities.writePdfTextAlignedRight(
+      doc,
+      endDateLabel,
+      to,
+      titlePositionY * 2
+    );
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      ['adate']
+    );
     autoTable(doc, {
-      html: table,
-      margin: { top: 20 },
-      // columns: this.tableDataService.getTableColumns().map((t,index) => {
-      //   return t.label;
-      // }),
-      columns: this.headers.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: endDateY2 * 1.15 },
+      columns: this.tableDataService.getTableColumns().map((c) => {
+        return c.label;
+      }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);

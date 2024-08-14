@@ -273,30 +273,29 @@ export class SummaryComponent implements OnInit {
         throw err;
       });
   }
-  private getTableActiveKeys() {
-    let indexes = this.headers.controls
-      .map((control, index) => {
-        return control.get('included')?.value ? index : -1;
-      })
-      .filter((num) => num !== -1);
-    return this.companyKeys(indexes);
-  }
   private parsePdf(table: HTMLTableElement, filename: string) {
-    let doc = new jsPDF();
-    doc.text('Vendors Summary Table', 13, 15);
+    let doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    let titleText = this.tr.translate('company.summary.name');
+    let titlePositionY = TableUtilities.writePdfTitleText(doc, titleText);
+    let body = TableUtilities.pdfData(
+      this.tableDataService.getData(),
+      this.headers,
+      []
+    );
     autoTable(doc, {
-      html: table as HTMLTableElement,
-      margin: {
-        top: 20,
-      },
-      columns: this.headers.controls
-        .filter(
-          (h) => h.get('included')?.value && h.get('value')?.value !== 'Action'
-        )
-        .map((h) => h.get('label')?.value),
+      body: body,
+      margin: { top: titlePositionY * 2 },
+      columns: this.tableDataService
+        .getTableColumns()
+        .filter((e, i) => {
+          return i < this.tableDataService.getTableColumns().length - 1;
+        })
+        .map((c, i) => {
+          return c.label;
+        }),
       headStyles: {
-        fillColor: '#8196FE',
-        textColor: '#000000',
+        fillColor: '#0B6587',
+        textColor: '#ffffff',
       },
     });
     doc.save(`${filename}.pdf`);
