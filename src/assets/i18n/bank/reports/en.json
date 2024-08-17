@@ -465,8 +465,8 @@
         "desc": ""
       },
       {
-        "label": "Invoice Date",
-        "value": "Invoice_Date",
+        "label": "Date Posted",
+        "value": "p_date",
         "desc": ""
       },
       {
@@ -505,6 +505,16 @@
         "desc": ""
       },
       {
+        "label": "Posted by",
+        "value": "AuditBy",
+        "desc": ""
+      },
+      {
+        "label": "Invoice Date",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
         "label": "Due Date",
         "value": "Due_Date",
         "desc": ""
@@ -522,8 +532,8 @@
         "desc": ""
       },
       {
-        "label": "Invoice Date",
-        "value": "Invoice_Date",
+        "label": "Date Posted",
+        "value": "p_date",
         "desc": ""
       },
       {
@@ -564,6 +574,16 @@
       {
         "label": "Total Amount",
         "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Posted by",
+        "value": "AuditBy",
+        "desc": ""
+      },
+      {
+        "label": "Invoice Date",
+        "value": "Invoice_Date",
         "desc": ""
       },
       {

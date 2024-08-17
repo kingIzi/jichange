@@ -195,12 +195,12 @@ export class ProfileComponent implements OnInit {
       ?.setValue(this.employeeDetail.Mobile_No);
   }
   private switchEmployeeDetailErrorMessage(message: string) {
-    let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
-      message,
-      this.tr,
-      this.generalFormGroup.get('fname')?.value
-    );
-    if (errorMessage.length > 0) return errorMessage;
+    // let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
+    //   message,
+    //   this.tr,
+    //   this.generalFormGroup.get('fname')?.value
+    // );
+    // if (errorMessage.length > 0) return errorMessage;
     switch (message.toLocaleLowerCase()) {
       default:
         return this.tr.translate('auth.profile.failedToFetchUser');

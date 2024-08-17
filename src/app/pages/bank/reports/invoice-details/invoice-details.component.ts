@@ -74,6 +74,8 @@ import {
   MatTableExporterDirective,
   MatTableExporterModule,
 } from 'mat-table-exporter';
+import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
+import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
 
 @Component({
   selector: 'app-invoice-details',
@@ -142,7 +144,7 @@ export class InvoiceDetailsComponent implements OnInit {
     private fb: FormBuilder,
     private branchService: BranchService,
     private cdr: ChangeDetectorRef,
-    private fileHandler: FileHandlerService,
+    private bankUserService: BankService,
     @Inject(TABLE_DATA_SERVICE)
     private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -658,6 +660,8 @@ export class InvoiceDetailsComponent implements OnInit {
       case 'Invoice_Expired_Date':
       case 'Status':
       case 'delivery_status':
+      case 'p_date':
+      case 'AuditBy':
         return column.value;
       default:
         return '';
@@ -726,7 +730,8 @@ export class InvoiceDetailsComponent implements OnInit {
           element['Currency_Code']
         );
       case 'Control_No':
-        return element['Control_No'] ? element['Control_No'] : '-';
+      case 'AuditBy':
+        return element[key] ?? '-';
       case 'delivery_status':
         return element[key] ? element[key] : 'Not sent';
       default:

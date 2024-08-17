@@ -173,8 +173,6 @@ export class ReportFormDetailsComponent implements OnInit {
   private handleCompanyChanged(compid: number) {
     if (compid > 0) {
       this.requestCustomerDetailsList({ companyIds: [compid] });
-    } else if (compid === 0 && this.filterFormData.companies.length === 0) {
-      this.filterFormData.customers = [];
     } else if (compid === 0 && this.filterFormData.companies.length > 0) {
       let companyIds = this.filterFormData.companies.map((c) => {
         return c.CompSno;
@@ -221,10 +219,17 @@ export class ReportFormDetailsComponent implements OnInit {
         );
       }
     }
+    // if (this.Comp.enabled) {
+    //   this.Comp.setValue(0);
+    // } else {
+    //   this.handleCompanyChanged(Number(this.Comp.value));
+    // }
     if (this.Comp.enabled) {
       this.Comp.setValue(0);
     } else {
-      this.handleCompanyChanged(Number(this.Comp.value));
+      this.Comp.setValue(
+        (this.appConfig.getLoginResponse() as VendorLoginResponse).InstID
+      );
     }
   }
   private requestCompaniesList(body: { branch: number | string }) {
@@ -284,21 +289,13 @@ export class ReportFormDetailsComponent implements OnInit {
   }
   submitForm() {
     if (this.formGroup.valid) {
-      let form = { ...this.formGroup.value }; //as InvoiceReportFormBanker;
-      // if (form.stdate) {
-      //   form.stdate = new Date(form.stdate).toISOString(); //AppUtilities.reformatDate(this.stdate.value.split('-'));
-      // }
-      // if (form.enddate) {
-      //   form.enddate = new Date(form.enddate).toISOString(); //AppUtilities.reformatDate(this.enddate.value.split('-'));
-      // }
+      let form = { ...this.formGroup.value };
       if (form.stdate) {
-        //form.stdate = new Date(form.stdate).toISOString();
         let startDate = new Date(form.stdate);
         startDate.setHours(0, 0, 0, 0);
         form.stdate = startDate.toISOString();
       }
       if (form.enddate) {
-        //form.enddate = new Date(form.enddate).toISOString();
         let endDate = new Date(form.enddate);
         endDate.setHours(23, 59, 59, 999);
         form.enddate = endDate.toISOString();

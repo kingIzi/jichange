@@ -98,7 +98,7 @@
             "
             [value]="customer.Cust_Sno"
           >
-            {{ customer.Cust_Name }}
+            {{ customer.Cust_Name + " - " + customer.Phone }}
           </option>
         </ng-container>
       </select>
@@ -167,7 +167,9 @@
               "
               [value]="customer.Cust_Sno"
             >
-              {{ customer.Cust_Name }}
+              <!-- {{ customer.Cust_Name }}
+              {{customer.Phone}} -->
+              {{ customer.Cust_Name + " - " + customer.Phone }}
             </option>
           </ng-container>
         </select>

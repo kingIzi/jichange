@@ -69,6 +69,8 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { ReportFormDetailsComponent } from 'src/app/components/dialogs/bank/reports/report-form-details/report-form-details.component';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
+import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
 
 @Component({
   selector: 'app-invoice-details',
@@ -109,19 +111,6 @@ export class InvoiceDetailsComponent implements OnInit {
   public tableFormGroup!: FormGroup;
   public filterFormGroup!: FormGroup;
   private queryData: string = '';
-  // public tableData: {
-  //   invoiceReports: InvoiceReport[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<InvoiceReport>;
-  // } = {
-  //   invoiceReports: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<InvoiceReport>([]),
-  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   public filterFormData: {
     companies: Company[];
@@ -149,6 +138,7 @@ export class InvoiceDetailsComponent implements OnInit {
     private invoiceReportService: InvoiceReportServiceService,
     private activatedRoute: ActivatedRoute,
     private appConfig: AppConfigService,
+    private bankUserService: BankService,
     @Inject(VENDOR_TABLE_DATA_SERVICE)
     private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -695,7 +685,8 @@ export class InvoiceDetailsComponent implements OnInit {
       case 'delivery_status':
         return element[key] ? element[key] : 'Not sent';
       case 'Control_No':
-        return element['Control_No'] ? element['Control_No'] : '-';
+      case 'AuditBy':
+        return element[key] ?? '-';
       default:
         return element[key];
     }

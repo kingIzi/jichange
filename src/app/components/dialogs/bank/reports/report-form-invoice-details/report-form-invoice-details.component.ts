@@ -123,8 +123,6 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
   private handleCompanyChanged(compid: number) {
     if (compid > 0) {
       this.requestCustomerDetailsList({ companyIds: [compid] });
-    } else if (compid === 0 && this.filterFormData.companies.length === 0) {
-      this.filterFormData.customers = [];
     } else if (compid === 0 && this.filterFormData.companies.length > 0) {
       let companyIds = this.filterFormData.companies.map((c) => {
         return c.CompSno;
@@ -235,7 +233,7 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
     );
     if (customer) {
       let message = this.tr
-        .translate(`reports.amendmentDetails.noInvoicesFound`)
+        .translate(`reports.invoiceDetails.noInvoicesFound`)
         .replace('{}', customer.Cust_Name);
       AppUtilities.openDisplayMessageBox(
         this.displayMessageBox,
@@ -302,10 +300,17 @@ export class ReportFormInvoiceDetailsComponent implements OnInit {
         );
       }
     }
+    // if (this.compid.enabled) {
+    //   this.compid.setValue(0);
+    // } else {
+    //   this.handleCompanyChanged(Number(this.compid.value));
+    // }
     if (this.compid.enabled) {
       this.compid.setValue(0);
     } else {
-      this.handleCompanyChanged(Number(this.compid.value));
+      this.compid.setValue(
+        (this.appConfig.getLoginResponse() as VendorLoginResponse).InstID
+      );
     }
   }
   private requestCompaniesList(body: { branch: number | string }) {

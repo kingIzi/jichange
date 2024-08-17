@@ -464,8 +464,8 @@
         "desc": ""
       },
       {
-        "label": "Tarehe ya Ankara",
-        "value": "Invoice_Date",
+        "label": "Tarehe Iliyotumwa",
+        "value": "p_date",
         "desc": ""
       },
       {
@@ -504,6 +504,16 @@
         "desc": ""
       },
       {
+        "label": "Imewekwa na",
+        "value": "AuditBy",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Ankara",
+        "value": "Invoice_Date",
+        "desc": ""
+      },
+      {
         "label": "Tarehe ya Kulipwa",
         "value": "Due_Date",
         "desc": ""
@@ -521,8 +531,8 @@
         "desc": ""
       },
       {
-        "label": "Tarehe ya Ankara",
-        "value": "Invoice_Date",
+        "label": "Tarehe Iliyotumwa",
+        "value": "p_date",
         "desc": ""
       },
       {
@@ -563,6 +573,16 @@
       {
         "label": "Kiasi cha Jumla",
         "value": "Total",
+        "desc": ""
+      },
+      {
+        "label": "Imewekwa na",
+        "value": "AuditBy",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Ankara",
+        "value": "Invoice_Date",
         "desc": ""
       },
       {
