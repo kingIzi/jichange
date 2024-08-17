@@ -6,9 +6,9 @@
     "noVendorFound": "Vendor haipatikani.",
     "actions": {
       "addCompany": "Ongeza muuzaji",
-      "addedCompanySuccessfully": "Kampuni ya kuongeza mafanikio!",
-      "modifiedCompanySuccessfully": "Kampuni iliyobadilishwa kwa mafanikio!",
-      "approvedCompanySuccessfully": "Kampuni imefanikiwa kwa mafanikio!",
+      "addedCompanySuccessfully": "Aliongeza muuzaji kwa mafanikio!",
+      "modifiedCompanySuccessfully": "Mchuuzi aliyebadilishwa kwa mafanikio!",
+      "approvedCompanySuccessfully": "Vendor kupitishwa kwa mafanikio!",
       "noSuspenseAccountsAvailable": "Hakuna akaunti za mashaka zinazopatikana. Je, ungependa kuunda moja?",
       "noDepositAccountAvailable": "Hakuna akaunti za amana zinazopatikana. Je! Ungependa kuunda moja?",
       "createSuspenseAccount": "Ongeza Akaunti ya Suspense",

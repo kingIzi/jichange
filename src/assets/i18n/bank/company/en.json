@@ -6,9 +6,9 @@
     "noVendorFound": "Vendor not found.",
     "actions": {
       "addCompany": "Add Vendor",
-      "addedCompanySuccessfully": "Added Company successfully!",
-      "modifiedCompanySuccessfully": "Modified company successfully!",
-      "approvedCompanySuccessfully": "Company approved successfully!",
+      "addedCompanySuccessfully": "Added vendor successfully!",
+      "modifiedCompanySuccessfully": "Modified vendor successfully!",
+      "approvedCompanySuccessfully": "Vendor approved successfully!",
       "noSuspenseAccountsAvailable": "No suspense accounts available. Would you like to create one?",
       "noDepositAccountAvailable": "No deposit accounts available. Would you like to create one?",
       "createSuspenseAccount": "Add Suspense account",
