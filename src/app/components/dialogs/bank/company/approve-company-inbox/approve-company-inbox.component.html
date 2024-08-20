@@ -65,6 +65,38 @@
   </form>
 </dialog>
 
+<dialog #confirmApproveVendor id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("confirm") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'company.inboxApproval'">
+      {{ t("sureApprove") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmApproveVendor.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmApproveVendor.close(); approveCompany()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("confirm") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -72,15 +104,38 @@
 <form [formGroup]="formGroup" class="w-full h-full p-4">
   <h3
     *transloco="let t; read: 'company.inboxApproval'"
-    class="font-bold text-lg"
+    class="font-bold text-lg lg:text-2xl w-full text-center flex flex-col"
   >
     {{ t("companyApproval") }}
   </h3>
+  <div class="flex flex-col">
+    <p
+      class="font-semibold text-sm capitalize"
+      *transloco="let t; read: 'company.inboxApproval'"
+    >
+      {{ t("vendor") }}:
+      <span class="font-normal">{{ getCompany()?.CompName }}</span>
+    </p>
+    <p
+      class="font-semibold text-sm"
+      *transloco="let t; read: 'company.inboxApproval'"
+    >
+      {{ t("mobile") }}:
+      <span class="font-normal">{{ getCompany()?.MobNo }}</span>
+    </p>
+    <p
+      class="font-semibold text-sm"
+      *transloco="let t; read: 'company.inboxApproval'"
+    >
+      {{ t("account") }}:
+      <span class="font-normal">{{ getCompany()?.AccountNo }}</span>
+    </p>
+  </div>
   <div class="flex flex-col mt-4 space-y-4">
     <div class="flex flex-col space-y-1 w-full">
       <h6
         *transloco="let t; read: 'company.inboxApproval.form'"
-        class="text-left text-sm"
+        class="text-left text-xs italic"
       >
         {{ t("pleaseSelect") }} <span class="text-red-600">*</span>
       </h6>
@@ -125,7 +180,7 @@
     <div class="flex flex-col space-y-1 w-full">
       <h6
         *transloco="let t; read: 'company.inboxApproval.form.errors'"
-        class="text-left text-sm"
+        class="text-left text-xs italic"
       >
         {{ t("account") }} <span class="text-red-600">*</span>
       </h6>

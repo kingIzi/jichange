@@ -231,8 +231,13 @@ export class BranchListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.branch.form.dialog.removedSuccessfully`)
+      let message = this.tr.translate(
+        `setup.branch.form.dialog.removedSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.close')
       );
       let index = this.tableDataService
         .getDataSource()

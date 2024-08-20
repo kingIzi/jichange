@@ -40,7 +40,6 @@ import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { NgxLoadingModule } from 'ngx-loading';
 import { AddBankUserForm } from 'src/app/core/models/bank/forms/setup/bank-user/add-bank-user-form';
-import Swal from 'sweetalert2';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 
@@ -305,7 +304,11 @@ export class BankUserDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      AppUtilities.showSuccessMessage(
+        successMessage,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.close')
+      );
       this.added.emit(result.response as EmployeeDetail);
     }
   }

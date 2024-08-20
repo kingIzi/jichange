@@ -37,6 +37,9 @@ import {
   VendorLoginResponse,
 } from 'src/app/core/models/login-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-sign-in',
@@ -55,6 +58,9 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
     SuccessMessageBoxComponent,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

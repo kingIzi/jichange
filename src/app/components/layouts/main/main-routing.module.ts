@@ -384,6 +384,17 @@ const routes: Routes = [
               animationState: 'reports-module-8',
             },
           },
+          // {
+          //   path: 'vendors/:id',
+          //   loadComponent: () =>
+          //     import(
+          //       '../../../pages/bank/reports/vendor-detail-report/vendor-detail-report.component'
+          //     ).then((s) => s.VendorDetailReportComponent),
+          //   data: {
+          //     breadcrumb: { alias: 'vendors', skip: false },
+          //     animationState: 'reports-module-8',
+          //   },
+          // },
           {
             path: 'invoice-consolidated',
             loadComponent: () =>

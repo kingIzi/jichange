@@ -17,7 +17,7 @@
       }
     },
     "inboxApproval": {
-      "name": "Kuidhinishwa kwa kikasha pokezi",
+      "name": "Za Kusubiri Liidhinishwa",
       "approve": "Kuidhinisha",
       "allOperations": "Uendeshaji wote",
       "pending": "Inasubiri",
@@ -27,6 +27,7 @@
     },
     "transaction": {
       "name": "Shughuli",
+      "recent": "Miamala ya hivi karibuni",
       "errors": {
         "noDataFound": "Hakuna data ya manunuzi iliyopatikana"
       }

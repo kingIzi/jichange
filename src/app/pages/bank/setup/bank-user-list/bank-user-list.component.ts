@@ -234,6 +234,20 @@ export class BankUserListComponent implements OnInit {
         return this.tr.translate(`setup.bankUser.failedToDeleteBankUser`);
     }
   }
+  private removedBankUserSuccessfullyHandler(detailId: number) {
+    let message = this.tr.translate(
+      `setup.bankUser.removedBankUserSucessfully`
+    );
+    AppUtilities.showSuccessMessage(
+      message,
+      (e: MouseEvent) => {},
+      this.tr.translate('actions.close')
+    );
+    let index = this.tableDataService
+      .getDataSource()
+      .data.findIndex((item) => item.Detail_Id === detailId);
+    this.tableDataService.removedData(index);
+  }
   private parseDeleteBankUserResponse(result: HttpDataResponse<number>) {
     let isErrorResult = AppUtilities.hasErrorResult(result);
     if (isErrorResult) {
@@ -246,13 +260,7 @@ export class BankUserListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.bankUser.removedBankUserSucessfully`)
-      );
-      let index = this.tableDataService
-        .getDataSource()
-        .data.findIndex((item) => item.Detail_Id === result.response);
-      this.tableDataService.removedData(index);
+      this.removedBankUserSuccessfullyHandler(result.response);
     }
   }
   private requestDeleteBankUser(body: DeleteBankUserForm) {

@@ -10,7 +10,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -126,6 +126,7 @@ export class SummaryComponent implements OnInit {
   @ViewChild('summaryTableContainer', { static: false })
   summaryTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
+    private activatedRoute: ActivatedRoute,
     private appConfig: AppConfigService,
     private dialog: MatDialog,
     private router: Router,
@@ -190,39 +191,18 @@ export class SummaryComponent implements OnInit {
     this.tableDataService.setTableColumnsObservable(tableColumns);
     //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private companyKeys(indexes: number[]) {
-    let keys: string[] = [];
-    if (indexes.includes(CompanySummaryTable.NAME)) {
-      keys.push('CompName');
-    }
-    if (indexes.includes(CompanySummaryTable.ADDRESS)) {
-      keys.push('Address');
-    }
-    if (indexes.includes(CompanySummaryTable.EMAIL)) {
-      keys.push('Email');
-    }
-    if (indexes.includes(CompanySummaryTable.TIN_NUMBER)) {
-      keys.push('TinNo');
-    }
-    if (indexes.includes(CompanySummaryTable.MOBILE_NUMBER)) {
-      keys.push('MobNo');
-    }
-    if (indexes.includes(CompanySummaryTable.STATUS)) {
-      keys.push('Status');
-    }
-    if (indexes.includes(CompanySummaryTable.DIRECTOR_NAME)) {
-      keys.push('DirectorName');
-    }
-    if (indexes.includes(CompanySummaryTable.POST_BOX)) {
-      keys.push('PostBox');
-    }
-    if (indexes.includes(CompanySummaryTable.TELEPHONE_NUMBER)) {
-      keys.push('TelNo');
-    }
-    if (indexes.includes(CompanySummaryTable.DATE_POSTED)) {
-      keys.push('Posteddate');
-    }
-    return keys;
+  private hasCompIdQueryParamHandler() {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params && params['compid']) {
+        let compid = atob(params['compid']);
+        let found = this.tableDataService
+          .getData()
+          .find((e) => e.CompSno === Number(compid));
+        if (found) {
+          this.tableSearch.setValue(found.CompName);
+        }
+      }
+    });
   }
   private dataSourceFilter() {
     let filterPredicate = (data: Company, filter: string) => {
@@ -259,6 +239,7 @@ export class SummaryComponent implements OnInit {
       .getBranchedCompanyList({ branch: this.getUserProfile().braid })
       .then((result) => {
         this.assignVendorsDataList(result);
+        this.hasCompIdQueryParamHandler();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

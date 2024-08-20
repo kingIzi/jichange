@@ -125,6 +125,7 @@ export class InboxApprovalComponent implements OnInit {
   @ViewChild('inboxApprovalTableContainer')
   inboxApprovalTableContainer!: ElementRef<HTMLDivElement>;
   constructor(
+    private activatedRoute: ActivatedRoute,
     private appConfig: AppConfigService,
     private tr: TranslocoService,
     private fb: FormBuilder,
@@ -186,32 +187,18 @@ export class InboxApprovalComponent implements OnInit {
     this.tableDataService.setTableColumns(tableColumns);
     this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private companyKeys(indexes: number[]) {
-    let keys: string[] = [];
-    if (indexes.includes(CompanyInboxTable.NAME)) {
-      keys.push('CompName');
-    }
-    if (indexes.includes(CompanyInboxTable.ADDRESS)) {
-      keys.push('Address');
-    }
-    if (indexes.includes(CompanyInboxTable.EMAIL)) {
-      keys.push('Email');
-    }
-    if (indexes.includes(CompanyInboxTable.MOBILE_NUMBER)) {
-      keys.push('MobNo');
-    }
-    if (indexes.includes(CompanyInboxTable.STATUS)) {
-      keys.push('Status');
-    }
-    return keys;
-  }
-  private getTableActiveKeys() {
-    let indexes = this.headers.controls
-      .map((control, index) => {
-        return control.get('included')?.value ? index : -1;
-      })
-      .filter((num) => num !== -1);
-    return this.companyKeys(indexes);
+  private hasCompIdQueryParamHandler() {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params && params['compid']) {
+        let compid = atob(params['compid']);
+        let found = this.tableDataService
+          .getData()
+          .find((e) => e.CompSno === Number(compid));
+        if (found) {
+          this.tableSearch.setValue(found.CompName);
+        }
+      }
+    });
   }
   private dataSourceFilterPredicate() {
     let filterPredicate = (data: Company, filter: string) => {
@@ -246,6 +233,7 @@ export class InboxApprovalComponent implements OnInit {
     inbox
       .then((result) => {
         this.assignCompanyInbox(result);
+        this.hasCompIdQueryParamHandler();
         this.tableLoading = false;
         this.cdr.detectChanges();
       })

@@ -6,12 +6,9 @@ import { SubmitMessageBoxComponent } from '../components/dialogs/submit-message-
 import { formatDate } from '@angular/common';
 import { Observable, TimeoutError, catchError, lastValueFrom, map } from 'rxjs';
 import Swal from 'sweetalert2';
-import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
-import { Keepalive } from '@ng-idle/keepalive';
 import { Router } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
 import { HttpDataResponse } from '../core/models/http-data-response';
-import jsPDF from 'jspdf';
+import { toast } from 'ngx-sonner';
 
 export class AppUtilities {
   static phoneNumberPrefixRegex: any = /^(?:[67]\d{8}|255\d{9})$/;
@@ -43,6 +40,25 @@ export class AppUtilities {
       animation: true,
       title: message,
     });
+  }
+  static showSuccessMessage(
+    message: string,
+    handler: (e: MouseEvent) => void,
+    view: string
+  ) {
+    toast.success(message, {
+      action: {
+        label: view,
+        onClick: handler,
+      },
+    });
+  }
+  static redirectPage(path: string, queryParams: {}, router: Router) {
+    return (e: MouseEvent) => {
+      router.navigate([path], {
+        ...queryParams,
+      });
+    };
   }
 
   static openTimeoutError(

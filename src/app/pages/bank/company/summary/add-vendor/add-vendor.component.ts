@@ -16,7 +16,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -57,6 +57,8 @@ import {
 } from 'src/app/components/layouts/main/router-transition-animations';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+//import { ToastrService } from 'ngx-toastr';
+import { toast, NgxSonnerToaster } from 'ngx-sonner';
 
 @Component({
   selector: 'app-add-vendor',
@@ -68,6 +70,8 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     PhoneNumberInputComponent,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    NgxSonnerToaster,
+    RouterModule,
   ],
   templateUrl: './add-vendor.component.html',
   styleUrl: './add-vendor.component.scss',
@@ -112,7 +116,7 @@ export class AddVendorComponent implements OnInit {
     private companyService: CompanyService,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
-    private location: Location
+    private router: Router
   ) {}
   private retrieveQueryParams() {
     this.activatedRoute.queryParams.subscribe((params) => {
@@ -387,8 +391,15 @@ export class AddVendorComponent implements OnInit {
         return this.tr.translate('company.summary.actions.failedToAddCompany');
     }
   }
+  // private redirectVendor(path: string, compid: string) {
+  //   return (e: MouseEvent) => {
+  //     this.router.navigate([path], {
+  //       queryParams: { compid: compid },
+  //     });
+  //   };
+  // }
   private assignInsertCompanyResponse(
-    result: HttpDataResponse<string | number>,
+    result: HttpDataResponse<Company | number>,
     message: string
   ) {
     let isErrorResult = AppUtilities.hasErrorResult(result);
@@ -402,7 +413,20 @@ export class AddVendorComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      let company = result.response as Company;
+      let path = '/main/company/summary';
+      if (
+        company.Status &&
+        company.Status.toLocaleLowerCase() === 'pending'.toLocaleLowerCase()
+      ) {
+        path = '/main/company/inbox';
+      }
+      let queryParams = { compid: btoa(company.CompSno.toString()) };
+      AppUtilities.showSuccessMessage(
+        message,
+        AppUtilities.redirectPage(path, queryParams, this.router),
+        this.tr.translate('actions.view')
+      );
       this.resetForm();
     }
   }
@@ -552,9 +576,6 @@ export class AddVendorComponent implements OnInit {
   }
   resetForm() {
     if (this.company) {
-      // this.company.subscribe((company) => {
-      //   this.createEditForm(company);
-      // });
       this.retrieveQueryParams();
     } else {
       this.createForm();

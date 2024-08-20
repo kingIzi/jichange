@@ -19,7 +19,6 @@ import {
 import { DashboardOverviewCardComponent } from 'src/app/components/cards/dashboard-overview-card/dashboard-overview-card.component';
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
-import { Chart, initTE } from 'tw-elements';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import * as json from 'src/assets/temp/data.json';
 import {
@@ -82,6 +81,7 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-dashboard',
@@ -131,12 +131,15 @@ export class DashboardComponent implements OnInit {
   public latestTransactions: TransactionDetail[] = [];
   public tableHeadersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public arr = Array.from({ length: 20 }, (_, i) => i + 1);
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('latestTransactionsGraph')
+  latestTransactionsGraph!: ElementRef<HTMLCanvasElement>;
   constructor(
     private appconfig: AppConfigService,
     private tr: TranslocoService,
@@ -264,20 +267,50 @@ export class DashboardComponent implements OnInit {
     };
     this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
-  // private prepareDataSource() {
-  //   this.tableData.dataSource = new MatTableDataSource<Company>(
-  //     this.tableData.tableCompanies
-  //   );
-  //   this.tableData.dataSource.paginator = this.paginator;
-  //   this.tableData.dataSource.sort = this.sort;
-  //   this.dataSourceFilter();
-  // }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
+  private createLatestTransactionsGraph() {
+    if (!this.latestTransactions || this.latestTransactions.length === 0)
+      return;
+    let canvas = this.latestTransactionsGraph.nativeElement;
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: this.latestTransactions.map((t) =>
+          new Date(t.Payment_Date).toLocaleDateString()
+        ),
+        datasets: [
+          {
+            label: 'Paid Amount',
+            data: this.latestTransactions.map((t) => t.PaidAmount),
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        aspectRatio: 2.5,
+        maintainAspectRatio: false,
+      },
+    });
+    // let canvas = this.operationsChart.nativeElement;
+    // let invoiceSummary = new Chart(canvas, {
+    //   type: 'doughnut',
+    //   data: {
+    //     labels: this.graphData.invoicePieChartLabels,
+    //     datasets: [
+    //       {
+    //         label: 'Total',
+    //         data: this.graphData.invoicePieChartData,
+    //         hoverOffset: 4,
+    //         backgroundColor: ['#7E22CE', '#0F766E'],
+    //       },
+    //     ],
+    //   },
+    //   options: {
+    //     responsive: true,
+    //     aspectRatio: 2.5,
+    //     maintainAspectRatio: false,
+    //   },
+    // });
+  }
   private getBuildPageRequests() {
     let approvalsObs = from(
       this.approvalService.postCompanyInboxList({
@@ -348,6 +381,7 @@ export class DashboardComponent implements OnInit {
       this.latestTransactions = [];
     } else {
       this.latestTransactions = result.response as TransactionDetail[];
+      this.createLatestTransactionsGraph();
     }
   }
   public buildPage() {

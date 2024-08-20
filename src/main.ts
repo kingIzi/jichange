@@ -9,11 +9,7 @@ import {
   withInterceptors,
 } from '@angular/common/http';
 import { AppRoutingModule, routes } from './app/app-routing.module';
-import {
-  BrowserAnimationsModule,
-  provideAnimations,
-  provideNoopAnimations,
-} from '@angular/platform-browser/animations';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   authInterceptor,
   timeoutInterceptor,
@@ -22,6 +18,8 @@ import { NgIdleKeepaliveModule } from '@ng-idle/keepalive';
 import { AppConfigService } from './app/core/services/app-config.service';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideRouter, withViewTransitions } from '@angular/router';
+import { provideToastr } from 'ngx-toastr';
+import { toast, NgxSonnerToaster } from 'ngx-sonner';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -35,6 +33,12 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor, timeoutInterceptor])),
     provideRouter(routes, withViewTransitions()),
+    //provideToastr(),
+    // provideToastr({
+    //   timeOut: 5000,
+    //   positionClass: 'toast-top-right',
+    //   preventDuplicates: true,
+    // }),
     AppConfigService,
   ],
 }).catch((err) => console.log(err));

@@ -17,7 +17,7 @@
       }
     },
     "inboxApproval": {
-      "name": "Inbox Approval",
+      "name": "Pending Approval",
       "approve": "Approve",
       "allOperations": "All Operations",
       "pending": "Pending",
@@ -26,7 +26,8 @@
       }
     },
     "transaction": {
-      "name": "Transaction",
+      "name": "Transactions",
+      "recent": "Recent Transactions",
       "errors": {
         "noDataFound": "No transaction data found"
       }

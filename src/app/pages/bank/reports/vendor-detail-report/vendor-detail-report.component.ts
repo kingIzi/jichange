@@ -372,12 +372,6 @@ export class VendorDetailReportComponent implements OnInit {
     this.createTableFilterForm();
     this.createTableHeadersFormGroup();
     this.buildPage();
-    this.activatedRoute.queryParams.subscribe((params) => {
-      if (params && params['q']) {
-        let q = atob(params['q']);
-        this.submitTableFilterForm();
-      }
-    });
     this.submitTableFilterForm();
   }
   getUserProfile() {

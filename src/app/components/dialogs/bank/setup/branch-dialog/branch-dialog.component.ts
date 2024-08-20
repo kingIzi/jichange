@@ -158,7 +158,11 @@ export class BranchDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.close')
+      );
       this.addedBranch.emit(result.response as Branch);
     }
   }

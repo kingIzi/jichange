@@ -5,111 +5,93 @@
 ></app-loader-infinite-spinner> -->
 
 <div
-  class="py-2 w-full h-fit pl-6 pr-4 grid grid-cols-12 gap-x-4 gap-y-4 overflow-y-auto"
+  class="py-2 w-full h-fit pl-6 pr-4 grid grid-cols-1 lg:grid-cols-12 gap-x-4 gap-y-4 overflow-y-auto"
 >
   <div
-    class="w-full grid grid-cols-3 gap-1 col-span-full lg:col-span-8 relative"
+    id="statistics"
+    class="col-span-full lg:col-span-8 flex flex-col space-y-1"
   >
     <h4
       *transloco="let t; read: 'dashboard.dashboard.overview'"
-      class="col-span-full row-span-1 text-black font-bold tracking-wide text-lg"
+      class="col-span-full row-span-1 text-black font-bold tracking-wide text-lg lg:text-2xl"
     >
       {{ t("name") }}
     </h4>
-    <ng-container
-      *ngIf="invoiceStatistics.length > 0; else statisticsLoadingTemplate"
-    >
-      <div
-        *ngFor="
-          let statistic of invoiceStatistics;
-          trackBy: PerformanceUtils.trackByIndex;
-          index as i
-        "
-        [@listAnimationMobile]="getTableDataSource().filteredData.length"
-        class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
-      >
-        <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
-          {{ statistic.Statistic }}
-        </h2>
-        <h4
-          *transloco="
-            let t;
-            read: 'dashboard.dashboard.overview.statisticsData'
-          "
-          class="text-sm lg:text-lg font-bold"
-        >
-          {{ t(statistic.Name.toLocaleLowerCase()) }}
-        </h4>
-      </div>
-    </ng-container>
-    <ng-template #statisticsLoadingTemplate>
-      <div
-        *ngIf="startLoading"
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-      >
-        <span class="loading loading-spinner loading-lg bg-primary"></span>
-      </div>
-    </ng-template>
-    <ng-container *ngIf="!overviewLoading && invoiceStatistics.length === 0">
-      <div
-        class="w-full h-full col-span-full row-span-12 bg-white grid place-items-center shadow"
-        *transloco="let t; read: 'errors'"
-      >
-        <p class="text-center text-sm tracking-wide pt-3 pb-1">
-          {{ t("noDataFound") }}
-        </p>
-      </div>
-    </ng-container>
-  </div>
-  <div
-    class="flex flex-col space-y-2 relative w-full max-h-min col-span-full lg:col-span-4 lg:col-start-9"
-  >
-    <div class="flex flex-row justify-between w-full">
-      <div class="relative flex flex-row items-center space-x-1">
-        <p
-          *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
-          class="text-black font-bold tracking-wide text-lg"
-        >
-          {{ t("name") }}
-        </p>
-      </div>
-      <a
-        [routerLink]="'/main/company/inbox'"
-        *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
-      >
-        {{ t("viewAll") }}
-      </a>
-    </div>
     <div
-      *ngIf="inboxApprovals.length === 0; else inboxApprovalTemplate"
-      class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+      class="w-full grid grid-cols-3 gap-1 col-span-full lg:col-span-8 relative"
     >
-      <p
-        [class]="startLoading ? 'hidden' : ''"
-        class="text-lg text-center"
-        *transloco="let t; read: 'dashboard.dashboard.inboxApproval.errors'"
+      <ng-container
+        *ngIf="invoiceStatistics.length > 0; else statisticsLoadingTemplate"
       >
-        {{ t("emptyInbox") }}
-      </p>
-      <ng-container *ngIf="startLoading">
-        <div class="w-full grid place-items-center mt-6">
+        <div
+          *ngFor="
+            let statistic of invoiceStatistics;
+            trackBy: PerformanceUtils.trackByIndex;
+            index as i
+          "
+          [@listAnimationMobile]="getTableDataSource().filteredData.length"
+          class="col-span-1 h-36 bg-neutral-50 shadow rounded flex flex-col items-center justify-center"
+        >
+          <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
+            {{ statistic.Statistic }}
+          </h2>
+          <h4
+            *transloco="
+              let t;
+              read: 'dashboard.dashboard.overview.statisticsData'
+            "
+            class="text-sm lg:text-lg font-bold"
+          >
+            {{ t(statistic.Name.toLocaleLowerCase()) }}
+          </h4>
+        </div>
+      </ng-container>
+      <ng-template #statisticsLoadingTemplate>
+        <div
+          *ngIf="startLoading"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
           <span class="loading loading-spinner loading-lg bg-primary"></span>
+        </div>
+      </ng-template>
+      <ng-container *ngIf="!overviewLoading && invoiceStatistics.length === 0">
+        <div
+          class="w-full h-full col-span-full row-span-12 bg-neutral-50 grid place-items-center shadow"
+          *transloco="let t; read: 'errors'"
+        >
+          <p class="text-center text-sm tracking-wide pt-3 pb-1">
+            {{ t("noDataFound") }}
+          </p>
         </div>
       </ng-container>
     </div>
-    <ng-template #inboxApprovalTemplate>
+  </div>
+  <div
+    id="inbox-approvals"
+    class="col-span-full lg:col-span-4 flex flex-col space-y-1"
+  >
+    <p
+      *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
+      class="text-black font-bold tracking-wide text-lg lg:text-2xl"
+    >
+      {{ t("name") }}
+    </p>
+    <div
+      class="bg-neutral-50 p-2 shadow rounded flex flex-col h-full w-full lg:max-h-72"
+    >
       <ul
         *ngIf="inboxApprovals.length > 0"
         id="inbox-approval"
-        class="bg-white p-2 shadow rounded flex flex-col space-y-4 divide-y overflow-y-auto h-full w-full lg:max-h-72"
+        class="flex flex-col space-y-0 overflow-y-auto max-h-fit"
       >
         <li
           class="py-2"
           [@listAnimationMobile]="getTableDataSource().filteredData.length"
           *ngFor="let info of inboxApprovals; index as i"
         >
-          <a class="flex flex-row items-center justify-between">
+          <a
+            class="flex flex-row items-center justify-between shadow p-3 rounded"
+          >
             <div class="flex flex-col">
               <p class="text-xs">
                 {{ info.CompName }}
@@ -121,128 +103,123 @@
             <button
               *transloco="let t; read: 'dashboard.dashboard.inboxApproval'"
               (click)="approveCompany(info)"
-              class="btn btn-sm border-success bg-transparent"
+              class="btn btn-xs btn-primary hover:text-neutral-50"
               matTooltip="{{ t('approve') }}"
+              [matTooltipPosition]="'above'"
             >
-              <span>
-                <i class="bi bi-check2-circle text-lg text-success"></i>
-              </span>
+              {{ t("pending") }}
             </button>
           </a>
         </li>
       </ul>
-    </ng-template>
-  </div>
-  <div
-    class="flex flex-col space-y-1 relative w-full h-full col-span-full lg:col-span-4 lg:col-start-9"
-  >
-    <div class="flex flex-row justify-between w-full">
-      <div class="relative flex flex-row items-center space-x-1">
-        <p
-          *transloco="let t; read: 'dashboard.dashboard.transaction'"
-          class="text-black font-bold tracking-wide text-lg"
-        >
-          {{ t("name") }}
-        </p>
-      </div>
-    </div>
-    <div
-      *ngIf="startLoading; else notFoundTransactionsMessage"
-      class="w-full h-full shadow bg-white grid place-items-center"
-    >
-      <div class="w-full grid place-items-center mt-6">
-        <span class="loading loading-spinner loading-lg bg-primary"></span>
-      </div>
-    </div>
-    <ng-template #notFoundTransactionsMessage>
-      <div
-        *ngIf="
-          !startLoading && latestTransactions?.length === 0;
-          else transactionsFound
-        "
-        class="bg-white py-10 rounded shadow h-full w-full grid place-items-center"
+      <button
+        *transloco="let t; read: 'defaults'"
+        class="btn btn-active text-primary btn-md mt-auto"
+        [routerLink]="'/main/company/inbox'"
       >
-        <p
-          class="text-lg text-center"
-          *transloco="let t; read: 'dashboard.dashboard.transaction.errors'"
-        >
-          {{ t("noDataFound") }}
-        </p>
-      </div>
-      <ng-template #transactionsFound>
+        {{ t("viewAll") }}
+      </button>
+    </div>
+  </div>
+  <div class="col-span-full grid grid-cols-12">
+    <div class="col-span-full lg:col-span-8 w-full space-y-1 flex flex-col">
+      <p
+        *transloco="let t; read: 'dashboard.dashboard.transaction'"
+        class="text-black font-bold tracking-wide text-lg lg:text-2xl"
+      >
+        {{ t("recent") }}
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-x-4 gap-y-4 w-full">
         <div
-          class="w-full max-h-96 overflow-y-auto rounded-lg p-2 flex flex-col relative bg-white shadow"
+          id="transactions"
+          class="col-span-full lg:col-span-12 inline-flex space-x-2 justify-between overflow-x-auto w-full carousel rounded max-h-fit p-0.5"
         >
-          <ul
-            *ngFor="let arr of transactionsLatest(); index as i"
-            class="flex flex-col space-y-2 py-2"
-          >
-            <li>
-              <div class="flex flex-col space-y-2">
-                <h6 class="font-semibold">
-                  {{
-                    PerformanceUtils.convertDateStringToDate(
-                      arr.at(0).Payment_Date
-                    ).toDateString()
-                  }}
-                </h6>
-                <div
-                  class="flex flex-col space-y-1 px-4"
-                  *ngFor="let trans of arr; index as ind"
-                >
-                  <button
-                    [routerLink]="getViewTransactionsUrl(trans)"
-                    class="flex flex-row items-center justify-between hover:bg-neutral-100 p-2"
-                  >
-                    <div class="flex flex-row items-center space-x-1">
-                      <div
-                        class="w-14 h-14 bg-success relative spiky-invoice-number"
-                      >
-                        <p
-                          class="text-xs font-bold absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                        >
-                          <!-- {{ trans.Status }} -->
-                          PAID
-                        </p>
-                      </div>
-                      <div class="flex flex-col">
-                        <p class="text-sm text-left">{{ trans.Payer_Name }}</p>
-                        <p class="text-xs text-neutral-500 text-left">
-                          {{ trans.Control_No }}
+          <ng-container *ngFor="let transaction of latestTransactions">
+            <div class="carousel-item w-fit">
+              <div class="card bg-base-100 w-72 shadow-xl">
+                <div class="card-body">
+                  <div class="flex flex-row items-center justify-between">
+                    <div class="flex flex-col">
+                      <h2 class="card-title text-xs text-black font-bold">
+                        <!-- Amaye Nazodaye -->
+                        {{ transaction.Payer_Name }}
+                      </h2>
+                      <p class="text-2xl font-bold">
+                        {{
+                          PerformanceUtils.moneyFormat(
+                            transaction.PaidAmount.toString()
+                          )
+                        }}
+                        <span class="text-xs">{{
+                          transaction.Currency_Code
+                        }}</span>
+                      </p>
+                      <h2 class="card-title text-xs text-neutral-400">
+                        {{
+                          PerformanceUtils.convertDateStringToDate(
+                            transaction.Payment_Date
+                          ).toLocaleDateString()
+                        }}
+                        at
+                        {{
+                          PerformanceUtils.convertDateStringToDate(
+                            transaction.Payment_Date
+                          ).toLocaleTimeString()
+                        }}
+                      </h2>
+                    </div>
+                    <div class="h-full grid place-items-center">
+                      <div class="flex flex-row items-center space-x-1">
+                        <div
+                          [ngClass]="
+                            transaction.Balance > 0
+                              ? 'bg-warning'
+                              : 'bg-success'
+                          "
+                          class="w-2 h-2 rounded-full"
+                        ></div>
+                        <p class="italic">
+                          {{ transaction.Balance > 0 ? "Ongoing" : "Paid" }}
                         </p>
                       </div>
                     </div>
-                    <p class="text-xs text-success">
-                      {{
-                        PerformanceUtils.moneyFormat(
-                          trans.PaidAmount.toString()
-                        ) + " TZS"
-                      }}
-                    </p>
-                  </button>
+                  </div>
                 </div>
               </div>
-            </li>
-          </ul>
+            </div>
+          </ng-container>
         </div>
-      </ng-template>
-    </ng-template>
+      </div>
+    </div>
+    <div
+      class="col-span-full lg:col-span-4 w-full flex flex-col space-y-1 lg:ml-3"
+    >
+      <p
+        *transloco="let t; read: 'dashboard.dashboard.transaction'"
+        class="text-black font-bold tracking-wide text-lg lg:text-2xl opacity-0"
+      >
+        {{ t("name") }}
+      </p>
+      <div class="bg-neutral-50 shadow rounded">
+        <canvas #latestTransactionsGraph></canvas>
+      </div>
+    </div>
   </div>
   <div
     [formGroup]="tableHeadersFormGroup"
-    class="flex flex-col w-full space-y-1 relative col-span-full col-end-13 lg:col-end-9 lg:row-start-2"
+    class="flex flex-col w-full space-y-1 relative col-span-full"
   >
     <div class="flex flex-row items-center justify-between">
       <p
         *transloco="let t; read: 'dashboard.dashboard.onboardCustomers'"
-        class="text-black font-bold tracking-wide text-lg capitalize"
+        class="text-black font-bold tracking-wide text-lg lg:text-2xl capitalize"
       >
         {{ t("name") }}
       </p>
       <a
         [routerLink]="'/main/company/summary'"
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
+        class="btn btn-xs btn-ghost text-primary bg-base-200 tracking-widest hover:font-bold capitalize hover:bg-base-200"
       >
         {{ t("viewAll") }}
       </a>
@@ -430,8 +407,8 @@
       <div class="flex flex-row-reverse items-center justify-between">
         <mat-paginator
           #paginator
-          [pageSize]="3"
-          [pageSizeOptions]="[3]"
+          [pageSize]="5"
+          [pageSizeOptions]="[5]"
           aria-label="Select page"
         >
         </mat-paginator>

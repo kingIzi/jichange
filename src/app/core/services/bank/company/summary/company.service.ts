@@ -33,7 +33,7 @@ export class CompanyService {
   }
   public async addCompany(body: AddCompany) {
     let data = await lastValueFrom(
-      this.client.performPost<AddCompany, HttpDataResponse<number | string>>(
+      this.client.performPost<AddCompany, HttpDataResponse<number | Company>>(
         `/api/Company/AddCompanyBank`,
         body
       )

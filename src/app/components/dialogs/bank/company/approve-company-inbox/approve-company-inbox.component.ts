@@ -52,6 +52,7 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-approve-company-inbox',
@@ -95,7 +96,10 @@ export class ApproveCompanyInboxComponent implements OnInit {
   noSuspenseAccountFoundDilog!: ElementRef<HTMLDialogElement>;
   @ViewChild('noDepositAccountFound', { static: true })
   noDepositAccountFound!: ElementRef<HTMLDialogElement>;
+  @ViewChild('confirmApproveVendor')
+  confirmApproveVendor!: ElementRef<HTMLDialogElement>;
   constructor(
+    private router: Router,
     private appConfig: AppConfigService,
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -257,8 +261,8 @@ export class ApproveCompanyInboxComponent implements OnInit {
       userid: this.fb.control(this.getUserProfile().Usno, [
         Validators.required,
       ]),
-      suspenseAccSno: this.fb.control('', []),
-      depositAccNo: this.fb.control('', []),
+      suspenseAccSno: this.fb.control('', [Validators.required]),
+      depositAccNo: this.fb.control('', [Validators.required]),
     });
   }
   private formErrors(errorsPath: string = 'company.inboxApproval.form.dialog') {
@@ -305,8 +309,15 @@ export class ApproveCompanyInboxComponent implements OnInit {
         errorMessage
       );
     } else {
-      let m = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`company.inboxApproval.approvedSuccessfully`)
+      let msg = this.tr.translate(`company.inboxApproval.approvedSuccessfully`);
+      let path = '/main/company/summary';
+      let queryParams = {
+        compid: btoa((result.response as Company).CompSno.toString()),
+      };
+      AppUtilities.showSuccessMessage(
+        msg,
+        AppUtilities.redirectPage(path, queryParams, this.router),
+        this.tr.translate('actions.view')
       );
       this.approved.emit();
     }
@@ -377,13 +388,16 @@ export class ApproveCompanyInboxComponent implements OnInit {
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
   }
+  approveCompany() {
+    this.requestApproveCompany(this.formGroup.value);
+  }
   submitInboxApproval() {
-    if (this.formGroup.valid) {
-      this.requestApproveCompany(this.formGroup.value);
-    } else {
-      this.formGroup.markAllAsTouched();
-      this.formErrors();
-    }
+    // if (this.formGroup.valid) {
+    //   this.confirmApproveVendor.nativeElement.showModal();
+    // } else {
+    //   this.formGroup.markAllAsTouched();
+    // }
+    this.approved.emit();
   }
   addSuspenseAccount() {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
@@ -415,6 +429,12 @@ export class ApproveCompanyInboxComponent implements OnInit {
   }
   closeDialog() {
     this.dialogRef.close();
+  }
+  getCompany() {
+    if (this?.data?.company) {
+      return this.data.company;
+    }
+    return null;
   }
   get suspenseAccSno() {
     return this.formGroup.get('suspenseAccSno') as FormControl;
