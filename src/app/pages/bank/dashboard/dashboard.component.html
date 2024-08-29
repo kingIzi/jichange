@@ -139,65 +139,81 @@
       >
         {{ t("recent") }}
       </p>
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-x-4 gap-y-4 w-full">
+      <div
+        class="grid grid-cols-1 lg:grid-cols-12 gap-x-4 gap-y-4 w-full bg-neutral-50 h-full"
+      >
+        <ng-template #noTransactionsFoundTemplate>
+          <div
+            class="w-full max-h-fit col-span-full bg-transparent grid place-items-center shadow"
+            *transloco="let t; read: 'errors'"
+          >
+            <p class="text-center text-sm tracking-wide pt-3 pb-1">
+              {{ t("noDataFound") }}
+            </p>
+          </div>
+        </ng-template>
         <div
+          *ngIf="
+            latestTransactions.length > 0;
+            else noTransactionsFoundTemplate
+          "
           id="transactions"
           class="col-span-full lg:col-span-12 inline-flex space-x-2 justify-between overflow-x-auto w-full carousel rounded max-h-fit p-0.5"
         >
-          <ng-container *ngFor="let transaction of latestTransactions">
-            <div class="carousel-item w-fit">
-              <div class="card bg-base-100 w-72 shadow-xl">
-                <div class="card-body">
-                  <div class="flex flex-row items-center justify-between">
-                    <div class="flex flex-col">
-                      <h2 class="card-title text-xs text-black font-bold">
-                        <!-- Amaye Nazodaye -->
-                        {{ transaction.Payer_Name }}
-                      </h2>
-                      <p class="text-2xl font-bold">
-                        {{
-                          PerformanceUtils.moneyFormat(
-                            transaction.PaidAmount.toString()
-                          )
-                        }}
-                        <span class="text-xs">{{
-                          transaction.Currency_Code
-                        }}</span>
+          >
+          <div
+            class="carousel-item w-fit"
+            *ngFor="let transaction of latestTransactions"
+          >
+            <div class="card bg-base-100 w-72 shadow-xl">
+              <div class="card-body">
+                <div class="flex flex-row items-center justify-between">
+                  <div class="flex flex-col">
+                    <h2 class="card-title text-xs text-black font-bold">
+                      <!-- Amaye Nazodaye -->
+                      {{ transaction.Payer_Name }}
+                    </h2>
+                    <p class="text-2xl font-bold">
+                      {{
+                        PerformanceUtils.moneyFormat(
+                          transaction.PaidAmount.toString()
+                        )
+                      }}
+                      <span class="text-xs">{{
+                        transaction.Currency_Code
+                      }}</span>
+                    </p>
+                    <h2 class="card-title text-xs text-neutral-400">
+                      {{
+                        PerformanceUtils.convertDateStringToDate(
+                          transaction.Payment_Date
+                        ).toLocaleDateString()
+                      }}
+                      at
+                      {{
+                        PerformanceUtils.convertDateStringToDate(
+                          transaction.Payment_Date
+                        ).toLocaleTimeString()
+                      }}
+                    </h2>
+                  </div>
+                  <div class="h-full grid place-items-center">
+                    <div class="flex flex-row items-center space-x-1">
+                      <div
+                        [ngClass]="
+                          transaction.Balance > 0 ? 'bg-warning' : 'bg-success'
+                        "
+                        class="w-2 h-2 rounded-full"
+                      ></div>
+                      <p class="italic">
+                        {{ transaction.Balance > 0 ? "Ongoing" : "Paid" }}
                       </p>
-                      <h2 class="card-title text-xs text-neutral-400">
-                        {{
-                          PerformanceUtils.convertDateStringToDate(
-                            transaction.Payment_Date
-                          ).toLocaleDateString()
-                        }}
-                        at
-                        {{
-                          PerformanceUtils.convertDateStringToDate(
-                            transaction.Payment_Date
-                          ).toLocaleTimeString()
-                        }}
-                      </h2>
-                    </div>
-                    <div class="h-full grid place-items-center">
-                      <div class="flex flex-row items-center space-x-1">
-                        <div
-                          [ngClass]="
-                            transaction.Balance > 0
-                              ? 'bg-warning'
-                              : 'bg-success'
-                          "
-                          class="w-2 h-2 rounded-full"
-                        ></div>
-                        <p class="italic">
-                          {{ transaction.Balance > 0 ? "Ongoing" : "Paid" }}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </ng-container>
+          </div>
         </div>
       </div>
     </div>
@@ -210,8 +226,19 @@
       >
         {{ t("name") }}
       </p>
-      <div class="bg-neutral-50 shadow rounded">
+      <div class="bg-neutral-50 shadow rounded relative">
         <canvas #latestTransactionsGraph></canvas>
+        <div
+          class="w-full h-full absolute top-0 left-0 right-0 bottom-0 grid place-items-center"
+          *ngIf="latestTransactions.length === 0"
+        >
+          <p
+            *transloco="let t; read: 'errors'"
+            class="text-center text-sm tracking-wide pt-3 pb-1"
+          >
+            {{ t("noDataFound") }}
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -234,7 +261,9 @@
         {{ t("viewAll") }}
       </a>
     </div>
-    <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
+    <div
+      class="flex flex-col bg-white shadow px-2 py-4 space-y-2 overflow-x-hidden"
+    >
       <div class="flex flex-row items-center justify-end space-x-2 pt-1">
         <div class="relative">
           <input

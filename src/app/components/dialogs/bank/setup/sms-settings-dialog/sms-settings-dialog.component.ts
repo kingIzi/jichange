@@ -172,6 +172,7 @@ export class SmsSettingsDialogComponent implements OnInit, AfterViewInit {
           this.smtp_mob.setValue(form.Mobile_Service ?? '');
           this.userid.setValue(this.appConfig.getUserIdFromSessionStorage());
           this.sno.setValue(form.SNO);
+          this.smtp_pwd.disable();
         },
         error: (err) => {
           AppUtilities.openDisplayMessageBox(

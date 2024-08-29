@@ -236,6 +236,7 @@
       "cautionMessage": "Marakani ikighairiwa, mabadiliko hayawezi kurejeshwa. Tafadhali endelea kwa tahadhari.",
       "cancelledSuccessfully": "Ankara iliyokatishwa kwa mafanikio!",
       "cannotCancelInvoice": "Huwezi kughairi ankara iliyolipwa tayari.",
+      "sureCancel": "Una uhakika unataka kughairi ankara '{}'?",
       "form": {
         "reason": "Sababu",
         "placeholders": {

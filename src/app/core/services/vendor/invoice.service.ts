@@ -24,6 +24,12 @@ export class InvoiceService {
     );
     return data;
   }
+  public signedDetailsList(body: { compid: number }) {
+    return this.client.performPost<
+      { compid: number },
+      HttpDataResponse<GeneratedInvoice[] | number>
+    >(`/api/Invoice/GetSignedDetails`, body);
+  }
   public isExistInvoice(compid: number, invno: string) {
     let data = this.client.performGet<HttpDataResponse<number | boolean>>(
       `/api/Invoice/IsExistInvoice?compid=${compid}&invno=${invno}`

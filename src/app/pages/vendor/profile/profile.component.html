@@ -117,12 +117,24 @@
         <div class="flex flex-col space-y-1 w-full">
           <h6
             *transloco="let t; read: 'auth.profile.language.form'"
-            class="text-left text-sm"
+            class="text-left text-xs"
           >
             {{ t("language") }}
-            <span class="text-red-600">*</span>
           </h6>
-          <select
+          <mat-form-field
+            *transloco="let t; read: 'auth.profile.language.form'"
+            class="!max-w-lg"
+          >
+            <mat-label>{{ t("placeholders.language") }}</mat-label>
+            <mat-select formControlName="lang">
+              @for (language of languages; track language) {
+              <mat-option [value]="language.code">{{
+                language.name
+              }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <!-- <select
             formControlName="lang"
             class="select select-bordered w-full max-w-lg bg-transparent text-black"
           >
@@ -145,18 +157,25 @@
             >
               {{ language.name }}
             </option>
-          </select>
+          </select> -->
         </div>
         <div
           class="flex flex-row items-center justify-end lg:justify-start py-2"
         >
           <button
             (click)="saveLanguageClicked()"
+            class="btn text-xs font-inter w-fit bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+            *transloco="let t; read: 'auth.profile.language'"
+          >
+            {{ t("changeLanguage") }}
+          </button>
+          <!-- <button
+            (click)="saveLanguageClicked()"
             class="btn text-xs btn-outline font-inter btn-success w-1/2 lg:w-1/4 float-right"
             *transloco="let t; read: 'auth.profile'"
           >
             {{ t("saveChanges") }}
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
@@ -177,27 +196,25 @@
           *transloco="let t; read: 'auth.profile.security.form'"
           class="text-left text-sm"
         >
-          {{ t("currentPassword") }}
-          <span class="text-red-600">*</span>
-        </h6>
-        <input
-          *transloco="let t; read: 'auth.profile.security.form.placeholders'"
-          type="password"
-          [placeholder]="t('currentPassword')"
-          value="My New Password here"
-          disabled
-          class="input input-bordered w-full max-w-lg bg-transparent text-black"
-        />
-      </div>
-      <div class="flex flex-col space-y-1 w-full">
-        <h6
-          *transloco="let t; read: 'auth.profile.security.form'"
-          class="text-left text-sm"
-        >
           {{ t("newPassword") }}
           <span class="text-red-600">*</span>
         </h6>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'auth.profile.security.form'"
+          class="!max-w-lg"
+        >
+          <mat-label>{{ t("placeholders.newPassword") }}</mat-label>
+          <input matInput [formControl]="pwd" type="password" />
+          <mat-error *ngIf="pwd && pwd.invalid && pwd.touched">
+            <!-- {{ t("errors.emailId") }} -->
+            @if (pwd.hasError('passwordMismatch')) {
+            {{ t("errors.passwordsDoNotMatch") }}
+            } @if (confirmPwd.hasError('required')) {
+            {{ t("errors.pleaseFill") }}
+            }
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'auth.profile.security.form.placeholders'"
           type="password"
           [placeholder]="t('newPassword')"
@@ -206,9 +223,6 @@
         />
         <span *ngIf="pwd && pwd.invalid && pwd.touched">
           <div *transloco="let t; read: 'auth.profile.security.form.errors'">
-            <!-- <p *ngIf="pwd.hasError('required')" class="text-danger-700 text-xs">
-              {{ t("isEmpty") }}
-            </p> -->
             <p
               *ngIf="pwd.hasError('passwordMismatch')"
               class="text-danger-700 text-xs"
@@ -216,7 +230,7 @@
               {{ t("passwordsDoNotMatch") }}
             </p>
           </div>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
@@ -226,7 +240,7 @@
           {{ t("confirmPassword") }}
           <span class="text-red-600">*</span>
         </h6>
-        <input
+        <!-- <input
           *transloco="let t; read: 'auth.profile.security.form.placeholders'"
           type="password"
           [placeholder]="t('confirmPassword')"
@@ -235,9 +249,6 @@
         />
         <span *ngIf="confirmPwd && confirmPwd.invalid && confirmPwd.touched">
           <div *transloco="let t; read: 'auth.profile.security.form.errors'">
-            <!-- <p *ngIf="pwd.hasError('required')" class="text-danger-700 text-xs">
-              {{ t("isEmpty") }}
-            </p> -->
             <p
               *ngIf="confirmPwd.hasError('passwordMismatch')"
               class="text-danger-700 text-xs"
@@ -245,16 +256,40 @@
               {{ t("passwordsDoNotMatch") }}
             </p>
           </div>
-        </span>
+        </span> -->
+        <mat-form-field
+          *transloco="let t; read: 'auth.profile.security.form'"
+          class="!max-w-lg"
+        >
+          <mat-label>{{ t("placeholders.confirmPassword") }}</mat-label>
+          <input matInput [formControl]="confirmPwd" type="password" />
+          <mat-error
+            *ngIf="confirmPwd && confirmPwd.invalid && confirmPwd.touched"
+          >
+            <!-- {{ t("errors.emailId") }} -->
+            @if (confirmPwd.hasError('passwordMismatch')) {
+            {{ t("errors.passwordsDoNotMatch") }}
+            } @if (confirmPwd.hasError('required')) {
+            {{ t("errors.pleaseFill") }}
+            }
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-row items-center justify-end lg:justify-start py-2">
         <button
+          (click)="changePasswordClicked()"
+          class="btn text-xs font-inter w-fit bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+          *transloco="let t; read: 'auth.profile.security'"
+        >
+          {{ t("changePassword") }}
+        </button>
+        <!-- <button
           (click)="changePasswordClicked()"
           class="btn text-xs btn-outline font-inter btn-success w-1/2 lg:w-1/4 float-right"
           *transloco="let t; read: 'auth.profile'"
         >
           {{ t("saveChanges") }}
-        </button>
+        </button> -->
       </div>
     </div>
   </div>

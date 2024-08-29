@@ -40,6 +40,12 @@ import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-profile',
@@ -53,6 +59,12 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     LoaderInfiniteSpinnerComponent,
     DisplayMessageBoxComponent,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

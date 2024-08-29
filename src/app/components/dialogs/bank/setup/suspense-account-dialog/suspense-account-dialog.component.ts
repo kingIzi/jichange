@@ -151,7 +151,12 @@ export class SuspenseAccountDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      //let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      AppUtilities.showSuccessMessage(
+        successMessage,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
+      );
       this.addedSuspenseAccount.emit(result.response as SuspenseAccount);
     }
   }

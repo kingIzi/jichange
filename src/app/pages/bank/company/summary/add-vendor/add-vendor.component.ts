@@ -412,7 +412,11 @@ export class AddVendorComponent implements OnInit {
       let queryParams = { compid: btoa(company.CompSno.toString()) };
       AppUtilities.showSuccessMessage(
         message,
-        AppUtilities.redirectPage(path, queryParams, this.router),
+        //AppUtilities.redirectPage(path, queryParams, this.router),
+        () =>
+          this.router.navigate([path], {
+            queryParams: queryParams,
+          }),
         this.tr.translate('actions.view')
       );
       this.resetForm();

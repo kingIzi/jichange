@@ -51,8 +51,8 @@
       {{ t("details") }}
     </h1>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("invoiceNo") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("invoiceNo") }}
       </p>
       <mat-form-field
         *transloco="let t; read: 'invoice.form'"
@@ -84,10 +84,24 @@
       </span> -->
     </div>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("invoiceDate") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("invoiceDate") }}
       </p>
-      <input
+      <mat-form-field *transloco="let t; read: 'invoice.form'">
+        <mat-label>{{ t("placeholders.invoiceDate") }}</mat-label>
+        <input matInput [formControl]="date" [matDatepicker]="startDate" />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="startDate"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #startDate></mat-datepicker>
+        <ng-container>
+          <mat-error *ngIf="date && date.invalid && date.touched">
+            {{ t("errors.invoiceDate") }}
+          </mat-error>
+        </ng-container>
+      </mat-form-field>
+      <!-- <input
         *transloco="let t; read: 'invoice.form.placeholders'"
         type="date"
         [placeholder]="t('invoiceDate')"
@@ -102,13 +116,13 @@
         >
           {{ t("invoiceDate") }}
         </p>
-      </span>
+      </span> -->
     </div>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("dueDate") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("dueDate") }}
       </p>
-      <input
+      <!-- <input
         *transloco="let t; read: 'invoice.form.placeholders'"
         type="date"
         [placeholder]="t('dueDate')"
@@ -123,13 +137,27 @@
         >
           {{ t("dueDate") }}
         </p>
-      </span>
+      </span> -->
+      <mat-form-field *transloco="let t; read: 'invoice.form'">
+        <mat-label>{{ t("placeholders.dueDate") }}</mat-label>
+        <input matInput [formControl]="edate" [matDatepicker]="dueDate" />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="dueDate"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #dueDate></mat-datepicker>
+        <ng-container>
+          <mat-error *ngIf="edate && edate.invalid && edate.touched">
+            {{ t("errors.dueDate") }}
+          </mat-error>
+        </ng-container>
+      </mat-form-field>
     </div>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("invoiceExpire") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("invoiceExpire") }}
       </p>
-      <input
+      <!-- <input
         *transloco="let t; read: 'invoice.form.placeholders'"
         type="date"
         [placeholder]="t('invoiceExpire')"
@@ -144,13 +172,40 @@
         >
           {{ t("invoiceExpire") }}
         </p>
-      </span>
+      </span> -->
+      <mat-form-field *transloco="let t; read: 'invoice.form'">
+        <mat-label>{{ t("placeholders.invoiceExpire") }}</mat-label>
+        <input matInput [formControl]="iedate" [matDatepicker]="expiryDate" />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="expiryDate"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #expiryDate></mat-datepicker>
+        <ng-container>
+          <mat-error *ngIf="iedate && iedate.invalid && iedate.touched">
+            {{ t("errors.invoiceExpire") }}
+          </mat-error>
+        </ng-container>
+      </mat-form-field>
     </div>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("customer") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("customer") }}
       </p>
-      <select
+      <mat-form-field *transloco="let t; read: 'invoice.form'">
+        <mat-label>{{ t("placeholders.customer") }}</mat-label>
+        <mat-select [formControl]="chus">
+          @for (customer of customers; track customer) {
+          <mat-option [value]="customer.Cus_Mas_Sno">{{
+            customer.Customer_Name
+          }}</mat-option>
+          }
+        </mat-select>
+        <mat-error *ngIf="chus && chus.invalid && chus.touched">
+          {{ t("errors.customer") }}</mat-error
+        >
+      </mat-form-field>
+      <!-- <select
         #customerInput
         [formControl]="chus"
         class="select select-sm select-bordered w-full font-normal"
@@ -188,13 +243,13 @@
         >
           {{ t("customer") }}
         </p>
-      </span>
+      </span> -->
     </div>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("paymentType") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("paymentType") }}
       </p>
-      <select
+      <!-- <select
         [formControl]="ptype"
         class="select select-sm select-bordered w-full font-normal"
       >
@@ -215,13 +270,36 @@
         >
           {{ t("paymentType") }}
         </p>
-      </span>
+      </span> -->
+      <mat-form-field *transloco="let t; read: 'invoice.form'">
+        <mat-label>{{ t("placeholders.paymentType") }}</mat-label>
+        <mat-select [formControl]="ptype">
+          <mat-option [value]="'Flexible'">Flexible</mat-option>
+          <mat-option [value]="'Fixed'">Fixed</mat-option>
+        </mat-select>
+        <mat-error *ngIf="ptype && ptype.invalid && ptype.touched">
+          {{ t("errors.paymentType") }}</mat-error
+        >
+      </mat-form-field>
     </div>
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'invoice.form'" class="text-xs">
-        {{ t("currency") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'invoice.form'" class="text-xs text-black">
+        {{ t("currency") }}
       </p>
-      <select
+      <mat-form-field *transloco="let t; read: 'invoice.form'">
+        <mat-label>{{ t("placeholders.currency") }}</mat-label>
+        <mat-select [formControl]="ccode">
+          @for (currency of currencies; track currency) {
+          <mat-option [value]="currency.Currency_Code">{{
+            currency.Currency_Code
+          }}</mat-option>
+          }
+        </mat-select>
+        <mat-error *ngIf="ccode && ccode.invalid && ccode.touched">
+          {{ t("errors.currency") }}</mat-error
+        >
+      </mat-form-field>
+      <!-- <select
         [formControl]="ccode"
         class="select select-sm select-bordered w-full font-normal"
       >
@@ -246,7 +324,7 @@
         >
           {{ t("currency") }}
         </p>
-      </span>
+      </span> -->
     </div>
     <!-- <div class="flex flex-col space-y-1">
       <p *transloco="let t; read: 'invoice.form'" class="text-xs">
@@ -270,10 +348,10 @@
       </span>
     </div> -->
     <div class="flex flex-col space-y-1">
-      <p *transloco="let t; read: 'generated.form'" class="text-xs">
-        {{ t("reason") }}<span class="text-red-600">*</span>
+      <p *transloco="let t; read: 'generated.form'" class="text-xs text-black">
+        {{ t("reason") }}
       </p>
-      <input
+      <!-- <input
         *transloco="let t; read: 'generated.form.placeholders'"
         type="text"
         [placeholder]="t('reason')"
@@ -287,7 +365,17 @@
         >
           {{ t("reason") }}
         </p>
-      </span>
+      </span> -->
+      <mat-form-field
+        *transloco="let t; read: 'generated.form'"
+        class="example-full-width"
+      >
+        <mat-label>{{ t("placeholders.reason") }}</mat-label>
+        <input matInput [formControl]="reason" />
+        <mat-error *ngIf="reason && reason.invalid && reason.touched">
+          {{ t("errors.reason") }}
+        </mat-error>
+      </mat-form-field>
     </div>
     <div class="flex flex-col col-span-full">
       <h1
@@ -533,8 +621,7 @@
       (click)="submitInvoiceDetailsForm()"
       type="submit"
       form="control-number-form"
-      class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
-      [disabled]="!formGroup.valid"
+      class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-neutral-50 shadow-4"
     >
       {{ t("submit") }}
     </button>

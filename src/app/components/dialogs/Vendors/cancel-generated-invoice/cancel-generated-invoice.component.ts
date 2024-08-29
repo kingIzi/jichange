@@ -37,6 +37,13 @@ import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice'
 import { Observable, of } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CountryDialogComponent } from '../../bank/setup/country-dialog/country-dialog.component';
+import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-cancel-generated-invoice',
@@ -47,6 +54,12 @@ import { CountryDialogComponent } from '../../bank/setup/country-dialog/country-
     TranslocoModule,
     LoaderInfiniteSpinnerComponent,
     DisplayMessageBoxComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   templateUrl: './cancel-generated-invoice.component.html',
   styleUrl: './cancel-generated-invoice.component.scss',
@@ -78,7 +91,7 @@ export class CancelGeneratedInvoiceComponent implements OnInit {
   @ViewChild('confirmCancelInvoice', { static: true })
   confirmCancelInvoice!: ElementRef<HTMLDialogElement>;
   constructor(
-    private datePipe: DatePipe,
+    private router: Router,
     private appConfig: AppConfigService,
     private fb: FormBuilder,
     private tr: TranslocoService,
@@ -171,10 +184,24 @@ export class CancelGeneratedInvoiceComponent implements OnInit {
         errorMessage
       );
     } else {
-      let msg = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(
-          `invoice.createdInvoice.cancelInvoice.cancelledSuccessfully`
-        )
+      // let msg = AppUtilities.sweetAlertSuccessMessage(
+      //   this.tr.translate(
+      //     `invoice.createdInvoice.cancelInvoice.cancelledSuccessfully`
+      //   )
+      // );
+      let path = '/vendor/reports/cancelled';
+      let invoice = result.response as GeneratedInvoice;
+      let queryParams = { invoiceId: btoa(invoice.Inv_Mas_Sno.toString()) };
+      let message = this.tr.translate(
+        `invoice.createdInvoice.cancelInvoice.cancelledSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        () =>
+          this.router.navigate([path], {
+            queryParams: queryParams,
+          }),
+        this.tr.translate('actions.view')
       );
       this.cancelledInvoice.emit(this.data.invid);
     }
@@ -280,7 +307,8 @@ export class CancelGeneratedInvoiceComponent implements OnInit {
   }
   submitCancelInvoice() {
     if (this.formGroup.valid) {
-      this.requestCancelInvoice(this.formGroup.value);
+      this.confirmCancelInvoice.nativeElement.showModal();
+      //this.requestCancelInvoice(this.formGroup.value);
     } else {
       this.formGroup.markAllAsTouched();
     }

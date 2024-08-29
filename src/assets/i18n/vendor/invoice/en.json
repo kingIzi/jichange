@@ -243,6 +243,7 @@
       "cautionMessage": "Once cancelled, changes can not be undone. Please proceed with caution.",
       "cancelledSuccessfully": "Cancelled invoice successfully!",
       "cannotCancelInvoice": "You cannot cancel an already paid invoice.",
+      "sureCancel": "Are you sure you want to cancel invoice '{}'?",
       "form": {
         "reason": "Reason",
         "placeholders": {

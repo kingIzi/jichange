@@ -43,6 +43,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { OptionalConfirmMessageBoxComponent } from '../../optional-confirm-message-box/optional-confirm-message-box.component';
 import { from } from 'rxjs';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-customers-dialog',
@@ -76,6 +77,7 @@ export class CustomersDialogComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public customerForm!: FormGroup;
   public addedCustomer = new EventEmitter<Customer>();
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')

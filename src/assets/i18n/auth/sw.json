@@ -209,7 +209,8 @@
         },
         "errors": {
           "isEmpty": "Tafadhali jaza",
-          "passwordsDoNotMatch": "Manenosiri hayalingani."
+          "passwordsDoNotMatch": "Manenosiri hayalingani.",
+          "pleaseFill": "Tafadhali jaza"
         }
       }
     },
@@ -218,9 +219,9 @@
       "changeLanguage": "Badilisha Lugha",
       "sureLanguage": "Una uhakika unataka kubadilisha lugha kuwa {}",
       "form": {
-        "language": "Lugha",
+        "language": "Chahua Lugha",
         "placeholders": {
-          "language": "Chagua lugha"
+          "language": "Lugha yako"
         }
       }
     },

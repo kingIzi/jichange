@@ -44,6 +44,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-amendment-details-dialog',
@@ -90,6 +91,7 @@ export class AmendmentDetailsDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<AmendmentDetailsDialogComponent>,
     private invoiceService: InvoiceService,
     private fb: FormBuilder,
+    private router: Router,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA)
@@ -348,9 +350,10 @@ export class AmendmentDetailsDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`generated.invoiceAmendedSuccessfully`)
-      );
+      // let sal = AppUtilities.sweetAlertSuccessMessage(
+      //   this.tr.translate(`generated.invoiceAmendedSuccessfully`)
+      // );
+      //let message = this.tr.translate(`generated.invoiceAmendedSuccessfully`);
       this.amended.emit(result.response as GeneratedInvoice);
     }
   }

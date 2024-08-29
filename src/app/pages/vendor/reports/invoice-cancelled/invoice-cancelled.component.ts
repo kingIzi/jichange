@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -121,7 +122,7 @@ import autoTable from 'jspdf-autotable';
   ],
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
-export class InvoiceCancelledComponent implements OnInit {
+export class InvoiceCancelledComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public tableLoading: boolean = false;
   // public tableData: {
@@ -168,6 +169,7 @@ export class InvoiceCancelledComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private cancelledService: CancelledService,
     private invoiceReportService: InvoiceReportServiceService,
+    private activatedRoute: ActivatedRoute,
     @Inject(VENDOR_TABLE_DATA_SERVICE)
     private tableDataService: TableDataService<CancelledInvoice>,
 
@@ -435,6 +437,24 @@ export class InvoiceCancelledComponent implements OnInit {
       this.tableDataService.setData(result.response as CancelledInvoice[]);
     }
   }
+  private examineActivatedRoute() {
+    this.activatedRoute.queryParams.subscribe({
+      next: (params) => {
+        try {
+          if (params && params['invoiceId']) {
+            let invoiceId = atob(params['invoiceId']);
+            setTimeout(() => {
+              this.reportFormInvoiceDetails.invno.setValue(invoiceId);
+              this.reportFormInvoiceDetails.submitFilterForm();
+              this.cdr.detectChanges();
+            }, 200);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
   private assignCancelledInvoiceResponse(
     result: HttpDataResponse<number | CancelledInvoice[]>
   ) {
@@ -549,6 +569,9 @@ export class InvoiceCancelledComponent implements OnInit {
     this.createFilterForm();
     //this.buildPage();
   }
+  ngAfterViewInit(): void {
+    this.examineActivatedRoute();
+  }
   requestCancelledInvoice(value: InvoiceDetailsForm | InvoiceReportForm) {
     this.tableLoading = true;
     this.cancelledService
@@ -650,27 +673,6 @@ export class InvoiceCancelledComponent implements OnInit {
   }
   tableHeader(columns: TableColumnsData[]) {
     return columns.map((col) => col.label);
-  }
-  submitFilterForm() {
-    if (this.filterFormGroup.valid) {
-      let form = { ...this.filterFormGroup.value };
-      form.compid = this.compid.value;
-      // value.stdate = AppUtilities.reformatDate(
-      //   this.filterFormGroup.value.stdate.split('-')
-      // );
-      // value.enddate = AppUtilities.reformatDate(
-      //   this.filterFormGroup.value.enddate.split('-')
-      // );
-      form.stdate = !form.stdate
-        ? form.stdate
-        : new Date(form.stdate).toISOString();
-      form.enddate = !form.enddate
-        ? form.enddate
-        : new Date(form.enddate).toISOString();
-      this.requestCancelledInvoice(form);
-    } else {
-      this.filterFormGroup.markAllAsTouched();
-    }
   }
   downloadSheet() {
     if (this.tableDataService.getData().length > 0) {

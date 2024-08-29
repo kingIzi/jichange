@@ -212,7 +212,8 @@
         },
         "errors": {
           "isEmpty": "Please fill",
-          "passwordsDoNotMatch": "Passwords do not match."
+          "passwordsDoNotMatch": "Passwords do not match.",
+          "pleaseFill": "Please fill"
         }
       }
     },
@@ -221,7 +222,7 @@
       "changeLanguage": "Change Language",
       "sureLanguage": "Are you sure you want to change the language to {}",
       "form": {
-        "language": "Language(s)",
+        "language": "Pick a language",
         "placeholders": {
           "language": "Select language"
         }

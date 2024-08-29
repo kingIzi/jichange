@@ -20,7 +20,10 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   TRANSLOCO_SCOPE,
@@ -120,6 +123,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   confirmAddInvoiceDetail!: ElementRef<HTMLDialogElement>;
   @ViewChild('customerNameInput')
   customerNameInput!: ElementRef<HTMLInputElement>;
+  @ViewChild(MatAutocompleteTrigger) autocomplete!: MatAutocompleteTrigger;
   constructor(
     private dialog: MatDialog,
     private datePipe: DatePipe,
@@ -620,6 +624,12 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         this.assignAddedCustomerToCustomerName(customer);
         this.customerNameInput.nativeElement.focus();
       });
+    dialogRef.afterOpened().subscribe({
+      next: () => {
+        this.autocomplete.closePanel();
+        this.cdr.detectChanges();
+      },
+    });
   }
   get invno() {
     return this.invoiceDetailsForm.get('invno') as FormControl;

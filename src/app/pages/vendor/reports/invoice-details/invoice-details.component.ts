@@ -72,6 +72,8 @@ import autoTable from 'jspdf-autotable';
 import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
 import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-invoice-details',
@@ -89,6 +91,7 @@ import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-re
     MatSortModule,
     ReportFormDetailsComponent,
     MatTableExporterModule,
+    MatCheckboxModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './invoice-details.component.html',
@@ -120,6 +123,8 @@ export class InvoiceDetailsComponent implements OnInit {
     companies: [],
     customers: [],
   };
+  public selection: SelectionModel<InvoiceReport> =
+    new SelectionModel<InvoiceReport>(true, []);
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -144,6 +149,42 @@ export class InvoiceDetailsComponent implements OnInit {
     private tableDataService: TableDataService<InvoiceReport>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
+
+  /** Whether the number of selected elements matches the total number of rows. */
+  isAllSelected() {
+    let numSelected = this.selection.selected.length;
+    let numRows = this.getTableDataList().length; //this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  toggleAllRows() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+
+    this.selection.select(...this.getTableDataList());
+  }
+
+  /** The label for the checkbox on the passed row */
+  checkboxLabel(row?: InvoiceReport): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    // return PerformanceUtils.getIndexOfItem(
+    //   this.tableDataService.getData(),
+    //   element
+    // );
+    let invoicePosition = PerformanceUtils.getIndexOfItem(
+      this.tableDataService.getData(),
+      row
+    );
+    return `${
+      this.selection.isSelected(row) ? 'deselect' : 'select'
+    } row ${invoicePosition}`;
+  }
+
   private createHeaderGroup() {
     let TABLE_SHOWING = 10;
     this.tableFormGroup = this.fb.group({
@@ -684,7 +725,7 @@ export class InvoiceDetailsComponent implements OnInit {
           element['Currency_Code']
         );
       case 'delivery_status':
-        return element[key] ? element[key] : 'Not sent';
+        return element[key] ? element[key] : 'Unsent';
       case 'Control_No':
       case 'AuditBy':
         return element[key] ?? '-';

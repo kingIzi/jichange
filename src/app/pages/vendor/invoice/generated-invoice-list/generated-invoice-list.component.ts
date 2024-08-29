@@ -271,6 +271,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
         );
         this.tableLoading = false;
         this.cdr.detectChanges();
+        throw err;
       });
   }
   private switchSendInvoiceDeliveryCode(message: string) {
@@ -310,6 +311,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
         .getDataSource()
         .data.findIndex((item) => item.Inv_Mas_Sno === invoice.Inv_Mas_Sno);
       this.tableDataService.editedData(invoice, index);
+      this.tableSearch.setValue(invoice.Invoice_No);
     }
   }
   //send delivery code to customer
@@ -405,7 +407,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
       case 'Control_No':
         return element['Control_No'] ? element['Control_No'] : '-';
       case 'delivery_status':
-        return element[key] ?? 'Not Sent';
+        return element[key] ?? 'Unsent';
       default:
         return element[key];
     }
@@ -548,9 +550,38 @@ export class GeneratedInvoiceListComponent implements OnInit {
         invid: invoice.Inv_Mas_Sno,
       },
     });
-    dialogRef.componentInstance.amended.asObservable().subscribe(() => {
+    dialogRef.componentInstance.amended.asObservable().subscribe((invoice) => {
       dialogRef.close();
-      this.requestGeneratedInvoice();
+      let message = this.tr.translate(`generated.invoiceAmendedSuccessfully`);
+      AppUtilities.showSuccessMessage(
+        message,
+        //AppUtilities.redirectPage(path, queryParams, this.router),
+        () => {},
+        this.tr.translate('actions.ok')
+      );
+
+      this.tableLoading = true;
+      let res = this.invoiceService.signedDetailsList({
+        compid: this.getUserProfile().InstID,
+      });
+      res.subscribe({
+        next: (result) => {
+          this.assignGeneratedInvoiceDataList(result);
+          this.tableSearch.setValue(invoice.Invoice_No);
+          this.tableLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          AppUtilities.requestFailedCatchError(
+            err,
+            this.displayMessageBox,
+            this.tr
+          );
+          this.tableLoading = false;
+          this.cdr.detectChanges();
+          throw err;
+        },
+      });
     });
   }
   makeInvoiceDelivery(
@@ -587,16 +618,6 @@ export class GeneratedInvoiceListComponent implements OnInit {
       : 'bg-orange-100 text-orange-600 px-4 py-1 rounded-lg shadow';
   }
   cancelInvoice(invoice: GeneratedInvoice) {
-    // dialog.title = this.tr.translate(`defaults.warning`);
-    // dialog.message = this.tr
-    //   .translate(`invoice.createdInvoice.sureCancelInvoice`)
-    //   .replace('{}', invoice.Invoice_No);
-    // dialog.userId = this.getUserProfile().Usno;
-    // dialog.invoiceId = invoice.Inv_Mas_Sno;
-    // dialog.cancelledInvoice.asObservable().subscribe(() => {
-    //   this.requestGeneratedInvoice();
-    // });
-    // dialog.openDialog();
     let dialogRef = this.dialog.open(CancelGeneratedInvoiceComponent, {
       width: '800px',
       data: { invid: invoice.Inv_Mas_Sno },

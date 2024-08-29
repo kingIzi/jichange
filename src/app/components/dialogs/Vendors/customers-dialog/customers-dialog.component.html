@@ -79,9 +79,42 @@
           {{ t("mobileNo") }}
         </h6>
         <span class="relative">
-          <app-phone-number-input
+          <!-- <app-phone-number-input
             [mobileNumber]="Mobile_Number"
-          ></app-phone-number-input>
+          ></app-phone-number-input> -->
+          <mat-form-field
+            color="primary"
+            accent="secondary"
+            class="example-full-width w-full"
+            *transloco="let t; read: 'auth.forgotPassword'"
+          >
+            <span matTextPrefix>+255 &nbsp;</span>
+            <input
+              #phoneNumber
+              [formControl]="Mobile_Number"
+              type="tel"
+              matInput
+              placeholder="666 - 666 - 666"
+              (change)="
+                PerformanceUtils.setPhoneNumberFormControl(
+                  '+255',
+                  phoneNumber.value,
+                  Mobile_Number
+                )
+              "
+            />
+            <mat-error
+              *ngIf="
+                Mobile_Number && Mobile_Number.invalid && Mobile_Number.touched
+              "
+            >
+              @if (Mobile_Number.hasError('required')) {
+              {{ t("form.errors.email") }}
+              } @else if (Mobile_Number.hasError('pattern')) {
+              {{ t("form.errors.invalidPhone") }}
+              }
+            </mat-error>
+          </mat-form-field>
         </span>
       </div>
       <div
@@ -132,7 +165,6 @@
         *transloco="let t; read: 'actions'"
         (click)="submitCustomerForm(addCustomerDialog)"
         type="submit"
-        [disabled]="!customerForm.valid"
         form="control-number-form"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >

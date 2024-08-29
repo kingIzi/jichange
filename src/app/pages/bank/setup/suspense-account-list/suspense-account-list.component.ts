@@ -218,7 +218,6 @@ export class SuspenseAccountListComponent implements OnInit {
       let message = this.tr.translate(
         `setup.suspenseAccount.deletedAccountSuccessully`
       );
-      //let sal = AppUtilities.sweetAlertSuccessMessage(message);
       AppUtilities.showSuccessMessage(
         message,
         (e: MouseEvent) => {},
