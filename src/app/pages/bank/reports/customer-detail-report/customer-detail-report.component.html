@@ -7,7 +7,7 @@
   <div class="flex flex-row items-center justify-between">
     <h2
       *transloco="let t; read: 'reports.customerDetailReport'"
-      class="text-lg font-bold"
+      class="text-lg font-bold lg:text-2xl"
     >
       {{ t("customerDetailReport") }}
     </h2>
@@ -18,34 +18,27 @@
         <p *transloco="let t; read: 'forms'" class="text-xs">
           {{ t("branch") }}
         </p>
-        <select
-          [formControl]="branch"
-          class="select select-sm select-bordered w-full"
-        >
-          <option *transloco="let t; read: 'defaults'" selected [value]="'0'">
-            {{ t("all") }}
-          </option>
-          <ng-container *ngIf="filterFormData.branches.length > 0">
-            <option
-              *ngFor="
-                let branch of filterFormData.branches;
-                index as i;
-                trackBy: PerformanceUtils.trackByIndex
-              "
-              [value]="branch.Branch_Sno.toString()"
+        <mat-form-field *transloco="let t; read: 'reports.invoiceDetails.form'">
+          <mat-select [formControl]="branch" name="">
+            <mat-option
+              *transloco="let t; read: 'defaults'"
+              selected
+              [value]="0"
             >
-              {{ branch.Name }}
-            </option>
-          </ng-container>
-        </select>
-        <span *ngIf="branch && branch.invalid && branch.touched">
-          <p
-            *transloco="let t; read: 'forms.errors'"
-            class="text-danger-700 text-xs"
-          >
-            {{ t("branch") }}
-          </p>
-        </span>
+              {{ t("all") }}
+            </mat-option>
+            @for (branch of filterFormData.branches; track branch) {
+            <mat-option [value]="branch.Branch_Sno">{{
+              branch.Name
+            }}</mat-option>
+            }
+            <ng-container *transloco="let t; read: 'forms.errors'">
+              <mat-error *ngIf="branch && branch.invalid && branch.touched">
+                {{ t("branch") }}
+              </mat-error>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1">
         <p
@@ -54,37 +47,32 @@
         >
           {{ t("company") }}
         </p>
-        <select
-          [formControl]="Comp"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
-            *transloco="
-              let t;
-              read: 'reports.customerDetailReport.form.placeholders'
-            "
-            [value]="'0'"
-          >
-            {{ t("all") }}
-          </option>
-          <option
-            [value]="company.CompSno"
-            *ngFor="
-              let company of filterFormData.companies;
-              trackBy: PerformanceUtils.trackByIndex
-            "
-          >
-            {{ company.CompName }}
-          </option>
-        </select>
-        <span *ngIf="Comp && Comp.invalid && Comp.touched">
-          <p
-            *transloco="let t; read: 'reports.customerDetailReport.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("company") }}
-          </p>
-        </span>
+        <mat-form-field>
+          <mat-select [formControl]="Comp" name="">
+            <mat-option
+              *transloco="let t; read: 'defaults'"
+              selected
+              [value]="'0'"
+            >
+              {{ t("all") }}
+            </mat-option>
+            @for (company of filterFormData.companies; track company) {
+            <mat-option [value]="company.CompSno">{{
+              company.CompName
+            }}</mat-option>
+            }
+            <ng-container
+              *transloco="
+                let t;
+                read: 'reports.customerDetailReport.form.errors'
+              "
+            >
+              <mat-error *ngIf="branch && branch.invalid && branch.touched">
+                {{ t("company") }}
+              </mat-error>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button

@@ -50,10 +50,28 @@
     </h1>
     <div class="w-full grid grid-cols-2 gap-3 py-4">
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.districtDialog'" class="text-xs">
-          {{ t("district") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.districtDialog'"
+          class="text-xs text-black"
+        >
+          {{ t("district") }}
         </p>
-        <select
+        <mat-form-field *transloco="let t; read: 'setup.wardDialog.form'">
+          <mat-label>{{ t("placeholders.district") }}</mat-label>
+          <mat-select [formControl]="district_sno">
+            @for (district of districts; track district) {
+            <mat-option [value]="district.SNO">{{
+              district.District_Name
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error
+            *ngIf="district_sno && district_sno.invalid && district_sno.touched"
+          >
+            {{ t("errors.selectDistrict") }}</mat-error
+          >
+        </mat-form-field>
+        <!-- <select
           [formControl]="district_sno"
           class="select select-sm select-bordered w-full"
         >
@@ -84,16 +102,30 @@
           >
             {{ t("selectDistrict") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'setup.wardDialog'"
-          class="text-left text-xs"
+          class="text-left text-xs text-black"
         >
-          {{ t("ward") }}<span class="text-red-600">*</span>
+          {{ t("ward") }}
         </h6>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.wardDialog.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.name") }}</mat-label>
+          <input matInput [formControl]="ward_name" />
+          <mat-error
+            *ngIf="ward_name && ward_name.invalid && ward_name.touched"
+          >
+            <ng-container>
+              {{ t("errors.missingWard") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.wardDialog.form.placeholders'"
           #controlNumber
           [formControl]="ward_name"
@@ -108,11 +140,11 @@
           >
             {{ t("missingWard") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col w-full">
-        <p *transloco="let t; read: 'defaults'" class="text-xs">
-          {{ t("status") }}<span class="text-red-600">*</span>
+        <p *transloco="let t; read: 'defaults'" class="text-xs text-black">
+          {{ t("status") }}
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -173,7 +205,6 @@
         (click)="submitWardForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!wardForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

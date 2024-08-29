@@ -35,6 +35,12 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { AddWardForm } from 'src/app/core/models/bank/forms/setup/ward/AddWardForm';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-ward-dialog',
@@ -48,6 +54,12 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -213,7 +225,11 @@ export class WardDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      AppUtilities.showSuccessMessage(
+        successMessage,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
+      );
       this.addedWard.emit(result.response as Ward);
     }
   }

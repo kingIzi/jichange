@@ -13,7 +13,7 @@
   </div>
 </div> -->
 
-<div class="h-screen w-screen overflow-hidden bg-jichangeDefault flex flex-col">
+<div class="h-screen w-screen overflow-hidden flex flex-col">
   <div
     [@opacityFadeTrigger]="prepareRoute(outlet, 'animationState')"
     class="h-full w-full relative flex-1"
@@ -21,6 +21,6 @@
     <router-outlet #outlet="outlet"></router-outlet>
   </div>
   <div class="flex-none">
-    <app-footer></app-footer>
+    <!-- <app-footer></app-footer> -->
   </div>
 </div>

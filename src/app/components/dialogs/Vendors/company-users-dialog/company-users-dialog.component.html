@@ -48,131 +48,124 @@
     <div class="grid grid-cols-2 w-full py-8 gap-3">
       <div class="flex flex-col space-y-1">
         <p *transloco="let t; read: 'company.companyUsersForm'" class="text-xs">
-          {{ t("role") }}<span class="text-red-600">*</span>
+          {{ t("role") }}
         </p>
-        <select
-          [formControl]="pos"
-          class="select select-sm select-bordered w-full"
-        >
-          <option
+        <mat-form-field>
+          <mat-label
             *transloco="let t; read: 'company.companyUsersForm.placeholder'"
-            disabled
-            selected
-            [value]="t('role')"
+            >{{ t("role") }}</mat-label
           >
-            {{ t("role") }}
-          </option>
-          <option
-            *ngFor="
-              let roleAct of roleActs;
-              index as i;
-              trackBy: PerformanceUtils.trackByIndex
-            "
-            [value]="roleAct.Sno"
-          >
-            {{ roleAct.Description }}
-          </option>
-        </select>
-        <span *ngIf="pos && pos.invalid && pos.touched">
-          <p
-            *transloco="let t; read: 'company.companyUsersForm.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("role") }}
-          </p>
-        </span>
+          <mat-select [formControl]="pos">
+            @for (roleAct of roleActs; track roleAct) {
+            <mat-option [value]="roleAct.Sno">{{
+              roleAct.Description
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="pos && pos.invalid && pos.touched">
+            <ng-container
+              *transloco="let t; read: 'company.companyUsersForm.errors'"
+            >
+              {{ t("role") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'company.companyUsersForm'"
           class="text-left text-xs"
         >
-          {{ t("username") }} <span class="text-red-600">*</span>
+          {{ t("username") }}
         </h6>
-        <input
-          *transloco="let t; read: 'company.companyUsersForm.placeholder'"
-          #usernameInput
-          [formControl]="auname"
-          (change)="setControlValue(auname, usernameInput.value)"
-          type="text"
-          [placeholder]="t('username')"
-          class="input input-sm input-bordered w-full bg-transparent text-black"
-        />
-        <span *ngIf="auname && auname.invalid && auname.touched">
-          <p
-            *transloco="let t; read: 'company.companyUsersForm.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("username") }}
-          </p>
-        </span>
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+        >
+          <input
+            *transloco="let t; read: 'company.companyUsersForm.placeholder'"
+            matInput
+            value=""
+            type="text"
+            [formControl]="auname"
+            [placeholder]="t('username')"
+          />
+          <mat-error *ngIf="auname && auname.invalid && auname.touched">
+            <ng-container
+              *transloco="let t; read: 'company.companyUsersForm.errors'"
+            >
+              {{ t("username") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'company.companyUsersForm'"
           class="text-left text-xs"
         >
-          {{ t("fullName") }} <span class="text-red-600">*</span>
+          {{ t("fullName") }}
         </h6>
-        <input
-          *transloco="let t; read: 'company.companyUsersForm.placeholder'"
-          #usernameInput
-          [formControl]="uname"
-          (change)="setControlValue(uname, usernameInput.value)"
-          type="text"
-          [placeholder]="t('fullName')"
-          class="input input-sm input-bordered w-full bg-transparent text-black"
-        />
-        <span *ngIf="uname && uname.invalid && uname.touched">
-          <p
-            *transloco="let t; read: 'company.companyUsersForm.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("fullName") }}
-          </p>
-        </span>
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+        >
+          <input
+            *transloco="let t; read: 'company.companyUsersForm.placeholder'"
+            matInput
+            value=""
+            type="text"
+            [formControl]="uname"
+            [placeholder]="t('fullName')"
+          />
+          <mat-error *ngIf="uname && uname.invalid && uname.touched">
+            <ng-container
+              *transloco="let t; read: 'company.companyUsersForm.errors'"
+            >
+              {{ t("fullName") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'company.companyUsersForm'"
           class="text-left text-xs"
         >
-          {{ t("mobileNo") }} <span class="text-red-600">*</span>
+          {{ t("mobileNo") }}
         </h6>
         <app-phone-number-input [mobileNumber]="mob"></app-phone-number-input>
-        <span *ngIf="mob && mob.invalid && mob.touched">
-          <p
-            *transloco="let t; read: 'company.companyUsersForm.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("mobileNo") }}
-          </p>
-        </span>
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'company.companyUsersForm'"
           class="text-left text-xs"
         >
-          {{ t("emailId") }}<span class="text-red-600">*</span>
+          {{ t("emailId") }}
         </h6>
-        <input
-          *transloco="let t; read: 'company.companyUsersForm.placeholder'"
-          #emailInput
-          [formControl]="mail"
-          (change)="setControlValue(mail, emailInput.value)"
-          type="email"
-          [placeholder]="t('emailId')"
-          class="input input-sm font-inter input-bordered w-full bg-transparent text-black"
-        />
-        <span *ngIf="mail && mail.invalid && mail.touched">
-          <p
-            *transloco="let t; read: 'company.companyUsersForm.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("emailId") }}
-          </p>
-        </span>
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+        >
+          <input
+            *transloco="let t; read: 'company.companyUsersForm.placeholder'"
+            matInput
+            value=""
+            type="text"
+            [formControl]="mail"
+            [placeholder]="t('emailId')"
+          />
+          <mat-error *ngIf="mail && mail.invalid && mail.touched">
+            <ng-container
+              *transloco="let t; read: 'company.companyUsersForm.errors'"
+            >
+              {{ t("emailId") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
     </div>
     <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">

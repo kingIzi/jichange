@@ -1,0 +1,166 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+<ng-container *transloco="let t">
+  <app-optional-confirm-message-box
+    [title]="
+      data
+        ? t('setup.smsSettings.modifySmsSettings')
+        : t('setup.smsSettings.addSmsSettings')
+    "
+    [message]="t('setup.smsSettings.sureAddSmsSetting')"
+    [confirmText]="t('defaults.confirm')"
+    #insertConfirmMessageBox
+  ></app-optional-confirm-message-box>
+</ng-container>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    [formGroup]="formGroup"
+    id="sms-settings-form"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'setup.smsSettings'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("title") }}
+    </h1>
+    <div class="w-full grid grid-cols-2 py-8 gap-3">
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          *transloco="let t; read: 'setup.smsSettings.form'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("username") }}
+        </h6>
+        <mat-form-field class="example-full-width">
+          <input
+            *transloco="let t; read: 'setup.smsSettings.form.placeholders'"
+            matInput
+            [placeholder]="t('username')"
+            [formControl]="smtp_uname"
+          />
+          <mat-error
+            *ngIf="smtp_uname && smtp_uname.invalid && smtp_uname.touched"
+          >
+            <ng-container
+              *transloco="let t; read: 'setup.smsSettings.form.errors'"
+            >
+              {{ t("username") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          class="text-left text-xs text-black"
+          *transloco="let t; read: 'setup.smsSettings.form'"
+        >
+          {{ t("fromAddress") }}
+        </h6>
+        <mat-form-field class="example-full-width">
+          <input
+            *transloco="let t; read: 'setup.smsSettings.form.placeholders'"
+            matInput
+            [formControl]="from_address"
+            [placeholder]="t('fromAddress')"
+          />
+          <mat-error
+            *ngIf="from_address && from_address.invalid && from_address.touched"
+          >
+            <ng-container
+              *transloco="let t; read: 'setup.smsSettings.form.errors'"
+            >
+              {{ t("fromAddress") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          class="text-left text-xs text-black"
+          *transloco="let t; read: 'setup.smsSettings.form'"
+        >
+          {{ t("phone") }}
+        </h6>
+        <!-- <app-phone-number-input
+          [mobileNumber]="smtp_mob"
+        ></app-phone-number-input> -->
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width w-full"
+          *transloco="let t; read: 'auth.forgotPassword'"
+        >
+          <span class="hidden" matTextPrefix>+255 &nbsp;</span>
+          <input
+            #phoneNumber
+            [formControl]="smtp_mob"
+            type="tel"
+            matInput
+            placeholder="666 - 666 - 666"
+            (change)="
+              PerformanceUtils.setPhoneNumberFormControl(
+                '+255',
+                phoneNumber.value,
+                smtp_mob
+              )
+            "
+          />
+          <mat-error *ngIf="smtp_mob && smtp_mob.invalid && smtp_mob.touched">
+            @if (smtp_mob.hasError('required')) {
+            {{ t("form.errors.email") }}
+            } @else if (smtp_mob.hasError('pattern')) {
+            {{ t("form.errors.invalidPhone") }}
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6
+          class="text-left text-xs text-black"
+          *transloco="let t; read: 'setup.smsSettings.form'"
+        >
+          {{ t("password") }}
+        </h6>
+        <mat-form-field class="example-full-width">
+          <input
+            *transloco="let t; read: 'setup.smsSettings.form.placeholders'"
+            matInput
+            [placeholder]="t('password')"
+            type="password"
+            [formControl]="smtp_pwd"
+          />
+          <mat-error *ngIf="smtp_pwd && smtp_pwd.invalid && smtp_pwd.touched">
+            <ng-container
+              *transloco="let t; read: 'setup.smsSettings.form.errors'"
+            >
+              {{ t("password") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        (click)="closeDialog()"
+        *transloco="let t; read: 'actions'"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        type="button"
+        form="sms-settings-form"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+        (click)="submitSmsSetting()"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

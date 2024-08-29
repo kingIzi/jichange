@@ -177,8 +177,11 @@ export class SmtpListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let m = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.smtp.deletedSmtp`)
+      let successMessage = this.tr.translate(`setup.smtp.deletedSmtp`);
+      AppUtilities.showSuccessMessage(
+        successMessage,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -320,7 +323,7 @@ export class SmtpListComponent implements OnInit {
   }
   openSmtpForm() {
     let dialogRef = this.dialog.open(SmtpDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         smtp: null,
@@ -333,7 +336,7 @@ export class SmtpListComponent implements OnInit {
   }
   openEditSmtpForm(smtp: SMTP) {
     let dialogRef = this.dialog.open(SmtpDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         smtp: smtp,

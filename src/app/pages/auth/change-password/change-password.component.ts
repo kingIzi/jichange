@@ -16,6 +16,10 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
@@ -23,6 +27,7 @@ import {
   TranslocoService,
 } from '@ngneat/transloco';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { LoginService } from 'src/app/core/services/login.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
@@ -38,6 +43,10 @@ import { AppUtilities } from 'src/app/utilities/app-utilities';
     PhoneNumberInputComponent,
     LoaderInfiniteSpinnerComponent,
     DisplayMessageBoxComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss',
@@ -86,24 +95,37 @@ export class ChangePasswordComponent implements OnInit {
   private parseMobileNumber() {
     this.mobileNumber = sessionStorage.getItem('otpMobileNumber') as string;
   }
+  private changePasswordResponse(result: HttpDataResponse<string | number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`auth.changePassword.failedToUpdatePassword`)
+      );
+    } else {
+      this.router.navigate(['/auth']);
+    }
+  }
   private requestChangePassword(body: { mobile: string; password: string }) {
     this.startLoading = true;
     this.loginService
       .forgotPasswordChangePasswordLink(body)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          typeof result.message === 'string' &&
-          result.message.toLocaleLowerCase() === 'Success'.toLocaleLowerCase()
-        ) {
-          this.router.navigate(['/auth']);
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`auth.changePassword.failedToUpdatePassword`)
-          );
-        }
+        // if (
+        //   typeof result.response === 'string' &&
+        //   typeof result.message === 'string' &&
+        //   result.message.toLocaleLowerCase() === 'Success'.toLocaleLowerCase()
+        // ) {
+        //   this.router.navigate(['/auth']);
+        // } else {
+        //   AppUtilities.openDisplayMessageBox(
+        //     this.displayMessageBox,
+        //     this.tr.translate(`defaults.failed`),
+        //     this.tr.translate(`auth.changePassword.failedToUpdatePassword`)
+        //   );
+        // }
+        this.changePasswordResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })

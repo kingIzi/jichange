@@ -7,7 +7,7 @@
   <div class="flex flex-row items-center justify-between">
     <h2
       *transloco="let t; read: 'reports.vendorReport'"
-      class="text-lg font-bold"
+      class="text-lg font-bold lg:text-2xl"
     >
       {{ t("vendorReport") }}
     </h2>
@@ -18,7 +18,7 @@
         <p *transloco="let t; read: 'forms'" class="text-xs">
           {{ t("branch") }}
         </p>
-        <select
+        <!-- <select
           [formControl]="branch"
           class="select select-sm select-bordered w-full"
         >
@@ -45,7 +45,28 @@
           >
             {{ t("branch") }}
           </p>
-        </span>
+        </span> -->
+        <mat-form-field *transloco="let t; read: 'reports.invoiceDetails.form'">
+          <mat-select [formControl]="branch" name="">
+            <mat-option
+              *transloco="let t; read: 'defaults'"
+              selected
+              [value]="0"
+            >
+              {{ t("all") }}
+            </mat-option>
+            @for (branch of filterFormData.branches; track branch) {
+            <mat-option [value]="branch.Branch_Sno">{{
+              branch.Name
+            }}</mat-option>
+            }
+            <ng-container *transloco="let t; read: 'forms.errors'">
+              <mat-error *ngIf="branch && branch.invalid && branch.touched">
+                {{ t("branch") }}
+              </mat-error>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button

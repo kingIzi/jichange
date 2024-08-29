@@ -109,7 +109,8 @@
         "tinNo": "Ingiza nambari ya TIN",
         "vatNo": "Ingiza nambari ya VAT",
         "directorName": "Ingiza jina la mkurugenzi",
-        "emailId": "Ingiza anwani ya barua pepe"
+        "emailId": "Ingiza anwani ya barua pepe",
+        "accountNumber": "Ingiza namba ya akaunti"
       },
       "errors": {
         "customer": "Tafadhali ingiza jina la kampuni",
@@ -162,6 +163,7 @@
     "vendor": "Muuzaji",
     "mobile": "Simu",
     "account": "Akaunti",
+    "pending": "Inasubiri",
     "form": {
       "pleaseSelect": "Tafadhali chagua bwawa",
       "suspense": "Akaunti ya Kutungwa",

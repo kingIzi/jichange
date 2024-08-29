@@ -215,8 +215,13 @@ export class WardListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate('setup.wardDialog.deletedWardSuccessfully')
+      let message = this.tr.translate(
+        'setup.wardDialog.deletedWardSuccessfully'
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -304,7 +309,7 @@ export class WardListComponent implements OnInit {
   }
   openWardForm() {
     let dialogRef = this.dialog.open(WardDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         ward: null,
@@ -317,7 +322,7 @@ export class WardListComponent implements OnInit {
   }
   openEditWardForm(ward: Ward) {
     let dialogRef = this.dialog.open(WardDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         ward: ward,

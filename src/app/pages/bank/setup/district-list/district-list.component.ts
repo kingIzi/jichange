@@ -218,8 +218,13 @@ export class DistrictListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate('setup.districtDialog.deletedDistrictSuccessfully')
+      let message = this.tr.translate(
+        'setup.districtDialog.deletedDistrictSuccessfully'
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -307,7 +312,7 @@ export class DistrictListComponent implements OnInit {
   }
   openDistrictForm() {
     let dialogRef = this.dialog.open(DistrictDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         district: null,
@@ -322,7 +327,7 @@ export class DistrictListComponent implements OnInit {
   }
   openEditDistrictDialog(district: District) {
     let dialogRef = this.dialog.open(DistrictDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         district: district,

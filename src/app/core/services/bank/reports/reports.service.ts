@@ -12,6 +12,7 @@ import { UserLog } from 'src/app/core/models/bank/reports/user-log';
 import { InvoiceConsolidatedReport } from 'src/app/core/models/bank/reports/invoice-consolidated-report';
 import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-details-form';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Injectable({
   providedIn: 'root',
@@ -104,11 +105,11 @@ export class ReportsService {
     return data;
   }
   public async getTransactionsReport(
-    body: TransactionDetailsReportForm | InvoiceReportForm
+    body: TransactionDetailsReportForm | InvoiceReportForm | InvoiceDetailsForm
   ) {
     let data = await lastValueFrom(
       this.client.performPost<
-        TransactionDetailsReportForm | InvoiceReportForm,
+        TransactionDetailsReportForm | InvoiceReportForm | InvoiceDetailsForm,
         HttpDataResponse<TransactionDetail[] | number | string>
       >(`/api/Invoice/GetchTransact_B`, body)
     );

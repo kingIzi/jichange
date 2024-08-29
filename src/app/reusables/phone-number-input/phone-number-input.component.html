@@ -1,29 +1,47 @@
-<div class="relative">
-  <select
-    #phonePrefix
-    [class]="inputSize ? 'select-' + inputSize : ''"
-    class="select select-bordered select-disabled w-20 absolute"
-  >
-    <option
-      *ngFor="
-        let prefix of prefixes;
-        index as ind;
-        trackBy: PerformanceUtils.trackByIndex
-      "
-      selected
-      class="font-inter text-xs"
-      [value]="prefix"
-    >
-      +{{ prefix }}
-    </option>
-  </select>
+<mat-form-field
+  color="primary"
+  accent="secondary"
+  class="example-full-width w-full"
+  *transloco="let t; read: 'auth.forgotPassword'"
+>
+  <span matTextPrefix>+255 &nbsp;</span>
   <input
+    #mobileNumber
+    [formControl]="mobileView"
     type="tel"
-    placeholder="(0) 111-000-333"
-    [formControl]="mobileNumber"
-    (change)="setControl(input.value, phonePrefix.value)"
-    #input
-    [class]="inputSize ? 'input-' + inputSize : ''"
-    class="input input-bordered w-full pl-[5.2rem] bg-transparent text-black font-inter"
+    matInput
+    placeholder="666 - 666 - 666"
+    (keyup)="formatToMobileNumber($event)"
   />
-</div>
+  <mat-error *ngIf="mobileView && mobileView.invalid && mobileView.touched">
+    @if (mobileView.hasError('required')) {
+    {{ t("form.errors.email") }}
+    } @else if (mobileView.hasError('pattern')) {
+    {{ t("form.errors.invalidPhone") }}
+    }
+  </mat-error>
+</mat-form-field>
+
+<!-- <mat-form-field
+  color="primary"
+  accent="secondary"
+  class="example-full-width w-full"
+  *transloco="let t; read: 'auth.forgotPassword'"
+>
+  <span matTextPrefix>+255 &nbsp;</span>
+  <input
+    [formControl]="mobileNumber"
+    type="tel"
+    matInput
+    placeholder="666-666-666 (9 digits)"
+  />
+  <mat-error
+    *ngIf="mobileNumber && mobileNumber.invalid && mobileNumber.touched"
+  >
+    @if (mobileNumber.hasError('required')) {
+    {{ t("form.errors.email") }}
+    } @else if (mobileNumber.hasError('pattern')) {
+    {{ t("form.errors.invalidPhone") }}
+    }
+  </mat-error>
+</mat-form-field> -->

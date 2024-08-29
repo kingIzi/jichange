@@ -80,7 +80,7 @@
       class="bg-neutral-50 p-2 shadow rounded flex flex-col h-full w-full lg:max-h-72"
     >
       <ul
-        *ngIf="inboxApprovals.length > 0"
+        *ngIf="inboxApprovals.length > 0; else noApprovalsFound"
         id="inbox-approval"
         class="flex flex-col space-y-0 overflow-y-auto max-h-fit"
       >
@@ -112,6 +112,16 @@
           </a>
         </li>
       </ul>
+      <ng-template #noApprovalsFound>
+        <div
+          class="w-full h-full col-span-full row-span-12 bg-neutral-50 grid place-items-center shadow"
+          *transloco="let t; read: 'errors'"
+        >
+          <p class="text-center text-sm tracking-wide pt-3 pb-1">
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </ng-template>
       <button
         *transloco="let t; read: 'defaults'"
         class="btn btn-active text-primary btn-md mt-auto"

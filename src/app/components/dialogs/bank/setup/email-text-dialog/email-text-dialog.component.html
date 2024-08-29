@@ -50,10 +50,26 @@
     </h1>
     <div action="" class="grid grid-cols-2 gap-3 w-full py-8">
       <div class="flex flex-col space-y-1 col-span-full">
-        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
-          {{ t("flowId") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="text-xs text-black"
+        >
+          {{ t("flowId") }}
         </p>
-        <select
+        <mat-form-field *transloco="let t; read: 'setup.emailText.form'">
+          <mat-label>{{ t("placeholders.flowId") }}</mat-label>
+          <mat-select [formControl]="flow">
+            @for (flow_number of flows; track flow_number) {
+            <mat-option [value]="flow_number.flow">{{
+              flow_number.label
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="flow && flow.invalid && flow.touched">
+            {{ t("errors.flowId") }}</mat-error
+          >
+        </mat-form-field>
+        <!-- <select
           [formControl]="flow"
           class="select select-sm select-bordered w-1/2"
         >
@@ -82,13 +98,16 @@
           >
             {{ t("flowId") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
-          {{ t("subjectEnglish") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="text-xs text-black"
+        >
+          {{ t("subjectEnglish") }}
         </p>
-        <input
+        <!-- <input
           *transloco="let t; read: 'setup.emailText.form.placeholders'"
           type="email"
           [placeholder]="t('subjectEnglish')"
@@ -103,13 +122,41 @@
           >
             {{ t("subjectEnglish") }}
           </p>
-        </span>
+        </span> -->
+        <mat-form-field
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.subjectEnglish") }}</mat-label>
+          <input matInput [formControl]="sub" />
+          <mat-error *ngIf="sub && sub.invalid && sub.touched">
+            <ng-container>
+              {{ t("errors.subjectEnglish") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
+        <p
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="text-xs text-black"
+        >
           {{ t("subjectSwahili") }}
         </p>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.subjectSwahili") }}</mat-label>
+
+          <input matInput [formControl]="subloc" />
+          <mat-error *ngIf="subloc && subloc.invalid && subloc.touched">
+            <ng-container>
+              {{ t("errors.subjectSwahili") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.emailText.form.placeholders'"
           type="email"
           [placeholder]="t('subjectSwahili')"
@@ -124,13 +171,28 @@
           >
             {{ t("subjectSwahili") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col col-span-full lg:col-span-1 space-y-1">
-        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
-          {{ t("emailText") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="text-xs text-black"
+        >
+          {{ t("emailText") }}
         </p>
-        <textarea
+        <mat-form-field
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="example-full-width !h-36"
+        >
+          <mat-label>{{ t("placeholders.emailText") }}</mat-label>
+          <textarea [formControl]="text" matInput></textarea>
+          <mat-error *ngIf="text && text.invalid && text.touched">
+            <ng-container>
+              {{ t("errors.emailText") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <textarea
           *transloco="let t; read: 'setup.emailText.form.placeholders'"
           [formControl]="text"
           [placeholder]="t('emailText')"
@@ -147,13 +209,28 @@
           >
             {{ t("emailText") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col col-span-full lg:col-span-1 space-y-1">
-        <p *transloco="let t; read: 'setup.emailText.form'" class="text-xs">
-          {{ t("emailSwahili") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="text-xs text-black"
+        >
+          {{ t("emailSwahili") }}
         </p>
-        <textarea
+        <mat-form-field
+          *transloco="let t; read: 'setup.emailText.form'"
+          class="example-full-width !h-36"
+        >
+          <mat-label>{{ t("placeholders.emailSwahili") }}</mat-label>
+          <textarea [formControl]="loctext" matInput></textarea>
+          <mat-error *ngIf="loctext && loctext.invalid && loctext.touched">
+            <ng-container>
+              {{ t("errors.emailSwahili") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <textarea
           *transloco="let t; read: 'setup.emailText.form.placeholders'"
           [formControl]="loctext"
           [placeholder]="t('emailSwahili')"
@@ -170,7 +247,7 @@
           >
             {{ t("emailSwahili") }}
           </p>
-        </span>
+        </span> -->
       </div>
     </div>
     <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
@@ -187,7 +264,6 @@
         (click)="submitEmailTextForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!emailTextForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

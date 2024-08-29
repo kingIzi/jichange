@@ -218,7 +218,12 @@ export class SuspenseAccountListComponent implements OnInit {
       let message = this.tr.translate(
         `setup.suspenseAccount.deletedAccountSuccessully`
       );
-      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      //let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
+      );
       let index = this.tableDataService
         .getDataSource()
         .data.findIndex((item) => item.Sus_Acc_Sno === result.response);
@@ -301,7 +306,7 @@ export class SuspenseAccountListComponent implements OnInit {
   }
   openAddSuspenseAccountDialog() {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         suspenseAccount: null,
@@ -316,7 +321,7 @@ export class SuspenseAccountListComponent implements OnInit {
   }
   openEditSuspenseAccountDialog(suspenseAccount: SuspenseAccount) {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         suspenseAccount: suspenseAccount,

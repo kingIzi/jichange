@@ -4,12 +4,13 @@
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between w-full">
-    <h2 *transloco="let t; read: 'company.summary'" class="text-lg font-bold">
+    <h2
+      *transloco="let t; read: 'company.summary'"
+      class="text-lg lg:text-2xl font-bold"
+    >
       {{ t("name") }}
     </h2>
     <div class="flex flex-row items-center space-x-2">
-      <!-- [routerLink]="'/main/company/summary/add'" -->
-
       <button
         [routerLink]="'/main/company/summary/add'"
         class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"

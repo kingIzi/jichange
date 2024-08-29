@@ -232,8 +232,11 @@ export class EmailTextListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.emailText.deletedEmailText`)
+      let message = this.tr.translate(`setup.emailText.deletedEmailText`);
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -343,7 +346,7 @@ export class EmailTextListComponent implements OnInit {
   }
   openEmailTextForm() {
     let dialogRef = this.dialog.open(EmailTextDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         emailText: null,
@@ -358,7 +361,7 @@ export class EmailTextListComponent implements OnInit {
   }
   openEditEmailTextForm(emailText: EmailText) {
     let dialogRef = this.dialog.open(EmailTextDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         emailText: emailText,

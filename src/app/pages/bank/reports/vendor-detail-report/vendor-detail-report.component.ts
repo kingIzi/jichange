@@ -54,6 +54,13 @@ import {
   MatTableExporterModule,
 } from 'mat-table-exporter';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-vendor-detail-report',
@@ -71,6 +78,13 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatTableModule,
     MatSortModule,
     MatTableExporterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   providers: [
     {

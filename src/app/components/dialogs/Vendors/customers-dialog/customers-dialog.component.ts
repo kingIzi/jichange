@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
   EventEmitter,
   Inject,
   OnInit,
@@ -35,6 +37,12 @@ import { AddCustomerForm } from 'src/app/core/models/vendors/forms/add-customer-
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { OptionalConfirmMessageBoxComponent } from '../../optional-confirm-message-box/optional-confirm-message-box.component';
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-customers-dialog',
@@ -50,6 +58,11 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
     SubmitMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
     PhoneNumberInputComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    OptionalConfirmMessageBoxComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -59,7 +72,7 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
     },
   ],
 })
-export class CustomersDialogComponent implements OnInit {
+export class CustomersDialogComponent implements OnInit, AfterViewInit {
   public startLoading: boolean = false;
   public customerForm!: FormGroup;
   public addedCustomer = new EventEmitter<Customer>();
@@ -68,6 +81,8 @@ export class CustomersDialogComponent implements OnInit {
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
   @ViewChild('submitMessagBox') submitMessagBox!: SubmitMessageBoxComponent;
+  @ViewChild('optionalConfirmMessageBox')
+  optionalConfirmMessageBox!: OptionalConfirmMessageBoxComponent;
   constructor(
     private appConfig: AppConfigService,
     private fb: FormBuilder,
@@ -76,7 +91,8 @@ export class CustomersDialogComponent implements OnInit {
     private customerService: CustomerService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    @Inject(MAT_DIALOG_DATA) public data: Customer
+    @Inject(MAT_DIALOG_DATA)
+    public data: { customer: Customer; allowAttachInvoice: boolean }
   ) {}
   private formErrors(errorsPath: string = 'customer.form.dialog') {
     if (this.CName.invalid) {
@@ -106,7 +122,7 @@ export class CustomersDialogComponent implements OnInit {
       compid: this.fb.control(this.getUserProfile().InstID, []),
       userid: this.fb.control(this.getUserProfile().Usno, []),
       CSno: this.fb.control(0, []),
-      CName: this.fb.control('', []),
+      CName: this.fb.control('', [Validators.required]),
       PostboxNo: this.fb.control('', []),
       Address: this.fb.control('', []),
       regid: this.fb.control(0, []),
@@ -116,10 +132,7 @@ export class CustomersDialogComponent implements OnInit {
       VatNo: this.fb.control('', []),
       CoPerson: this.fb.control('', []),
       Mail: this.fb.control('', [Validators.email]),
-      Mobile_Number: this.fb.control('', [
-        //Validators.required,
-        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
-      ]),
+      Mobile_Number: this.fb.control('', [Validators.required]),
       dummy: this.fb.control(true, []),
       check_status: this.fb.control(''),
     });
@@ -128,8 +141,10 @@ export class CustomersDialogComponent implements OnInit {
     this.customerForm = this.fb.group({
       compid: this.fb.control(this.getUserProfile().InstID, []),
       userid: this.fb.control(this.getUserProfile().Usno, []),
-      CSno: this.fb.control(this.data.Cust_Sno, []),
-      CName: this.fb.control(this.data.Cust_Name, [Validators.required]),
+      CSno: this.fb.control(this.data.customer.Cust_Sno, []),
+      CName: this.fb.control(this.data.customer.Cust_Name, [
+        Validators.required,
+      ]),
       PostboxNo: this.fb.control('', []),
       Address: this.fb.control('', []),
       regid: this.fb.control(0, []),
@@ -138,8 +153,8 @@ export class CustomersDialogComponent implements OnInit {
       Tinno: this.fb.control('', []),
       VatNo: this.fb.control('', []),
       CoPerson: this.fb.control('', []),
-      Mail: this.fb.control(this.data.Email, [Validators.email]),
-      Mobile_Number: this.fb.control(this.data.Phone, [
+      Mail: this.fb.control(this.data.customer.Email, [Validators.email]),
+      Mobile_Number: this.fb.control(this.data.customer.Phone, [
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
@@ -188,20 +203,38 @@ export class CustomersDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(successMessage);
+      AppUtilities.showSuccessMessage(
+        successMessage,
+        () => {},
+        this.tr.translate('actions.ok')
+      );
       this.addedCustomer.emit(result.response as Customer);
     }
   }
-  private requestAddCustomer(body: AddCustomerForm, successMessage: string) {
+  private routeToAddInvoice(customerId: number) {
+    let link = `/vendor/customers/${customerId}/add/add`;
+    this.router.navigate([link], {
+      queryParams: { customerId: btoa(customerId.toString()) },
+    });
+  }
+  private requestAddCustomerAttachedToInvoice(
+    body: AddCustomerForm,
+    successMessage: string
+  ) {
     this.startLoading = true;
-    this.customerService
-      .addCustomer(body)
-      .then((result) => {
+    let addedCustomer = from(this.customerService.addCustomer(body));
+    addedCustomer.subscribe({
+      next: (result) => {
         this.parseAddCustomerResponse(result, successMessage);
+        let isErrorResult = AppUtilities.hasErrorResult(result);
+        if (!isErrorResult) {
+          let customer = result.response as Customer;
+          this.routeToAddInvoice(customer.Cust_Sno);
+        }
         this.startLoading = false;
         this.cdr.detectChanges();
-      })
-      .catch((err) => {
+      },
+      error: (err) => {
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
@@ -209,14 +242,72 @@ export class CustomersDialogComponent implements OnInit {
         );
         this.startLoading = false;
         this.cdr.detectChanges();
-      });
+        throw err;
+      },
+    });
+  }
+  private requestAddCustomer(body: AddCustomerForm, successMessage: string) {
+    this.startLoading = true;
+    let addedCustomer = from(this.customerService.addCustomer(body));
+    addedCustomer.subscribe({
+      next: (result) => {
+        this.parseAddCustomerResponse(result, successMessage);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      },
+    });
+  }
+  private confirmAddModifyCustomerDialog() {
+    if (this?.data?.customer) {
+      this.optionalConfirmMessageBox.modify();
+    } else if (!this?.data?.customer && !this?.data?.allowAttachInvoice) {
+      this.optionalConfirmMessageBox.create(false);
+    } else if (!this?.data?.customer) {
+      this.optionalConfirmMessageBox.create(true);
+    }
+  }
+  private optionalConfirmMessageBoxEventHandler() {
+    this.optionalConfirmMessageBox.optionalChoice.asObservable().subscribe({
+      next: () => {
+        //this.addCustomer();
+        let message = this.tr.translate(`customer.addedCustomerSuccessfully`);
+        this.requestAddCustomerAttachedToInvoice(
+          this.customerForm.value,
+          message
+        );
+      },
+      error: (err) => {
+        throw err;
+      },
+    });
+    this.optionalConfirmMessageBox.defaultChoice.asObservable().subscribe({
+      next: () => {
+        this.addCustomer();
+      },
+      error: (err) => {
+        throw err;
+      },
+    });
   }
   ngOnInit(): void {
-    if (this.data) {
+    if (this?.data?.customer) {
       this.createEditForm();
     } else {
       this.createForm();
     }
+  }
+  ngAfterViewInit(): void {
+    this.optionalConfirmMessageBoxEventHandler();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;
@@ -231,8 +322,9 @@ export class CustomersDialogComponent implements OnInit {
     AppUtilities.mobileNumberFormat(prefix, control);
   }
   submitCustomerForm(dialog: HTMLDialogElement) {
+    this.confirmAddModifyCustomerDialog();
     if (this.customerForm.valid) {
-      dialog.showModal();
+      this.optionalConfirmMessageBox.openDialog();
     } else {
       this.customerForm.markAllAsTouched();
     }

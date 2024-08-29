@@ -241,7 +241,7 @@ export class BankUserListComponent implements OnInit {
     AppUtilities.showSuccessMessage(
       message,
       (e: MouseEvent) => {},
-      this.tr.translate('actions.close')
+      this.tr.translate('actions.ok')
     );
     let index = this.tableDataService
       .getDataSource()
@@ -345,7 +345,8 @@ export class BankUserListComponent implements OnInit {
   }
   openBankUserForm() {
     let dialogRef = this.dialog.open(BankUserDialogComponent, {
-      width: '600px',
+      width: '800px',
+      maxHeight: '600px',
       disableClose: true,
       data: {
         Detail_Id: null,
@@ -360,7 +361,8 @@ export class BankUserListComponent implements OnInit {
   }
   openEditBankUserForm(employeeDetail: EmployeeDetail) {
     let dialogRef = this.dialog.open(BankUserDialogComponent, {
-      width: '600px',
+      width: '800px',
+      maxHeight: '600px',
       disableClose: true,
       data: {
         Detail_Id: employeeDetail.Detail_Id,

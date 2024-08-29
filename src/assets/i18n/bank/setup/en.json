@@ -277,7 +277,7 @@
         "failed": "Failed",
         "missingDesignation": "Please provide a designation name",
         "removeDesignation": "Remove designation",
-        "sureDelete": "Are you sure you want to delete this?",
+        "sureDelete": "Are you sure you want to delete the '{}' designation?",
         "removedSuccessfully": "Designation deleted successfully!",
         "addedSuccessfully": "Designation added successfully!",
         "modifiedSuccessfully": "Designation modified successfully!",
@@ -601,7 +601,9 @@
         "branch": "Please provide a branch",
         "emailId": "Please provide a email Id",
         "mobileNo": "Please provide a mobile number",
-        "status": "Please specify a status"
+        "status": "Please specify a status",
+        "usernameExists": "The username you provided already exists.",
+        "employeeIdExists": "The employee ID you provided already exists"
       }
     },
     "bankUserTable": [
@@ -664,7 +666,7 @@
         "suspenseAccount": "Enter suspense account"
       },
       "errors": {
-        "suspenseAccount": "Please enter suspense account number"
+        "suspenseAccount": "Please fill"
       },
       "dialog": {
         "invalidForm": "Invalid form.",
@@ -747,6 +749,145 @@
       {
         "label": "Reason",
         "value": "Reason",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
+  },
+  "smsSettings": {
+    "title": "SMS Settings",
+    "addSmsSettings": "Add SMS Setting",
+    "modifySmsSettings": "Modify SMS Setting",
+    "sureAddSmsSetting": "Are you sue you wan to add this configuration?",
+    "flowIdExists": "The flow Id you selected, already exists.",
+    "failedToModifySmsSettings": "Failed to configure new SMS Setting.",
+    "successfullyAddedSmsSetting": "Successfully added new SMS Setting.",
+    "successfullyModifiedSmsSetting": "Successfully modified SMS Setting.",
+    "failedToFetchSmsSetting": "Failed to fetch SMS Setting.",
+    "removeSmsSetting": "Remove SMS Setting",
+    "sureRemove": "Are you sure you want to remove this setting.",
+    "failedToRemoveSmsSetting": "Failed to remove SMS Setting.",
+    "successfullyRemovedSmsSetting": "Successfully removed SMS Setting.",
+    "form": {
+      "username": "Username",
+      "fromAddress": "From Address",
+      "phone": "Phone number",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "placeholders": {
+        "username": "Enter username",
+        "fromAddress": "Enter sender's address",
+        "phone": "Enter mobile number",
+        "password": "Create password",
+        "confirmPassword": "Confirm password"
+      },
+      "errors": {
+        "username": "Please enter username",
+        "fromAddress": "Please provide a from address",
+        "password": "Cannot be empty"
+      }
+    },
+    "tableData": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Username",
+        "value": "USER_Name",
+        "desc": ""
+      },
+      {
+        "label": "From Address",
+        "value": "From_Address",
+        "desc": ""
+      },
+      {
+        "label": "Mobile Service",
+        "value": "Mobile_Service",
+        "desc": ""
+      },
+      {
+        "label": "Effective date",
+        "value": "Effective_Date",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
+  },
+  "smsText": {
+    "title": "SMS Text",
+    "addSmsText": "Add SMS Text",
+    "failedToFetchSmsText": "Failed to fetch SMS Text",
+    "addedSmsTextSuccessully": "Successfully added SMS Text",
+    "failedToAddSmsText": "Failed to add SMS Text",
+    "modifiedSmsTextSuccessfully": "Successfully modified SMS Text",
+    "failedToModifySmsText": "Failed to modify SMS Text",
+    "removeSmsText": "Remove SMS Text",
+    "sureRemove": "Are you sure you want to remove the '{}' SMS text",
+    "removedSmsTextSuccessfully": "Removed SMS Text successfully!",
+    "form": {
+      "flowId": "Flow Id",
+      "subjectEnglish": "Subject English",
+      "subjectSwahili": "Subject Swahili",
+      "smsText": "SMS Text",
+      "smsSwahili": "SMS Swahili Text",
+      "placeholders": {
+        "flowId": "Select flow Id",
+        "subjectEnglish": "Enter subject in english",
+        "subjectSwahili": "Enter subject in swahili",
+        "smsText": "Enter your SMS text in enlish",
+        "smsSwahili": "Enter your SMS in swahili"
+      },
+      "errors": {
+        "flowId": "Please, select a flow Id",
+        "subjectEnglish": "Please, enter SMS subject in english",
+        "subjectSwahili": "Please, enter SMS subject in swahili",
+        "smsText": "Please, enter your SMS text in english",
+        "smsSwahili": "Please, enter your SMS text in swahili"
+      },
+      "dialog": {
+        "invalidForm": "Invalid form",
+        "flowId": "Please select a flow Id",
+        "subjectEnglish": "Please, provide the SMS subject in english",
+        "subjectSwahili": "Please, provide the SMS's subject in swahili",
+        "smsText": "Please, enter your SMS text in enlish",
+        "smsSwahili": "Please, enter your SMS text in swahili"
+      }
+    },
+    "tableData": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Flow",
+        "value": "Flow_Id",
+        "desc": ""
+      },
+      {
+        "label": "Subject",
+        "value": "SMS_Subject",
+        "desc": ""
+      },
+      {
+        "label": "Text",
+        "value": "SMS_Text",
+        "desc": ""
+      },
+      {
+        "label": "Effective date",
+        "value": "Effective_Date",
         "desc": ""
       },
       {

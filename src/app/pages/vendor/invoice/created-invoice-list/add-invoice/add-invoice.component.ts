@@ -9,11 +9,15 @@ import {
   ViewChild,
 } from '@angular/core';
 import {
+  AbstractControl,
+  AsyncValidatorFn,
   FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -23,7 +27,7 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import { Observable, from, map, of, startWith, zip } from 'rxjs';
+import { Observable, catchError, from, map, of, startWith, zip } from 'rxjs';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
@@ -33,7 +37,7 @@ import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { Currency } from 'src/app/core/models/vendors/currency';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AddInvoiceForm } from 'src/app/core/models/vendors/forms/add-invoice-form';
 import {
   listAnimationMobile,
@@ -44,6 +48,17 @@ import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { CustomersDialogComponent } from 'src/app/components/dialogs/Vendors/customers-dialog/customers-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Customer } from 'src/app/core/models/vendors/customer';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import {
+  MatDatepickerModule,
+  MatDateRangePicker,
+} from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { CompanyUserService } from 'src/app/core/services/vendor/company-user.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-add-invoice',
@@ -56,6 +71,14 @@ import { Customer } from 'src/app/core/models/vendors/customer';
     MatFormFieldModule,
     LoaderInfiniteSpinnerComponent,
     DisplayMessageBoxComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSelectModule,
+    MatTooltipModule,
   ],
   templateUrl: './add-invoice.component.html',
   styleUrl: './add-invoice.component.scss',
@@ -82,10 +105,13 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
   public formData: {
     customers: CustomerName[];
     currencies: Observable<Currency[]>;
+    paymentTypes: string[];
   } = {
     customers: [],
     currencies: of([]),
+    paymentTypes: ['Fixed', 'Flexible'],
   };
+  public today: Date = new Date();
   @ViewChild('noCustomersFound', { static: true })
   noCustomersFound!: ElementRef<HTMLDialogElement>;
   @ViewChild('displayMessageBox')
@@ -103,6 +129,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     private invoiceService: InvoiceService,
     private tr: TranslocoService,
     private cdr: ChangeDetectorRef,
+    private router: Router,
     private location: Location
   ) {}
   private createForm() {
@@ -114,13 +141,20 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         Validators.required,
       ]),
       auname: this.fb.control('', [Validators.required]),
-      invno: this.fb.control('', [Validators.required]),
+      // invno: this.fb.control('', [
+      //   Validators.required,
+      //   this.isExistInvoiceNumberValidator(),
+      // ]),
+      invno: this.fb.control('', {
+        asyncValidators: this.isExistInvoiceNumberValidator(),
+        validators: [Validators.required],
+      }),
       date: this.fb.control(new Date(), [Validators.required]),
       edate: this.fb.control('', [Validators.required]),
       iedate: this.fb.control('', [Validators.required]),
       ptype: this.fb.control('', [Validators.required]),
       chus: this.fb.control('', []),
-      customerName: this.fb.control('', []),
+      customerName: this.fb.control('', [Validators.required]),
       ccode: this.fb.control('', [Validators.required]),
       comno: this.fb.control(0, [Validators.required]),
       ctype: this.fb.control('0', [Validators.required]),
@@ -161,10 +195,6 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     });
   }
   private autocompleteEventListener() {
-    // this.filteredCustomers = this.customerName.valueChanges.pipe(
-    //   startWith(''),
-    //   map((value) => this.customerAutoCompleteData(value || ''))
-    // );
     if (this.formData.customers.length > 0) {
       this.filteredCustomers = this.customerName.valueChanges.pipe(
         startWith(''),
@@ -179,6 +209,26 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     return this.formData.customers.filter((customer) =>
       customer.Customer_Name.toLocaleLowerCase().includes(filterValue)
     );
+  }
+  private isExistInvoiceNumberValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value) {
+        return of(null); // No validation if the value is empty
+      }
+      return this.invoiceService
+        .isExistInvoice(this.getUserProfile().InstID, control.value)
+        .pipe(
+          map((result) => {
+            let msg = this.tr.translate(
+              'invoice.form.dialog.invoiceNumberExists'
+            );
+            return result.response ? { existsInvoiceNo: msg } : null;
+          }),
+          catchError(() =>
+            of({ apiError: 'Failed to validate invoice number.' })
+          )
+        );
+    };
   }
   private assignCustomersFormData(
     result: HttpDataResponse<number | CustomerName[]>
@@ -237,6 +287,24 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         return this.tr.translate('invoice.form.dialog.failedToCreateInvoice');
     }
   }
+  private addInvoiceSuccessHandler(invoice: GeneratedInvoice, message: string) {
+    let path = '/vendor/invoice/list';
+    let approvalStatus =
+      invoice.approval_status && invoice.approval_status === '2';
+    if (approvalStatus) {
+      path = '/vendor/invoice/generated';
+    }
+    let queryParams = { invno: btoa(invoice.Invoice_No) };
+    AppUtilities.showSuccessMessage(
+      message,
+      () =>
+        this.router.navigate([path], {
+          queryParams: queryParams,
+        }),
+      this.tr.translate('actions.view')
+    );
+    this.resetForm();
+  }
   private parseAddInvoiceResponse(
     result: HttpDataResponse<GeneratedInvoice | number>,
     message: string
@@ -250,10 +318,10 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(message)
+      this.addInvoiceSuccessHandler(
+        result.response as GeneratedInvoice,
+        message
       );
-      this.resetForm();
     }
   }
   private createEditForm() {
@@ -331,30 +399,6 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
       this.invoiceItems = of(invoice.details ?? []);
       this.createEditForm();
     }
-    // if (
-    //   invoice.response &&
-    //   typeof invoice.response !== 'string' &&
-    //   typeof invoice.response !== 'number'
-    // ) {
-    //   this.generatedInvoice = of(invoice.response);
-    // }
-    // if (
-    //   items.response &&
-    //   typeof items.response !== 'string' &&
-    //   typeof items.response !== 'number' &&
-    //   items.response.length > 0
-    // ) {
-    //   this.invoiceItems = of(items.response);
-    // }
-    // if (!this.generatedInvoice) {
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.warning`),
-    //     this.tr.translate(`invoice.noGeneratedInvoicesFound`)
-    //   );
-    //   return;
-    // }
-    // this.createEditForm();
   }
   private getBuildPageRequests() {
     let customerNamesObservable = from(
@@ -372,8 +416,8 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
       .addInvoice(body)
       .then((result) => {
         let message = this.generatedInvoice
-          ? `invoice.form.dialog.modifiedSuccessfully`
-          : `invoice.form.dialog.addedInvoiceSuccessfully`;
+          ? this.tr.translate(`invoice.form.dialog.modifiedSuccessfully`)
+          : this.tr.translate(`invoice.form.dialog.addedInvoiceSuccessfully`);
         this.parseAddInvoiceResponse(result, message);
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -495,6 +539,7 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     }
   }
   addItemDetail(ind: number = -1) {
+    let t = this.fb.control('p');
     let group = this.fb.group({
       item_description: this.fb.control('', [Validators.required]),
       item_qty: this.fb.control(0, [Validators.required, Validators.min(1)]),
@@ -549,6 +594,8 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     }
   }
   resetForm() {
+    this.invoiceDetailsForm.markAsUntouched();
+    this.invoiceDetailsForm.markAsPristine();
     if (this.generatedInvoice) {
       this.retrieveQueryParams();
     } else {
@@ -561,6 +608,10 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     let dialogRef = this.dialog.open(CustomersDialogComponent, {
       width: '800px',
       disableClose: true,
+      data: {
+        allowAttachInvoice: false,
+        customer: null,
+      },
     });
     dialogRef.componentInstance.addedCustomer
       .asObservable()

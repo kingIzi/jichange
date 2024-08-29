@@ -50,10 +50,28 @@
     </h1>
     <div class="w-full grid grid-cols-2 gap-3 py-4">
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.regionDialog'" class="text-xs">
-          {{ t("region") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.regionDialog'"
+          class="text-xs text-black"
+        >
+          {{ t("region") }}
         </p>
-        <select
+        <mat-form-field *transloco="let t; read: 'setup.districtDialog.form'">
+          <mat-label>{{ t("placeholders.region") }}</mat-label>
+          <mat-select [formControl]="region_id">
+            @for (region of regions; track region) {
+            <mat-option [value]="region.Region_SNO">{{
+              region.Region_Name
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error
+            *ngIf="region_id && region_id.invalid && region_id.touched"
+          >
+            {{ t("errors.selectRegion") }}</mat-error
+          >
+        </mat-form-field>
+        <!-- <select
           [formControl]="region_id"
           class="select select-sm select-bordered w-full"
         >
@@ -82,16 +100,16 @@
           >
             {{ t("selectRegion") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'setup.districtDialog'"
-          class="text-left text-xs"
+          class="text-left text-xs text-black"
         >
-          {{ t("district") }}<span class="text-red-600">*</span>
+          {{ t("district") }}
         </h6>
-        <input
+        <!-- <input
           *transloco="let t; read: 'setup.regionDialog.form.placeholders'"
           #controlNumber
           [formControl]="district_name"
@@ -110,11 +128,27 @@
           >
             {{ t("missingDistrict") }}
           </p>
-        </span>
+        </span> -->
+        <mat-form-field
+          *transloco="let t; read: 'setup.districtDialog.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.name") }}</mat-label>
+          <input matInput [formControl]="district_name" />
+          <mat-error
+            *ngIf="
+              district_name && district_name.invalid && district_name.touched
+            "
+          >
+            <ng-container>
+              {{ t("errors.missingDistrict") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col w-full">
-        <p *transloco="let t; read: 'defaults'" class="text-xs">
-          {{ t("status") }}<span class="text-red-600">*</span>
+        <p *transloco="let t; read: 'defaults'" class="text-xs text-black">
+          {{ t("status") }}
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -181,7 +215,6 @@
         (click)="submitRegionForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!districtForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

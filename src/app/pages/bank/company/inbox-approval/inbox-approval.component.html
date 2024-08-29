@@ -6,7 +6,7 @@
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between w-full">
-    <h2 class="text-lg font-bold">
+    <h2 class="text-lg lg:text-2xl font-bold">
       {{ "company.inboxApproval.name" | transloco }}
     </h2>
   </div>
@@ -127,12 +127,11 @@
                   <button
                     *transloco="let t; read: 'company.inboxApproval'"
                     (click)="approveCompany(element)"
-                    class="btn btn-sm border-success bg-transparent tooltip"
+                    class="btn btn-xs btn-primary hover:text-neutral-50"
                     matTooltip="{{ t('approve') }}"
+                    [matTooltipPosition]="'above'"
                   >
-                    <span>
-                      <i class="bi bi-check2-circle text-lg text-success"></i>
-                    </span>
+                    {{ t("pending") }}
                   </button>
                 </div>
               </ng-template>
@@ -223,14 +222,11 @@
                       <button
                         *transloco="let t; read: 'company.inboxApproval'"
                         (click)="approveCompany(element)"
-                        class="btn btn-sm border-success bg-transparent tooltip"
+                        class="btn btn-xs btn-primary hover:text-neutral-50"
                         matTooltip="{{ t('approve') }}"
+                        [matTooltipPosition]="'above'"
                       >
-                        <span>
-                          <i
-                            class="bi bi-check2-circle text-lg text-success"
-                          ></i>
-                        </span>
+                        {{ t("pending") }}
                       </button>
                     </div>
                   </ng-template>

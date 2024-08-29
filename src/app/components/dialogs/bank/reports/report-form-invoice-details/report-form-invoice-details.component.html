@@ -12,175 +12,133 @@
     <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("branch") }}
     </p>
-    <select
-      [formControl]="branch"
-      class="select select-sm select-bordered w-full"
-    >
-      <option
-        *transloco="let t; read: 'reports.invoiceDetails.form.placeholders'"
-        selected
-        [value]="0"
-      >
-        {{ t("all") }}
-      </option>
-      <ng-container *ngIf="filterFormData.branches.length > 0">
-        <option
-          *ngFor="
-            let branch of filterFormData.branches;
-            index as i;
-            trackBy: PerformanceUtils.trackByIndex
-          "
-          [value]="branch.Branch_Sno.toString()"
-        >
-          {{ branch.Name }}
-        </option>
-      </ng-container>
-    </select>
-    <span *ngIf="branch && branch.invalid && branch.touched">
-      <p
-        *transloco="let t; read: 'forms.errors'"
-        class="text-danger-700 text-xs"
-      >
-        {{ t("branch") }}
-      </p>
-    </span>
+    <mat-form-field *transloco="let t; read: 'reports.invoiceDetails.form'">
+      <mat-select [formControl]="branch" name="">
+        <mat-option *transloco="let t; read: 'defaults'" selected [value]="0">
+          {{ t("all") }}
+        </mat-option>
+        @for (branch of filterFormData.branches; track branch) {
+        <mat-option [value]="branch.Branch_Sno">{{ branch.Name }}</mat-option>
+        }
+        <ng-container *transloco="let t; read: 'forms.errors'">
+          <mat-error *ngIf="branch && branch.invalid && branch.touched">
+            {{ t("branch") }}
+          </mat-error>
+        </ng-container>
+      </mat-select>
+    </mat-form-field>
   </div>
   <div class="flex flex-col space-y-1">
     <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("vendor") }}
     </p>
-    <select
-      [formControl]="compid"
-      class="select select-sm select-bordered w-full"
-    >
-      <option *transloco="let t; read: 'defaults'" [value]="0">
-        {{ t("all") }}
-      </option>
-      <ng-container *ngIf="filterFormData.companies.length > 0">
-        <option
-          *ngFor="
-            let company of filterFormData.companies;
-            index as i;
-            trackBy: PerformanceUtils.trackByIndex
-          "
-          [value]="company.CompSno"
-        >
-          {{ company.CompName }}
-        </option>
-      </ng-container>
-    </select>
-    <span *ngIf="compid && compid.invalid && compid.touched">
-      <p
-        *transloco="let t; read: 'forms.errors'"
-        class="text-danger-700 text-xs"
-      >
-        {{ t("vendor") }}
-      </p>
-    </span>
+    <mat-form-field>
+      <mat-select [formControl]="Comp" name="">
+        <mat-option *transloco="let t; read: 'defaults'" selected [value]="0">
+          {{ t("all") }}
+        </mat-option>
+        @for (company of filterFormData.companies; track company) {
+        <mat-option [value]="company.CompSno">{{
+          company.CompName
+        }}</mat-option>
+        }
+        <ng-container *transloco="let t; read: 'forms.errors'">
+          <mat-error *ngIf="branch && branch.invalid && branch.touched">
+            {{ t("vendor") }}
+          </mat-error>
+        </ng-container>
+      </mat-select>
+    </mat-form-field>
   </div>
   <div class="flex flex-col space-y-1">
     <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("customer") }}
     </p>
-    <select
-      [formControl]="cusid"
-      class="select select-sm select-bordered w-full"
-    >
-      <option *transloco="let t; read: 'defaults'" selected [value]="0">
-        {{ t("all") }}
-      </option>
-      <ng-container *ngIf="filterFormData.customers.length > 0">
-        <option
-          *ngFor="
-            let customer of filterFormData.customers;
-            index as i;
-            trackBy: PerformanceUtils.trackByIndex
-          "
-          [value]="customer.Cust_Sno"
+    <mat-form-field>
+      <mat-select [formControl]="cusid" name="">
+        <mat-option *transloco="let t; read: 'defaults'" selected [value]="0">
+          {{ t("all") }}
+        </mat-option>
+        @for (customer of customers$ | async; track customer) {
+        <mat-option [value]="customer.Cust_Sno">{{
+          customer.Cust_Name + " - " + customer.Phone
+        }}</mat-option>
+        }
+        <ng-container
+          *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
         >
-          {{ customer.Cust_Name + " - " + customer.Phone }}
-        </option>
-      </ng-container>
-    </select>
-    <span *ngIf="cusid && cusid.invalid && cusid.touched">
-      <p
-        *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-        class="text-danger-700 text-xs"
-      >
-        {{ t("customer") }}
-      </p>
-    </span>
+          <mat-error *ngIf="branch && branch.invalid && branch.touched">
+            {{ t("customer") }}
+          </mat-error>
+        </ng-container>
+      </mat-select>
+    </mat-form-field>
   </div>
   <div class="flex flex-col space-y-1">
     <p *transloco="let t; read: 'forms'" class="text-xs">
       {{ t("invoiceNumber") }}
     </p>
-    <select
-      [formControl]="invno"
-      class="select select-sm select-bordered w-full"
-    >
-      <option *transloco="let t; read: 'defaults'" selected [value]="''">
-        {{ t("all") }}
-      </option>
-      <ng-container *ngIf="filterFormData.invoiceReports.length > 0">
-        <option
-          *ngFor="
-            let invoiceReport of filterFormData.invoiceReports;
-            index as i;
-            trackBy: PerformanceUtils.trackByIndex
-          "
-          [value]="invoiceReport.Inv_Mas_Sno"
-        >
-          {{ invoiceReport.Invoice_No }}
-        </option>
+    <mat-form-field>
+      <mat-select [formControl]="invno" name="">
+        <mat-option *transloco="let t; read: 'defaults'" selected [value]="''">
+          {{ t("all") }}
+        </mat-option>
+        @for (invoiceReport of filterFormData.invoiceReports; track
+        invoiceReport) {
+        <mat-option [value]="invoiceReport.Inv_Mas_Sno">{{
+          invoiceReport.Invoice_No
+        }}</mat-option>
+        }
+      </mat-select>
+      <ng-container *transloco="let t; read: 'form.errors'">
+        <mat-error *ngIf="branch && branch.invalid && branch.touched">
+          {{ t("invoiceNumber") }}
+        </mat-error>
       </ng-container>
-    </select>
-    <span *ngIf="invno && invno.invalid && invno.touched">
-      <p
-        *transloco="let t; read: 'form.errors'"
-        class="text-danger-700 text-xs"
-      >
-        {{ t("invoiceNumber") }}
-      </p>
-    </span>
+    </mat-form-field>
   </div>
   <div class="col-span-full grid grid-cols-2 gap-x-2">
     <div class="flex flex-col space-y-1">
       <p *transloco="let t; read: 'forms'" class="text-xs">
         {{ t("from") }} {{ "(" + dateLabel + ")" }}
       </p>
-      <input
-        type="date"
-        [formControl]="stdate"
-        class="input input-sm input-bordered"
-      />
-      <span *ngIf="stdate && stdate.invalid && stdate.touched">
-        <p
+      <mat-form-field>
+        <mat-label>Choose a date</mat-label>
+        <input matInput [formControl]="stdate" [matDatepicker]="startDate" />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="startDate"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #startDate></mat-datepicker>
+        <ng-container
           *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-          class="text-danger-700 text-xs"
         >
-          {{ t("startDate") }}
-        </p>
-      </span>
+          <mat-error *ngIf="stdate && stdate.invalid && stdate.touched">
+            {{ t("startDate") }}
+          </mat-error>
+        </ng-container>
+      </mat-form-field>
     </div>
     <div class="flex flex-col space-y-1">
       <p *transloco="let t; read: 'forms'" class="text-xs">
         {{ t("to") }} {{ "(" + dateLabel + ")" }}
       </p>
-      <input
-        type="date"
-        [formControl]="enddate"
-        class="input input-sm input-bordered"
-        [min]="stdate.value"
-      />
-      <span *ngIf="enddate && enddate.invalid && enddate.touched">
-        <p
+      <mat-form-field>
+        <mat-label>Choose a date</mat-label>
+        <input matInput [formControl]="enddate" [matDatepicker]="endDate" />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="endDate"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #endDate></mat-datepicker>
+        <ng-container
           *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
-          class="text-danger-700 text-xs"
         >
-          {{ t("endDate") }}
-        </p>
-      </span>
+          <mat-error *ngIf="enddate && enddate.invalid && enddate.touched">
+            {{ t("endDate") }}
+          </mat-error>
+        </ng-container>
+      </mat-form-field>
     </div>
   </div>
   <div class="col-span-full flex flex-row items-center justify-end">

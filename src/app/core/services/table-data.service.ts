@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { FormArray } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root',
@@ -106,5 +107,18 @@ export class TableDataService<T> {
       this.data.splice(index, 1);
       this.dataSource._updateChangeSubscription();
     }
+  }
+  public resetTableColumns(headers: FormArray) {
+    let tableColumns = headers.controls
+      .filter((header) => header.get('included')?.value)
+      .map((header) => {
+        return {
+          label: header.get('label')?.value,
+          value: header.get('value')?.value,
+          desc: header.get('desc')?.value,
+        } as TableColumnsData;
+      });
+    this.setTableColumns(tableColumns);
+    this.setTableColumnsObservable(tableColumns);
   }
 }

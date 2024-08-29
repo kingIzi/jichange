@@ -275,7 +275,7 @@
         "failed": "Imeshindwa",
         "missingDesignation": "Tafadhali toa jina la jina",
         "removeDesignation": "Ondoa cheo",
-        "sureDelete": "Una uhakika unataka kufuta hii?",
+        "sureDelete": "Una uhakika unataka kufuta jina la '{}'?",
         "removedSuccessfully": "Nchi imefutwa kwa mafanikio!",
         "addedSuccessfully": "Nchi imeongezwa kwa mafanikio!",
         "modifiedSuccessfully": "Nchi imebadilishwa kwa mafanikio!"
@@ -598,7 +598,9 @@
         "branch": "Tafadhali toa tawi",
         "emailId": "Tafadhali tuma barua pepe",
         "mobileNo": "Tafadhali toa nambari ya simu",
-        "status": "Tafadhali bainisha hali"
+        "status": "Tafadhali bainisha hali",
+        "usernameExists": "Jina la mtumiaji ulilotoa tayari lipo.",
+        "employeeIdExists": "Kitambulisho cha mfanyakazi ulichotoa tayari kipo."
       }
     },
     "bankUserTable": [
@@ -748,6 +750,145 @@
       },
       {
         "label": "Kitendo",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
+  },
+  "smsSettings": {
+    "title": "Mipangilio ya SMS",
+    "addSmsSettings": "Ongeza Mpangilio wa SMS",
+    "modifySmsSettings": "Badilisha Mpangilio wa SMS",
+    "sureAddSmsSetting": "Je, unashtaki wewe wan kuongeza usanidi huu?",
+    "flowIdExists": "Id ya mtiririko uliyochagua, tayari ipo.",
+    "failedToModifySmsSettings": "Failed to configure new SMS Setting.",
+    "successfullyAddedSmsSetting": "Imefanikiwa kuongeza mipangilio mpya ya SMS.",
+    "successfullyModifiedSmsSetting": "Mpangilio wa SMS uliobadilishwa kwa mafanikio",
+    "failedToFetchSmsSetting": "Imeshindwa kupata Mpangilio wa SMS.",
+    "removeSmsSetting": "Ondoa Mpangilio wa SMS",
+    "sureRemove": "Una uhakika unataka kuondoa mpangilio huu?",
+    "failedToRemoveSmsSetting": "Imeshindwa kuondoa Mpangilio wa SMS.",
+    "successfullyRemovedSmsSetting": "Imeondolewa kwa ufanisi Mipangilio ya SMS.",
+    "form": {
+      "username": "Jina la mtumiaji",
+      "fromAddress": "Anwani ya Mtumaji",
+      "phone": "Nambari ya simu",
+      "password": "Nenosiri",
+      "confirmPassword": "Thibitisha nenosiri",
+      "placeholders": {
+        "username": "Ingiza jina la mtumiaji",
+        "fromAddress": "Ingiza anwani ya mtumaji",
+        "phone": "Ingiza nambari ya simu",
+        "password": "Tengeneza nenosiri",
+        "confirmPassword": "Thibitisha nenosiri"
+      },
+      "errors": {
+        "username": "Tafadhali ingiza jina la mtumiaji",
+        "fromAddress": "Tafadhali toa anwani kutoka kwa anwani",
+        "password": "Haiwezi kuwa tupu"
+      }
+    },
+    "tableData": [
+      {
+        "label": "No.",
+        "value": "No.",
+        "desc": ""
+      },
+      {
+        "label": "Jina la mtumiaji",
+        "value": "USER_Name",
+        "desc": ""
+      },
+      {
+        "label": "Kutoka kwa Anwani",
+        "value": "From_Address",
+        "desc": ""
+      },
+      {
+        "label": "Huduma ya Simu ya Mkononi",
+        "value": "Mobile_Service",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya ufanisi",
+        "value": "Effective_Date",
+        "desc": ""
+      },
+      {
+        "label": "Action",
+        "value": "Action",
+        "desc": ""
+      }
+    ]
+  },
+  "smsText": {
+    "title": "Maandishi ya SMS",
+    "addSmsText": "Ongeza Maandishi ya SMS",
+    "failedToFetchSmsText": "Imeshindwa kupakua Maandishi ya SMS",
+    "addedSmsTextSuccessully": "Imefanikiwa kuongeza Maandishi ya SMS",
+    "failedToAddSmsText": "Imeshindwa kuongeza Maandishi ya SMS",
+    "modifiedSmsTextSuccessfully": "Imefanikiwa kubadilisha Maandishi ya SMS",
+    "failedToModifySmsText": "Imeshindwa kubadilisha Maandishi ya SMS",
+    "removeSmsText": "Ondoa Maandishi ya SMS",
+    "sureRemove": "Je, una uhakika unataka kuondoa maandishi ya SMS '{}'",
+    "removedSmsTextSuccessfully": "Maandishi ya SMS yameondolewa kwa mafanikio!",
+    "form": {
+      "flowId": "Id ya Mchakato",
+      "subjectEnglish": "Kichwa Kiingereza",
+      "subjectSwahili": "Kichwa Kiswahili",
+      "smsText": "Maandishi ya SMS",
+      "smsSwahili": "Maandishi ya SMS Kiswahili",
+      "placeholders": {
+        "flowId": "Chagua Id ya Mchakato",
+        "subjectEnglish": "Ingiza kichwa kwa kiingereza",
+        "subjectSwahili": "Ingiza kichwa kwa kiswahili",
+        "smsText": "Ingiza maandishi yako ya SMS kwa kiingereza",
+        "smsSwahili": "Ingiza maandishi yako ya SMS kwa kiswahili"
+      },
+      "errors": {
+        "flowId": "Tafadhali, chagua Id ya Mchakato",
+        "subjectEnglish": "Tafadhali, ingiza kichwa cha SMS kwa kiingereza",
+        "subjectSwahili": "Tafadhali, ingiza kichwa cha SMS kwa kiswahili",
+        "smsText": "Tafadhali, ingiza maandishi yako ya SMS kwa kiingereza",
+        "smsSwahili": "Tafadhali, ingiza maandishi yako ya SMS kwa kiswahili"
+      },
+      "dialog": {
+        "invalidForm": "Fomu isiyo sahihi",
+        "flowId": "Tafadhali chagua Id ya Mchakato",
+        "subjectEnglish": "Tafadhali, toa kichwa cha SMS kwa kiingereza",
+        "subjectSwahili": "Tafadhali, toa kichwa cha SMS kwa kiswahili",
+        "smsText": "Tafadhali, ingiza maandishi yako ya SMS kwa kiingereza",
+        "smsSwahili": "Tafadhali, ingiza maandishi yako ya SMS kwa kiswahili"
+      }
+    },
+    "tableData": [
+      {
+        "label": "Na.",
+        "value": "Na.",
+        "desc": ""
+      },
+      {
+        "label": "Mchakato",
+        "value": "Flow_Id",
+        "desc": ""
+      },
+      {
+        "label": "Kichwa",
+        "value": "SMS_Subject",
+        "desc": ""
+      },
+      {
+        "label": "Maandishi",
+        "value": "SMS_Text",
+        "desc": ""
+      },
+      {
+        "label": "Tarehe ya Kutumika",
+        "value": "Effective_Date",
+        "desc": ""
+      },
+      {
+        "label": "Hatua",
         "value": "Action",
         "desc": ""
       }

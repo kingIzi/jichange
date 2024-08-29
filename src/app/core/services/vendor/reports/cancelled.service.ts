@@ -5,6 +5,7 @@ import { CancelledInvoiceForm } from 'src/app/core/models/vendors/forms/cancelle
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { CancelledInvoice } from 'src/app/core/models/vendors/cancelled-invoice';
 import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +13,11 @@ import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-re
 export class CancelledService {
   constructor(private client: RequestClientService) {}
   public async getPaymentReport(
-    body: CancelledInvoiceForm | InvoiceDetailsForm
+    body: CancelledInvoiceForm | InvoiceDetailsForm | InvoiceReportForm
   ) {
     const data = await lastValueFrom(
       this.client.performPost<
-        CancelledInvoiceForm | InvoiceDetailsForm,
+        CancelledInvoiceForm | InvoiceDetailsForm | InvoiceReportForm,
         HttpDataResponse<CancelledInvoice[] | number>
       >(`/api/Invoice/GetCancelReport`, body)
     );

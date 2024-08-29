@@ -49,10 +49,25 @@
   </h1>
   <div class="grid grid-cols-2 gap-3 w-full h-full">
     <div class="flex flex-col space-y-1 w-full py-8">
-      <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
-        {{ t("code") }} <span class="text-red-600">*</span>
+      <h6
+        *transloco="let t; read: 'setup.currency'"
+        class="text-left text-xs text-black"
+      >
+        {{ t("code") }}
       </h6>
-      <input
+      <mat-form-field
+        *transloco="let t; read: 'setup.currency.form'"
+        class="example-full-width"
+      >
+        <mat-label>{{ t("placeholders.code") }}</mat-label>
+        <input matInput [formControl]="code" />
+        <mat-error *ngIf="code && code.invalid && code.touched">
+          <ng-container>
+            {{ t("errors.code") }}
+          </ng-container>
+        </mat-error>
+      </mat-form-field>
+      <!-- <input
         *transloco="let t; read: 'setup.currency.form.placeholders'"
         #currencyNumber
         [formControl]="code"
@@ -67,13 +82,28 @@
         >
           {{ t("code") }}
         </p>
-      </span>
+      </span> -->
     </div>
     <div class="flex flex-col space-y-1 w-full py-8">
-      <h6 *transloco="let t; read: 'setup.currency'" class="text-left text-sm">
-        {{ t("currencyName") }} <span class="text-red-600">*</span>
+      <h6
+        *transloco="let t; read: 'setup.currency'"
+        class="text-left text-xs text-black"
+      >
+        {{ t("currencyName") }}
       </h6>
-      <input
+      <mat-form-field
+        *transloco="let t; read: 'setup.currency.form'"
+        class="example-full-width"
+      >
+        <mat-label>{{ t("placeholders.name") }}</mat-label>
+        <input matInput [formControl]="cname" />
+        <mat-error *ngIf="cname && cname.invalid && cname.touched">
+          <ng-container>
+            {{ t("errors.name") }}
+          </ng-container>
+        </mat-error>
+      </mat-form-field>
+      <!-- <input
         *transloco="let t; read: 'setup.currency.form.placeholders'"
         #currencyNumber
         [formControl]="cname"
@@ -88,7 +118,7 @@
         >
           {{ t("name") }}
         </p>
-      </span>
+      </span> -->
     </div>
   </div>
   <div
@@ -107,7 +137,6 @@
       (click)="submitCurrencyForm()"
       type="submit"
       form="currency-form"
-      [disabled]="!currencyForm.valid"
       class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
     >
       {{ t("submit") }}

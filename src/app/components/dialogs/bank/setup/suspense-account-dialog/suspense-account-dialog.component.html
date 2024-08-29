@@ -53,30 +53,29 @@
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'setup.suspenseAccount'"
-          class="text-left text-sm"
+          class="text-left text-xs text-black"
         >
-          {{ t("suspenseAccount") }} <span class="text-red-600">*</span>
+          {{ t("suspenseAccount") }}
         </h6>
-        <input
-          *transloco="let t; read: 'setup.suspenseAccount.form.placeholders'"
-          #controlNumber
-          [formControl]="account"
-          type="text"
-          [placeholder]="t('suspenseAccount')"
-          class="input input-bordered w-full max-w-lg bg-transparent text-black"
-        />
-        <span *ngIf="account && account.invalid && account.touched">
-          <p
-            *transloco="let t; read: 'setup.suspenseAccount.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("suspenseAccount") }}
-          </p>
-        </span>
+        <mat-form-field
+          *transloco="let t; read: 'setup.suspenseAccount.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.suspenseAccount") }}</mat-label>
+          <input matInput [formControl]="account" />
+          <mat-error *ngIf="account && account.invalid && account.touched">
+            <ng-container>
+              {{ t("errors.suspenseAccount") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col w-full">
-        <p *transloco="let t; read: 'defaults'" class="text-xs">
-          {{ t("status") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'defaults'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("status") }}
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -137,7 +136,6 @@
         (click)="submitSuspenseAccountForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!suspenseAccountForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

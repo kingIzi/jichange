@@ -225,8 +225,13 @@ export class DesignationListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.designation.form.dialog.removedSuccessfully`)
+      let message = this.tr.translate(
+        `setup.designation.form.dialog.removedSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -307,7 +312,7 @@ export class DesignationListComponent implements OnInit {
   }
   openDesignationDialog() {
     let dialogRef = this.dialog.open(DesignationDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         designationData: null,
@@ -322,7 +327,7 @@ export class DesignationListComponent implements OnInit {
   }
   openEditDesignationDialog(designation: Designation) {
     let dialogRef = this.dialog.open(DesignationDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         designationData: designation,
@@ -345,9 +350,9 @@ export class DesignationListComponent implements OnInit {
     dialog.title = this.tr.translate(
       `setup.designation.form.dialog.removeDesignation`
     );
-    dialog.title = this.tr.translate(
-      `setup.designation.form.dialog.sureDelete`
-    );
+    dialog.message = this.tr
+      .translate(`setup.designation.form.dialog.sureDelete`)
+      .replace('{}', designation.Desg_Name);
     dialog.openDialog();
     dialog.remove.asObservable().subscribe(() => {
       let body = {

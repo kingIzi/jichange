@@ -52,6 +52,12 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-region-list',
@@ -73,6 +79,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTableModule,
     MatSortModule,
     MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   providers: [
     {
@@ -219,8 +231,13 @@ export class RegionListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.regionDialog.removeRegionSuccessfully`)
+      let message = this.tr.translate(
+        `setup.regionDialog.removeRegionSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -308,7 +325,7 @@ export class RegionListComponent implements OnInit {
   }
   openAddRegionDialog() {
     let dialogRef = this.dialog.open(RegionDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         region: null,
@@ -324,7 +341,7 @@ export class RegionListComponent implements OnInit {
   }
   openEditRegionDialog(region: Region) {
     let dialogRef = this.dialog.open(RegionDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         region: region,

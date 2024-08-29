@@ -37,6 +37,11 @@ import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-company-users-dialog',
@@ -52,6 +57,11 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
     PhoneNumberInputComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
   ],
   providers: [
     {
@@ -129,11 +139,8 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       pos: this.fb.control('', [Validators.required]),
       auname: this.fb.control('', [Validators.required]),
       uname: this.fb.control('', [Validators.required]),
-      mob: this.fb.control('', [
-        Validators.required,
-        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
-      ]),
-      mail: this.fb.control('', [Validators.email]),
+      mob: this.fb.control('', [Validators.required]),
+      mail: this.fb.control('', [Validators.required, Validators.email]),
       userid: this.fb.control(this.getUserProfile().Usno, [
         Validators.required,
       ]),
@@ -285,8 +292,11 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`company.companyUsersForm.successMessage`)
+      let msg = this.tr.translate(`company.companyUsersForm.successMessage`);
+      AppUtilities.showSuccessMessage(
+        msg,
+        () => {},
+        this.tr.translate('actions.ok')
       );
       this.addedUser.emit(result.response as CompanyUser);
     }

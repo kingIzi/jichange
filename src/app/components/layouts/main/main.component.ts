@@ -24,6 +24,7 @@ import { BreadcrumbService, BreadcrumbModule } from 'xng-breadcrumb';
 import { mainModuleAnimations } from './router-transition-animations';
 import { TranslocoService } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
+import { NgxSonnerToaster } from 'ngx-sonner';
 
 @Component({
   selector: 'app-main',
@@ -40,6 +41,7 @@ import { NgxLoadingModule } from 'ngx-loading';
     CommonModule,
     BreadcrumbModule,
     NgxLoadingModule,
+    NgxSonnerToaster,
   ],
 })
 export class MainComponent implements OnInit, AfterViewInit {
@@ -192,6 +194,14 @@ export class MainComponent implements OnInit, AfterViewInit {
     this.breadcrumbService.set(
       '@deposit',
       this.tr.translate(`bankRoutes.setup.deposit`)
+    );
+    this.breadcrumbService.set(
+      '@sms-settings',
+      this.tr.translate(`bankRoutes.setup.smsSettings`)
+    );
+    this.breadcrumbService.set(
+      '@sms-text',
+      this.tr.translate(`bankRoutes.setup.smsText`)
     );
   }
   private prepareCompanyRoutes() {

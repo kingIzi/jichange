@@ -48,6 +48,13 @@ import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { ReportFormInvoiceDetailsComponent } from '../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-payment-consolidated',
@@ -63,6 +70,13 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatSortModule,
     MatTableExporterModule,
     ReportFormInvoiceDetailsComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './payment-consolidated.component.html',
   styleUrl: './payment-consolidated.component.scss',

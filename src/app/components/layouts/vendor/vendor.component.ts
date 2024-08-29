@@ -23,6 +23,7 @@ import { vendorAnimations } from '../main/router-transition-animations';
 import { BreadcrumbModule, BreadcrumbService } from 'xng-breadcrumb';
 import { TranslocoService } from '@ngneat/transloco';
 import { NgxLoadingModule } from 'ngx-loading';
+import { NgxSonnerToaster } from 'ngx-sonner';
 
 @Component({
   selector: 'app-vendor',
@@ -36,6 +37,7 @@ import { NgxLoadingModule } from 'ngx-loading';
     FooterComponent,
     BreadcrumbModule,
     NgxLoadingModule,
+    NgxSonnerToaster,
   ],
   animations: [vendorAnimations],
   changeDetection: ChangeDetectionStrategy.OnPush,

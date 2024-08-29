@@ -64,6 +64,13 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
+import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-audit-trails',
@@ -83,6 +90,13 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
     MatTableModule,
     MatSortModule,
     MatTableExporterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   providers: [
     {

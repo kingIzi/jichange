@@ -193,7 +193,9 @@
               (click)="logout()"
               class="flex flex-row items-center text-red-600"
             >
-              <span class="material-symbols-outlined"> logout </span>
+              <span>
+                <i class="bi bi-box-arrow-right text-lg"></i>
+              </span>
               <p *transloco="let t; read: 'roles'">{{ t("logout") }}</p>
             </button>
           </li>

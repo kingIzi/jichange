@@ -76,6 +76,7 @@ import {
 } from 'mat-table-exporter';
 import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Component({
   selector: 'app-invoice-details',
@@ -619,7 +620,7 @@ export class InvoiceDetailsComponent implements OnInit {
     this.createHeaderGroup();
     //this.buildPage();
   }
-  requestInvoiceDetails(body: InvoiceReportForm) {
+  requestInvoiceDetails(body: InvoiceReportForm | InvoiceDetailsForm) {
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)

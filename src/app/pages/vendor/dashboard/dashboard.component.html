@@ -84,13 +84,13 @@
             {{ t("transaction") }}
           </p>
         </div>
-        <a
-          [routerLink]="'/vendor/reports/overview'"
+        <button
           *transloco="let t; read: 'defaults'"
-          class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
+          class="btn btn-active text-primary btn-xs mt-auto"
+          [routerLink]="'/vendor/reports/overview'"
         >
           {{ t("viewAll") }}
-        </a>
+        </button>
       </div>
     </div>
     <div class="w-full h-80 lg:h-full relative bg-white shadow">
@@ -118,13 +118,13 @@
         >
           {{ t("paymentTypeChartTitle") }}
         </p>
-        <a
-          [routerLink]="'/vendor/invoice/generated'"
+        <button
           *transloco="let t; read: 'defaults'"
-          class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
+          class="btn btn-active text-primary btn-xs mt-auto"
+          [routerLink]="'/vendor/invoice/generated'"
         >
           {{ t("viewAll") }}
-        </a>
+        </button>
       </div>
     </div>
     <div class="w-full h-full flex flex-col relative bg-white shadow">
@@ -192,13 +192,13 @@
       >
         {{ t("generatedInvoices") }}
       </p>
-      <a
-        [routerLink]="'/vendor/invoice/generated'"
+      <button
         *transloco="let t; read: 'defaults'"
-        class="btn btn-xs btn-ghost bg-transparent text-primary border border-primary hover:bg-primary hover:border-none hover:text-white"
+        class="btn btn-active text-primary btn-xs mt-auto"
+        [routerLink]="'/vendor/invoice/generated'"
       >
         {{ t("viewAll") }}
-      </a>
+      </button>
     </div>
     <div class="flex flex-col bg-white shadow px-2 py-4 space-y-2">
       <div class="flex flex-row items-center justify-end space-x-2 pt-1">
@@ -206,7 +206,7 @@
           <input
             *transloco="let t; read: 'panel.dashboard'"
             type="search"
-            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-primary bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
             id="exampleSearch"
             [placeholder]="t('searchBy')"
             [formControl]="tableSearch"

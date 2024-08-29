@@ -13,14 +13,22 @@ import { CustomerDetailsForm } from 'src/app/core/models/bank/reports/customer-d
 })
 export class CustomerService {
   constructor(private client: RequestClientService) {}
-  public async addCustomer(body: AddCustomerForm) {
-    let data = await lastValueFrom(
+  // public async addCustomer(body: AddCustomerForm) {
+  //   let data = await lastValueFrom(
+  //     this.client.performPost<
+  //       AddCustomerForm,
+  //       HttpDataResponse<number | Customer>
+  //     >(`/api/Customer/AddCustomer`, body)
+  //   );
+  //   return data;
+  // }
+  public addCustomer(body: AddCustomerForm) {
+    return lastValueFrom(
       this.client.performPost<
         AddCustomerForm,
         HttpDataResponse<number | Customer>
       >(`/api/Customer/AddCustomer`, body)
     );
-    return data;
   }
   public async deleteCustomer(body: DeleteCustomerForm) {
     let data = await lastValueFrom(

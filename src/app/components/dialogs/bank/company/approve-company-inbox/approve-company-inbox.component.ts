@@ -53,6 +53,22 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { CompanyService } from 'src/app/core/services/bank/company/summary/company.service';
 import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+
+interface ApprovedCompany {
+  Comp_Dep_Acc_Sno: number;
+  Deposit_Acc_No: string;
+  Comp_Mas_Sno: number;
+  AuditBy: string;
+  Reason: string;
+  Company: null;
+  Audit_Date: null;
+}
 
 @Component({
   selector: 'app-approve-company-inbox',
@@ -67,6 +83,12 @@ import { Router } from '@angular/router';
     SuccessMessageBoxComponent,
     SubmitMessageBoxComponent,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   templateUrl: './approve-company-inbox.component.html',
   styleUrl: './approve-company-inbox.component.scss',
@@ -85,7 +107,7 @@ export class ApproveCompanyInboxComponent implements OnInit {
   public accountPool: FormControl = this.fb.control('', []);
   public selectAccountList: SuspenseAccount[] = [];
   public selectDepositAccountList: Company[] = [];
-  public approved = new EventEmitter<any>();
+  public approved = new EventEmitter<number>();
   public company$: Observable<Company> = of();
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -309,17 +331,8 @@ export class ApproveCompanyInboxComponent implements OnInit {
         errorMessage
       );
     } else {
-      let msg = this.tr.translate(`company.inboxApproval.approvedSuccessfully`);
-      let path = '/main/company/summary';
-      let queryParams = {
-        compid: btoa((result.response as Company).CompSno.toString()),
-      };
-      AppUtilities.showSuccessMessage(
-        msg,
-        AppUtilities.redirectPage(path, queryParams, this.router),
-        this.tr.translate('actions.view')
-      );
-      this.approved.emit();
+      let comp = result.response as any;
+      this.approved.emit(comp.Comp_Mas_Sno);
     }
   }
   private requestApproveCompany(form: CompanyApprovalForm) {
@@ -392,12 +405,12 @@ export class ApproveCompanyInboxComponent implements OnInit {
     this.requestApproveCompany(this.formGroup.value);
   }
   submitInboxApproval() {
-    // if (this.formGroup.valid) {
-    //   this.confirmApproveVendor.nativeElement.showModal();
-    // } else {
-    //   this.formGroup.markAllAsTouched();
-    // }
-    this.approved.emit();
+    if (this.formGroup.valid) {
+      this.confirmApproveVendor.nativeElement.showModal();
+    } else {
+      this.formGroup.markAllAsTouched();
+    }
+    //this.approved.emit();;lr4ofj[g53;t]
   }
   addSuspenseAccount() {
     let dialogRef = this.dialog.open(SuspenseAccountDialogComponent, {

@@ -37,6 +37,12 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TimeoutError } from 'rxjs';
 import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/phone-number-input.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'app-vendor-registration',
@@ -55,6 +61,12 @@ import { PhoneNumberInputComponent } from 'src/app/reusables/phone-number-input/
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
     PhoneNumberInputComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
 })
 export class VendorRegistrationComponent implements OnInit {
@@ -223,7 +235,11 @@ export class VendorRegistrationComponent implements OnInit {
       let message = this.tr.translate(
         `auth.vendorRegistration.form.success.vendorAddedSuccessfully`
       );
-      let sal = AppUtilities.sweetAlertSuccessMessage(message);
+      AppUtilities.showSuccessMessage(
+        message,
+        () => {},
+        this.tr.translate('actions.ok')
+      );
       this.addedVendor.emit();
     }
   }
@@ -326,14 +342,14 @@ export class VendorRegistrationComponent implements OnInit {
       });
   }
 
-  createVendorForm() {
+  private createVendorForm() {
     this.vendorFormGroup = this.fb.group({
       compsno: this.fb.control('0', [Validators.required]),
       compname: this.fb.control('', [Validators.required]),
       userid: this.fb.control('0', []),
       mob: this.fb.control('', [
         Validators.required,
-        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+        //Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       branch: this.fb.control('', [Validators.required]),
       check_status: this.fb.control('', [Validators.required]),
@@ -347,7 +363,7 @@ export class VendorRegistrationComponent implements OnInit {
       vat: this.fb.control('', []),
       dname: this.fb.control('', []),
       telno: this.fb.control('', [
-        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+        //Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       email: this.fb.control('', [Validators.email]),
       dummy: this.fb.control(true, [Validators.required]),

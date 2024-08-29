@@ -259,6 +259,28 @@ const routes: Routes = [
               animationState: 'setup-module-14',
             },
           },
+          {
+            path: 'sms-settings',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/setup/sms-settings-list/sms-settings-list.component'
+              ).then((s) => s.SmsSettingsListComponent),
+            data: {
+              breadcrumb: { alias: 'sms-settings', skip: false },
+              animationState: 'setup-module-15',
+            },
+          },
+          {
+            path: 'sms-text',
+            loadComponent: () =>
+              import(
+                '../../../pages/bank/setup/sms-text-list/sms-text-list.component'
+              ).then((s) => s.SmsTextListComponent),
+            data: {
+              breadcrumb: { alias: 'sms-text', skip: false },
+              animationState: 'setup-module-16',
+            },
+          },
         ],
       },
       {

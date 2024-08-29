@@ -51,6 +51,7 @@ import {
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Component({
   selector: 'app-cancelled-invoice-report',
@@ -216,9 +217,7 @@ export class CancelledInvoiceReportComponent implements OnInit {
         })?.Name || this.tr.translate('defaults.any'),
       vendor: string =
         this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
-          return (
-            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
-          );
+          return e.CompSno === Number(this.reportFormInvoiceDetails.Comp.value);
         })?.CompName || this.tr.translate('defaults.all'),
       customer: string =
         this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {
@@ -315,7 +314,7 @@ export class CancelledInvoiceReportComponent implements OnInit {
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
   }
-  requestCancelledInvoiceReport(form: InvoiceDetailsForm) {
+  requestCancelledInvoiceReport(form: InvoiceDetailsForm | InvoiceReportForm) {
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(form)

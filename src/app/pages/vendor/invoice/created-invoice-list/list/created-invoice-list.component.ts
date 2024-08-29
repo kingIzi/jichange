@@ -19,7 +19,7 @@ import {
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
@@ -27,18 +27,7 @@ import {
   TranslocoModule,
   TranslocoService,
 } from '@ngneat/transloco';
-import {
-  from,
-  zip,
-  lastValueFrom,
-  map,
-  catchError,
-  Observable,
-  of,
-} from 'rxjs';
 import { CancelGeneratedInvoiceComponent } from 'src/app/components/dialogs/Vendors/cancel-generated-invoice/cancel-generated-invoice.component';
-import { GeneratedInvoiceDialogComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-dialog/generated-invoice-dialog.component';
-import { GeneratedInvoiceViewComponent } from 'src/app/components/dialogs/Vendors/generated-invoice-view/generated-invoice-view.component';
 import { InvoiceDetailsDialogComponent } from 'src/app/components/dialogs/Vendors/invoice-details-dialog/invoice-details-dialog.component';
 import { InvoiceDetailsViewComponent } from 'src/app/components/dialogs/Vendors/invoice-details-view/invoice-details-view.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
@@ -49,7 +38,6 @@ import {
   listAnimationDesktop,
   inOutAnimation,
 } from 'src/app/components/layouts/main/router-transition-animations';
-import { InvoiceListTable } from 'src/app/core/enums/vendor/invoices/invoice-list-table';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
@@ -63,7 +51,6 @@ import { VENDOR_TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import { TableUtilities } from 'src/app/utilities/table-utilities';
 
 @Component({
   selector: 'app-created-invoice-list',
@@ -104,19 +91,6 @@ export class CreatedInvoiceListComponent implements OnInit {
   public tableLoading: boolean = false;
   public startLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  // public tableData: {
-  //   invoiceList: GeneratedInvoice[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<GeneratedInvoice>;
-  // } = {
-  //   invoiceList: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<GeneratedInvoice>([]),
-  // };
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild('successMessageBox')
   successMessageBox!: SuccessMessageBoxComponent;
@@ -146,7 +120,6 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.tr
       .selectTranslate(`createdInvoice.createdInvoiceTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        //this.tableData.originalTableColumns = labels;
         this.tableDataService.setOriginalTableColumns(labels);
         this.tableDataService
           .getOriginalTableColumns()
@@ -188,12 +161,6 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.tableDataService.setTableColumns(tableColumns);
     this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
   private dataSourceFilterPredicate() {
     let filterPredicate = (data: GeneratedInvoice, filter: string) => {
       return (
@@ -237,6 +204,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     this.tableDataService.prepareDataSource(this.paginator, this.sort);
     this.dataSourceFilterPredicate();
     this.dataSourceSortingAccessor();
+    this.examineActivatedRoute(); //sorts viewed invoice
   }
   private requestCreatedInvoiceList() {
     this.tableLoading = true;
@@ -367,13 +335,6 @@ export class CreatedInvoiceListComponent implements OnInit {
       }
     });
   }
-  private failedToApproveInvoice() {
-    AppUtilities.openDisplayMessageBox(
-      this.displayMessageBox,
-      this.tr.translate(`defaults.failed`),
-      this.tr.translate(`invoice.form.dialog.invoiceExists`)
-    );
-  }
   private switchApproveInvoiceErrorMessage(message: string) {
     let errorMessage = AppUtilities.switchGenericSetupErrorMessage(
       message,
@@ -426,8 +387,13 @@ export class CreatedInvoiceListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate('invoice.form.dialog.invoiceApprovedSuccessfully')
+      let msg = this.tr.translate(
+        'invoice.form.dialog.invoiceApprovedSuccessfully'
+      );
+      AppUtilities.showSuccessMessage(
+        msg,
+        (e) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -492,8 +458,8 @@ export class CreatedInvoiceListComponent implements OnInit {
       .findInvoice({ compid: compid, inv: inv })
       .then((result) => {
         this.parseApproveInvoiceResponse(result);
-        // this.startLoading = false;
-        // this.cdr.detectChanges();
+        this.startLoading = false;
+        this.cdr.detectChanges();
       })
       .catch((err) => {
         AppUtilities.requestFailedCatchError(
@@ -506,9 +472,25 @@ export class CreatedInvoiceListComponent implements OnInit {
         throw err;
       });
   }
+  private examineActivatedRoute() {
+    this.activatedRoute.queryParams.subscribe({
+      next: (params) => {
+        try {
+          if (params && params['invno']) {
+            let invno = atob(params['invno']);
+            this.tableSearch.setValue(invno);
+          }
+          this.cdr.detectChanges();
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.requestCreatedInvoiceList();
+    //this.examineActivatedRoute();
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;

@@ -1,0 +1,33 @@
+<dialog #optionalConfirmMessageBox id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">{{ title }}</h3>
+    <p class="py-4 text-sm">{{ message }}</p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="closeDialog()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          (click)="optionalChoiceClicked()"
+          class="btn btn-ghost btn-xs btn-info text-info"
+          *ngIf="optionConfirmText.length > 0"
+        >
+          {{ optionConfirmText }}
+        </button>
+        <button
+          (click)="defaultChoiceClicked()"
+          class="btn btn-ghost btn-xs btn-info text-success"
+        >
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>

@@ -224,8 +224,13 @@ export class CurrencyListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.currency.createdCurrencySuccessfully`)
+      let message = this.tr.translate(
+        `setup.currency.currencyRemovedSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -307,7 +312,7 @@ export class CurrencyListComponent implements OnInit {
   }
   openCurrencyForm() {
     let dialogRef = this.dialog.open(CurrencyDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         currency: null,
@@ -320,7 +325,7 @@ export class CurrencyListComponent implements OnInit {
   }
   editCurrencyForm(currency: Currency) {
     let dialogRef = this.dialog.open(CurrencyDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         currency: currency,

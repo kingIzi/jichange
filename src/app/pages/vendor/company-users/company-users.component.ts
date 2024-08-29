@@ -14,12 +14,17 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import {
   PageEvent,
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -68,6 +73,11 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatTableModule,
     MatSortModule,
     MatTooltipModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
   ],
   templateUrl: './company-users.component.html',
   styleUrl: './company-users.component.scss',

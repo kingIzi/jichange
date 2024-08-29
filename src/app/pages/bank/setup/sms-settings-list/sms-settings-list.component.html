@@ -1,0 +1,292 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<div class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'setup.smsSettings'"
+      class="text-lg lg:text-2xl font-bold"
+    >
+      {{ t("title") }}
+    </h2>
+    <button
+      (click)="openSmsSettingsDialog()"
+      class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"
+    >
+      <span>
+        <i class="bi bi-plus-circle text-xl"></i>
+      </span>
+      <p *transloco="let t; read: 'setup.smsSettings'" class="text-sm">
+        {{ t("addSmsSettings") }}
+      </p>
+    </button>
+  </div>
+  <div
+    [formGroup]="tableFormGroup"
+    class="flex flex-col bg-white shadow px-2 py-4"
+  >
+    <div class="flex flex-row items-center justify-end">
+      <div class="flex flex-row items-center space-x-2">
+        <div class="relative">
+          <input
+            *transloco="let t; read: 'defaults'"
+            type="search"
+            class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+            id="exampleSearch"
+            [placeholder]="t('search')"
+            #searchInput
+            [formControl]="tableSearch"
+          />
+          <span class="absolute top-1/2 left-2 -translate-y-1/2">
+            <i class="bi bi-search text-neutral-500"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div id="list-view" class="py-4 md:hidden">
+      <ul class="flex flex-col space-y-4">
+        <li
+          *ngFor="
+            let element of getTableDataSource().filteredData
+              | slice
+                : 1 + paginator.pageSize * paginator.pageIndex - 1
+                : 1 +
+                    paginator.pageSize * paginator.pageIndex +
+                    paginator.pageSize -
+                    1;
+            index as i
+          "
+          [@listAnimationDesktop]="getTableDataSource().filteredData.length"
+        >
+          <div
+            class="flex flex-col space-y-1 rounded"
+            [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+          >
+            <div *ngFor="let header of headers.controls; index as i">
+              <div
+                *ngIf="i < headers.controls.length - 1; else actionButtons"
+                class="flex flex-row items-center justify-between border-b p-1"
+              >
+                <p class="text-xs font-semibold">
+                  {{ header.get("label")?.value }}
+                </p>
+                <p
+                  [class]="tableValueStyle(element, header.get('value')?.value)"
+                >
+                  {{ tableValue(element, header.get("value")?.value) }}
+                </p>
+              </div>
+              <ng-template #actionButtons>
+                <app-remove-item-dialog
+                  #removeItemDialog
+                ></app-remove-item-dialog>
+                <div
+                  class="flex flex-row items-center justify-between space-x-2 p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <div class="flex flex-row items-center space-x-2">
+                    <button
+                      (click)="openSmsSettingsEditDialog(element)"
+                      *transloco="let t; read: 'actions'"
+                      class="btn btn-sm btn-ghost border-info"
+                      matTooltip="{{ t('edit') }}"
+                    >
+                      <span>
+                        <i class="bi bi-pen text-lg text-info"></i>
+                      </span>
+                    </button>
+                    <button
+                      (click)="
+                        openSmsSettingsRemoveDialog(element, removeItemDialog)
+                      "
+                      *transloco="let t; read: 'actions'"
+                      class="btn btn-sm btn-ghost border-danger-600"
+                      matTooltip="{{ t('delete') }}"
+                    >
+                      <span>
+                        <i class="bi bi-trash text-lg text-danger-600"></i>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <ng-container *ngIf="!tableLoading">
+        <div
+          class="border-t border-b grid place-items-center"
+          *transloco="let t; read: 'errors'"
+        >
+          <p
+            *ngIf="getTableDataList().length <= 0"
+            class="text-center text-sm tracking-wide p-3"
+          >
+            {{ t("noDataFound") }}
+          </p>
+        </div>
+      </ng-container>
+      <div [@inOutAnimation] *ngIf="tableLoading">
+        <div class="w-full grid place-items-center mt-6">
+          <span class="loading loading-spinner loading-lg bg-primary"></span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+    >
+      <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+        <div class="overflow-y-auto shadow">
+          <ng-container
+            *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
+          >
+            <table
+              mat-table
+              matSort
+              [dataSource]="getTableDataSource()"
+              class="mat-elevation-z2 w-full"
+            >
+              <ng-container
+                *ngFor="
+                  let column of displayedColumns;
+                  trackBy: PerformanceUtils.trackByIndex;
+                  index as ind;
+                  last
+                "
+                [matColumnDef]="column.label"
+              >
+                <th class="!bg-base-200" mat-header-cell *matHeaderCellDef>
+                  <div class="relative">
+                    <div
+                      *ngIf="tableSortableColumns(column); else notSortable"
+                      [mat-sort-header]="tableSortableColumns(column)"
+                      sortActionDescription="{{ column.desc }}"
+                      [ngClass]="tableHeaderStyle(column.value)"
+                      class="text-black font-semibold"
+                    >
+                      {{ column.label }}
+                    </div>
+                    <ng-template #notSortable>
+                      <div
+                        [ngClass]="tableHeaderStyle(column.value)"
+                        class="text-black font-semibold"
+                      >
+                        {{ column.label }}
+                      </div>
+                    </ng-template>
+                  </div>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  <ng-container
+                    *ngIf="
+                      ind !== displayedColumns.length - 1;
+                      else actionTemplate
+                    "
+                  >
+                    <p [class]="tableValueStyle(element, column.value)">
+                      {{ tableValue(element, column.value) }}
+                    </p>
+                  </ng-container>
+                  <ng-template #actionTemplate>
+                    <app-remove-item-dialog
+                      #removeItemDialog
+                    ></app-remove-item-dialog>
+                    <div
+                      class="flex flex-row items-center justify-end space-x-2"
+                    >
+                      <button
+                        (click)="openSmsSettingsEditDialog(element)"
+                        *transloco="let t; read: 'actions'"
+                        class="btn btn-sm btn-ghost border-info"
+                        matTooltip="{{ t('edit') }}"
+                      >
+                        <span>
+                          <i class="bi bi-pen text-lg text-info"></i>
+                        </span>
+                      </button>
+                      <button
+                        (click)="
+                          openSmsSettingsRemoveDialog(element, removeItemDialog)
+                        "
+                        *transloco="let t; read: 'actions'"
+                        class="btn btn-sm btn-ghost border-danger-600"
+                        matTooltip="{{ t('delete') }}"
+                      >
+                        <span>
+                          <i class="bi bi-trash text-lg text-danger-600"></i>
+                        </span>
+                      </button>
+                    </div>
+                  </ng-template>
+                </td>
+              </ng-container>
+              <tr
+                mat-header-row
+                *matHeaderRowDef="tableHeader(displayedColumns)"
+              ></tr>
+              <tr
+                mat-row
+                [@listAnimationDesktop]="
+                  getTableDataSource().filteredData.length
+                "
+                *matRowDef="
+                  let row;
+                  columns: tableHeader(displayedColumns);
+                  index as i
+                "
+              ></tr>
+              <tr class="mat-row" *matNoDataRow>
+                <td
+                  *transloco="let t; read: 'errors'"
+                  class="mat-cell"
+                  [attr.colspan]="getTableDataColumns().length"
+                >
+                  <p
+                    *ngIf="
+                      tableSearch.value &&
+                      getTableDataList().length > 0 &&
+                      !tableLoading
+                    "
+                    class="text-xs lg:text-sm py-2 px-4"
+                  >
+                    {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
+                  </p>
+                  <p
+                    *ngIf="getTableDataList().length <= 0 && !tableLoading"
+                    class="text-center text-sm tracking-wide pt-3 pb-1"
+                  >
+                    {{ t("noDataFound") }}
+                  </p>
+                  <div
+                    *ngIf="tableLoading"
+                    class="w-full grid place-items-center mt-6"
+                    [@inOutAnimation]
+                  >
+                    <span
+                      class="loading loading-spinner loading-lg bg-primary"
+                    ></span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row items-center justify-end">
+      <mat-paginator
+        #paginator
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+      >
+      </mat-paginator>
+    </div>
+  </div>
+</div>

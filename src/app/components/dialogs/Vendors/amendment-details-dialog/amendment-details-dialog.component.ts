@@ -38,6 +38,12 @@ import { AmendInvoiceForm } from 'src/app/core/models/vendors/forms/amend-invoic
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-amendment-details-dialog',
@@ -52,6 +58,12 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
     DisplayMessageBoxComponent,
     ReactiveFormsModule,
     TranslocoModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   providers: [
     {

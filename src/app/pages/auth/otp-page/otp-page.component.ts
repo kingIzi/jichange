@@ -25,6 +25,11 @@ import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-m
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { LoginService } from 'src/app/core/services/login.service';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 
 @Component({
   selector: 'app-otp-page',
@@ -35,6 +40,11 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
     ReactiveFormsModule,
     DisplayMessageBoxComponent,
     LoaderInfiniteSpinnerComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    TranslocoModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: TRANSLOCO_SCOPE, useValue: 'auth' }],
@@ -45,13 +55,13 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 export class OtpPageComponent implements OnInit {
   public startLoading: boolean = false;
   public formGroup!: FormGroup;
-  private counterValue: number = 0;
   private intervalId: number | undefined;
-  private duration: number = 2 * 60 * 1000;
   private RESEND_CODE_TIMER = 300;
   public resendCodeCounter: number = this.RESEND_CODE_TIMER; //2 minutes
-  private phoneNumber: string = '';
   private otpData!: ForgotPasswordResponse;
+  public formControl: FormControl = new FormControl('', [
+    Validators.pattern(/^\d{1} - \d{1} - \d{1} - \d{1} - \d{1} - \d{1}$/),
+  ]);
   @ViewChild('noSessionFound') noSessionFound!: DisplayMessageBoxComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -92,6 +102,20 @@ export class OtpPageComponent implements OnInit {
       this.cdr.detectChanges();
     }, 1000);
   }
+  private parseSendOtpDataResponse(result: HttpDataResponse<string | number>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(`auth.otp.invalidCode`)
+      );
+    } else {
+      sessionStorage.removeItem('otp');
+      sessionStorage.setItem('otpMobileNumber', this.mobile.value);
+      this.router.navigate([`/auth/password`]);
+    }
+  }
   private requestSendOtpData(form: {
     mobile: string;
     otp_code: number | string;
@@ -100,20 +124,7 @@ export class OtpPageComponent implements OnInit {
     this.loginService
       .sendOtpResetPasswordLink(form)
       .then((result) => {
-        if (
-          typeof result.response === 'string' &&
-          result.response.toLocaleLowerCase() === 'Valid'.toLocaleLowerCase()
-        ) {
-          sessionStorage.removeItem('otp');
-          sessionStorage.setItem('otpMobileNumber', this.mobile.value);
-          this.router.navigate([`/auth/password`]);
-        } else {
-          AppUtilities.openDisplayMessageBox(
-            this.displayMessageBox,
-            this.tr.translate(`defaults.failed`),
-            this.tr.translate(`auth.otp.invalidCode`)
-          );
-        }
+        this.parseSendOtpDataResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
       })
@@ -167,6 +178,16 @@ export class OtpPageComponent implements OnInit {
         throw err;
       });
   }
+  private cleanedParts(cleaned: string) {
+    if (cleaned.length > 6) {
+      cleaned = cleaned.substring(0, 6);
+    }
+    let parts = [];
+    for (let i = 0; i < cleaned.length; i++) {
+      parts.push(cleaned[i]);
+    }
+    return parts;
+  }
   ngOnInit(): void {
     this.parseOtpData();
     this.createFormGroup();
@@ -180,6 +201,17 @@ export class OtpPageComponent implements OnInit {
       this.requestSendOtpData(this.formGroup.value);
     } else {
       this.formGroup.markAllAsTouched();
+    }
+  }
+  formatToMobileNumber(inputFeild: any) {
+    let prefix = ' - ';
+    let text = inputFeild.target.value;
+    let cleaned = text.replace(/\D/g, '');
+    let parts = this.cleanedParts(cleaned);
+    let formatted = parts.join(prefix);
+    this.formControl.setValue(formatted);
+    if (this.formControl.valid) {
+      this.otp_code.setValue(parts.join(''));
     }
   }
   get mobile() {

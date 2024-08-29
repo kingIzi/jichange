@@ -8,9 +8,14 @@
 
 <dialog #controlFound class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-lg">Found</h3>
+    <h3
+      class="font-bold mat-title-mediumn text-center"
+      *transloco="let t; read: 'auth.controlNumberDetails'"
+    >
+      {{ t("controlNumberFound") }}
+    </h3>
     <!-- <p class="py-4">Press ESC key or click the button below to close</p> -->
-    <form [formGroup]="foundFormGroup" class="grid grid-cols-2 gap-3">
+    <form [formGroup]="foundFormGroup" class="grid grid-cols-2 gap-3 pt-4">
       <div class="flex flex-col">
         <p
           *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
@@ -94,7 +99,7 @@
       <h6 class="text-left text-sm">
         {{ t("form.controlName") }} <span class="text-red-600">*</span>
       </h6>
-      <input
+      <!-- <input
         #controlNumber
         formControlName="control"
         (change)="setControlNumberValue(controlNumber.value)"
@@ -106,7 +111,24 @@
         <p class="text-xs text-red-600">
           {{ t("form.errors.controlName") }}
         </p>
-      </span>
+      </span> -->
+      <mat-form-field
+        color="primary"
+        accent="secondary"
+        class="example-full-width"
+      >
+        <mat-icon matPrefix>account_balance</mat-icon>
+        <input
+          matInput
+          [placeholder]="t('form.placeholders.controlName')"
+          value=""
+          type="text"
+          [formControl]="control"
+        />
+        <mat-error *ngIf="control && control.invalid && control.touched">
+          {{ t("form.errors.controlName") }}</mat-error
+        >
+      </mat-form-field>
     </div>
     <div
       *transloco="let y; read: 'actions'"
@@ -123,7 +145,8 @@
         (click)="submitControlNumberForm()"
         type="submit"
         form="control-number-form"
-        class="btn text-xs btn-outline font-inter btn-success w-24"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+        [disabled]="!controlNumberFormGroup.valid"
       >
         {{ y("submit") }}
       </button>

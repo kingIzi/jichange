@@ -44,7 +44,10 @@ import { Branch } from 'src/app/core/models/bank/setup/branch';
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
-import { InvoiceReportFormBanker } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import {
+  InvoiceReportForm,
+  InvoiceReportFormBanker,
+} from 'src/app/core/models/vendors/forms/invoice-report-form';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { InvoiceReportServiceService } from 'src/app/core/services/bank/reports/invoice-details/invoice-report-service.service';
@@ -574,9 +577,7 @@ export class AmendmentComponent implements OnInit {
         })?.Name || this.tr.translate('defaults.any'),
       vendor: string =
         this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
-          return (
-            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
-          );
+          return e.CompSno === Number(this.reportFormInvoiceDetails.Comp.value);
         })?.CompName || this.tr.translate('defaults.all'),
       customer: string =
         this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {
@@ -672,7 +673,7 @@ export class AmendmentComponent implements OnInit {
     this.createHeaderGroup();
     this.buildPage();
   }
-  requestAmendmentsReport(value: InvoiceDetailsForm) {
+  requestAmendmentsReport(value: InvoiceDetailsForm | InvoiceReportForm) {
     this.tableLoading = true;
     this.amendmentService
       .getAmendmentsReport(value)

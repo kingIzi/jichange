@@ -9,7 +9,7 @@
   },
   "loginForm": {
     "welcomeMessage": "Sign in to your account",
-    "signInMessage": "Enter your email & password to login",
+    "signInMessage": "Enter your username & password to login",
     "username": "Username",
     "password": "Password",
     "placeholders": {
@@ -34,8 +34,8 @@
     "rememberMe": "Remember me",
     "actions": {
       "signIn": "Sign in",
-      "controlNumberDetails": "Control No Details",
-      "register": "Register"
+      "controlNumberDetails": "Got a control number?",
+      "register": "Click here!"
     }
   },
   "vendorRegistration": {
@@ -90,12 +90,14 @@
   },
   "controlNumberDetails": {
     "title": "Control Number Details",
+    "controlNumberFound": "Control number found.",
     "controlFound": {
       "controlNo": "Control Number",
       "customerName": "Customer name",
       "paymentType": "Payment type",
       "itemTotalAmount": "Item total amount",
-      "balance": "balance"
+      "balance": "balance",
+      "currencyCode": "Currency code"
     },
     "form": {
       "controlName": "Control number",
@@ -118,6 +120,7 @@
     "forgotPasswordMessage": "Enter your mobile number and instructions will be sent to you.",
     "resetPasswordSuccessfull": "Resest password has been Successfuly sent!",
     "resetPasswordFailed": "Failed to send reset password",
+    "sendResetPasswordLink": "Send reset password link",
     "form": {
       "email": "Mobile number",
       "placeholders": {
@@ -125,6 +128,7 @@
       },
       "errors": {
         "email": "Please provide mobile number",
+        "invalidPhone": "Phone number is invalid.",
         "dialogs": {
           "invalidFormError": "Invalid form",
           "missingEmail": "Please provide a valid email address"
@@ -145,7 +149,7 @@
     "form": {
       "code": "Code",
       "placeholders": {
-        "code": "Enter code"
+        "code": "Enter 6 digit code"
       },
       "errors": {
         "code": "Please fill"

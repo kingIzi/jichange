@@ -16,7 +16,8 @@
     "close": "Funga",
     "success": "Mafanikio",
     "cancel": "Katisha",
-    "all": "Yote"
+    "all": "Yote",
+    "optional": "Hiari"
   },
   "forms": {
     "from": "Kutoka",
@@ -89,7 +90,9 @@
       "email": "Barua pepe",
       "bankUser": "Mtumiaji wa Benki(s)",
       "suspense": "Akaunti ya Kusubiri",
-      "deposit": "akaunti ya muuzaji"
+      "deposit": "akaunti ya muuzaji",
+      "smsSettings": "Mipangilio ya SMS",
+      "smsText": "Matini ya SMS"
     },
     "reports": {
       "overview": "Ripoti",
@@ -232,6 +235,16 @@
         {
           "label": "Akaunti ya Kusubiri",
           "routerLink": "/main/setup/suspense",
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+        },
+        {
+          "label": "Mipangilio ya SMS",
+          "routerLink": "/main/setup/sms-settings",
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+        },
+        {
+          "label": "Matini ya SMS",
+          "routerLink": "/main/setup/sms-text",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         }
       ]

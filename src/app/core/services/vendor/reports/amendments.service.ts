@@ -5,6 +5,7 @@ import { AmendmentReportForm } from 'src/app/core/models/vendors/forms/amendment
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import { InvoiceReportForm } from 'src/app/core/models/vendors/forms/invoice-report-form';
 
 @Injectable({
   providedIn: 'root',
@@ -12,11 +13,11 @@ import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-re
 export class AmendmentsService {
   constructor(private client: RequestClientService) {}
   public async getAmendmentsReport(
-    body: AmendmentReportForm | InvoiceDetailsForm
+    body: AmendmentReportForm | InvoiceDetailsForm | InvoiceReportForm
   ) {
     const data = await lastValueFrom(
       this.client.performPost<
-        AmendmentReportForm | InvoiceDetailsForm,
+        AmendmentReportForm | InvoiceDetailsForm | InvoiceReportForm,
         HttpDataResponse<GeneratedInvoice[] | number>
       >(`/api/Invoice/GetAmendReport`, body)
     );

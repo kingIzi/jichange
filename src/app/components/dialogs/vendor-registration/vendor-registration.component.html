@@ -52,102 +52,98 @@
     >
       <div class="flex flex-col space-y-1 w-full">
         <h6 class="text-left text-sm">
-          {{ t("vendorName") }} <span class="text-red-600">*</span>
+          {{ t("vendorName") }}
         </h6>
-        <input
-          type="text"
-          [placeholder]="t('placeholders.vendorName')"
-          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
-          [formControl]="compname"
-        />
-        <span *ngIf="compname && compname.invalid && compname.touched">
-          <p class="text-xs text-red-600">
-            {{ t("errors.vendorName") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1 w-full">
-        <h6 class="text-left text-sm">
-          {{ t("mobileNo") }} <span class="text-red-600">*</span>
-        </h6>
-        <app-phone-number-input
-          [inputSize]="'sm'"
-          [mobileNumber]="mob"
-        ></app-phone-number-input>
-        <span *ngIf="mob && mob.invalid && mob.touched">
-          <p class="text-xs text-red-600">
-            {{ t("errors.mobileNo") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1 w-full">
-        <h6 class="text-left text-sm">
-          {{ t("email") }} <span class="text-red-600">*</span>
-        </h6>
-        <input
-          type="text"
-          [placeholder]="t('placeholders.email')"
-          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black"
-          [formControl]="email"
-        />
-        <span *ngIf="email && email.invalid && email.touched">
-          <p class="text-xs text-red-600">
-            {{ t("errors.email") }}
-          </p>
-        </span>
-      </div>
-      <div class="flex flex-col space-y-1 w-full">
-        <h6 class="text-left text-sm">
-          {{ t("branch") }} <span class="text-red-600">*</span>
-        </h6>
-        <select
-          [formControl]="branch"
-          class="select select-sm select-bordered w-full max-w-xs"
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
         >
-          <option
-            disabled
-            selected
-            [value]="t('placeholders.branch')"
-            class="font-inter"
+          <input
+            matInput
+            value=""
+            type="text"
+            [formControl]="compname"
+            [placeholder]="t('placeholders.vendorName')"
+          />
+          <mat-error *ngIf="compname && compname.invalid && compname.touched">
+            {{ t("errors.vendorName") }}</mat-error
           >
-            {{ t("placeholders.branch") }}
-          </option>
-          <option
-            class="font-inter"
-            *ngFor="let branchDetail of branchDetails; index as ind"
-            [value]="branchDetail.Sno"
-          >
-            {{ branchDetail.Name }}
-          </option>
-        </select>
-        <span *ngIf="branch && branch.invalid && branch.touched">
-          <p class="text-xs text-red-600">
-            {{ t("errors.branch") }}
-          </p>
-        </span>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1 w-full">
-        <h6 class="text-left text-sm">
-          {{ t("accountNo") }} <span class="text-red-600">*</span>
+        <h6 class="text-left text-sm" *transloco="let y; read: 'defaults'">
+          {{ t("email") }} ({{ y("optional") }})
         </h6>
-        <input
-          type="text"
-          [formControl]="accno"
-          [placeholder]="t('placeholders.accountNo')"
-          class="input input-sm input-bordered w-full max-w-lg bg-transparent text-black font-inter"
-        />
-        <span *ngIf="accno && accno.invalid && accno.touched">
-          <p *ngIf="accno.hasError('required')" class="text-xs text-red-600">
-            {{ t("errors.accountNo") }}
-          </p>
-          <p *ngIf="accno.hasError('pattern')" class="text-xs text-red-600">
-            {{ t("errors.invalidAccountNo") }}
-          </p>
-        </span>
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+        >
+          <input
+            matInput
+            value=""
+            type="text"
+            [formControl]="email"
+            placeholder="Ex. here@example.com"
+          />
+          <mat-error *ngIf="email && email.invalid && email.touched">
+            {{ t("form.errors.customerName") }}</mat-error
+          >
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6 class="text-left text-sm">
-          {{ t("makerCheckerApproval") }} <span class="text-red-600">*</span>
+          {{ t("branch") }}
+        </h6>
+        <mat-form-field>
+          <mat-label>{{ t("errors.branch") }}</mat-label>
+          <mat-select [formControl]="branch">
+            @for (branchDetail of branchDetails; track branchDetail) {
+            <mat-option [value]="branchDetail.Sno">{{
+              branchDetail.Name
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="branch && branch.invalid && branch.touched">
+            {{ t("errors.branch") }}</mat-error
+          >
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6 class="text-left text-sm">
+          {{ t("accountNo") }}
+        </h6>
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+        >
+          <input
+            matInput
+            value=""
+            type="text"
+            [formControl]="accno"
+            [placeholder]="t('placeholders.vendorName')"
+          />
+          <mat-error *ngIf="accno && accno.invalid && accno.touched">
+            @if (accno.hasError('required')) {
+            {{ t("errors.accountNo") }}
+            } @else if (accno.hasError('pattern')) {
+            {{ t("errors.invalidAccountNo") }}
+            }
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6 class="text-left text-sm">
+          {{ t("mobileNo") }}
+        </h6>
+        <app-phone-number-input [mobileNumber]="mob"></app-phone-number-input>
+      </div>
+      <div class="flex flex-col space-y-1 w-full">
+        <h6 class="text-left text-sm">
+          {{ t("makerCheckerApproval") }}
         </h6>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -186,7 +182,7 @@
         <span
           *ngIf="check_status && check_status.invalid && check_status.touched"
         >
-          <p class="text-xs text-red-600">
+          <p class="text-xs text-red-500">
             {{ t("errors.branch") }}
           </p>
         </span>

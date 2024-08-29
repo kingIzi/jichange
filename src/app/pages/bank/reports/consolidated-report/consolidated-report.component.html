@@ -4,7 +4,7 @@
   <div class="flex flex-row items-center justify-between">
     <h2
       *transloco="let t; read: 'reports.invoiceConsolidated'"
-      class="text-lg font-bold"
+      class="text-lg font-bold lg:text-2xl"
     >
       {{ t("label") }}
     </h2>
@@ -21,19 +21,22 @@
         <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
           {{ t("from") }} {{ "(" + y("invoiceDate") + ")" }}
         </p>
-        <input
-          [formControl]="stdate"
-          type="date"
-          class="input input-sm input-bordered"
-        />
-        <span *ngIf="stdate && stdate.invalid && stdate.touched">
-          <p
-            *transloco="let t; read: 'forms.errors'"
-            class="text-danger-700 text-xs"
+        <mat-form-field>
+          <mat-label>Choose a date</mat-label>
+          <input matInput [formControl]="stdate" [matDatepicker]="startDate" />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="startDate"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #startDate></mat-datepicker>
+          <ng-container
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
           >
-            {{ t("startDate") }}
-          </p>
-        </span>
+            <mat-error *ngIf="stdate && stdate.invalid && stdate.touched">
+              {{ t("startDate") }}
+            </mat-error>
+          </ng-container>
+        </mat-form-field>
       </div>
       <div
         *transloco="let y; read: 'reports.invoiceDetails'"
@@ -42,20 +45,22 @@
         <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
           {{ t("to") }} {{ "(" + y("invoiceDate") + ")" }}
         </p>
-        <input
-          [formControl]="enddate"
-          type="date"
-          class="input input-sm input-bordered"
-          [min]="stdate.value"
-        />
-        <span *ngIf="enddate && enddate.invalid && enddate.touched">
-          <p
-            *transloco="let t; read: 'forms.errors'"
-            class="text-danger-700 text-xs"
+        <mat-form-field>
+          <mat-label>Choose a date</mat-label>
+          <input matInput [formControl]="enddate" [matDatepicker]="endDate" />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="endDate"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #endDate></mat-datepicker>
+          <ng-container
+            *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
           >
-            {{ t("endDate") }}
-          </p>
-        </span>
+            <mat-error *ngIf="enddate && enddate.invalid && enddate.touched">
+              {{ t("endDate") }}
+            </mat-error>
+          </ng-container>
+        </mat-form-field>
       </div>
       <div class="col-span-full flex flex-row items-center justify-end">
         <button

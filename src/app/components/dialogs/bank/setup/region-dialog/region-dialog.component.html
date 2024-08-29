@@ -50,10 +50,26 @@
     </h1>
     <div class="w-full grid grid-cols-2 gap-3 py-4">
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.countryDialog'" class="text-xs">
-          {{ t("country") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.countryDialog'"
+          class="text-xs text-black"
+        >
+          {{ t("country") }}
         </p>
-        <select
+        <mat-form-field *transloco="let t; read: 'setup.regionDialog.form'">
+          <mat-label>{{ t("placeholders.country") }}</mat-label>
+          <mat-select [formControl]="csno">
+            @for (country of countries; track region) {
+            <mat-option [value]="country.SNO">{{
+              country.Country_Name
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="csno && csno.invalid && csno.touched">
+            {{ t("errors.selectCountry") }}</mat-error
+          >
+        </mat-form-field>
+        <!-- <select
           [formControl]="csno"
           class="select select-sm select-bordered w-full"
         >
@@ -78,16 +94,28 @@
           >
             {{ t("selectCountry") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6
           *transloco="let t; read: 'setup.regionDialog'"
-          class="text-left text-xs"
+          class="text-left text-xs text-black"
         >
-          {{ t("region") }}<span class="text-red-600">*</span>
+          {{ t("region") }}
         </h6>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.regionDialog.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.name") }}</mat-label>
+          <input matInput [formControl]="region" />
+          <mat-error *ngIf="region && region.invalid && region.touched">
+            <ng-container>
+              {{ t("errors.missingRegion") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.regionDialog.form.placeholders'"
           #controlNumber
           [formControl]="region"
@@ -102,11 +130,11 @@
           >
             {{ t("missingRegion") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col w-full">
-        <p *transloco="let t; read: 'defaults'" class="text-xs">
-          {{ t("status") }}<span class="text-red-600">*</span>
+        <p *transloco="let t; read: 'defaults'" class="text-xs text-black">
+          {{ t("status") }}
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -167,7 +195,6 @@
         (click)="submitRegionForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!regionForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

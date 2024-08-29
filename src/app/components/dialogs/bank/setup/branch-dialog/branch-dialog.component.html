@@ -52,10 +52,25 @@
     </h1>
     <div action="" class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full py-8">
       <div class="flex flex-col space-y-1 w-full">
-        <h6 *transloco="let t; read: 'setup.branch'" class="text-left text-sm">
-          {{ t("branch") }} <span class="text-red-600">*</span>
+        <h6
+          *transloco="let t; read: 'setup.branch'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("branch") }}
         </h6>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.branch.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.branch") }}</mat-label>
+          <input matInput [formControl]="Name" />
+          <mat-error *ngIf="Name && Name.invalid && Name.touched">
+            <ng-container>
+              {{ t("errors.branch") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.branch.form.placeholders'"
           #currencyNumber
           [formControl]="Name"
@@ -71,13 +86,28 @@
           >
             {{ t("branch") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1 w-full">
-        <h6 *transloco="let t; read: 'setup.branch'" class="text-left text-sm">
-          {{ t("location") }} <span class="text-red-600">*</span>
+        <h6
+          *transloco="let t; read: 'setup.branch'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("location") }}
         </h6>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.branch.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.location") }}</mat-label>
+          <input matInput [formControl]="Location" />
+          <mat-error *ngIf="Location && Location.invalid && Location.touched">
+            <ng-container>
+              {{ t("errors.location") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.branch.form.placeholders'"
           #currencyNumber
           [formControl]="Location"
@@ -93,11 +123,11 @@
           >
             {{ t("location") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col w-full">
-        <p *transloco="let t; read: 'defaults'" class="text-xs">
-          {{ t("status") }}<span class="text-red-600">*</span>
+        <p *transloco="let t; read: 'defaults'" class="text-xs text-black">
+          {{ t("status") }}
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -160,7 +190,6 @@
         (click)="submitBranchForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!branchForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

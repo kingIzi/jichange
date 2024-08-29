@@ -78,6 +78,7 @@ import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { GeneratedInvoice } from 'src/app/core/models/vendors/generated-invoice';
 import { ReportFormInvoiceDetailsComponent } from '../../../../../components/dialogs/bank/reports/report-form-invoice-details/report-form-invoice-details.component';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Component({
   selector: 'app-transaction-details',
@@ -664,7 +665,7 @@ export class TransactionDetailsComponent implements OnInit {
     this.initialSubmission();
   }
   requestTransactionDetailsList(
-    form: TransactionDetailsReportForm | InvoiceReportForm
+    form: TransactionDetailsReportForm | InvoiceReportForm | InvoiceDetailsForm
   ) {
     this.tableLoading = true;
     this.reportsService

@@ -55,7 +55,7 @@
       >
         {{ t("country") }} <span class="text-red-600">*</span>
       </h6>
-      <input
+      <!-- <input
         *transloco="let t; read: 'setup.countryDialog.form.placeholders'"
         #controlNumber
         [formControl]="country_name"
@@ -73,7 +73,21 @@
         >
           {{ t("missingCountry") }}
         </p>
-      </span>
+      </span> -->
+      <mat-form-field
+        *transloco="let t; read: 'setup.countryDialog.form'"
+        class="example-full-width"
+      >
+        <mat-label>{{ t("placeholders.name") }}</mat-label>
+        <input matInput [formControl]="country_name" />
+        <mat-error
+          *ngIf="country_name && country_name.invalid && country_name.touched"
+        >
+          <ng-container>
+            {{ t("errors.missingCountry") }}
+          </ng-container>
+        </mat-error>
+      </mat-form-field>
     </div>
     <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
       <button

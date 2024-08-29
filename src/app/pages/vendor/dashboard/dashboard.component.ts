@@ -61,6 +61,10 @@ import {
   TABLE_DATA_SERVICE,
   VENDOR_TABLE_DATA_SERVICE,
 } from 'src/app/core/tokens/tokens';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-dashboard',
@@ -81,6 +85,10 @@ import {
     LoaderInfiniteSpinnerComponent,
     MatTableModule,
     MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   providers: [
     {

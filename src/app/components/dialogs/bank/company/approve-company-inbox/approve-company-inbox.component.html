@@ -180,11 +180,32 @@
     <div class="flex flex-col space-y-1 w-full">
       <h6
         *transloco="let t; read: 'company.inboxApproval.form.errors'"
-        class="text-left text-xs italic"
+        class="text-left text-xs italic text-black"
       >
-        {{ t("account") }} <span class="text-red-600">*</span>
+        {{ t("account") }}
       </h6>
-      <select
+      <mat-form-field *transloco="let t; read: 'company.inboxApproval.form'">
+        <mat-label>{{ t("placeholders.account") }}</mat-label>
+        <mat-select [formControl]="depositAccNo">
+          @if(selectAccountList.length > 0) { @for (selectAccount of
+          selectAccountList; track selectAccount) {
+          <mat-option [value]="selectAccount.Sus_Acc_No">{{
+            selectAccount.Sus_Acc_No
+          }}</mat-option>
+          } } @if(selectDepositAccountList.length > 0) { @for (depositAccount of
+          selectDepositAccountList; track depositAccount) {
+          <mat-option [value]="depositAccount.AccountNo">{{
+            depositAccount.AccountNo
+          }}</mat-option>
+          } }
+        </mat-select>
+        <mat-error
+          *ngIf="depositAccNo && depositAccNo.invalid && depositAccNo.touched"
+        >
+          {{ t("errors.account") }}</mat-error
+        >
+      </mat-form-field>
+      <!-- <select
         [formControl]="depositAccNo"
         class="select select-sm select-bordered w-full"
       >
@@ -204,12 +225,6 @@
           </option>
         </ng-container>
         <ng-container *ngIf="selectDepositAccountList.length > 0">
-          <!-- <option
-            *ngFor="let depositAccount of selectDepositAccountList"
-            [value]="depositAccount.Deposit_Acc_No"
-          >
-            {{ depositAccount.Deposit_Acc_No }}
-          </option> -->
           <option
             *ngFor="let depositAccount of selectDepositAccountList"
             [value]="depositAccount.AccountNo"
@@ -227,7 +242,7 @@
         >
           {{ t("account") }}
         </p>
-      </span>
+      </span> -->
     </div>
   </div>
   <div
@@ -244,7 +259,6 @@
     <button
       (click)="submitInboxApproval()"
       type="submit"
-      [disabled]="!formGroup.valid"
       form="vendor-registration-form"
       class="btn text-xs font-inter w-24 bg-primary hover:bg-primary hover:text-neutral-50 btn-ghost text-black shadow-4"
     >

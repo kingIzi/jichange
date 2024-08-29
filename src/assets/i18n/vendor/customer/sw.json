@@ -42,7 +42,7 @@
     "addNewCustomer": "Ongeza mteja mpya",
     "actions": {
       "modifyCustomer": "Rekebisha mteja",
-      "addCustomerMessage": "Una uhakika unataka kuongeza mteja huyu?",
+      "addCustomerMessage": "Una uhakika unataka kuongeza mteja huyu? Je, ungependa pia kuambatanisha ankara kwa hiyo?",
       "modifyCustomerMessage": "Je, una uhakika unataka kurekebisha mteja huyu?",
       "confirm": "Thibitisha",
       "areYouSureYouWantToAddANewCustomer": "Una uhakika unataka kuongeza mteja mpya?",

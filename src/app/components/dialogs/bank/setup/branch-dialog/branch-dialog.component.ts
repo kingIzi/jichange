@@ -34,6 +34,12 @@ import { AddBranchForm } from 'src/app/core/models/bank/forms/setup/branch/add-b
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-branch-dialog',
@@ -48,6 +54,12 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     TranslocoModule,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

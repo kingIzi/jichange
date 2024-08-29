@@ -322,7 +322,7 @@ export class BranchListComponent implements OnInit {
   }
   openBranchForm() {
     let dialogRef = this.dialog.open(BranchDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
     });
     dialogRef.componentInstance.addedBranch
@@ -334,7 +334,7 @@ export class BranchListComponent implements OnInit {
   }
   openEditBranchForm(branch: Branch) {
     let dialogRef = this.dialog.open(BranchDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         branch: branch,

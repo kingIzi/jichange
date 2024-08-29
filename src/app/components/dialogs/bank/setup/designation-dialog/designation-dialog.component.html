@@ -52,11 +52,23 @@
     <div class="flex flex-col space-y-1 w-full py-8">
       <h6
         *transloco="let t; read: 'setup.designation'"
-        class="text-left text-sm"
+        class="text-left text-xs text-black"
       >
-        {{ t("designation") }} <span class="text-red-600">*</span>
+        {{ t("designation") }}
       </h6>
-      <input
+      <mat-form-field
+        *transloco="let t; read: 'setup.designation.form'"
+        class="example-full-width"
+      >
+        <mat-label>{{ t("placeholders.name") }}</mat-label>
+        <input matInput [formControl]="desg" />
+        <mat-error *ngIf="desg && desg.invalid && desg.touched">
+          <ng-container>
+            {{ t("errors.name") }}
+          </ng-container>
+        </mat-error>
+      </mat-form-field>
+      <!-- <input
         *transloco="let t; read: 'setup.designation.form.placeholders'"
         #controlNumber
         [formControl]="desg"
@@ -71,7 +83,7 @@
         >
           {{ t("name") }}
         </p>
-      </span>
+      </span> -->
     </div>
     <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
       <button
@@ -87,7 +99,6 @@
         (click)="submitDesignationForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!designationForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}

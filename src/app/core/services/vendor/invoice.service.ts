@@ -24,6 +24,12 @@ export class InvoiceService {
     );
     return data;
   }
+  public isExistInvoice(compid: number, invno: string) {
+    let data = this.client.performGet<HttpDataResponse<number | boolean>>(
+      `/api/Invoice/IsExistInvoice?compid=${compid}&invno=${invno}`
+    );
+    return data;
+  }
   public async invoiceDetailsById(body: { compid: number; invid: number }) {
     let data = await lastValueFrom(
       this.client.performPost<

@@ -71,6 +71,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { BankService } from 'src/app/core/services/bank/setup/bank/bank.service';
 import { EmployeeDetail } from 'src/app/core/models/bank/setup/employee-detail';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
 
 @Component({
   selector: 'app-invoice-details',
@@ -489,7 +490,7 @@ export class InvoiceDetailsComponent implements OnInit {
     );
     let startDateLabel = `${this.tr.translate(
       'forms.from'
-    )} (${this.tr.translate('reports.overview.paymentDate')})`;
+    )} (${this.tr.translate('reports.invoiceDetails.invoiceDate')})`;
     let [startDateY1, startDateY2] = TableUtilities.writePdfTextAlignedLeft(
       doc,
       startDateLabel,
@@ -497,7 +498,7 @@ export class InvoiceDetailsComponent implements OnInit {
       branchY2 * 1.25
     );
     let endDateLabel = `${this.tr.translate('forms.to')} (${this.tr.translate(
-      'reports.overview.paymentDate'
+      'reports.invoiceDetails.invoiceDate'
     )})`;
     let [endDateY1, endDateY2] = TableUtilities.writePdfTextAlignedRight(
       doc,
@@ -578,7 +579,7 @@ export class InvoiceDetailsComponent implements OnInit {
       }
     });
   }
-  requestInvoiceDetails(body: InvoiceReportForm) {
+  requestInvoiceDetails(body: InvoiceReportForm | InvoiceDetailsForm) {
     this.tableLoading = true;
     this.invoiceReportService
       .getInvoiceReport(body)
@@ -725,21 +726,6 @@ export class InvoiceDetailsComponent implements OnInit {
   isCashAmountColumn(index: number) {
     return index === InvoiceDetailsTable.TOTAL;
   }
-  // submitFilterForm() {
-  //   if (this.filterFormGroup.valid) {
-  //     let form = { ...this.filterFormGroup.value } as InvoiceReportFormVendor;
-  //     form.Comp = this.getUserProfile().InstID;
-  //     if (form.stdate) {
-  //       form.stdate = AppUtilities.reformatDate(this.stdate.value.split('-'));
-  //     }
-  //     if (form.enddate) {
-  //       form.enddate = AppUtilities.reformatDate(this.enddate.value.split('-'));
-  //     }
-  //     this.requestInvoiceDetails(form);
-  //   } else {
-  //     this.filterFormGroup.markAllAsTouched();
-  //   }
-  // }
   getTableDataSource() {
     return this.tableDataService.getDataSource();
   }

@@ -450,9 +450,7 @@ export class InvoiceCancelledComponent implements OnInit {
         })?.Name || this.tr.translate('defaults.any'),
       vendor: string =
         this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
-          return (
-            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
-          );
+          return e.CompSno === Number(this.reportFormInvoiceDetails.Comp.value);
         })?.CompName || this.tr.translate('defaults.all'),
       customer: string =
         this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {
@@ -551,7 +549,7 @@ export class InvoiceCancelledComponent implements OnInit {
     this.createFilterForm();
     //this.buildPage();
   }
-  requestCancelledInvoice(value: InvoiceDetailsForm) {
+  requestCancelledInvoice(value: InvoiceDetailsForm | InvoiceReportForm) {
     this.tableLoading = true;
     this.cancelledService
       .getPaymentReport(value)

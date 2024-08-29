@@ -20,7 +20,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -136,6 +136,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   constructor(
     private appConfig: AppConfigService,
+    private activatedRoute: ActivatedRoute,
     private dialog: MatDialog,
     private tr: TranslocoService,
     private fb: FormBuilder,
@@ -251,6 +252,7 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.tableDataService.prepareDataSource(this.paginator, this.sort);
     this.dataSourceFilterPredicate();
     this.dataSourceSortingAccessor();
+    this.examineActivatedRoute();
   }
   private requestGeneratedInvoice() {
     this.tableLoading = true;
@@ -295,9 +297,13 @@ export class GeneratedInvoiceListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`generated.deliver.deliveryCodeSentSuccessfully`),
-        5000
+      let msg = this.tr.translate(
+        `generated.deliver.deliveryCodeSentSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        msg,
+        (e) => {},
+        this.tr.translate(`actions.ok`)
       );
       let invoice = result.response as GeneratedInvoice;
       let index = this.tableDataService
@@ -315,22 +321,6 @@ export class GeneratedInvoiceListComponent implements OnInit {
     this.invoiceService
       .addDeliveryCode(body)
       .then((result) => {
-        // if (
-        //   typeof result.response === 'string' &&
-        //   result.response.toLocaleLowerCase() ===
-        //     'Delivery Code created Successful & sent to customer'.toLocaleLowerCase()
-        // ) {
-        //   let sal = AppUtilities.sweetAlertSuccessMessage(
-        //     this.tr.translate(`generated.deliver.deliveryCodeSentSuccessfully`),
-        //     5000
-        //   );
-        // } else {
-        //   AppUtilities.openDisplayMessageBox(
-        //     this.displayMessageBox,
-        //     this.tr.translate(`defaults.failed`),
-        //     this.tr.translate(`generated.deliver.failedToSendDeliveryCode`)
-        //   );
-        // }
         this.parseSendInvoiceDeliveryCodeResponse(result);
         this.startLoading = false;
         this.cdr.detectChanges();
@@ -362,11 +352,26 @@ export class GeneratedInvoiceListComponent implements OnInit {
   private invoiceStatusStyle(status: string) {
     if (status && status.toLocaleLowerCase() === 'active') {
       return 'invoice-active';
-    } else if (status.toLocaleLowerCase() === 'overdue') {
+    } else if (status && status.toLocaleLowerCase() === 'overdue') {
       return 'invoice-overdue';
-    } else if (status.toLocaleLowerCase() === 'expired') {
+    } else if (status && status.toLocaleLowerCase() === 'expired') {
       return 'invoice-expired';
     } else return 'invoice-completed';
+  }
+  private examineActivatedRoute() {
+    this.activatedRoute.queryParams.subscribe({
+      next: (params) => {
+        try {
+          if (params && params['invno']) {
+            let invno = atob(params['invno']);
+            this.tableSearch.setValue(invno);
+          }
+          this.cdr.detectChanges();
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
   }
   ngOnInit(): void {
     this.createHeadersForm();
@@ -526,8 +531,11 @@ export class GeneratedInvoiceListComponent implements OnInit {
     });
     dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
       dialogRef.close();
-      let m = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate('generated.addedInvoiceSuccessfully')
+      let msg = this.tr.translate('generated.addedInvoiceSuccessfully');
+      AppUtilities.showSuccessMessage(
+        msg,
+        (e) => {},
+        this.tr.translate(`actions.ok`)
       );
       this.requestGeneratedInvoice();
     });

@@ -189,8 +189,11 @@ export class CustomersListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate('customer.removedCustomerSuccessfully')
+      let msg = this.tr.translate('customer.removedCustomerSuccessfully');
+      AppUtilities.showSuccessMessage(
+        msg,
+        () => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -338,6 +341,10 @@ export class CustomersListComponent implements OnInit {
     let dialogRef = this.dialog.open(CustomersDialogComponent, {
       width: '800px',
       disableClose: true,
+      data: {
+        customer: null,
+        allowAttachInvoice: true,
+      },
     });
     dialogRef.componentInstance.addedCustomer
       .asObservable()
@@ -349,7 +356,9 @@ export class CustomersListComponent implements OnInit {
   openCustomerEditDialog(customer: Customer) {
     let dialogRef = this.dialog.open(CustomersDialogComponent, {
       width: '800px',
-      data: customer,
+      data: {
+        customer: customer,
+      },
       disableClose: true,
     });
     dialogRef.componentInstance.addedCustomer

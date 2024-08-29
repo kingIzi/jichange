@@ -8,7 +8,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   TRANSLOCO_SCOPE,
   TranslocoModule,
@@ -132,7 +132,7 @@ export class InboxApprovalComponent implements OnInit {
     private approvalService: ApprovalService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    private fileHandler: FileHandlerService,
+    private router: Router,
     @Inject(TABLE_DATA_SERVICE)
     private tableDataService: TableDataService<Company>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
@@ -382,9 +382,23 @@ export class InboxApprovalComponent implements OnInit {
         company: company,
       },
     });
-    dialogRef.componentInstance.approved.asObservable().subscribe(() => {
+    dialogRef.componentInstance.approved.asObservable().subscribe((compid) => {
       dialogRef.close();
-      this.requestCompanyInbox();
+      let msg = this.tr.translate(`company.inboxApproval.approvedSuccessfully`);
+      let path = '/main/company/summary';
+      let queryParams = {
+        compid: btoa(compid.toString()),
+        //compid: btoa((result.response as Company).CompSno.toString()),
+      };
+      AppUtilities.showSuccessMessage(
+        msg,
+        () =>
+          this.router.navigate([path], {
+            queryParams: queryParams,
+          }),
+        this.tr.translate('actions.view')
+      );
+      //this.requestCompanyInbox();
     });
   }
   getTableDataSource() {

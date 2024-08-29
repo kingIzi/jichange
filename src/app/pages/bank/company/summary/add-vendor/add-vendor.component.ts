@@ -59,6 +59,14 @@ import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
 //import { ToastrService } from 'ngx-toastr';
 import { toast, NgxSonnerToaster } from 'ngx-sonner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'app-add-vendor',
@@ -72,6 +80,14 @@ import { toast, NgxSonnerToaster } from 'ngx-sonner';
     LoaderInfiniteSpinnerComponent,
     NgxSonnerToaster,
     RouterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatRadioModule,
   ],
   templateUrl: './add-vendor.component.html',
   styleUrl: './add-vendor.component.scss',
@@ -137,27 +153,6 @@ export class AddVendorComponent implements OnInit {
       first()
     );
     return await lastValueFrom(found$);
-  }
-  private determineAddCompanyErrorMessage(message: string) {
-    if (
-      message.toLocaleLowerCase() ===
-      'Email Address already Exist'.toLocaleLowerCase()
-    ) {
-      return this.tr.translate(
-        `company.summary.companyForm.dialogs.emailAddressExists`
-      );
-    } else if (
-      message.toLocaleLowerCase() ===
-      'Mobile number already Exist'.toLocaleLowerCase()
-    ) {
-      return this.tr.translate(
-        `company.summary.companyForm.dialogs.mobileNumberAlreadyExists`
-      );
-    } else {
-      return this.tr.translate(
-        `company.summary.companyForm.dialogs.failedToAddCompany`
-      );
-    }
   }
   private createForm() {
     this.companySummaryForm = this.fb.group({
@@ -391,13 +386,6 @@ export class AddVendorComponent implements OnInit {
         return this.tr.translate('company.summary.actions.failedToAddCompany');
     }
   }
-  // private redirectVendor(path: string, compid: string) {
-  //   return (e: MouseEvent) => {
-  //     this.router.navigate([path], {
-  //       queryParams: { compid: compid },
-  //     });
-  //   };
-  // }
   private assignInsertCompanyResponse(
     result: HttpDataResponse<Company | number>,
     message: string

@@ -227,8 +227,16 @@ export class CountryListComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(
-        this.tr.translate(`setup.countryDialog.form.dialog.removedSuccessfully`)
+      // let sal = AppUtilities.sweetAlertSuccessMessage(
+      //   this.tr.translate(`setup.countryDialog.form.dialog.removedSuccessfully`)
+      // );
+      let message = this.tr.translate(
+        `setup.countryDialog.form.dialog.removedSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e) => {},
+        this.tr.translate('actions.ok')
       );
       let index = this.tableDataService
         .getDataSource()
@@ -309,7 +317,7 @@ export class CountryListComponent implements OnInit {
   }
   openAddCountryDialog() {
     let dialogRef = this.dialog.open(CountryDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
     });
     dialogRef.componentInstance.addedCountry
@@ -321,7 +329,7 @@ export class CountryListComponent implements OnInit {
   }
   openEditCountryDialog(country: Country) {
     let dialogRef = this.dialog.open(CountryDialogComponent, {
-      width: '600px',
+      width: '800px',
       disableClose: true,
       data: {
         country: country,

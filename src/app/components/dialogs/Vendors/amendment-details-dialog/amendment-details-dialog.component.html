@@ -54,7 +54,19 @@
       <p *transloco="let t; read: 'invoice.form'" class="text-xs">
         {{ t("invoiceNo") }}<span class="text-red-600">*</span>
       </p>
-      <input
+      <mat-form-field
+        *transloco="let t; read: 'invoice.form'"
+        class="example-full-width"
+      >
+        <mat-label>{{ t("placeholders.invoiceNo") }}</mat-label>
+        <input matInput [formControl]="invno" />
+        <mat-error *ngIf="invno && invno.invalid && invno.touched">
+          <ng-container>
+            {{ t("errors.invoiceNo") }}
+          </ng-container>
+        </mat-error>
+      </mat-form-field>
+      <!-- <input
         *transloco="let t; read: 'invoice.form.placeholders'"
         type="text"
         [placeholder]="t('invoiceNo')"
@@ -69,7 +81,7 @@
         >
           {{ t("invoiceNo") }}
         </p>
-      </span>
+      </span> -->
     </div>
     <div class="flex flex-col space-y-1">
       <p *transloco="let t; read: 'invoice.form'" class="text-xs">

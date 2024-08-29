@@ -5,7 +5,10 @@
 
 <div class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
-    <h2 *transloco="let t; read: 'setup.smtp'" class="text-lg font-bold">
+    <h2
+      *transloco="let t; read: 'setup.smtp'"
+      class="text-lg lg:text-2xl font-bold"
+    >
       {{ t("smtp") }}
     </h2>
     <button

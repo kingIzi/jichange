@@ -1,6 +1,9 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
 <app-success-message-box #successMessageBox></app-success-message-box>
 <app-submit-message-box #submitMessagBox></app-submit-message-box>
+<app-optional-confirm-message-box
+  #optionalConfirmMessageBox
+></app-optional-confirm-message-box>
 <app-loader-infinite-spinner
   [show]="startLoading"
 ></app-loader-infinite-spinner>
@@ -51,68 +54,60 @@
     <div class="grid grid-cols-2 w-full py-8 gap-3">
       <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
         <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
-          {{ t("customerName") }} <span class="text-red-600">*</span>
+          {{ t("customerName") }}
         </h6>
-        <input
-          *transloco="let t; read: 'customer.form.placeholders'"
-          #controlNumber
-          [formControl]="CName"
-          type="text"
-          [placeholder]="t('customerName')"
-          class="input input-sm input-bordered w-full bg-transparent text-black"
-        />
-        <span *ngIf="CName && CName.invalid && CName.touched">
-          <p
-            *transloco="let t; read: 'customer.form.errors'"
-            class="text-xs text-red-600"
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+          *transloco="let t; read: 'customer'"
+        >
+          <input
+            matInput
+            value=""
+            type="text"
+            [formControl]="CName"
+            [placeholder]="t('form.placeholders.customerName')"
+          />
+          <mat-error *ngIf="CName && CName.invalid && CName.touched">
+            {{ t("form.errors.customerName") }}</mat-error
           >
-            {{ t("customerName") }}
-          </p>
-        </span>
+        </mat-form-field>
       </div>
       <div class="flex flex-col col-span-full lg:col-span-1 space-y-1 w-full">
         <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
-          {{ t("mobileNo") }} <span class="text-red-600">*</span>
+          {{ t("mobileNo") }}
         </h6>
         <span class="relative">
           <app-phone-number-input
             [mobileNumber]="Mobile_Number"
-            [inputSize]="'sm'"
           ></app-phone-number-input>
         </span>
-        <span
-          *ngIf="
-            Mobile_Number && Mobile_Number.invalid && Mobile_Number.touched
-          "
-        >
-          <p
-            *transloco="let t; read: 'customer.form.errors'"
-            class="text-xs text-red-600"
-          >
-            {{ t("mobileNo") }}
-          </p>
-        </span>
       </div>
-      <div class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1">
+      <div
+        *transloco="let y; read: 'defaults'"
+        class="flex flex-col space-y-1 w-full col-span-full lg:col-span-1"
+      >
         <h6 *transloco="let t; read: 'customer.form'" class="text-left text-sm">
-          {{ t("emailId") }}
+          {{ t("emailId") }} ({{ y("optional") }})
         </h6>
-        <input
-          *transloco="let t; read: 'customer.form.placeholders'"
-          #emailInput
-          [formControl]="Mail"
-          type="email"
-          [placeholder]="t('emailId')"
-          class="input input-sm font-inter input-bordered w-full bg-transparent text-black"
-        />
-        <span *ngIf="Mail && Mail.invalid && Mail.touched">
-          <p
-            *transloco="let t; read: 'customer.form.errors'"
-            class="text-xs text-red-600"
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width"
+          *transloco="let t; read: 'customer'"
+        >
+          <input
+            matInput
+            value=""
+            type="text"
+            [formControl]="Mail"
+            placeholder="Ex. yaee@example.com"
+          />
+          <mat-error *ngIf="Mail && Mail.invalid && Mail.touched">
+            {{ t("form.errors.emailId") }}</mat-error
           >
-            {{ t("emailId") }}
-          </p>
-        </span>
+        </mat-form-field>
       </div>
     </div>
     <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">

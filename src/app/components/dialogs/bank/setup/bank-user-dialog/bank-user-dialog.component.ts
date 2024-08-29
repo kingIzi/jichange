@@ -42,6 +42,12 @@ import { NgxLoadingModule } from 'ngx-loading';
 import { AddBankUserForm } from 'src/app/core/models/bank/forms/setup/bank-user/add-bank-user-form';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-bank-user-dialog',
@@ -55,10 +61,15 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     DisplayMessageBoxComponent,
     SuccessMessageBoxComponent,
     TranslocoModule,
-    //LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
     PhoneNumberInputComponent,
     NgxLoadingModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   providers: [
     {
@@ -166,8 +177,9 @@ export class BankUserDialogComponent implements OnInit {
       lname: this.fb.control('', [Validators.required]),
       user: this.fb.control('', [Validators.required]),
       desg: this.fb.control('', [Validators.required]),
-      branch: this.fb.control('', []),
-      email: this.fb.control('', [Validators.email]),
+      branch: this.fb.control('', [Validators.required]),
+      email: this.fb.control('', [Validators.required, Validators.email]),
+      //mobile: this.fb.control('', [Validators.required]),
       mobile: this.fb.control('', [
         Validators.required,
         Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
@@ -182,22 +194,18 @@ export class BankUserDialogComponent implements OnInit {
   }
   private setEditFormValues() {
     this.bankUserForm.setValue({
-      empid: this.employeeDetail.Emp_Id_No,
-      fname: this.employeeDetail.First_Name,
-      mname: this.employeeDetail.Middle_name,
-      lname: this.employeeDetail.Last_name,
-      user: this.employeeDetail.User_name,
-      desg: this.employeeDetail.Desg_Id
-        ? this.employeeDetail.Desg_Id.toString()
-        : '',
-      branch: this.employeeDetail.Branch_Sno
-        ? this.employeeDetail?.Branch_Sno.toString()
-        : '',
-      email: this.employeeDetail.Email_Address,
-      mobile: this.employeeDetail.Mobile_No,
-      gender: this.employeeDetail.Emp_Status,
+      empid: this.employeeDetail?.Emp_Id_No ?? '',
+      fname: this.employeeDetail?.First_Name ?? '',
+      mname: this.employeeDetail?.Middle_name ?? '',
+      lname: this.employeeDetail?.Last_name ?? '',
+      user: this.employeeDetail?.User_name ?? '',
+      desg: this.employeeDetail?.Desg_Id ?? '',
+      branch: this.employeeDetail?.Branch_Sno ?? '',
+      email: this.employeeDetail?.Email_Address ?? '',
+      mobile: this.employeeDetail?.Mobile_No ?? '',
+      gender: this.employeeDetail?.Emp_Status ?? '',
       dummy: true,
-      sno: this.employeeDetail.Detail_Id,
+      sno: this.employeeDetail?.Detail_Id,
       userid: this.getUserProfile().Usno,
     });
   }
@@ -287,6 +295,10 @@ export class BankUserDialogComponent implements OnInit {
       case 'Missing SNO'.toLocaleLowerCase():
       case 'Missing user id'.toLocaleLowerCase():
         return this.tr.translate(`errors.missingUserIdMessage`);
+      case 'Username exists'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.usernameExists`);
+      case 'Employee Id exists'.toLocaleLowerCase():
+        return this.tr.translate(`setup.bankUser.form.dialog.employeeIdExists`);
       default:
         return this.tr.translate(`setup.bankUser.failedToAddUser`);
     }

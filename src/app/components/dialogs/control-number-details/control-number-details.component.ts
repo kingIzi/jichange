@@ -30,6 +30,10 @@ import { GetControlResponse } from 'src/app/core/models/vendors/get-control-resp
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TimeoutError } from 'rxjs';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-control-number-details',
@@ -46,6 +50,10 @@ import { PerformanceUtils } from 'src/app/utilities/performance-utils';
     TranslocoModule,
     LoaderRainbowComponent,
     LoaderInfiniteSpinnerComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
   ],
 })
 export class ControlNumberDetailsComponent implements OnInit {

@@ -20,6 +20,8 @@ import { PaymentDetail } from '../models/vendors/payment-detail';
 import { CompanyUser } from '../models/vendors/company-user';
 import { TransactionDetail } from '../models/bank/reports/transaction-detail';
 import { InvoiceConsolidatedReport } from '../models/bank/reports/invoice-consolidated-report';
+import { SmsSetting, SmsSettingsData } from '../models/bank/setup/sms-setting';
+import { SmsText } from '../models/bank/setup/sms-text';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -39,6 +41,8 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | TransactionDetail
     | CancelledInvoice
     | InvoiceConsolidatedReport
+    | SmsSettingsData
+    | SmsText
   >
 >('TABLE_DATA_SERVICE');
 

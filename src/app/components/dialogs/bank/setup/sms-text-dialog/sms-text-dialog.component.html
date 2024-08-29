@@ -1,0 +1,174 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<dialog #confirmAddSmsText id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("confirm") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'actions'">
+      {{ t("saveChanges") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddSmsText.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddSmsText.close(); addSmsText()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("confirm") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
+<div class="flex flex-col w-full h-full">
+  <form
+    id="sms-text-form"
+    [formGroup]="formGroup"
+    class="py-10 px-10 flex flex-col divide-y"
+  >
+    <h1
+      *transloco="let t; read: 'setup.smsText'"
+      class="text-xl md:text-2xl p-0"
+    >
+      {{ t("title") }}
+    </h1>
+    <div class="grid grid-cols-2 gap-3 w-full py-8">
+      <div class="flex flex-col space-y-1 col-span-full">
+        <p
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("flowId") }}
+        </p>
+        <mat-form-field *transloco="let t; read: 'setup.smsText.form'">
+          <mat-label>{{ t("placeholders.flowId") }}</mat-label>
+          <mat-select [formControl]="flow">
+            @for (flow_number of flows; track flow_number) {
+            <mat-option [value]="flow_number.flow.toString()">{{
+              flow_number.label
+            }}</mat-option>
+            }
+          </mat-select>
+          <mat-error *ngIf="flow && flow.invalid && flow.touched">
+            {{ t("errors.flowId") }}</mat-error
+          >
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("subjectEnglish") }}
+        </p>
+        <mat-form-field
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.subjectEnglish") }}</mat-label>
+          <input matInput [formControl]="sub" />
+          <mat-error *ngIf="sub && sub.invalid && sub.touched">
+            <ng-container>
+              {{ t("errors.subjectEnglish") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col space-y-1">
+        <p
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("subjectSwahili") }}
+        </p>
+        <mat-form-field
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.subjectSwahili") }}</mat-label>
+
+          <input matInput [formControl]="subloc" />
+          <mat-error *ngIf="subloc && subloc.invalid && subloc.touched">
+            <ng-container>
+              {{ t("errors.subjectSwahili") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col col-span-full lg:col-span-1 space-y-1">
+        <p
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("smsText") }}
+        </p>
+        <mat-form-field
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.smsText") }}</mat-label>
+          <textarea [formControl]="text" matInput></textarea>
+          <mat-error *ngIf="text && text.invalid && text.touched">
+            <ng-container>
+              {{ t("errors.smsText") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-col col-span-full lg:col-span-1 space-y-1">
+        <p
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="text-left text-xs text-black"
+        >
+          {{ t("smsSwahili") }}
+        </p>
+        <mat-form-field
+          *transloco="let t; read: 'setup.smsText.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.smsSwahili") }}</mat-label>
+          <textarea [formControl]="loctext" matInput></textarea>
+          <mat-error *ngIf="loctext && loctext.invalid && loctext.touched">
+            <ng-container>
+              {{ t("errors.smsSwahili") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="flex flex-row space-x-2 items-center w-full justify-end pt-2">
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="closeDialog()"
+        type="button"
+        class="btn text-xs font-inter btn-ghost text-neutral-500 w-24"
+      >
+        {{ t("close") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitSmsText()"
+        type="submit"
+        form="sms-text-form"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </form>
+</div>

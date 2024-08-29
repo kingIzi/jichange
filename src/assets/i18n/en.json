@@ -17,7 +17,8 @@
     "close": "Close",
     "success": "Success",
     "cancel": "Cancel",
-    "all": "All"
+    "all": "All",
+    "optional": "Optional"
   },
   "forms": {
     "from": "From",
@@ -128,23 +129,33 @@
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "smtp",
+          "label": "SMTP",
           "routerLink": "/main/setup/smtp",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "emailText",
+          "label": "Email Text",
           "routerLink": "/main/setup/email",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
-          "label": "bankUser",
+          "label": "Bank User",
           "routerLink": "/main/setup/user",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         },
         {
           "label": "Suspense account",
           "routerLink": "/main/setup/suspense",
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+        },
+        {
+          "label": "SMS Settings",
+          "routerLink": "/main/setup/sms-settings",
+          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+        },
+        {
+          "label": "SMS Text",
+          "routerLink": "/main/setup/sms-text",
           "access": ["Administrator", "Recruitment Manager", "Customer Support"]
         }
       ]
@@ -262,7 +273,9 @@
       "bankUser": "Bank user(s)",
       "language": "Language(s)",
       "suspense": "Suspense account",
-      "deposit": "Vendor account"
+      "deposit": "Vendor account",
+      "smsSettings": "SMS Settings",
+      "smsText": "SMS Text"
     },
     "reports": {
       "overview": "Report(s)",

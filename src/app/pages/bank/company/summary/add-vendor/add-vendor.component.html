@@ -4,7 +4,6 @@
   [show]="startLoading"
 ></app-loader-infinite-spinner>
 
-<!-- <ngx-sonner-toaster [richColors]="true" /> -->
 <ngx-sonner-toaster
   position="top-right"
   [richColors]="true"
@@ -81,104 +80,94 @@
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("customer") }} <span class="text-red-600">*</span>
+              {{ t("customer") }}
             </h6>
-            <input
-              *transloco="
-                let t;
-                read: 'company.summary.companyForm.placeholders'
-              "
-              [placeholder]="t('customer')"
-              type="text"
-              [formControl]="compname"
-              class="input input-sm input-bordered w-full bg-transparent text-black"
-            />
-            <span *ngIf="compname && compname.invalid && compname.touched">
-              <p
+            <mat-form-field class="example-full-width">
+              <input
+                *transloco="
+                  let t;
+                  read: 'company.summary.companyForm.placeholders'
+                "
+                matInput
+                [placeholder]="t('customer')"
+                [formControl]="compname"
+                value=""
+              />
+              <mat-error
                 *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-danger-600 text-xs"
               >
                 {{ t("customer") }}
-              </p>
-            </span>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("tinNo") }} <span class="text-red-600">*</span>
+              {{ t("tinNo") }}
             </h6>
-            <input
-              *transloco="
-                let t;
-                read: 'company.summary.companyForm.placeholders'
-              "
-              [formControl]="tin"
-              [placeholder]="t('tinNo')"
-              type="text"
-              class="input input-sm input-bordered w-full bg-transparent text-black"
-            />
-            <span *ngIf="tin && tin.invalid && tin.touched">
-              <ng-container
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-              >
-                <p
-                  class="text-xs text-red-600"
-                  *ngIf="tin.hasError('required')"
+            <mat-form-field class="example-full-width">
+              <input
+                *transloco="
+                  let t;
+                  read: 'company.summary.companyForm.placeholders'
+                "
+                matInput
+                [placeholder]="t('tinNo')"
+                [formControl]="tin"
+                value=""
+              />
+              <mat-error *ngIf="tin && tin.invalid && tin.touched">
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
                 >
+                  @if (tin.hasError('required')) {
                   {{ t("tinNo") }}
-                </p>
-                <p class="text-xs text-red-600" *ngIf="tin.hasError('pattern')">
+                  } @else if (tin.hasError('pattern')) {
                   {{ t("invalidTin") }}
-                </p>
-              </ng-container>
-            </span>
+                  }
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("mobileNo") }} <span class="text-red-600">*</span>
+              {{ t("mobileNo") }}
             </h6>
             <app-phone-number-input
               [mobileNumber]="mob"
             ></app-phone-number-input>
-            <span *ngIf="mob && mob.invalid && mob.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-danger-600 text-xs"
-              >
-                {{ t("mobileNo") }}
-              </p>
-            </span>
           </div>
           <div class="flex flex-col space-y-1">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("emailId") }}<span class="text-red-600">*</span>
+              {{ t("emailId") }}
             </h6>
-            <input
-              *transloco="
-                let t;
-                read: 'company.summary.companyForm.placeholders'
-              "
-              [formControl]="email"
-              [placeholder]="t('emailId')"
-              type="text"
-              class="input input-sm input-bordered w-full bg-transparent text-black"
-            />
-            <span *ngIf="email && email.invalid && email.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
-              >
-                {{ t("emailId") }}
-              </p>
-            </span>
+            <mat-form-field class="example-full-width">
+              <input
+                *transloco="
+                  let t;
+                  read: 'company.summary.companyForm.placeholders'
+                "
+                matInput
+                [placeholder]="t('emailId')"
+                [formControl]="email"
+                type="email"
+              />
+              <mat-error *ngIf="email && email.invalid && email.touched">
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("emailId") }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1">
             <h6
@@ -186,82 +175,64 @@
               class="text-left text-xs"
             >
               {{ t("directorName") }}
-            </h6>
-            <input
-              *transloco="
-                let t;
-                read: 'company.summary.companyForm.placeholders'
-              "
-              [formControl]="dname"
-              [placeholder]="t('directorName')"
-              type="text"
-              class="input input-sm input-bordered w-full bg-transparent text-black"
-            />
-            <span *ngIf="dname && dname.invalid && dname.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
+              <span *transloco="let y; read: 'defaults'"
+                >({{ y("optional") }})</span
               >
-                {{ t("directorName") }}
-              </p>
-            </span>
+            </h6>
+            <mat-form-field class="example-full-width">
+              <input
+                *transloco="
+                  let t;
+                  read: 'company.summary.companyForm.placeholders'
+                "
+                [placeholder]="t('directorName')"
+                [formControl]="dname"
+                matInput
+                type="text"
+              />
+              <mat-error *ngIf="dname && dname.invalid && dname.touched">
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("directorName") }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("makerChecker") }} <span class="text-red-600">*</span>
+              {{ t("makerChecker") }}
             </h6>
-            <div class="flex flex-row items-center">
-              <div class="form-control">
-                <label
-                  *transloco="let y; read: 'defaults'"
-                  class="label cursor-pointer flex flex-row space-x-0.5"
-                >
-                  <span class="label-text text-xs font-inter">
-                    {{ y("yes") }}
-                  </span>
-                  <input
-                    type="radio"
-                    name="makerChecker"
-                    [formControl]="check_status"
-                    class="radio radio-xs"
-                    [value]="y('yes')"
-                    checked
-                  />
-                </label>
-              </div>
-              <div class="form-control">
-                <label
-                  *transloco="let y; read: 'defaults'"
-                  class="label cursor-pointer flex flex-row space-x-0.5"
-                >
-                  <span class="label-text text-xs font-inter">
-                    {{ y("no") }}
-                  </span>
-                  <input
-                    [formControl]="check_status"
-                    type="radio"
-                    name="makerChecker"
-                    [value]="y('no')"
-                    class="radio radio-xs"
-                  />
-                </label>
-              </div>
-            </div>
-            <span
-              *ngIf="
-                check_status && check_status.invalid && check_status.touched
-              "
-            >
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
+            <mat-radio-group aria-label="Select an option">
+              <mat-radio-button
+                *transloco="let y; read: 'defaults'"
+                [formControl]="check_status"
+                [value]="y('yes')"
+                color="primary"
+                >{{ y("yes") }}</mat-radio-button
               >
-                {{ t("makerChecker") }}
-              </p>
-            </span>
+              <mat-radio-button
+                *transloco="let y; read: 'defaults'"
+                [formControl]="check_status"
+                [value]="y('no')"
+                color="primary"
+                >{{ y("no") }}</mat-radio-button
+              >
+              <mat-error
+                *ngIf="
+                  check_status && check_status.invalid && check_status.touched
+                "
+              >
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("makerChecker") }}
+                </ng-container>
+              </mat-error>
+            </mat-radio-group>
           </div>
         </div>
       </div>
@@ -272,7 +243,6 @@
         >
           {{ t("addressInformation") }}
         </h4>
-        <!-- <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2"> -->
         <div
           class="grid grid-cols-1 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2"
         >
@@ -281,68 +251,58 @@
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("address") }}<span class="text-red-600">*</span>
+              {{ t("address") }}
             </h6>
-            <input
-              *transloco="
-                let t;
-                read: 'company.summary.companyForm.placeholders'
-              "
-              [formControl]="addr"
-              [placeholder]="t('address')"
-              type="text"
-              class="input input-sm input-bordered w-full bg-transparent text-black"
-            />
-            <span *ngIf="addr && addr.invalid && addr.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
-              >
-                {{ t("address") }}
-              </p>
-            </span>
+            <mat-form-field class="example-full-width">
+              <input
+                *transloco="
+                  let t;
+                  read: 'company.summary.companyForm.placeholders'
+                "
+                matInput
+                [formControl]="addr"
+                [placeholder]="t('address')"
+              />
+              <mat-error *ngIf="addr && addr.invalid && addr.touched">
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("address") }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
               *transloco="let t; read: 'company.summary.companyForm'"
               class="text-left text-xs"
             >
-              {{ t("branch") }} <span class="text-red-600">*</span>
+              {{ t("branch") }}
             </h6>
-            <select
-              [formControl]="branch"
-              class="select select-sm select-bordered w-full"
-            >
-              <option
+            <mat-form-field>
+              <mat-label
                 *transloco="
-                  let t;
+                  let k;
                   read: 'company.summary.companyForm.placeholders'
                 "
-                disabled
-                selected
-                value=""
+                >{{ k("branch") }}</mat-label
               >
-                {{ t("branch") }}
-              </option>
-              <option
-                *ngFor="
-                  let branch of formData.branches$ | async;
-                  index as i;
-                  trackBy: PerformanceUtils.trackByIndex
-                "
-                [value]="branch.Branch_Sno"
-              >
-                {{ branch.Name }}
-              </option>
-            </select>
-            <span *ngIf="branch && branch.invalid && branch.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-danger-600 text-xs"
-              >
-                {{ t("branch") }}
-              </p>
-            </span>
+              <mat-select [formControl]="branch">
+                @for (branch of formData.branches$ | async; track branch) {
+                <mat-option [value]="branch.Branch_Sno">{{
+                  branch.Name
+                }}</mat-option>
+                }
+              </mat-select>
+              <mat-error *ngIf="branch && branch.invalid && branch.touched">
+                <mat-label>Favorite food</mat-label>
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("branch") }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
@@ -350,41 +310,34 @@
               class="text-left text-xs"
             >
               {{ t("region") }}
+              <span *transloco="let y; read: 'defaults'"
+                >({{ y("optional") }})</span
+              >
             </h6>
-            <select
-              [formControl]="rsno"
-              class="select select-sm select-bordered w-full"
-            >
-              <option
+            <mat-form-field>
+              <mat-label
                 *transloco="
                   let t;
                   read: 'company.summary.companyForm.placeholders'
                 "
-                disabled
-                selected
-                value="0"
+                >{{ t("region") }}</mat-label
               >
-                {{ t("region") }}
-              </option>
-              <option
-                *ngFor="
-                  let region of formData.regions$ | async;
-                  index as i;
-                  trackBy: PerformanceUtils.trackByIndex
-                "
-                [value]="region.Region_SNO"
-              >
-                {{ region.Region_Name }}
-              </option>
-            </select>
-            <span *ngIf="rsno && rsno.invalid && rsno.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
-              >
-                {{ t("region") }}
-              </p>
-            </span>
+              <mat-select [formControl]="rsno">
+                @for (region of formData.regions$ | async; track region) {
+                <mat-option [value]="region.Region_SNO">{{
+                  region.Region_Name
+                }}</mat-option>
+                }
+              </mat-select>
+              <mat-error *ngIf="rsno && rsno.invalid && rsno.touched">
+                <mat-label>Favorite food</mat-label>
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("region") }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
@@ -393,40 +346,31 @@
             >
               {{ t("district") }}
             </h6>
-            <select
-              [formControl]="dsno"
-              class="select select-sm select-bordered w-full"
-            >
-              <option
+            <mat-form-field>
+              <mat-label
                 *transloco="
                   let t;
                   read: 'company.summary.companyForm.placeholders'
                 "
-                selected
-                disabled
-                value="0"
+                >{{ t("district") }}</mat-label
               >
-                {{ t("district") }}
-              </option>
-              <option
-                *ngFor="
-                  let districtOption of formData.districts$ | async;
-                  index as i;
-                  trackBy: PerformanceUtils.trackByIndex
-                "
-                [value]="districtOption.SNO"
-              >
-                {{ districtOption.District_Name }}
-              </option>
-            </select>
-            <span *ngIf="dsno && dsno.invalid && dsno.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
-              >
-                {{ t("district") }}
-              </p>
-            </span>
+              <mat-select [formControl]="dsno">
+                @for (districtOption of formData.districts$ | async; track
+                districtOption) {
+                <mat-option [value]="districtOption.SNO">{{
+                  districtOption.District_Name
+                }}</mat-option>
+                }
+              </mat-select>
+              <mat-error *ngIf="dsno && dsno.invalid && dsno.touched">
+                <mat-label>Favorite food</mat-label>
+                <ng-container
+                  *transloco="let t; read: 'company.summary.companyForm.errors'"
+                >
+                  {{ t("district") }}
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
           </div>
           <div class="flex flex-col space-y-1 w-full">
             <h6
@@ -435,40 +379,20 @@
             >
               {{ t("ward") }}
             </h6>
-            <select
-              [formControl]="wsno"
-              class="select select-sm select-bordered w-full"
-            >
-              <option
+            <mat-form-field>
+              <mat-label
                 *transloco="
                   let t;
                   read: 'company.summary.companyForm.placeholders'
                 "
-                selected
-                disabled
-                value="0"
+                >{{ t("ward") }}</mat-label
               >
-                {{ t("ward") }}
-              </option>
-              <option
-                *ngFor="
-                  let ward of formData.wards$ | async;
-                  index as i;
-                  trackBy: PerformanceUtils.trackByIndex
-                "
-                [value]="ward.SNO"
-              >
-                {{ ward.Ward_Name }}
-              </option>
-            </select>
-            <span *ngIf="wsno && wsno.invalid && wsno.touched">
-              <p
-                *transloco="let t; read: 'company.summary.companyForm.errors'"
-                class="text-xs text-red-600"
-              >
-                {{ t("ward") }}
-              </p>
-            </span>
+              <mat-select [formControl]="wsno">
+                @for (ward of formData.wards$ | async; track ward) {
+                <mat-option [value]="ward.SNO">{{ ward.Ward_Name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           </div>
         </div>
       </div>
@@ -496,28 +420,35 @@
               >
                 {{ t("accountNo") }} {{ ind + 1 }}
               </p>
-              <input
-                formControlName="AccountNo"
-                type="number"
-                class="input-sm input-bordered input-ghost input w-full"
-                [min]="0"
-              />
-              <span
-                [class]="
-                  details.controls.at(ind)?.get('AccountNo') &&
-                  details.controls.at(ind)?.get('AccountNo')?.invalid &&
-                  details.controls.at(ind)?.get('AccountNo')?.touched
-                    ? 'opacity-100'
-                    : 'opacity-0'
-                "
-              >
-                <p
-                  *transloco="let t; read: 'company.summary.companyForm.errors'"
-                  class="text-xs text-red-600"
+              <mat-form-field class="example-full-width">
+                <input
+                  formControlName="AccountNo"
+                  type="number"
+                  [min]="0"
+                  *transloco="
+                    let k;
+                    read: 'company.summary.companyForm.placeholders'
+                  "
+                  matInput
+                  [placeholder]="k('accountNumber')"
+                />
+                <mat-error
+                  *ngIf="
+                    details.controls.at(ind)?.get('AccountNo') &&
+                    details.controls.at(ind)?.get('AccountNo')?.invalid &&
+                    details.controls.at(ind)?.get('AccountNo')?.touched
+                  "
                 >
-                  {{ t("accountNumber") }}
-                </p>
-              </span>
+                  <ng-container
+                    *transloco="
+                      let t;
+                      read: 'company.summary.companyForm.errors'
+                    "
+                  >
+                    {{ t("accountNumber") }}
+                  </ng-container>
+                </mat-error>
+              </mat-form-field>
             </div>
             <div
               class="flex flex-row justify-center items-center space-x-1 flex-none"
@@ -569,6 +500,7 @@
       </button> -->
       <button
         (click)="submitCompanySummary()"
+        [disabled]="!companySummaryForm.valid"
         type="submit"
         form="add-company-form"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"

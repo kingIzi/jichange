@@ -406,9 +406,7 @@ export class AmendmentsComponent implements OnInit {
         })?.Name || this.tr.translate('defaults.any'),
       vendor: string =
         this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
-          return (
-            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
-          );
+          return e.CompSno === Number(this.reportFormInvoiceDetails.Comp.value);
         })?.CompName || this.tr.translate('defaults.all'),
       customer: string =
         this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {

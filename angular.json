@@ -36,7 +36,7 @@
               "src/styles.scss",
               "node_modules/sweetalert2/src/sweetalert2.scss",
               "node_modules/ngx-toastr/toastr.css",
-              "src/themes.scss"
+              "src/m3-theme.scss"
             ],
             "scripts": [],
             "customWebpackConfig": {
@@ -109,8 +109,8 @@
             "styles": [
               "src/styles.scss",
               "node_modules/sweetalert2/src/sweetalert2.scss",
-              "src/themes.scss",
-              "node_modules/ngx-toastr/toastr.css"
+              "node_modules/ngx-toastr/toastr.css",
+              "src/m3-theme.scss"
             ],
             "scripts": []
           }

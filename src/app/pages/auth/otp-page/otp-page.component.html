@@ -4,7 +4,13 @@
 <app-display-message-box #noSessionFound></app-display-message-box>
 <app-display-message-box #displayMessageBox></app-display-message-box>
 
-<div class="w-full h-full">
+<div class="w-full h-full relative">
+  <img
+    src="assets/img/bg-8.avif"
+    class="absolute z-0 object-cover w-full h-full"
+    alt=""
+    srcset=""
+  />
   <div class="absolute top-0 left-0 right-0 bottom-0 grid place-items-center">
     <form
       id="forgot-password-form"
@@ -21,11 +27,33 @@
           {{ t("verifyAccountMessage").replace("{}", mobile.value) }}
         </h6>
       </div>
-      <div class="flex flex-col space-y-1 w-full py-8">
-        <h6 class="text-left text-sm">
-          {{ t("form.code") }} <span class="text-red-600">*</span>
+      <div class="flex flex-col items-center space-y-1 w-full py-8">
+        <h6 class="text-left text-xs text-black">
+          {{ t("form.placeholders.code") }} <span class="text-red-600">*</span>
         </h6>
-        <input
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width w-1/2 flex flex-row justify-center"
+        >
+          <input
+            #mobileNumber
+            [formControl]="formControl"
+            matInput
+            placeholder="0-0-0-0-0-0"
+            class="text-center"
+            (keyup)="formatToMobileNumber($event)"
+            autocomplete="off"
+          />
+          <mat-error
+            *ngIf="formControl && formControl.invalid && formControl.touched"
+          >
+            @if (formControl.hasError('required')) {
+            {{ t("form.errors.code") }}
+            }
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           [formControl]="otp_code"
           type="email"
           [placeholder]="t('form.placeholders.code')"
@@ -35,7 +63,7 @@
           <p class="text-xs text-red-600">
             {{ t("form.errors.code") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="w-full pb-4">
         <a
@@ -54,11 +82,13 @@
         </ng-template>
       </div>
       <button
-        form="forgot-password-form"
-        (click)="submitForm()"
-        type="submit"
         *transloco="let y; read: 'actions'"
-        class="btn w-full btn-outline font-inter text-sm border-linkBlue hover:bg-buttonBlue"
+        (click)="submitForm()"
+        form="forgot-password-form"
+        type="submit"
+        mat-flat-button
+        color="primary"
+        class="w-full"
       >
         {{ y("submit") }}
       </button>

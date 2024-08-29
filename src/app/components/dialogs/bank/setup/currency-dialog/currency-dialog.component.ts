@@ -33,6 +33,12 @@ import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinit
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { BankLoginResponse } from 'src/app/core/models/login-response';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-currency-dialog',
@@ -46,6 +52,12 @@ import { BankLoginResponse } from 'src/app/core/models/login-response';
     SuccessMessageBoxComponent,
     TranslocoModule,
     LoaderInfiniteSpinnerComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatRadioModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -110,7 +122,11 @@ export class CurrencyDialogComponent implements OnInit {
         errorMessage
       );
     } else {
-      let sal = AppUtilities.sweetAlertSuccessMessage(succesMessage);
+      AppUtilities.showSuccessMessage(
+        succesMessage,
+        (e: MouseEvent) => {},
+        this.tr.translate('actions.ok')
+      );
       this.added.emit(result.response as Currency);
     }
   }

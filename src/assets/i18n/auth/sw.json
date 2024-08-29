@@ -31,8 +31,8 @@
     "rememberMe": "Nikumbuke",
     "actions": {
       "signIn": "Ingia ndani",
-      "controlNumberDetails": "Dhibiti Hakuna Maelezo",
-      "register": "Kujiandikisha"
+      "controlNumberDetails": "Una control number?",
+      "register": "Finyanga apa!"
     }
   },
   "vendorRegistration": {
@@ -87,12 +87,14 @@
   },
   "controlNumberDetails": {
     "title": "Maelezo ya Nambari ya Kudhibiti",
+    "controlNumberFound": "Nambari ya kudhibiti imepatikana.",
     "controlFound": {
       "controlNo": "Namba ya Udhibiti",
       "customerName": "Jina la Mteja",
       "paymentType": "Aina ya Malipo",
       "itemTotalAmount": "Jumla ya Bidhaa",
-      "balance": "Salio"
+      "balance": "Salio",
+      "currencyCode": "Msimbo wa sarafu"
     },
     "form": {
       "controlName": "Nambari ya kudhibiti",
@@ -115,6 +117,7 @@
     "forgotPasswordMessage": "Ingiza nambari yako ya simu na maagizo yatatumwa kwako.",
     "resetPasswordSuccessfull": "Barua pepe ya kuweka upya nenosiri imetumwa kwa mafanikio!",
     "resetPasswordFailed": "Imeshindwa kutuma barua pepe ya kuweka upya nenosiri",
+    "sendResetPasswordLink": "Tuma kiungo cha nenosiri la kuweka upya",
     "form": {
       "email": "Namba ya simu",
       "placeholders": {
@@ -122,6 +125,7 @@
       },
       "errors": {
         "email": "Tafadhali ingiza namba ya simu",
+        "invalidPhone": "Namba ya simu ni batili.",
         "dialogs": {
           "invalidFormError": "Fomu batili",
           "missingEmail": "Tafadhali toa anwani halali ya barua pepe"
@@ -142,7 +146,7 @@
     "form": {
       "code": "Msimbo",
       "placeholders": {
-        "code": "Ingiza msimbo"
+        "code": "Ingiza msimbo wa tarakimu 6"
       },
       "errors": {
         "code": "Tafadhali jaza"

@@ -52,7 +52,10 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
 import { TableColumnsData } from 'src/app/core/models/table-columns-data';
 import { CustomerName } from 'src/app/core/models/vendors/customer-name';
-import { InvoiceReportFormVendor } from 'src/app/core/models/vendors/forms/invoice-report-form';
+import {
+  InvoiceReportForm,
+  InvoiceReportFormVendor,
+} from 'src/app/core/models/vendors/forms/invoice-report-form';
 import {
   InvoiceDetailsForm,
   PaymentDetailReportForm,
@@ -509,9 +512,7 @@ export class PaymentDetailsComponent implements OnInit {
         })?.Name || this.tr.translate('defaults.any'),
       vendor: string =
         this.reportFormInvoiceDetails.filterFormData.companies.find((e) => {
-          return (
-            e.CompSno === Number(this.reportFormInvoiceDetails.compid.value)
-          );
+          return e.CompSno === Number(this.reportFormInvoiceDetails.Comp.value);
         })?.CompName || this.tr.translate('defaults.all'),
       customer: string =
         this.reportFormInvoiceDetails.filterFormData.customers.find((e) => {
@@ -621,7 +622,9 @@ export class PaymentDetailsComponent implements OnInit {
     this.createHeaderGroup();
     //this.buildPage();
   }
-  requestPaymentReport(value: PaymentDetailReportForm | InvoiceDetailsForm) {
+  requestPaymentReport(
+    value: PaymentDetailReportForm | InvoiceDetailsForm | InvoiceReportForm
+  ) {
     this.tableLoading = true;
     this.paymentService
       .getPaymentReport(value)

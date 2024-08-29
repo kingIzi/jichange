@@ -71,6 +71,10 @@ import {
 import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { InvoiceDetailsForm } from 'src/app/core/models/vendors/forms/payment-report-form';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-list',
@@ -94,6 +98,10 @@ import autoTable from 'jspdf-autotable';
     MatNativeDateModule,
     ReportFormDetailsComponent,
     MatTableExporterModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -481,7 +489,7 @@ export class ListComponent implements OnInit {
     //this.initialFormSubmission();
   }
   requestTransactionDetailsList(
-    form: TransactionDetailsReportForm | InvoiceReportForm
+    form: TransactionDetailsReportForm | InvoiceReportForm | InvoiceDetailsForm
   ) {
     this.tableLoading = true;
     this.reportsService

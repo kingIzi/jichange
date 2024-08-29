@@ -3,9 +3,12 @@
   [show]="startLoading"
 ></app-loader-infinite-spinner>
 
-<div class="px-6 py-2 w-full flex flex-col space-y-2">
+<div id="parent-div" class="px-6 py-2 w-full flex flex-col space-y-2">
   <div class="flex flex-row items-center justify-between">
-    <h2 *transloco="let t; read: 'setup.bankUser'" class="text-lg font-bold">
+    <h2
+      *transloco="let t; read: 'setup.bankUser'"
+      class="text-lg lg:text-2xl font-bold"
+    >
       {{ t("bankUser") }}
     </h2>
     <button

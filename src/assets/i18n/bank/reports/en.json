@@ -743,7 +743,7 @@
     ]
   },
   "customerDetailReport": {
-    "customerDetailReport": "Vendor detail report",
+    "customerDetailReport": "Available customers",
     "form": {
       "company": "Company",
       "region": "region",

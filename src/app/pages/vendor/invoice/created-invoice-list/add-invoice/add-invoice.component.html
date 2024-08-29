@@ -99,6 +99,107 @@
   </form>
 </dialog>
 
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<dialog #confirmAddInvoiceDetail id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("confirm") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'actions'">
+      {{ t("saveChanges") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddInvoiceDetail.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddInvoiceDetail.close(); addInvoice()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("confirm") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
+<dialog #confirmAddInvoiceDetail id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("confirm") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'actions'">
+      {{ t("saveChanges") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddInvoiceDetail.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("close") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="confirmAddInvoiceDetail.close(); addInvoice()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("confirm") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
+<dialog #noCustomersFound id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      {{ t("warning") }}
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'invoice'">
+      {{ t("createdInvoice.noCustomersFoundAddCustomer") }}
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="noCustomersFound.close()"
+          class="btn btn-ghost btn-xs btn-info text-red-600"
+        >
+          {{ t("no") }}
+        </button>
+        <button
+          *transloco="let t; read: 'defaults'"
+          (click)="noCustomersFound.close(); openCustomersDialog()"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("yes") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
 <form
   id="add-invoice-form"
   [formGroup]="invoiceDetailsForm"
@@ -131,7 +232,462 @@
         {{ t("details") }}
       </h4>
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2">
-        <!-- <div class="grid grid-cols-1 gap-x-2 gap-y-4 w-full lg:w-1/2 py-2"> -->
+        <div
+          *transloco="let t; read: 'invoice.form'"
+          class="flex flex-col space-y-1 w-full"
+        >
+          <p class="text-xs">
+            {{ t("invoiceNo") }}
+          </p>
+          <mat-form-field
+            color="primary"
+            accent="secondary"
+            class="example-full-width"
+          >
+            <input
+              type="text"
+              #input
+              [value]="input.value.toUpperCase()"
+              matInput
+              [formControl]="invno"
+              [placeholder]="t('placeholders.invoiceNo')"
+            />
+            <mat-error *ngIf="invno && invno.invalid && invno.touched">
+              @if (invno.hasError('required')) {
+              {{ t("errors.invoiceNo") }}
+              } @else if (invno.hasError('existsInvoiceNo')) {
+              {{ t("dialog.invoiceNumberExists") }}
+              }
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex flex-col space-y-1 w-full">
+          <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+            {{ t("invoiceDate") }}
+          </p>
+          <mat-form-field>
+            <mat-label>Choose a date</mat-label>
+            <input
+              [formControl]="date"
+              [min]="today"
+              matInput
+              [matDatepicker]="picker"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="date && date.invalid && date.touched">
+              <ng-container *transloco="let t; read: 'invoice.form.errors'">
+                {{ t("invoiceDate") }}
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex flex-col space-y-1 w-full">
+          <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+            {{ t("dueDate") }}
+          </p>
+          <mat-form-field>
+            <mat-label>Choose a date</mat-label>
+            <input
+              matInput
+              [formControl]="edate"
+              [min]="date.value"
+              [matDatepicker]="invoiceDueDate"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="invoiceDueDate"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #invoiceDueDate></mat-datepicker>
+            <mat-error *ngIf="edate && edate.invalid && edate.touched">
+              <ng-container *transloco="let t; read: 'invoice.form.errors'">
+                {{ t("dueDate") }}
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex flex-col space-y-1 w-full">
+          <p *transloco="let t; read: 'invoice.form'" class="text-xs">
+            {{ t("invoiceExpire") }}
+          </p>
+          <mat-form-field>
+            <mat-label>Choose a date</mat-label>
+            <input
+              matInput
+              [formControl]="iedate"
+              [min]="edate.value"
+              [matDatepicker]="invoiceExpiryDatePicker"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="invoiceExpiryDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #invoiceExpiryDatePicker></mat-datepicker>
+            <mat-error *ngIf="iedate && iedate.invalid && iedate.touched">
+              <ng-container *transloco="let t; read: 'invoice.form.errors'">
+                {{ t("invoiceExpire") }}
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div
+          *transloco="let t; read: 'invoice.form'"
+          class="flex flex-col space-y-1 w-full"
+        >
+          <p class="text-xs">
+            {{ t("customer") }}
+          </p>
+          <mat-form-field class="example-full-width">
+            <input
+              type="text"
+              [placeholder]="t('placeholders.customer')"
+              aria-label="Number"
+              matInput
+              [formControl]="customerName"
+              [matAutocomplete]="auto"
+              [readOnly]="!!generatedInvoice"
+            />
+            <mat-autocomplete #auto="matAutocomplete">
+              @for (customer of filteredCustomers | async; track customer) {
+              <mat-option [value]="customer.Customer_Name">{{
+                customer.Customer_Name
+              }}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (customerName.value && customerName.value.length === 0) {
+            <button
+              *transloco="let y; read: 'invoice'"
+              matSuffix
+              mat-icon-button
+              type="button"
+              matTooltip="{{ y('addInvoice') }}"
+              (click)="openCustomersDialog()"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+            }
+            <mat-error
+              *ngIf="
+                customerName && customerName.invalid && customerName.touched
+              "
+            >
+              <ng-container>
+                {{ t("dialog.customer") }}
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div
+          *transloco="let t; read: 'invoice.form'"
+          class="flex flex-col space-y-1 w-full"
+        >
+          <p class="text-xs">
+            {{ t("paymentType") }}
+          </p>
+          <mat-form-field>
+            <mat-label>{{ t("placeholders.paymentType") }}</mat-label>
+            <mat-select [formControl]="ptype">
+              @for (paymentType of formData.paymentTypes; track paymentType) {
+              <mat-option [value]="paymentType">{{ paymentType }}</mat-option>
+              }
+            </mat-select>
+            <mat-error *ngIf="ptype && ptype.invalid && ptype.touched">
+              {{ t("errors.paymentType") }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div
+          *transloco="let t; read: 'invoice.form'"
+          class="flex flex-col space-y-1 w-full"
+        >
+          <p class="text-xs">
+            {{ t("currency") }}
+          </p>
+          <mat-form-field>
+            <mat-label>{{ t("placeholders.currency") }}</mat-label>
+            <mat-select [formControl]="ccode">
+              @for (currency of formData.currencies | async; track currency) {
+              <mat-option [value]="currency.Currency_Code">{{
+                currency.Currency_Code
+              }}</mat-option>
+              }
+            </mat-select>
+            <mat-error *ngIf="ptype && ptype.invalid && ptype.touched">
+              {{ t("errors.currency") }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div
+          *transloco="let t; read: 'invoice.form'"
+          class="flex flex-col space-y-1 w-full"
+        >
+          <p class="text-xs" *transloco="let y; read: 'defaults'">
+            {{ t("invoiceRemark") }} ({{ y("optional") }})
+          </p>
+          <mat-form-field
+            color="primary"
+            accent="secondary"
+            class="example-full-width"
+          >
+            <input
+              type="text"
+              matInput
+              [formControl]="Inv_remark"
+              [placeholder]="t('placeholders.invoiceRemark')"
+            />
+            <mat-error *ngIf="invno && invno.invalid && invno.touched">
+              {{ t("errors.invoiceRemark") }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col w-full space-y-2 pt-4">
+      <div class="flex flex-row items-center justify-between">
+        <h1
+          *transloco="let t; read: 'invoice.form'"
+          class="text-lg p-0 col-span-full font-semibold"
+        >
+          {{ t("itemDetails") }}
+        </h1>
+        <div class="flex flex-row items-center space-x-2">
+          <button
+            type="button"
+            (click)="addItemDetail(details.controls.length - 1)"
+            class="btn btn-sm bg-success flex flex-row-reverse items-center space-x-2 w-28 hover:bg-success hover:text-white"
+          >
+            <p class="text-xs">Add</p>
+            <span>
+              <i class="bi bi-plus-lg text-lg"></i>
+            </span>
+          </button>
+          <button
+            type="button"
+            (click)="removeItemDetail(details.controls.length - 1)"
+            class="btn btn-sm bg-error flex flex-row-reverse items-center space-x-2 w-28 hover:bg-error hover:text-white"
+          >
+            <p class="text-xs">Remove</p>
+            <span>
+              <i class="bi bi-trash text-lg"></i>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col col-span-full">
+        <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div class="inline-block min-w-full sm:px-6 lg:px-8">
+            <div class="overflow-y-auto">
+              <table class="min-w-full text-left text-sm font-light">
+                <thead class="font-medium">
+                  <tr
+                    *transloco="let t; read: 'invoice.form'"
+                    class="!bg-base-200"
+                  >
+                    <th
+                      *ngFor="
+                        let header of t('itemDetailsTableHeaders');
+                        index as ind
+                      "
+                      class="text-sm font-inter py-4 px-2 font-semibold"
+                      [ngClass]="ind > 0 ? 'text-right' : ''"
+                    >
+                      {{ header }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="details">
+                  <tr
+                    formGroupName="{{ ind }}"
+                    *ngFor="let i of details.controls; index as ind"
+                    class="py-2"
+                    [@inOutAnimation]
+                  >
+                    <td class="w-full">
+                      <div class="flex flex-col w-full my-2">
+                        <input
+                          formControlName="item_description"
+                          type="text"
+                          class="input-sm input-bordered input-ghost input mx-1 min-w-1/2 lg:w-full"
+                        />
+                        <span>
+                          <p
+                            *transloco="
+                              let t;
+                              read: 'invoice.form.errors.itemDetails'
+                            "
+                            class="text-xs text-error"
+                            [ngClass]="
+                              details.controls
+                                .at(ind)
+                                ?.get('item_description') &&
+                              details.controls.at(ind)?.get('item_description')
+                                ?.invalid &&
+                              details.controls.at(ind)?.get('item_description')
+                                ?.touched
+                                ? 'opacity-1'
+                                : 'opacity-0'
+                            "
+                          >
+                            {{ t("missingDescription") }}
+                          </p>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="flex flex-row justify-end w-24 my-2">
+                      <div class="flex flex-col w-24">
+                        <input
+                          formControlName="item_qty"
+                          type="number"
+                          class="input-sm input-bordered input-ghost input mx-1 min-w-1/2 lg:w-full"
+                        />
+                        <span class="w-full">
+                          <p
+                            *transloco="
+                              let t;
+                              read: 'invoice.form.errors.itemDetails'
+                            "
+                            class="text-right text-xs text-error duration-200"
+                            [ngClass]="
+                              details.controls.at(ind)?.get('item_qty') &&
+                              details.controls.at(ind)?.get('item_qty')
+                                ?.invalid &&
+                              details.controls.at(ind)?.get('item_qty')?.touched
+                                ? 'opacity-1'
+                                : 'opacity-0'
+                            "
+                          >
+                            {{ t("noQuantity") }}
+                          </p>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="w-full">
+                      <div class="flex flex-col w-36 my-2">
+                        <input
+                          #unitPriceInput
+                          formControlName="item_unit_price"
+                          [min]="1"
+                          type="number"
+                          class="input-sm input-bordered input-ghost input mx-1 w-full text-right"
+                        />
+                        <span class="w-full">
+                          <p
+                            *transloco="
+                              let t;
+                              read: 'invoice.form.errors.itemDetails'
+                            "
+                            class="text-right text-xs text-error duration-200"
+                            [ngClass]="
+                              details.controls
+                                .at(ind)
+                                ?.get('item_unit_price') &&
+                              details.controls.at(ind)?.get('item_unit_price')
+                                ?.invalid &&
+                              details.controls.at(ind)?.get('item_unit_price')
+                                ?.touched
+                                ? 'opacity-1'
+                                : 'opacity-0'
+                            "
+                          >
+                            {{ t("noUnitPrice") }}
+                          </p>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="w-full">
+                      <div class="flex flex-col w-56 my-2">
+                        <input
+                          formControlName="item_total_amount"
+                          type="number"
+                          class="input-sm input-bordered input-ghost input mx-1 disabled w-full text-right"
+                          [readOnly]="true"
+                        />
+                        <span class="w-full">
+                          <p
+                            *transloco="
+                              let t;
+                              read: 'invoice.form.errors.itemDetails'
+                            "
+                            class="text-right text-xs text-error duration-200 opacity-0"
+                          >
+                            {{ t("noQuantity") }}
+                          </p>
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-row items-center">
+          <p *transloco="let t; read: 'invoice.form'" class="text-sm">
+            {{ t("totalPrice") }}: {{ accumulateData() }}
+            {{ ccode.value ? ccode.value : "/" }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="flex flex-row space-x-2 items-center w-full justify-end pt-2 col-span-full"
+    >
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="resetForm()"
+        type="button"
+        class="btn text-xs btn-ghost text-danger-600 border border-danger-600 font-inter w-24"
+      >
+        {{ t("reset") }}
+      </button>
+      <button
+        *transloco="let t; read: 'actions'"
+        (click)="submitInvoiceDetailsForm()"
+        type="submit"
+        form="add-invoice-form"
+        class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+      >
+        {{ t("submit") }}
+      </button>
+    </div>
+  </div>
+</form>
+
+<!-- <form
+  id="add-invoice-form"
+  [formGroup]="invoiceDetailsForm"
+  class="px-6 py-2 w-full flex flex-col space-y-2"
+>
+  <ng-container *ngIf="!generatedInvoice; else editInvoiceLabel">
+    <h1
+      *transloco="let t; read: 'invoice'"
+      class="text-xl md:text-2xl p-0 col-span-full font-bold"
+    >
+      {{ t("createInvoice") }}
+    </h1>
+  </ng-container>
+  <ng-template #editInvoiceLabel>
+    <h1
+      *transloco="let t; read: 'invoice'"
+      class="text-xl md:text-2xl p-0 col-span-full font-bold"
+    >
+      {{ t("editInvoice") }}
+    </h1>
+  </ng-template>
+  <div
+    class="flex flex-col space-y-8 bg-white shadow px-2 py-4 w-full divide-y"
+  >
+    <div class="flex flex-col w-full space-y-2">
+      <h4
+        *transloco="let t; read: 'invoice.form'"
+        class="text-lg font-semibold w-full"
+      >
+        {{ t("details") }}
+      </h4>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-2 gap-y-3 w-full py-2">
         <div class="flex flex-col space-y-1 w-full">
           <p *transloco="let t; read: 'invoice.form'" class="text-xs">
             {{ t("invoiceNo") }}<span class="text-red-600">*</span>
@@ -541,4 +1097,4 @@
       </button>
     </div>
   </div>
-</form>
+</form> -->

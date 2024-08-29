@@ -47,10 +47,27 @@
     </h1>
     <div action="" class="grid grid-cols-2 gap-3 w-full py-8">
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("fromAddress") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="text-xs text-black"
+        >
+          {{ t("fromAddress") }}
         </p>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.fromAddress") }}</mat-label>
+          <input matInput [formControl]="from_address" type="email" />
+          <mat-error
+            *ngIf="from_address && from_address.invalid && from_address.touched"
+          >
+            <ng-container>
+              {{ t("errors.fromAddress") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.smtp.form.placeholders'"
           type="email"
           [placeholder]="t('fromAddress')"
@@ -66,13 +83,30 @@
           >
             {{ t("fromAddress") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("address") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="text-xs text-black"
+        >
+          {{ t("address") }}
         </p>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.address") }}</mat-label>
+          <input matInput [formControl]="smtp_address" type="email" />
+          <mat-error
+            *ngIf="smtp_address && smtp_address.invalid && smtp_address.touched"
+          >
+            <ng-container>
+              {{ t("errors.address") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.smtp.form.placeholders'"
           type="text"
           [placeholder]="t('address')"
@@ -89,13 +123,30 @@
           >
             {{ t("address") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("portNumber") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="text-xs text-black"
+        >
+          {{ t("portNumber") }}
         </p>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.portNumber") }}</mat-label>
+          <input matInput [formControl]="smtp_port" type="email" />
+          <mat-error
+            *ngIf="smtp_port && smtp_port.invalid && smtp_port.touched"
+          >
+            <ng-container>
+              {{ t("errors.portNumber") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.smtp.form.placeholders'"
           type="text"
           [placeholder]="t('portNumber')"
@@ -110,13 +161,30 @@
           >
             {{ t("portNumber") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("username") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="text-xs text-black"
+        >
+          {{ t("username") }}
         </p>
-        <input
+        <mat-form-field
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="example-full-width"
+        >
+          <mat-label>{{ t("placeholders.username") }}</mat-label>
+          <input matInput [formControl]="smtp_uname" type="email" />
+          <mat-error
+            *ngIf="smtp_uname && smtp_uname.invalid && smtp_uname.touched"
+          >
+            <ng-container>
+              {{ t("errors.username") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.smtp.form.placeholders'"
           type="text"
           [placeholder]="t('username')"
@@ -131,14 +199,25 @@
           >
             {{ t("username") }}
           </p>
-        </span>
+        </span> -->
       </div>
-      <div class="flex flex-col space-y-1">
-        <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("password")
-          }}<span *ngIf="!data.smtp" class="text-red-600">*</span>
+      <div
+        *transloco="let t; read: 'setup.smtp.form'"
+        class="flex flex-col space-y-1"
+      >
+        <p *transloco="let y; read: 'defaults'" class="text-xs text-black">
+          {{ t("password") }} ({{ y("optional") }})
         </p>
-        <input
+        <mat-form-field class="example-full-width">
+          <mat-label>{{ t("placeholders.password") }}</mat-label>
+          <input matInput [formControl]="smtp_pwd" type="email" />
+          <mat-error *ngIf="smtp_pwd && smtp_pwd.invalid && smtp_pwd.touched">
+            <ng-container>
+              {{ t("errors.password") }}
+            </ng-container>
+          </mat-error>
+        </mat-form-field>
+        <!-- <input
           *transloco="let t; read: 'setup.smtp.form.placeholders'"
           type="password"
           [placeholder]="t('password')"
@@ -153,11 +232,14 @@
           >
             {{ t("password") }}
           </p>
-        </span>
+        </span> -->
       </div>
       <div class="flex flex-col w-full">
-        <p *transloco="let t; read: 'setup.smtp.form'" class="text-xs">
-          {{ t("sslEnable") }}<span class="text-red-600">*</span>
+        <p
+          *transloco="let t; read: 'setup.smtp.form'"
+          class="text-xs text-black"
+        >
+          {{ t("sslEnable") }}
         </p>
         <div class="flex flex-row items-center">
           <div class="form-control">
@@ -218,7 +300,6 @@
         (click)="submitSmtpForm()"
         type="submit"
         form="control-number-form"
-        [disabled]="!smtpForm.valid"
         class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
       >
         {{ t("submit") }}
