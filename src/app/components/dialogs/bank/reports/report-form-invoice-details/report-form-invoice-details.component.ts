@@ -234,6 +234,8 @@ export class ReportFormInvoiceDetailsComponent extends ReportFormDetailsComponen
         enddate: form.enddate,
       } as InvoiceDetailsForm;
 
+      this.cdr.detectChanges();
+
       this.formData.emit(body);
     } else {
       this.filterForm.markAllAsTouched();
