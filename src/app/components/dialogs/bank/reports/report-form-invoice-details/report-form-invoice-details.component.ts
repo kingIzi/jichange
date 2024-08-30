@@ -210,21 +210,38 @@ export class ReportFormInvoiceDetailsComponent extends ReportFormDetailsComponen
       let customersIds: number[] = [];
       if (cusid > 0) {
         customersIds = [cusid];
-      } else {
+      } else if (cusid === 0 && this.filterFormData.customers.length > 0) {
         customersIds = this.filterFormData.customers.map((c) => {
           return c.Cust_Sno;
         });
+      } else {
+        customersIds = [0];
       }
+
+      // else {
+      //   customersIds = this.filterFormData.customers.map((c) => {
+      //     return c.Cust_Sno;
+      //   });
+      // }
 
       let invno = Number(form.invno);
       let invoiceIds: number[] = [];
       if (invno > 0) {
         invoiceIds = [invno];
-      } else {
+      } else if (invno === 0 && this.filterFormData.invoiceReports.length > 0) {
         invoiceIds = this.filterFormData.invoiceReports.map((c) => {
           return c.Inv_Mas_Sno;
         });
+      } else {
+        invoiceIds = [0];
       }
+
+      // else if ()
+      // else {
+      //   invoiceIds = this.filterFormData.invoiceReports.map((c) => {
+      //     return c.Inv_Mas_Sno;
+      //   });
+      // }
 
       let body = {
         companyIds: companyIds,
