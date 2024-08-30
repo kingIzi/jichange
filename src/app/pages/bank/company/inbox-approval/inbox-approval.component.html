@@ -127,11 +127,10 @@
                   <button
                     *transloco="let t; read: 'company.inboxApproval'"
                     (click)="approveCompany(element)"
-                    class="btn btn-xs btn-primary hover:text-neutral-50"
-                    matTooltip="{{ t('approve') }}"
+                    class="btn btn-xs btn-primary text-neutral-50"
                     [matTooltipPosition]="'above'"
                   >
-                    {{ t("pending") }}
+                    {{ t("approve") }}
                   </button>
                 </div>
               </ng-template>
@@ -222,11 +221,10 @@
                       <button
                         *transloco="let t; read: 'company.inboxApproval'"
                         (click)="approveCompany(element)"
-                        class="btn btn-xs btn-primary hover:text-neutral-50"
-                        matTooltip="{{ t('approve') }}"
+                        class="btn btn-xs btn-primary hover:text-neutral-50 text-neutral-50"
                         [matTooltipPosition]="'above'"
                       >
-                        {{ t("pending") }}
+                        {{ t("approve") }}
                       </button>
                     </div>
                   </ng-template>

@@ -302,6 +302,8 @@ export class InboxApprovalComponent implements OnInit {
     switch (key) {
       // case 'Status':
       //   return `${style}`;
+      case 'Action':
+        return `${style} justify-end`;
       default:
         return `${style}`;
     }
