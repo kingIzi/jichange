@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -45,6 +45,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
+import {
+  DateAdapter,
+  MatNativeDateModule,
+  NativeDateAdapter,
+  NativeDateModule,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 @Component({
   selector: 'app-amendment-details-dialog',
@@ -65,8 +72,12 @@ import { Router } from '@angular/router';
     MatIconModule,
     MatSelectModule,
     MatRadioModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    NativeDateModule,
   ],
   providers: [
+    DatePipe,
     {
       provide: TRANSLOCO_SCOPE,
       useValue: { scope: 'vendor/invoice', alias: 'invoice' },

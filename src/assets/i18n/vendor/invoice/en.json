@@ -8,6 +8,7 @@
   "editInvoice": "Edit invoice",
   "exportToExcel": "Export to excel",
   "exportToPdf": "Export to pdf",
+  "approve": "Approve",
   "form": {
     "itemDetailsTableHeaders": [
       "Description",
@@ -212,6 +213,11 @@
       {
         "label": "Payment type",
         "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Status",
+        "value": "Status",
         "desc": ""
       },
       {

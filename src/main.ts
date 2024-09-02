@@ -20,6 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { provideToastr } from 'ngx-toastr';
 import { toast, NgxSonnerToaster } from 'ngx-sonner';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -33,6 +34,7 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor, timeoutInterceptor])),
     provideRouter(routes, withViewTransitions()),
+    provideNativeDateAdapter(),
     //provideToastr(),
     // provideToastr({
     //   timeOut: 5000,

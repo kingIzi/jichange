@@ -68,6 +68,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-user-log-report',
@@ -109,19 +110,6 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class UserLogReportComponent implements OnInit {
   public startLoading: boolean = false;
-  // public tableData: {
-  //   userReportLogs: UserLog[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<UserLog>;
-  // } = {
-  //   userReportLogs: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<UserLog>([]),
-  // };
   public branches: Branch[] = [];
   public tableFilterFormGroup!: FormGroup;
   public tableHeadersFormGroup!: FormGroup;
@@ -165,7 +153,6 @@ export class UserLogReportComponent implements OnInit {
     this.tr
       .selectTranslate(`userLogReport.userLogReportTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        //this.tableData.originalTableColumns = labels;
         this.tableDataService.setOriginalTableColumns(labels);
         this.tableDataService
           .getOriginalTableColumns()
@@ -229,12 +216,6 @@ export class UserLogReportComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.userLogKeys(indexes);
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
   private dataSourceFilter() {
     let filterPredicate = (data: UserLog, filter: string) => {
       return data.Full_Name.toLocaleLowerCase().includes(
@@ -260,15 +241,6 @@ export class UserLogReportComponent implements OnInit {
     };
     this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  // private prepareDataSource() {
-  //   this.tableData.dataSource = new MatTableDataSource<UserLog>(
-  //     this.tableData.userReportLogs
-  //   );
-  //   this.tableData.dataSource.paginator = this.paginator;
-  //   this.tableData.dataSource.sort = this.sort;
-  //   this.dataSourceFilter();
-  //   this.dataSourceSortingAccessor();
-  // }
   private parseUserLogDataList(
     result: HttpDataResponse<string | number | UserLog[]>
   ) {
@@ -282,22 +254,6 @@ export class UserLogReportComponent implements OnInit {
   private assignUserLogDataList(
     result: HttpDataResponse<string | number | UserLog[]>
   ) {
-    // if (
-    //   result.response &&
-    //   typeof result.response !== 'string' &&
-    //   typeof result.response !== 'number' &&
-    //   result.response.length > 0
-    // ) {
-    //   this.tableData.userReportLogs = result.response;
-    // } else {
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.warning`),
-    //     this.tr.translate(`reports.userLogReport.noUserLogReportFound`)
-    //   );
-    //   this.tableData.userReportLogs = [];
-    // }
-    // this.prepareDataSource();
     this.parseUserLogDataList(result);
     this.tableDataService.prepareDataSource(this.paginator, this.sort);
     this.dataSourceFilter();
@@ -460,9 +416,10 @@ export class UserLogReportComponent implements OnInit {
   }
   tableValue(element: any, key: string) {
     let dateString = (dateObj: Date) => {
-      let date = dateObj.toLocaleDateString();
-      let time = dateObj.toLocaleTimeString();
-      return `${date} at ${time}`;
+      let datePart = formatDate(dateObj, 'MMM dd, yyyy', 'en-US');
+      let timePart = formatDate(dateObj, 'HH:mm', 'en-US');
+      //let date = dateObj.toDateString();
+      return `${datePart} at ${timePart}`;
     };
     switch (key) {
       case 'No.':

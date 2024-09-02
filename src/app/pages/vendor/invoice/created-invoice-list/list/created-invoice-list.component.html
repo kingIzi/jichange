@@ -123,33 +123,23 @@
                   </p>
                 </div>
                 <ng-template #approveInvoiceTemplate>
-                  <ng-container
-                    *ngIf="
-                      getUserProfile().Usno.toString().toLocaleLowerCase() !==
-                      element?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
-                    "
+                  <div
+                    *ngIf="isApprovedInvoice(element); else notApprovedInvoice"
                   >
                     <app-submit-message-box
                       #submitMessageBox
                     ></app-submit-message-box>
                     <button
+                      *transloco="let t; read: 'invoice'"
                       (click)="approveInvoice(element, submitMessageBox)"
-                      class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
+                      class="badge badge-primary text-neutral-50"
                     >
-                      {{ determineApprovalStatus(element.approval_status) }}
+                      {{ t("approve") }}
                     </button>
-                  </ng-container>
-                  <!-- <ng-container
-                    *ngIf="
-                      getUserProfile().Usno.toString().toLocaleLowerCase() ===
-                      element?.AuditBy?.trim()?.toString()?.toLocaleLowerCase()
-                    "
-                  >
+                  </div>
+                  <ng-template #notApprovedInvoice>
                     <mark class="p-1">No Access</mark>
-                  </ng-container> -->
-                  <ng-container *ngIf="isApprovedInvoice(element)">
-                    <mark class="p-1">No Access</mark>
-                  </ng-container>
+                  </ng-template>
                 </ng-template>
               </ng-container>
               <ng-template #actionButtons>
@@ -160,7 +150,7 @@
                     {{ header.get("label")?.value }}
                   </p>
                   <div class="flex flex-row items-center space-x-2">
-                    <ng-container *ngIf="isApprovedInvoice(element)">
+                    <ng-container>
                       <button
                         *transloco="let t; read: 'actions'"
                         class="btn btn-sm btn-ghost border-info"
@@ -172,7 +162,7 @@
                         </span>
                       </button>
                     </ng-container>
-                    <ng-container *ngIf="isApprovedInvoice(element)">
+                    <ng-container>
                       <button
                         *transloco="let t; read: 'defaults'"
                         class="btn btn-sm btn-ghost border-danger-600"
@@ -302,10 +292,11 @@
                           #submitMessageBox
                         ></app-submit-message-box>
                         <button
+                          *transloco="let t; read: 'invoice'"
                           (click)="approveInvoice(element, submitMessageBox)"
-                          class="text-white rounded-sm px-4 py-1 shadow btn bg-purple-600 btn-xs hover:text-black hover:bg-purple-700"
+                          class="badge badge-primary text-neutral-50"
                         >
-                          {{ determineApprovalStatus(element.approval_status) }}
+                          {{ t("approve") }}
                         </button>
                       </div>
                       <ng-template #noAccessToApproveTemplate>
@@ -317,18 +308,6 @@
                     <div
                       class="flex flex-row items-center justify-end space-x-2"
                     >
-                      <!-- <ng-container *ngIf="isApprovedInvoice(element)">
-                        <button
-                          *transloco="let t; read: 'actions'"
-                          class="btn btn-sm btn-ghost border-info"
-                          (click)="openEditInvoiceDialog(element)"
-                          matTooltip="{{ t('edit') }}"
-                        >
-                          <span class="text-info">
-                            <i class="bi bi-pen text-lg"></i>
-                          </span>
-                        </button>
-                      </ng-container> -->
                       <ng-container>
                         <button
                           *transloco="let t; read: 'actions'"
@@ -341,7 +320,7 @@
                           </span>
                         </button>
                       </ng-container>
-                      <ng-container *ngIf="isApprovedInvoice(element)">
+                      <ng-container>
                         <button
                           *transloco="let t; read: 'defaults'"
                           class="btn btn-sm btn-ghost border-danger-600"

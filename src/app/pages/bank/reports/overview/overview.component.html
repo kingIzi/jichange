@@ -1,111 +1,4 @@
 <app-display-message-box #displayMessageBox></app-display-message-box>
-<!-- <div
-  class="py-2 w-full h-fit pl-6 pr-4 grid grid-cols-12 gap-x-4 gap-y-4 overflow-y-auto"
->
-  <div
-    class="w-full grid grid-cols-2 lg:grid-cols-3 gap-1 col-span-full lg:col-span-8 relative"
-  >
-    <h4
-      *transloco="let t; read: 'reports.overview'"
-      class="col-span-full row-span-1 text-black font-bold tracking-wide text-lg"
-    >
-      {{ t("salesSummary") }}
-    </h4>
-    <ng-container
-      *ngIf="
-        graphData.invoiceStatistics.length > 0;
-        else statisticsLoadingTemplate
-      "
-    >
-      <div
-        *ngFor="
-          let statistic of graphData.invoiceStatistics;
-          trackBy: PerformanceUtils.trackByIndex;
-          index as i
-        "
-        [@listAnimationMobile]="getTableDataSource().filteredData.length"
-        class="col-span-1 h-36 bg-white shadow rounded flex flex-col items-center justify-center"
-      >
-        <h2 class="card-title font-inter font-light text-xl lg:text-2xl">
-          {{ statistic.Statistic }}
-        </h2>
-        <h4
-          *transloco="let t; read: 'reports.overview.statisticsDataBanker'"
-          class="text-sm lg:text-lg font-bold"
-        >
-          {{ t(statistic.Name.toLocaleLowerCase()) }}
-        </h4>
-      </div>
-    </ng-container>
-    <ng-template #statisticsLoadingTemplate>
-      <div
-        *ngIf="buildPageLoading"
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-      >
-        <span class="loading loading-spinner loading-lg bg-primary"></span>
-      </div>
-    </ng-template>
-  </div>
-  <div class="col-span-full lg:col-span-4 lg:row-span-12">
-    <div class="flex flex-col space-y-4">
-      <div class="flex flex-col space-y-1">
-        <div class="flex flex-row justify-between w-full">
-          <p
-            *transloco="let t; read: 'reports.overview'"
-            class="text-black font-bold tracking-wide text-lg"
-          >
-            {{ t("invoiceChart") }}
-          </p>
-        </div>
-        <div
-          class="py-2 w-full relative bg-white shadow max-h-64 min-h-64 h-64 chart-container"
-        >
-          <div
-            *ngIf="buildPageLoading"
-            class="loading loading-spinner loading-lg bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-          ></div>
-          <canvas #invoiceSummary></canvas>
-        </div>
-      </div>
-      <div class="flex flex-col space-y-1 relative w-full">
-        <div class="flex flex-row justify-between w-full">
-          <p
-            *transloco="let t; read: 'reports.overview'"
-            class="text-black font-bold tracking-wide text-lg"
-          >
-            {{ t("statistics") }}
-          </p>
-        </div>
-        <div
-          class="grid grid-cols-2 bg-white shadow w-full h-full min-h-40 py-6 px-3 gap-2"
-        >
-          <a
-            *ngFor="
-              let statistic of graphData.invoiceStatistics;
-              trackBy: PerformanceUtils.trackByIndex;
-              index as i
-            "
-            [@inOutAnimation]
-            (click)="dashboardStatisticRouterLink(statistic.Name)"
-            class="flex flex-col bg-lightPurple p-2 rounded w-full cursor-pointer group"
-          >
-            <p
-              class="text-normal text-sm capitalize group-hover:underline"
-              *transloco="let t; read: 'reports.overview.statisticsDataBanker'"
-            >
-              {{ t(statistic.Name.toLocaleLowerCase()) }}
-            </p>
-            <p class="font-bold text-lg">{{ statistic.Statistic }}</p>
-          </a>
-        </div>
-        <div
-          *ngIf="buildPageLoading"
-          class="loading loading-spinner loading-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary"
-        ></div>
-      </div>
-    </div>
-  </div>
-</div> -->
 
 <div class="px-6 py-2 w-full grid grid-cols-12 gap-3 lg:gap-x-3 lg:gap-y-6">
   <div
@@ -132,6 +25,7 @@
           graphData.transactions.length > 0 && !buildPageLoading;
           else noTransactionsGraphFound
         "
+        class="flex flex-col"
       >
         <p
           *transloco="let t; read: 'reports.overview'"

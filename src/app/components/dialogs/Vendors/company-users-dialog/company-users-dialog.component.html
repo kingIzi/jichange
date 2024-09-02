@@ -57,7 +57,7 @@
           >
           <mat-select [formControl]="pos">
             @for (roleAct of roleActs; track roleAct) {
-            <mat-option [value]="roleAct.Sno">{{
+            <mat-option [value]="roleAct.Sno.toString()">{{
               roleAct.Description
             }}</mat-option>
             }

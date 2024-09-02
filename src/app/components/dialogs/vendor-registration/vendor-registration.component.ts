@@ -43,6 +43,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
+import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 
 @Component({
   selector: 'app-vendor-registration',
@@ -74,6 +75,7 @@ export class VendorRegistrationComponent implements OnInit {
   public branchDetails: BranchDetail[] = [];
   public vendorFormGroup!: FormGroup;
   public addedVendor = new EventEmitter<void>();
+  public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('successMessageBox')
@@ -349,7 +351,7 @@ export class VendorRegistrationComponent implements OnInit {
       userid: this.fb.control('0', []),
       mob: this.fb.control('', [
         Validators.required,
-        //Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
       ]),
       branch: this.fb.control('', [Validators.required]),
       check_status: this.fb.control('', [Validators.required]),

@@ -139,7 +139,36 @@
         <h6 class="text-left text-sm">
           {{ t("mobileNo") }}
         </h6>
-        <app-phone-number-input [mobileNumber]="mob"></app-phone-number-input>
+        <!-- <app-phone-number-input [mobileNumber]="mob"></app-phone-number-input> -->
+        <mat-form-field
+          color="primary"
+          accent="secondary"
+          class="example-full-width w-full"
+          *transloco="let t; read: 'auth.forgotPassword'"
+        >
+          <span matTextPrefix>+255 &nbsp;</span>
+          <input
+            #phoneNumber
+            [formControl]="mob"
+            type="tel"
+            matInput
+            placeholder="666 - 666 - 666"
+            (change)="
+              PerformanceUtils.setPhoneNumberFormControl(
+                '+255',
+                phoneNumber.value,
+                mob
+              )
+            "
+          />
+          <mat-error *ngIf="mob && mob.invalid && mob.touched">
+            @if (mob.hasError('required')) {
+            {{ t("form.errors.email") }}
+            } @else if (mob.hasError('pattern')) {
+            {{ t("form.errors.invalidPhone") }}
+            }
+          </mat-error>
+        </mat-form-field>
       </div>
       <div class="flex flex-col space-y-1 w-full">
         <h6 class="text-left text-sm">

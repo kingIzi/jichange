@@ -139,7 +139,10 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
       pos: this.fb.control('', [Validators.required]),
       auname: this.fb.control('', [Validators.required]),
       uname: this.fb.control('', [Validators.required]),
-      mob: this.fb.control('', [Validators.required]),
+      mob: this.fb.control('', [
+        Validators.required,
+        Validators.pattern(AppUtilities.phoneNumberPrefixRegex),
+      ]),
       mail: this.fb.control('', [Validators.required, Validators.email]),
       userid: this.fb.control(this.getUserProfile().Usno, [
         Validators.required,

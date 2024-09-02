@@ -72,7 +72,8 @@
     "markDeliver": "Make delivery",
     "sureDeliver": "Are you sure you want to deliver items for invoice {}?",
     "deliveryCodeSentSuccessfully": "A delivery Code has been sent to the customer.",
-    "failedToSendDeliveryCode": "Failed to send delivery code."
+    "failedToSendDeliveryCode": "Failed to send delivery code.",
+    "pendingDeliveryMessage": "Pending Delivery"
   },
   "amendInvoice": "Amend Invoice",
   "invoiceAmendedSuccessfully": "Amended invoice successfully!",

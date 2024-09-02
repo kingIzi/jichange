@@ -8,6 +8,7 @@
   "addInvoice": "Ongeza Bili",
   "createInvoice": "Unda Bili",
   "editInvoice": "Hariri ankara",
+  "approve": "Kubali",
   "form": {
     "details": "Maelezo ya ankara",
     "itemDetailsTableHeaders": [
@@ -205,6 +206,11 @@
       {
         "label": "Aina ya Malipo",
         "value": "Payment_Type",
+        "desc": ""
+      },
+      {
+        "label": "Hali",
+        "value": "Status",
         "desc": ""
       },
       {

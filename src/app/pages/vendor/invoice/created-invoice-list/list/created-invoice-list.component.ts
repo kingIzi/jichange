@@ -112,7 +112,7 @@ export class CreatedInvoiceListComponent implements OnInit {
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createTableHeadersFormGroup() {
-    let TABLE_SHOWING = 8;
+    let TABLE_SHOWING = 9;
     this.tableHeadersFormGroup = this.fb.group({
       headers: this.fb.array([], []),
       tableSearch: this.fb.control('', []),
@@ -487,6 +487,15 @@ export class CreatedInvoiceListComponent implements OnInit {
       },
     });
   }
+  private invoiceStatusStyle(status: string) {
+    if (status && status.toLocaleLowerCase() === 'active') {
+      return 'invoice-active';
+    } else if (status && status.toLocaleLowerCase() === 'overdue') {
+      return 'invoice-overdue';
+    } else if (status && status.toLocaleLowerCase() === 'expired') {
+      return 'invoice-expired';
+    } else return 'invoice-completed';
+  }
   ngOnInit(): void {
     this.createTableHeadersFormGroup();
     this.requestCreatedInvoiceList();
@@ -546,6 +555,8 @@ export class CreatedInvoiceListComponent implements OnInit {
         )} w-fit`;
       case 'Total':
         return `${style} text-right`;
+      case 'Status':
+        return `${style} ${this.invoiceStatusStyle(element[key])}`;
       default:
         return `${style} text-black font-normal`;
     }
@@ -676,16 +687,16 @@ export class CreatedInvoiceListComponent implements OnInit {
       dialog.closeDialog();
     });
   }
-  determineApprovalStatus(status: string) {
-    if (!status) {
-      return '-';
-    } else if (status.trim().toLocaleLowerCase() == '1') {
-      return 'Approve';
-    } else if (status.trim().toLocaleLowerCase() == '2') {
-      return 'Done';
-    }
-    return '-';
-  }
+  // determineApprovalStatus(status: string) {
+  //   if (!status) {
+  //     return '-';
+  //   } else if (status.trim().toLocaleLowerCase() == '1') {
+  //     return 'Approve';
+  //   } else if (status.trim().toLocaleLowerCase() == '2') {
+  //     return 'Done';
+  //   }
+  //   return '-';
+  // }
   isApprovedInvoice(invoice: GeneratedInvoice) {
     return (
       this.getUserProfile()

@@ -385,12 +385,37 @@
         {{ t("itemDetails") }}
       </h1>
       <div class="flex flex-col col-span-full pt-2">
+        <div class="flex flex-row items-center space-x-2 w-full justify-end">
+          <button
+            type="button"
+            (click)="addItemDetail(details.controls.length - 1)"
+            class="btn btn-sm bg-success flex flex-row-reverse items-center space-x-2 w-28 hover:bg-success hover:text-white"
+          >
+            <p class="text-xs">Add</p>
+            <span>
+              <i class="bi bi-plus-lg text-lg"></i>
+            </span>
+          </button>
+          <button
+            type="button"
+            (click)="removeItemDetail(details.controls.length - 1)"
+            class="btn btn-sm bg-error flex flex-row-reverse items-center space-x-2 w-28 hover:bg-error hover:text-white"
+          >
+            <p class="text-xs">Remove</p>
+            <span>
+              <i class="bi bi-trash text-lg"></i>
+            </span>
+          </button>
+        </div>
         <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
             <div class="overflow-y-auto">
               <table class="min-w-full text-left text-sm font-light">
                 <thead class="border-b font-medium dark:border-neutral-500">
-                  <tr *transloco="let t; read: 'tableData'">
+                  <tr
+                    *transloco="let t; read: 'tableData'"
+                    class="!bg-base-200"
+                  >
                     <th
                       *transloco="let t; read: 'invoice.form'"
                       class="text-xs font-inter py-4"
@@ -416,17 +441,11 @@
                       {{ t("totalPrice") }}
                     </th>
                     <!-- <th
-                    *transloco="let t; read: 'invoice.form'"
-                    class="text-xs font-inter py-4"
-                  >
-                    {{ t("remarks") }}
-                  </th> -->
-                    <th
                       *transloco="let t; read: 'defaults'"
                       class="text-xs font-inter py-4"
                     >
                       {{ t("action") }}
-                    </th>
+                    </th> -->
                   </tr>
                 </thead>
                 <tbody formArrayName="details">
@@ -569,7 +588,7 @@
                       class="input-sm input-bordered input-ghost input w-24 my-1 mx-1"
                     />
                   </td> -->
-                    <td class="flex flex-row items-center justify-center">
+                    <!-- <td class="flex flex-row items-center justify-center">
                       <button
                         (click)="addItemDetail(ind)"
                         [class]="
@@ -594,7 +613,7 @@
                           <i class="bi bi-trash text-lg text-danger-600"></i>
                         </span>
                       </button>
-                    </td>
+                    </td> -->
                   </tr>
                 </tbody>
               </table>

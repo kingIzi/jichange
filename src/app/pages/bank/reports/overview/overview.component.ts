@@ -91,9 +91,9 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
   animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
 })
 export class OverviewComponent implements OnInit, AfterViewInit {
-  @ViewChild('transactionsChart', { static: true })
+  @ViewChild('transactionsChart', { static: false })
   transactionsChart!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('invoiceSummary', { static: true })
+  @ViewChild('invoiceSummary')
   invoiceSummary!: ElementRef<HTMLCanvasElement>;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
@@ -101,24 +101,8 @@ export class OverviewComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
   public headersFormGroup!: FormGroup;
   public customers: any[] = [];
-  // public transactionsChartLoading: boolean = false;
-  // public statisticChartLoading: boolean = false;
-  // public invoicePieChartLoading: boolean = false;
   public buildPageLoading: boolean = false;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
-  // public tableData: {
-  //   latestTransactions: TransactionDetail[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<TransactionDetail>;
-  // } = {
-  //   latestTransactions: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<TransactionDetail>([]),
-  // };
   public graphData: {
     transactions: TransactionDetail[];
     invoiceStatistics: DashboardOverviewStatistic[];
@@ -149,7 +133,6 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     this.tr
       .selectTranslate(`overview.vendorsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        //this.tableData.originalTableColumns = labels;
         this.tableDataService.setOriginalTableColumns(labels);
         this.tableDataService
           .getOriginalTableColumns()
@@ -190,14 +173,7 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       });
     this.tableDataService.setTableColumns(tableColumns);
     this.tableDataService.setTableColumnsObservable(tableColumns);
-    //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
   private transactionsLineChartDataset(transactions: TransactionDetail[]) {
     let labels = [];
     let paymentAmounts = [];
@@ -221,7 +197,6 @@ export class OverviewComponent implements OnInit, AfterViewInit {
       if (!acc[paymentType]) {
         acc[paymentType] = 0;
       }
-      //acc[paymentType] += item.Total ? item.Total : 0;
       acc[paymentType] += 1;
       return acc;
     }, {} as any);
@@ -230,8 +205,10 @@ export class OverviewComponent implements OnInit, AfterViewInit {
     return [labels, totalAmounts];
   }
   private createTransactionsChart(transactions: TransactionDetail[]) {
+    this.cdr.detectChanges();
     let [labels, paymentAmounts] =
       this.transactionsLineChartDataset(transactions);
+
     let canvas = this.transactionsChart.nativeElement;
     let paymentChart = new Chart(canvas, {
       type: 'line',
@@ -443,33 +420,6 @@ export class OverviewComponent implements OnInit, AfterViewInit {
           invoiceList,
           latestTransactionsList,
         ] = results;
-        // if (
-        //   typeof transactionsList.response !== 'number' &&
-        //   typeof transactionsList.response !== 'string'
-        // ) {
-        //   this.graphData.transactions = transactionsList.response;
-        // }
-        // if (
-        //   typeof invoiceStats.response !== 'string' &&
-        //   typeof invoiceStats.response !== 'number'
-        // ) {
-        //   this.graphData.invoiceStatistics = invoiceStats.response;
-        // }
-        // if (
-        //   typeof invoiceList.response !== 'string' &&
-        //   typeof invoiceList.response !== 'number'
-        // ) {
-        //   this.graphData.invoices = invoiceList.response;
-        // }
-        // if (
-        //   typeof latestTransactionsList.response !== 'string' &&
-        //   typeof latestTransactionsList.response !== 'number'
-        // ) {
-        //   this.tableData.latestTransactions = latestTransactionsList.response;
-        // }
-        // this.createTransactionsChart(this.graphData.transactions);
-        // this.createInvoiceTypePieChart(this.graphData.invoices);
-        // this.prepareDataSource();
         this.parseTransactionsListResponse(transactionsList);
         this.parseInvoiceStatisticsResponse(invoiceStats);
         this.parseInvoiceListResponse(invoiceList);
