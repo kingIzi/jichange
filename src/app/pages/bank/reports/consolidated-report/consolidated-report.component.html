@@ -47,7 +47,12 @@
         </p>
         <mat-form-field>
           <mat-label>Choose a date</mat-label>
-          <input matInput [formControl]="enddate" [matDatepicker]="endDate" />
+          <input
+            matInput
+            [formControl]="enddate"
+            [matDatepicker]="endDate"
+            [min]="stdate.value"
+          />
           <mat-datepicker-toggle
             matIconSuffix
             [for]="endDate"

@@ -4,6 +4,7 @@
   "addCompanyButton": "Add vendor users",
   "failedToRetrieveCompanyUser": "Failed to retrieve vendor user.",
   "searchBy": "Search by username, full name or email",
+  "resend": "Resend credentials",
   "companyTable": [
     {
       "label": "No.",
@@ -49,6 +50,16 @@
     "emailId": "Email ID",
     "userPosition": "User position",
     "successMessage": "User added successfully!",
+    "modified": "User modified successfully!",
+    "resend": {
+      "email": "Email",
+      "mobile": "Telephone",
+      "message": "Choose email or mobile to receive reissued credentials.",
+      "sureResendEmail": "An email of the user's credentials will be sent to the user.",
+      "sureResendMobile": "An SMS text of the user's credentials will be sent to the user.",
+      "sentSuccessfully": "Credentials sent successfully!",
+      "failedToResendCredential": "Failed to resend user credentials. Verify email and mobile number and try again."
+    },
     "placeholder": {
       "role": "Select role",
       "username": "Enter User name",

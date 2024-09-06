@@ -61,6 +61,7 @@ import { HttpDataResponse } from 'src/app/core/models/http-data-response';
 import { TableDataService } from 'src/app/core/services/table-data.service';
 import { TABLE_DATA_SERVICE } from 'src/app/core/tokens/tokens';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppConfigService } from 'src/app/core/services/app-config.service';
 
 @Component({
   selector: 'app-branch-list',
@@ -114,6 +115,7 @@ export class BranchListComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<Branch>;
   constructor(
+    private appConfig: AppConfigService,
     private dialog: MatDialog,
     private branchService: BranchService,
     private tr: TranslocoService,
@@ -248,7 +250,10 @@ export class BranchListComponent implements OnInit {
   private removeBranch(sno: number) {
     this.startLoading = true;
     this.branchService
-      .removeBranch(sno)
+      .removeBranch({
+        sno: sno,
+        userid: this.appConfig.getUserIdFromSessionStorage(),
+      })
       .then((result) => {
         this.parseDeleteBranchResponse(result);
         this.startLoading = false;

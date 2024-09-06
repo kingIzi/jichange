@@ -280,6 +280,18 @@ const routes: Routes = [
                     '../../../pages/vendor/reports/customer-report/customer-report.component'
                   ).then((c) => c.CustomerReportComponent),
               },
+              {
+                path: 'audit',
+                data: {
+                  breadcrumb: { alias: 'audit', skip: false },
+                  animationState: 'reports-module-8',
+                  reuseRoute: true,
+                },
+                loadComponent: () =>
+                  import(
+                    '../../../pages/vendor/reports/audit-trails/audit-trails.component'
+                  ).then((e) => e.AuditTrailsComponent),
+              },
             ],
           },
         ],

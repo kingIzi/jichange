@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -24,7 +25,11 @@ import {
 import { TableDateFiltersComponent } from 'src/app/components/cards/table-date-filters/table-date-filters.component';
 import { DisplayMessageBoxComponent } from 'src/app/components/dialogs/display-message-box/display-message-box.component';
 import { TablePaginationComponent } from 'src/app/components/table-pagination/table-pagination.component';
-import { AuditTrail } from 'src/app/core/models/bank/reports/auditTrail';
+import {
+  AuditTrail,
+  AuditTrailLogData,
+  ResultsSet,
+} from 'src/app/core/models/bank/reports/auditTrail';
 import { RequestClientService } from 'src/app/core/services/request-client.service';
 import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-rainbow.component';
 import { AppUtilities } from 'src/app/utilities/app-utilities';
@@ -36,7 +41,18 @@ import {
 import { formatDate } from '@angular/common';
 import { AuditTrailsService } from 'src/app/core/services/bank/reports/audit-trails/audit-trails.service';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
-import { Observable, TimeoutError, from, of, zip } from 'rxjs';
+import {
+  Observable,
+  TimeoutError,
+  catchError,
+  from,
+  map,
+  merge,
+  of,
+  startWith,
+  switchMap,
+  zip,
+} from 'rxjs';
 import { LoaderInfiniteSpinnerComponent } from 'src/app/reusables/loader-infinite-spinner/loader-infinite-spinner.component';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
 import { AuditTrailsTable } from 'src/app/core/enums/bank/reports/audit-trails-table';
@@ -71,6 +87,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { AuditTrailsReportFormComponent } from '../../../../components/dialogs/bank/reports/audit-trails-report-form/audit-trails-report-form.component';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate,
+} from '@angular/animations';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-audit-trails',
@@ -97,6 +123,9 @@ import { MatSelectModule } from '@angular/material/select';
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatRadioModule,
+    MatProgressSpinnerModule,
+    AuditTrailsReportFormComponent,
   ],
   providers: [
     {
@@ -108,47 +137,36 @@ import { MatSelectModule } from '@angular/material/select';
       useClass: TableDataService,
     },
   ],
-  animations: [listAnimationMobile, listAnimationDesktop, inOutAnimation],
+  animations: [
+    listAnimationMobile,
+    listAnimationDesktop,
+    inOutAnimation,
+    trigger('detailExpand', [
+      state('collapsed,void', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuditTrailsComponent implements OnInit {
-  public selectPageOptions: string[] = [
-    'Country',
-    'Region',
-    'District',
-    'Ward',
-    'Designation',
-    'Currency',
-    'Email Text',
-    'Smtp Settings',
-    'Bank User',
-    'Questions',
-    'Vat Percentage',
-    'Company',
-  ];
-  public actions: string[] = ['All', 'Insert', 'Update', 'Delete'];
-  public formGroup!: FormGroup;
+export class AuditTrailsComponent implements OnInit, AfterViewInit {
+  //public formGroup!: FormGroup;
   public startLoading: boolean = false;
-  public tableLoading: boolean = false;
+  //public tableLoading: boolean = false;
   public branches: Branch[] = [];
-  // public tableData: {
-  //   auditTrails: AuditTrail[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<AuditTrail>;
-  // } = {
-  //   auditTrails: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<AuditTrail>([]),
-  // };
   public headersFormGroup!: FormGroup;
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public AppUtilities: typeof AppUtilities = AppUtilities;
+  public resultsLength: number = 0;
+  expandedElement!: AuditTrailLogData | null;
+  @ViewChild('auditTrailsReportForm')
+  auditTrailsReportForm!: AuditTrailsReportFormComponent;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
-  @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('auditTrailTableContainer')
   auditTrailTableContainer!: ElementRef<HTMLDivElement>;
@@ -158,11 +176,9 @@ export class AuditTrailsComponent implements OnInit {
     private fb: FormBuilder,
     private tr: TranslocoService,
     private auditTrailsService: AuditTrailsService,
-    private fileHandler: FileHandlerService,
-    private branchService: BranchService,
     private cdf: ChangeDetectorRef,
     @Inject(TABLE_DATA_SERVICE)
-    private tableDataService: TableDataService<AuditTrail>,
+    private tableDataService: TableDataService<AuditTrailLogData>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
   private createHeadersGroup() {
@@ -174,18 +190,14 @@ export class AuditTrailsComponent implements OnInit {
     this.tr
       .selectTranslate(`auditTrails.auditTrailsTable`, {}, this.scope)
       .subscribe((labels: TableColumnsData[]) => {
-        //this.tableData.originalTableColumns = labels;
         this.tableDataService.setOriginalTableColumns(labels);
         this.tableDataService
           .getOriginalTableColumns()
           .forEach((column, index) => {
             let col = this.fb.group({
-              included: this.fb.control(
-                index === 0 ? false : index < TABLE_SHOWING,
-                []
-              ),
-              label: this.fb.control(column.label, []),
-              value: this.fb.control(column.value, []),
+              included: this.fb.control(index < TABLE_SHOWING, []),
+              label: this.fb.control(column.label ?? '', []),
+              value: this.fb.control(column.value ?? '', []),
             });
             col.get(`included`)?.valueChanges.subscribe((included) => {
               this.resetTableColumns();
@@ -212,59 +224,24 @@ export class AuditTrailsComponent implements OnInit {
     this.tableDataService.setTableColumnsObservable(tableColumns);
     //this.tableData.tableColumns$ = of(this.tableData.tableColumns);
   }
-  private createForm() {
-    this.formGroup = this.fb.group({
-      tbname: this.fb.control(this.selectPageOptions[0], [Validators.required]),
-      Startdate: this.fb.control('', [Validators.required]),
-      Enddate: this.fb.control('', [Validators.required]),
-      act: this.fb.control(this.actions[0], [Validators.required]),
-      branch: this.fb.control(this.getUserProfile().braid, []),
-    });
-    if (Number(this.getUserProfile().braid) > 0) {
-      this.branch.disable();
-    }
-  }
-  private formErrors(
-    errorsPath: string = 'reports.auditTrails.form.errors.dialog'
-  ) {
-    if (this.tbname.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.selectPage`)
-      );
-    }
-    if (this.act.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.action`)
-      );
-    }
-    if (this.Startdate.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.validDate`)
-      );
-    }
-    if (this.Enddate.invalid) {
-      AppUtilities.openDisplayMessageBox(
-        this.displayMessageBox,
-        this.tr.translate(`${errorsPath}.invalidForm`),
-        this.tr.translate(`${errorsPath}.validDate`)
-      );
-    }
-  }
   private reformatDate(values: string[]) {
     let [year, month, date] = values;
     return `${date}/${month}/${year}`;
   }
   private dataSourceFilter() {
-    let filterPredicate = (data: AuditTrail, filter: string) => {
-      return data.atype
-        .toLocaleLowerCase()
-        .includes(filter.toLocaleLowerCase());
+    let filterPredicate = (data: AuditTrailLogData, filter: string) => {
+      // return data.Audit_Type &&
+      //   data.Audit_Type.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
+      //   ? true
+      //   : false;
+      let index = this.getTableDataList().indexOf(data);
+      return this.getTableDataList().at(index)?.Audit_Type &&
+        this.getTableDataList()
+          .at(index)
+          ?.Audit_Type.toLocaleLowerCase()
+          .includes(filter.toLocaleLowerCase())
+        ? true
+        : false;
     };
     this.tableDataService.setDataSourceFilterPredicate(filterPredicate);
   }
@@ -279,68 +256,44 @@ export class AuditTrailsComponent implements OnInit {
     };
     this.tableDataService.setDataSourceSortingDataAccessor(sortingDataAccessor);
   }
-  // private prepareDataSource() {
-  //   this.tableData.dataSource = new MatTableDataSource<AuditTrail>(
-  //     this.tableData.auditTrails
-  //   );
-  //   this.tableData.dataSource.paginator = this.paginator;
-  //   this.tableData.dataSource.sort = this.sort;
-  //   this.dataSourceFilter();
-  //   this.dataSourceSortingAccessor();
-  // }
   private parseAuditTrailDataList(
-    result: HttpDataResponse<string | number | AuditTrail[]>
+    result: HttpDataResponse<string | number | ResultsSet>
   ) {
     let hasErrors = AppUtilities.hasErrorResult(result);
     if (hasErrors) {
       this.tableDataService.setData([]);
     } else {
-      this.tableDataService.setData(result.response as AuditTrail[]);
+      this.resultsLength = (result.response as ResultsSet).size;
+      this.tableDataService.setData((result.response as ResultsSet).content);
     }
   }
   private assignAuditTrailsDataList(
-    result: HttpDataResponse<string | number | AuditTrail[]>
+    result: HttpDataResponse<number | ResultsSet>
   ) {
-    // if (
-    //   result.response &&
-    //   typeof result.response !== 'string' &&
-    //   typeof result.response !== 'number' &&
-    //   result.response.length > 0
-    // ) {
-    //   this.tableData.auditTrails = result.response;
-    // } else {
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.warning`),
-    //     this.tr.translate(`reports.auditTrails.noAuditTrailsFound`)
-    //   );
-    //   this.tableData.auditTrails = [];
-    // }
-    // this.prepareDataSource();
     this.parseAuditTrailDataList(result);
-    this.tableDataService.prepareDataSource(this.paginator, this.sort);
+    this.tableDataService.initDataSource(this.sort);
     this.dataSourceFilter();
     this.dataSourceSortingAccessor();
   }
   private filterAuditTrailsRequest(value: AuditTrailsReportForm) {
-    this.tableLoading = true;
-    this.auditTrailsService
-      .getDetails(value)
-      .then((result) => {
+    this.startLoading = true;
+    this.auditTrailsService.getAuditReport(value).subscribe({
+      next: (result) => {
         this.assignAuditTrailsDataList(result);
-        this.tableLoading = false;
+        this.startLoading = false;
         this.cdf.detectChanges();
-      })
-      .catch((err) => {
+      },
+      error: (err) => {
         AppUtilities.requestFailedCatchError(
           err,
           this.displayMessageBox,
           this.tr
         );
-        this.tableLoading = false;
+        this.startLoading = false;
         this.cdf.detectChanges();
         throw err;
-      });
+      },
+    });
   }
   private audiTrailKeys(indexes: number[]) {
     let keys: string[] = [];
@@ -375,45 +328,12 @@ export class AuditTrailsComponent implements OnInit {
       .filter((num) => num !== -1);
     return this.audiTrailKeys(indexes);
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
-  private buildPage() {
-    this.startLoading = true;
-    let branchesObs = from(this.branchService.postBranchList({}));
-    let res = AppUtilities.pipedObservables(zip(branchesObs));
-    res
-      .then((results) => {
-        let [branches] = results;
-        if (
-          typeof branches.response !== 'string' &&
-          typeof branches.response !== 'number'
-        ) {
-          this.branches = branches.response;
-        }
-        this.startLoading = false;
-        this.cdf.detectChanges();
-      })
-      .catch((err) => {
-        AppUtilities.requestFailedCatchError(
-          err,
-          this.displayMessageBox,
-          this.tr
-        );
-        this.startLoading = false;
-        this.cdf.detectChanges();
-        throw err;
-      });
-  }
   private getPdfHeaderLabels() {
-    let from: string = this.Startdate.value
-        ? new Date(this.Startdate.value).toDateString()
+    let from: string = this.auditTrailsReportForm.Startdate.value
+        ? new Date(this.auditTrailsReportForm.Startdate.value).toDateString()
         : 'N/A',
-      to: string = this.Enddate.value
-        ? new Date(this.Enddate.value).toDateString()
+      to: string = this.auditTrailsReportForm.Enddate.value
+        ? new Date(this.auditTrailsReportForm.Enddate.value).toDateString()
         : 'N/A';
     return [from, to];
   }
@@ -458,10 +378,91 @@ export class AuditTrailsComponent implements OnInit {
     });
     doc.save(`${filename}.pdf`);
   }
+  private getTableNameLabel(element: AuditTrailLogData) {
+    let prefix = 'reports.auditTrails.display';
+    let tableName = AppUtilities.replaceUnderscoreValue(element.Table_Name);
+    let columnName = AppUtilities.replaceUnderscoreValue(element.ColumnsName);
+    switch (element.Audit_Type?.toLocaleLowerCase()) {
+      case 'insert'.toLocaleLowerCase():
+        return this.tr
+          .translate(`${prefix}.insert`)
+          .replace('{table}', `'${tableName}'`)
+          .replace('{column}', `'${columnName}'`);
+      case 'update'.toLocaleLowerCase():
+        return this.tr
+          .translate(`${prefix}.update`)
+          .replace('{table}', `'${tableName}'`)
+          .replace('{column}', `'${columnName}'`);
+      case 'delete'.toLocaleLowerCase():
+        return this.tr
+          .translate(`${prefix}.delete`)
+          .replace('{table}', `'${tableName}'`);
+      default:
+        return `Untracked Audit type caught. Audit Sno is ${element.Audit_Sno}`;
+    }
+  }
+  ngAfterViewInit(): void {
+    this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+    merge(this.sort.sortChange, this.paginator.page)
+      .pipe(
+        startWith({}),
+        switchMap(() => {
+          this.startLoading = true;
+          let form = this.auditTrailsReportForm.getFormData();
+          form.pageNumber = this.paginator.pageIndex + 1;
+          form.pageSize = this.paginator.pageSize;
+          return this.auditTrailsService
+            .getAuditReport(form)
+            .pipe(catchError(() => of(null)));
+        }),
+        map((data) => {
+          this.startLoading = false;
+          if (data === null) {
+            return [];
+          }
+          if (AppUtilities.hasErrorResult(data!)) {
+            return [];
+          }
+          return data;
+        })
+      )
+      .subscribe({
+        next: (result: any) => {
+          this.assignAuditTrailsDataList(result);
+          this.cdf.detectChanges();
+        },
+        error: (err) => {
+          AppUtilities.requestFailedCatchError(
+            err,
+            this.displayMessageBox,
+            this.tr
+          );
+          this.startLoading = false;
+          this.cdf.detectChanges();
+          throw err;
+        },
+      });
+  }
   ngOnInit(): void {
-    this.createForm();
+    //this.createForm();
     this.createHeadersGroup();
-    this.buildPage();
+    //this.buildPage();
+  }
+  tableAuditDate(element: AuditTrailLogData) {
+    let postedDate = new Date(element.Audit_Date);
+    const time = postedDate.toLocaleString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    const formattedDate = postedDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+    });
+
+    return `${time}, ${formattedDate}`;
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as BankLoginResponse;
@@ -492,8 +493,8 @@ export class AuditTrailsComponent implements OnInit {
   tableValueStyle(element: any, key: string) {
     let style = 'text-xs lg:text-sm leading-relaxed';
     switch (key) {
-      case 'atype':
-        return `${style} text-black font-semibold`;
+      case 'Audit_Type':
+        return `${style} text-black font-semibold uppercase`;
       default:
         return `${style} text-black font-normal`;
     }
@@ -505,58 +506,33 @@ export class AuditTrailsComponent implements OnInit {
           this.tableDataService.getData(),
           element
         );
-      case 'adate':
-        return new Date(element[key]).toDateString();
+      case 'Table_Name':
+        return this.getTableNameLabel(element);
       default:
         return element[key] ? element[key] : '-';
     }
+  }
+  getColumnsToDisplayWithExpand() {
+    //columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+    // return [
+    //   ...this.tableDataService.getTableColumns(),
+    //   { labe: 'expand', value: '' },
+    // ];
+    return [
+      ...this.tableDataService.getTableColumns().map((e) => e.label),
+      'expand',
+    ];
   }
   sortColumnClicked(ind: number) {
     let sortAsc = this.headers.at(ind).get('sortAsc');
     sortAsc?.setValue(!sortAsc?.value);
   }
-  submitFilter() {
-    if (this.formGroup.valid) {
-      let form = { ...this.formGroup.value };
-      // value.Startdate = this.reformatDate(
-      //   this.formGroup.value.Startdate.split('-')
-      // );
-      // value.Enddate = this.reformatDate(
-      //   this.formGroup.value.Enddate.split('-')
-      // );
-      if (form.Startdate) {
-        //form.stdate = new Date(form.stdate).toISOString();
-        let startDate = new Date(form.Startdate);
-        startDate.setHours(0, 0, 0, 0);
-        form.Startdate = startDate.toISOString();
-      }
-      if (form.Enddate) {
-        //form.enddate = new Date(form.enddate).toISOString();
-        let endDate = new Date(form.Enddate);
-        endDate.setHours(23, 59, 59, 999);
-        form.Enddate = endDate.toISOString();
-      }
-      form.branch = this.branch.value;
-      this.filterAuditTrailsRequest(form);
-    } else {
-      this.formGroup.markAllAsTouched();
-    }
+  onAuditTrailForm(form: any) {
+    form.pageNumber = this.paginator.pageIndex + 1;
+    form.pageSize = this.paginator.pageSize;
+    this.filterAuditTrailsRequest(form);
   }
   downloadSheet() {
-    // if (this.tableData.auditTrails.length > 0) {
-    //   this.fileHandler.downloadExcelTable(
-    //     this.tableData.auditTrails,
-    //     this.getActiveTableKeys(),
-    //     'audit_trails_report',
-    //     ['adate']
-    //   );
-    // } else {
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.failed`),
-    //     this.tr.translate(`errors.noDataFound`)
-    //   );
-    // }
     if (this.tableDataService.getData().length > 0) {
       this.exporter.hiddenColumns = [
         this.tableDataService.getTableColumns().length,
@@ -599,21 +575,6 @@ export class AuditTrailsComponent implements OnInit {
   }
   geTableDataColumnsObservable() {
     return this.tableDataService.getTableColumnsObservable();
-  }
-  get tbname() {
-    return this.formGroup.get('tbname') as FormControl;
-  }
-  get Startdate() {
-    return this.formGroup.get('Startdate') as FormControl;
-  }
-  get Enddate() {
-    return this.formGroup.get('Enddate') as FormControl;
-  }
-  get act() {
-    return this.formGroup.get('act') as FormControl;
-  }
-  get branch() {
-    return this.formGroup.get('branch') as FormControl;
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

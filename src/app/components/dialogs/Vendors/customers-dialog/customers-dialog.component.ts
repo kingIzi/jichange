@@ -332,7 +332,7 @@ export class CustomersDialogComponent implements OnInit, AfterViewInit {
     }
   }
   addCustomer() {
-    if (this.data) {
+    if (this.data?.customer) {
       let message = this.tr.translate(`customer.modifiedCustomerSuccessfully`);
       this.requestAddCustomer(this.customerForm.value, message);
     } else {

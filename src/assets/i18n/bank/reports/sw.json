@@ -942,6 +942,18 @@
     "auditTrails": "Kufuatilia Ukaguzi",
     "noAuditTrailsFound": "Hakukuwa na njia za ukaguzi zilizopatikana kwa tarehe zilizobainishwa.",
     "searchBy": "Tafuta kwa aina ya kitendo",
+    "defaults": {
+      "added": "Imeongezwa",
+      "update": "Ilibadilishwa",
+      "delete": "Imefutwa",
+      "at": "Katika",
+      "blankField": "Sehemu iliachwa bila kujazwa"
+    },
+    "display": {
+      "insert": "Imeingiza {column} katika {table}",
+      "update": "Ilibadilisha {column} katika {table}",
+      "delete": "Imefuta kutoka meza ya {table}"
+    },
     "form": {
       "selectPage": "Chagua ukarasa",
       "company": "Kampuni",
@@ -950,7 +962,8 @@
       "endDate": "Tarehe ya Mwisho",
       "placeholders": {
         "all": "Zote",
-        "pleaseSelect": "Tafadahli, chagua"
+        "pleaseSelect": "Tafadahli, chagua",
+        "action": "Chagua kitendo"
       },
       "errors": {
         "selectPage": "Tafadhali chagua ukurasa",
@@ -965,38 +978,18 @@
     },
     "auditTrailsTable": [
       {
-        "label": "No.",
-        "value": "No.",
+        "label": "Kichwa",
+        "value": "Table_Name",
         "desc": ""
       },
       {
         "label": "Aina",
-        "value": "atype",
+        "value": "Audit_Type",
         "desc": ""
       },
       {
-        "label": "Safu",
-        "value": "colname",
-        "desc": ""
-      },
-      {
-        "label": "Thamani ya Zamani",
-        "value": "ovalue",
-        "desc": ""
-      },
-      {
-        "label": "Thamani Mpya",
-        "value": "nvalue",
-        "desc": ""
-      },
-      {
-        "label": "Imetumwa na",
-        "value": "aby",
-        "desc": ""
-      },
-      {
-        "label": "Tarehe ya Ukaguzi",
-        "value": "adate",
+        "label": "Mtumiaji",
+        "value": "AuditorName",
         "desc": ""
       }
     ]

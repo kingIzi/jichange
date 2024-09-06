@@ -4,5 +4,5 @@ export class GetControlResponse {
   Payment_Type!: string | null;
   Item_Total_Amount!: number;
   Balance!: number;
-  Currency!: string;
+  Currency_Code!: string;
 }

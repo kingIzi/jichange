@@ -97,7 +97,7 @@ export class ControlNumberDetailsComponent implements OnInit {
     this.Payment_Type.setValue(controlFound?.Payment_Type?.trim());
     this.Item_Total_Amount.setValue(controlFound?.Item_Total_Amount);
     this.Balance.setValue(controlFound?.Balance);
-    this.Currency.setValue(controlFound?.Currency);
+    this.Currency.setValue(controlFound?.Currency_Code);
   }
 
   private createForm() {
@@ -132,9 +132,6 @@ export class ControlNumberDetailsComponent implements OnInit {
         } else {
           this.modifyControlFoundData(results.response);
           this.controlFound.nativeElement.showModal();
-          this.controlFound.nativeElement.addEventListener('close', () => {
-            this.closeDialog();
-          });
         }
         this.cdr.detectChanges();
       })

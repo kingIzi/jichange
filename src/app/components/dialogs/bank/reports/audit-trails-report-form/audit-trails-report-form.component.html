@@ -1,0 +1,120 @@
+<app-display-message-box #displayMessageBox></app-display-message-box>
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+
+<form
+  *ngIf="formGroup !== null && formGroup !== undefined"
+  [formGroup]="formGroup"
+  class="w-full grid grid-cols-2 lg:grid-cols-4 gap-x-2 gap-y-3"
+>
+  <div class="flex flex-col space-y-1">
+    <p
+      *transloco="let t; read: 'reports.auditTrails.form'"
+      class="text-xs capitalize"
+    >
+      {{ t("selectPage") }}
+    </p>
+    <mat-form-field *transloco="let t; read: 'reports.auditTrails.form'">
+      <mat-select [formControl]="tbname" name="">
+        <mat-option *transloco="let y; read: 'defaults'" [value]="''">{{
+          y("all")
+        }}</mat-option>
+        @for (selectPageOption of selectPageOptions; track selectPageOption) {
+        <mat-option [value]="selectPageOption">{{
+          AppUtilities.replaceUnderscoreValue(selectPageOption)
+        }}</mat-option>
+        }
+      </mat-select>
+      <mat-error *ngIf="tbname && tbname.invalid && tbname.touched">
+        {{ t("errors.selectPage") }}
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <div
+    *transloco="let y; read: 'reports.auditTrails.form'"
+    class="flex flex-col space-y-1"
+  >
+    <p class="text-xs capitalize">
+      {{ y("actions") }}
+    </p>
+    <mat-form-field *transloco="let t; read: 'reports.invoiceDetails.form'">
+      <mat-select [formControl]="act" name="">
+        <!-- <mat-option disabled [value]="''">{{
+          y("placeholders.action")
+        }}</mat-option> -->
+        <mat-option *transloco="let y; read: 'defaults'" [value]="''">{{
+          y("all")
+        }}</mat-option>
+        @for (action of actions; track action) {
+        <mat-option [value]="action">{{ action }}</mat-option>
+        }
+      </mat-select>
+      <mat-error *ngIf="tbname && tbname.invalid && tbname.touched">
+        {{ y("errors.action") }}
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <div
+    *transloco="let y; read: 'reports.overview'"
+    class="flex flex-col space-y-1"
+  >
+    <p *transloco="let t; read: 'forms'" class="text-xs capitalize">
+      {{ t("from") }} {{ "(" + y("postedDate") + ")" }}
+    </p>
+    <mat-form-field>
+      <mat-label>Choose a date</mat-label>
+      <input matInput [formControl]="Startdate" [matDatepicker]="startDate" />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="startDate"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #startDate></mat-datepicker>
+      <mat-error *ngIf="Startdate && Startdate.invalid && Startdate.touched">
+        <ng-container
+          *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+        >
+          {{ t("startDate") }}
+        </ng-container>
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <div
+    *transloco="let y; read: 'reports.overview'"
+    class="flex flex-col space-y-1"
+  >
+    <p *transloco="let t; read: 'forms'" class="text-xs">
+      {{ t("to") }} {{ "(" + y("postedDate") + ")" }}
+    </p>
+    <mat-form-field>
+      <mat-label>Choose a date</mat-label>
+      <input
+        matInput
+        [formControl]="Enddate"
+        [matDatepicker]="endDate"
+        [min]="Startdate.value"
+      />
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="endDate"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #endDate></mat-datepicker>
+      <mat-error *ngIf="Enddate && Enddate.invalid && Enddate.touched">
+        <ng-container
+          *transloco="let t; read: 'reports.invoiceDetails.form.errors'"
+        >
+          {{ t("endDate") }}
+        </ng-container>
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <div class="col-span-full flex flex-row items-center justify-end">
+    <button
+      (click)="submitFilter()"
+      *transloco="let t; read: 'actions'"
+      class="flex flex-row items-center btn btn-sm bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow"
+    >
+      {{ t("submit") }}
+    </button>
+  </div>
+</form>

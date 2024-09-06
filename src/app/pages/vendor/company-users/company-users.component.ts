@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  ElementRef,
   Inject,
   OnInit,
   ViewChild,
@@ -13,6 +14,7 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -24,6 +26,7 @@ import {
   MatPaginatorModule,
   MatPaginator,
 } from '@angular/material/paginator';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -57,6 +60,7 @@ import { LoaderRainbowComponent } from 'src/app/reusables/loader-rainbow/loader-
 import { AppUtilities } from 'src/app/utilities/app-utilities';
 import { PerformanceUtils } from 'src/app/utilities/performance-utils';
 import { TableUtilities } from 'src/app/utilities/table-utilities';
+import { SubmitMessageBoxComponent } from '../../../components/dialogs/submit-message-box/submit-message-box.component';
 
 @Component({
   selector: 'app-company-users',
@@ -78,6 +82,8 @@ import { TableUtilities } from 'src/app/utilities/table-utilities';
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
+    MatRadioModule,
+    SubmitMessageBoxComponent,
   ],
   templateUrl: './company-users.component.html',
   styleUrl: './company-users.component.scss',
@@ -98,24 +104,14 @@ export class CompanyUsersComponent implements OnInit {
   public tableLoading: boolean = false;
   public headersFormGroup!: FormGroup;
   public roleActs: RoleAct[] = [];
-  // public tableData: {
-  //   companUsers: CompanyUser[];
-  //   originalTableColumns: TableColumnsData[];
-  //   tableColumns: TableColumnsData[];
-  //   tableColumns$: Observable<TableColumnsData[]>;
-  //   dataSource: MatTableDataSource<CompanyUser>;
-  // } = {
-  //   companUsers: [],
-  //   originalTableColumns: [],
-  //   tableColumns: [],
-  //   tableColumns$: of([]),
-  //   dataSource: new MatTableDataSource<CompanyUser>([]),
-  // };
   public PerformanceUtils: typeof PerformanceUtils = PerformanceUtils;
+  public resendCredentialsFormGroup!: FormGroup;
   @ViewChild('displayMessageBox')
   displayMessageBox!: DisplayMessageBoxComponent;
   @ViewChild('paginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('resendCredentialsDialog')
+  resendCredentialsDialog!: ElementRef<HTMLDialogElement>;
   constructor(
     private appConfig: AppConfigService,
     private fb: FormBuilder,
@@ -128,14 +124,12 @@ export class CompanyUsersComponent implements OnInit {
     private tableDataService: TableDataService<CompanyUser>,
     @Inject(TRANSLOCO_SCOPE) private scope: any
   ) {}
-  // private prepareDataSource() {
-  //   this.tableData.dataSource = new MatTableDataSource<CompanyUser>(
-  //     this.tableData.companUsers
-  //   );
-  //   this.tableData.dataSource.paginator = this.paginator;
-  //   this.tableData.dataSource.sort = this.sort;
-  //   this.dataSourceFilter();
-  // }
+  private createResendCredentialsFormGroup() {
+    this.resendCredentialsFormGroup = this.fb.group({
+      resendCredentials: this.fb.control<string>('', [Validators.required]),
+      companyUserId: this.fb.control<number>(0, [Validators.required]),
+    });
+  }
   private dataSourceFilter() {
     let filterPredicate = (data: CompanyUser, filter: string) => {
       return data.Username.toLocaleLowerCase().includes(
@@ -167,22 +161,6 @@ export class CompanyUsersComponent implements OnInit {
   private assignCompanyUsersDataList(
     result: HttpDataResponse<string | number | CompanyUser[]>
   ) {
-    // if (
-    //   result.response &&
-    //   typeof result.response !== 'string' &&
-    //   typeof result.response !== 'number' &&
-    //   result.response.length > 0
-    // ) {
-    //   this.tableData.companUsers = result.response;
-    // } else {
-    //   this.tableData.companUsers = [];
-    //   AppUtilities.openDisplayMessageBox(
-    //     this.displayMessageBox,
-    //     this.tr.translate(`defaults.warning`),
-    //     this.tr.translate(`company.noUsersFound`)
-    //   );
-    // }
-    // this.prepareDataSource();
     this.parseCompanyUsersDataList(result);
     this.tableDataService.prepareDataSource(this.paginator, this.sort);
     this.dataSourceFilter();
@@ -297,16 +275,9 @@ export class CompanyUsersComponent implements OnInit {
         this.cdr.detectChanges();
       });
   }
-  //returns a form control given a name
   getFormControl(control: AbstractControl, name: string) {
     return control.get(name) as FormControl;
   }
-  // private searchTable(searchText: string, paginator: MatPaginator) {
-  //   this.tableData.dataSource.filter = searchText.trim().toLowerCase();
-  //   if (this.tableData.dataSource.paginator) {
-  //     this.tableData.dataSource.paginator.firstPage();
-  //   }
-  // }
   private buildPage() {
     let vendor = this.appConfig.getLoginResponse() as VendorLoginResponse;
     this.tableLoading = true;
@@ -336,11 +307,56 @@ export class CompanyUsersComponent implements OnInit {
         throw err;
       });
   }
+  private parseResendCredentials(
+    result: HttpDataResponse<number | CompanyUser>
+  ) {
+    let hasError = AppUtilities.hasErrorResult(result);
+    if (hasError) {
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.failed`),
+        this.tr.translate(
+          `company.companyUsersForm.resend.failedToResendCredential`
+        )
+      );
+    } else {
+      let message = this.tr.translate(
+        `company.companyUsersForm.resend.sentSuccessfully`
+      );
+      AppUtilities.showSuccessMessage(
+        message,
+        (e) => {},
+        this.tr.translate(`actions.ok`)
+      );
+    }
+  }
   ngOnInit(): void {
-    //this.requestRolesAct();
     this.createHeadersFormGroup();
-    //this.requestCompanyUsers();
+    this.createResendCredentialsFormGroup();
     this.buildPage();
+  }
+  private requestResendCredentials(form: {
+    resendCredentials: string;
+    companyUserId: number;
+  }) {
+    this.startLoading = true;
+    this.companyUserService.resendCredentials(form).subscribe({
+      next: (result) => {
+        this.parseResendCredentials(result);
+        this.startLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.startLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      },
+    });
   }
   getUserProfile() {
     return this.appConfig.getLoginResponse() as VendorLoginResponse;
@@ -435,6 +451,32 @@ export class CompanyUsersComponent implements OnInit {
         //this.requestCompanyUsers();
       });
   }
+  submitResendCredentialsDialog(
+    user: CompanyUser,
+    ref: SubmitMessageBoxComponent,
+    dialog: HTMLDialogElement
+  ) {
+    if (this.resendCredentialsFormGroup.valid) {
+      this.companyUserId.setValue(user.CompuserSno);
+      let message =
+        this.resendCredentials.value === 'email'
+          ? 'sureResendEmail'
+          : 'sureResendMobile';
+      ref.title = this.tr.translate('defaults.confirm');
+      ref.message = this.tr.translate(
+        `company.companyUsersForm.resend.${message}`
+      );
+      ref.openDialog();
+      ref.confirm.asObservable().subscribe({
+        next: () => {
+          this.requestResendCredentials(this.resendCredentialsFormGroup.value);
+          dialog.close();
+        },
+      });
+    } else {
+      this.resendCredentialsFormGroup.markAllAsTouched();
+    }
+  }
   getTableDataSource() {
     return this.tableDataService.getDataSource();
   }
@@ -446,6 +488,14 @@ export class CompanyUsersComponent implements OnInit {
   }
   geTableDataColumnsObservable() {
     return this.tableDataService.getTableColumnsObservable();
+  }
+  get resendCredentials() {
+    return this.resendCredentialsFormGroup.get(
+      'resendCredentials'
+    ) as FormControl;
+  }
+  get companyUserId() {
+    return this.resendCredentialsFormGroup.get('companyUserId') as FormControl;
   }
   get headers() {
     return this.headersFormGroup.get('headers') as FormArray;

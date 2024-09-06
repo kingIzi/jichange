@@ -7,6 +7,7 @@
       "timeOutInXSeconds": "Utaisha baada ya sekunde {}!"
     }
   },
+  "noRoleActsFound": "Hakuna vitendo vya jukumu vilivyopatikana.",
   "loginForm": {
     "welcomeMessage": "Ingia kwenye akaunti yako",
     "signInMessage": "Ingiza barua pepe yako na nenosiri kuingia",

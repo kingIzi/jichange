@@ -1,0 +1,60 @@
+table {
+  width: 100% !important;
+}
+
+tr.example-detail-row {
+  height: 0 !important;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: whitesmoke !important;
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: #efefef !important;
+}
+
+table tr:nth-child(odd) {
+  background-color: theme("colors.neutral");
+}
+
+table tr:nth-child(even) {
+  background-color: theme("colors.secondary");
+  //background-color: theme("colors.neutral-50");
+}
+
+.example-element-row td {
+  border-bottom-width: 0 !important;
+}
+
+.example-element-detail {
+  overflow: hidden !important;
+  display: flex !important;
+}
+
+.example-element-diagram {
+  min-width: 80px !important;
+  border: 2px solid black !important;
+  padding: 8px !important;
+  font-weight: lighter !important;
+  margin: 8px 0 !important;
+  height: 104px !important;
+}
+
+.example-element-symbol {
+  font-weight: bold !important;
+  font-size: 40px !important;
+  line-height: normal !important;
+}
+
+.example-element-description {
+  padding: 16px !important;
+}
+
+.example-element-description-attribution {
+  opacity: 0.5;
+}
+
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: theme(colors.primary);
+}

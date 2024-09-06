@@ -76,6 +76,16 @@ export class TableDataService<T> {
       this.dataSource.sortingDataAccessor = this.dataSourceSortingDataAccessor;
     }
   }
+  public initDataSource(sort: MatSort) {
+    this.dataSource = new MatTableDataSource<T>(this.data);
+    this.dataSource.sort = sort;
+    if (this.dataSourceFilterPredicate) {
+      this.dataSource.filterPredicate = this.dataSourceFilterPredicate;
+    }
+    if (this.dataSourceSortingDataAccessor) {
+      this.dataSource.sortingDataAccessor = this.dataSourceSortingDataAccessor;
+    }
+  }
   public setDataSourceFilterPredicate(
     filterPredicate: (data: T, filter: string) => boolean
   ) {

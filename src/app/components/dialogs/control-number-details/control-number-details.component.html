@@ -19,44 +19,44 @@
       <div class="flex flex-col">
         <p
           *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
-          class="capitalize"
+          class="capitalize text-xs text-black"
         >
           {{ t("controlNo") }}
         </p>
-        <p class="font-semibold">
+        <p class="font-semibold text-black text-sm">
           {{ Control_No.value ? Control_No.value : "-" }}
         </p>
       </div>
       <div class="flex flex-col">
         <p
           *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
-          class="capitalize"
+          class="capitalize text-xs text-black"
         >
           {{ t("customerName") }}
         </p>
-        <p class="font-semibold">
+        <p class="font-semibold text-black text-sm">
           {{ Cust_Name.value ? Cust_Name.value : "-" }}
         </p>
       </div>
       <div class="flex flex-col">
         <p
           *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
-          class="capitalize"
+          class="capitalize text-xs text-black"
         >
           {{ t("paymentType") }}
         </p>
-        <p class="font-semibold">
+        <p class="font-semibold text-black text-sm">
           {{ Payment_Type.value ? Payment_Type.value : "-" }}
         </p>
       </div>
       <div class="flex flex-col">
         <p
           *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
-          class="capitalize"
+          class="capitalize text-xs text-black"
         >
           {{ t("itemTotalAmount") }}
         </p>
-        <p class="font-semibold">
+        <p class="font-semibold text-black text-sm">
           {{ PerformanceUtils.moneyFormat(Item_Total_Amount.value.toString()) }}
           {{ Currency.value }}
         </p>
@@ -64,11 +64,11 @@
       <div class="flex flex-col">
         <p
           *transloco="let t; read: 'auth.controlNumberDetails.controlFound'"
-          class="capitalize"
+          class="capitalize text-xs text-black"
         >
           {{ t("balance") }}
         </p>
-        <p class="font-semibold">
+        <p class="font-semibold text-black text-sm">
           {{ PerformanceUtils.moneyFormat(Balance.value.toString()) }}
           {{ Currency.value }}
         </p>
@@ -76,8 +76,9 @@
     </form>
     <div class="modal-action">
       <form method="dialog">
-        <!-- if there is a button in form, it will close the modal -->
-        <button class="btn text-xs btn-outline font-inter btn-success w-24">
+        <button
+          class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+        >
           Ok
         </button>
       </form>

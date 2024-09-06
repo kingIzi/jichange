@@ -18,7 +18,9 @@
     "success": "Success",
     "cancel": "Cancel",
     "all": "All",
-    "optional": "Optional"
+    "optional": "Optional",
+    "pleaseFill": "Please fill",
+    "send": "Send"
   },
   "forms": {
     "from": "From",
@@ -75,154 +77,294 @@
   "bankHeaders": [
     {
       "name": "Vendor",
-      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
+      "access": [
+        "Administrator",
+        "Recruitment Manager",
+        "Customer Support",
+        "Business Management"
+      ],
       "dropdowns": [
         {
           "label": "Summary",
           "routerLink": "/main/company/summary",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Approvals",
           "routerLink": "/main/company/inbox",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         }
       ]
     },
     {
       "name": "Setup",
-      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
+      "access": [
+        "Administrator",
+        "Recruitment Manager",
+        "Customer Support",
+        "Business Management"
+      ],
       "dropdowns": [
         {
           "label": "country",
           "routerLink": "/main/setup/country",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "region",
           "routerLink": "/main/setup/region",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "district",
           "routerLink": "/main/setup/district",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "ward",
           "routerLink": "/main/setup/ward",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "currency",
           "routerLink": "/main/setup/currency",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "designation",
           "routerLink": "/main/setup/designation",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "branch",
           "routerLink": "/main/setup/branch",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "SMTP",
           "routerLink": "/main/setup/smtp",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Email Text",
           "routerLink": "/main/setup/email",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Bank User",
           "routerLink": "/main/setup/user",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Suspense account",
           "routerLink": "/main/setup/suspense",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "SMS Settings",
           "routerLink": "/main/setup/sms-settings",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "SMS Text",
           "routerLink": "/main/setup/sms-text",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         }
       ]
     },
     {
       "name": "Reports",
-      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
+      "access": [
+        "Administrator",
+        "Recruitment Manager",
+        "Customer Support",
+        "Business Management"
+      ],
       "dropdowns": [
         {
           "label": "Overview",
           "routerLink": "/main/reports/overview",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Payment Details",
           "routerLink": "/main/reports/transactions",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Completed Payments",
           "routerLink": "/main/reports/payment",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Invoice Details",
           "routerLink": "/main/reports/invoice",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Cancelled Invoice",
           "routerLink": "/main/reports/cancelled",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Amendments Details",
           "routerLink": "/main/reports/amendment",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Customers Report",
           "routerLink": "/main/reports/customer",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Vendors Report",
           "routerLink": "/main/reports/vendors",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Invoice Consolidated",
           "routerLink": "/main/reports/invoice-consolidated",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Payment Consolidated",
           "routerLink": "/main/reports/payment-consolidated",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "User Log Report",
           "routerLink": "/main/reports/userlog",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": ["Administrator"]
         },
         {
           "label": "Audit Trails",
           "routerLink": "/main/reports/audit",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": ["Administrator"]
         }
       ]
     }
@@ -230,25 +372,58 @@
   "vendorHeaders": [
     {
       "name": "Customers",
+      "access": ["Admin", "Manager"],
       "dropdowns": []
     },
     {
       "name": "Vendor users",
+      "access": ["Admin", "Manager"],
       "dropdowns": []
     },
     {
       "name": "Invoices",
+      "access": ["Admin", "Manager"],
       "dropdowns": ["Created", "Generated"]
     },
     {
       "name": "Reports",
+      "access": ["Admin", "Manager"],
       "dropdowns": [
-        "overview",
-        "Payment Details",
-        "Invoice Details",
-        "Completed Payments",
-        "Amendments Details",
-        "Cancelled invoice"
+        {
+          "label": "Overview",
+          "routerLink": "/vendor/reports/overview",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Payment Details",
+          "routerLink": "/vendor/reports/transactions",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Invoice Details",
+          "routerLink": "/vendor/reports/invoice",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Completed Payments",
+          "routerLink": "/vendor/reports/payments",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Amendments Details",
+          "routerLink": "/vendor/reports/amendment",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Cancelled invoice",
+          "routerLink": "/vendor/reports/cancelled",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Audit Trails",
+          "routerLink": "/vendor/reports/audit",
+          "access": ["Admin"]
+        }
       ]
     }
   ],

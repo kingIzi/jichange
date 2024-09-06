@@ -295,20 +295,43 @@ export class AddInvoiceComponent implements OnInit, AfterViewInit {
     let path = '/vendor/invoice/list';
     let approvalStatus =
       invoice.approval_status && invoice.approval_status === '2';
-    if (approvalStatus) {
-      path = '/vendor/invoice/generated';
-    }
+    if (approvalStatus) path = '/vendor/invoice/generated';
     let queryParams = { invno: btoa(invoice.Invoice_No) };
     AppUtilities.showSuccessMessage(
       message,
-      () =>
-        this.router.navigate([path], {
-          queryParams: queryParams,
-        }),
-      this.tr.translate('actions.view')
+      (e) => {},
+      this.tr.translate('actions.ok')
     );
-    this.resetForm();
+    this.router.navigate([path], {
+      queryParams: queryParams,
+    });
   }
+  // private addInvoiceSuccessHandler(invoice: GeneratedInvoice, message: string) {
+  //   let path = '/vendor/invoice/list';
+  //   let approvalStatus =
+  //     invoice.approval_status && invoice.approval_status === '2';
+  //   if (approvalStatus) {
+  //     path = '/vendor/invoice/generated';
+  //   }
+  //   let queryParams = { invno: btoa(invoice.Invoice_No) };
+  //   AppUtilities.showSuccessMessage(
+  //     message,
+  //     (e) => {},
+  //     this.tr.translate('actions.ok')
+  //   );
+  //   this.router.navigate([path], {
+  //     queryParams: queryParams,
+  //   }),
+  //     // AppUtilities.showSuccessMessage(
+  //     //   message,
+  //     //   () =>
+  //     //     this.router.navigate([path], {
+  //     //       queryParams: queryParams,
+  //     //     }),
+  //     //   this.tr.translate('actions.view')
+  //     // );
+  //     this.resetForm();
+  // }
   private parseAddInvoiceResponse(
     result: HttpDataResponse<GeneratedInvoice | number>,
     message: string

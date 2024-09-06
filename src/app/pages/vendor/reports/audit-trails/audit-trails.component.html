@@ -1,0 +1,290 @@
+<app-loader-infinite-spinner
+  [show]="startLoading"
+></app-loader-infinite-spinner>
+<app-display-message-box #displayMessageBox></app-display-message-box>
+
+<dialog #sorryImplementationUnderway id="my_modal_2" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg" *transloco="let t; read: 'defaults'">
+      Sorry😢😢
+    </h3>
+    <p class="py-4 text-sm" *transloco="let t; read: 'actions'">
+      Implementation is underway
+    </p>
+    <div class="modal-action">
+      <div class="flex flex-row items">
+        <button
+          *transloco="let t; read: 'actions'"
+          class="btn btn-ghost btn-xs btn-info text-linkBlue"
+        >
+          {{ t("ok") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button #close>close</button>
+  </form>
+</dialog>
+
+<div class="px-6 py-2 w-full flex flex-col space-y-2">
+  <div class="flex flex-row items-center justify-between">
+    <h2
+      *transloco="let t; read: 'reports.auditTrails'"
+      class="text-lg font-bold lg:text-2xl"
+    >
+      {{ t("auditTrails") }}
+    </h2>
+  </div>
+  <div class="flex flex-col divide-y space-y-4 w-full bg-neutral-50 shadow p-2">
+    <app-audit-trails-report-form
+      #auditTrailsReportForm
+      (auditTrailForm)="onAuditTrailForm($event)"
+    ></app-audit-trails-report-form>
+    <div [formGroup]="headersFormGroup" class="flex flex-col px-2 py-4">
+      <div class="flex flex-row items-center justify-between">
+        <div class="flex flex-row items-center space-x-2">
+          <div class="relative">
+            <input
+              *transloco="let t; read: 'reports.auditTrails'"
+              type="search"
+              class="relative pl-8 m-0 block w-full lg:w-96 min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-neutral-500 focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none"
+              id="exampleSearch"
+              [placeholder]="t('searchBy')"
+              [formControl]="tableSearch"
+            />
+            <span class="absolute top-1/2 left-2 -translate-y-1/2">
+              <i class="bi bi-search text-lg text-neutral-500"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div id="list-view" class="py-4 md:hidden">
+        <ul class="flex flex-col space-y-4">
+          <li
+            *ngFor="
+              let element of getTableDataSource().filteredData
+                | slice
+                  : 1 + paginator.pageSize * paginator.pageIndex - 1
+                  : 1 +
+                      paginator.pageSize * paginator.pageIndex +
+                      paginator.pageSize -
+                      1;
+              index as i
+            "
+            [@listAnimationDesktop]="getTableDataSource().filteredData.length"
+          >
+            <div
+              class="flex flex-col space-y-1 rounded"
+              [class]="i % 2 === 0 ? 'bg-neutral-50 shadow' : 'bg-white'"
+            >
+              <div *ngFor="let header of headers.controls; index as i">
+                <div
+                  class="flex flex-row items-center justify-between border-b p-1"
+                >
+                  <p class="text-xs font-semibold">
+                    {{ header.get("label")?.value }}
+                  </p>
+                  <p
+                    [class]="
+                      tableValueStyle(element, header.get('value')?.value)
+                    "
+                  >
+                    {{ tableValue(element, header.get("value")?.value) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="overflow-x-auto hidden md:flex flex-col sm:-mx-6 lg:-mx-8 relative"
+      >
+        <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8 relative">
+          <div #auditTrailTableContainer class="overflow-y-auto shadow">
+            <ng-container
+              *ngIf="geTableDataColumnsObservable() | async as displayedColumns"
+            >
+              <table
+                mat-table
+                matTableExporter
+                #exporter="matTableExporter"
+                matSort
+                [dataSource]="getTableDataSource()"
+                class="mat-elevation-z2 w-full relative"
+                multiTemplateDataRows
+              >
+                @for (column of displayedColumns; track column) {
+                <ng-container [matColumnDef]="column.label">
+                  <th class="!bg-base-200" mat-header-cell *matHeaderCellDef>
+                    <p class="text-black font-semibold tracking-widest">
+                      {{ column.label }}
+                    </p>
+                  </th>
+                  <td mat-cell *matCellDef="let element">
+                    <div
+                      *ngIf="column.value === 'Table_Name'; else valueTemplate"
+                      class="flex flex-row items-center space-x-4"
+                    >
+                      <mat-radio-button
+                        [checked]="expandedElement === element"
+                        color="primary"
+                      ></mat-radio-button>
+                      <p
+                        [ngClass]="
+                          expandedElement === element ? 'font-semibold' : ''
+                        "
+                        [class]="tableValueStyle(element, column.value)"
+                      >
+                        {{ tableValue(element, column.value) }}
+                      </p>
+                    </div>
+                    <ng-template #valueTemplate>
+                      <p [class]="tableValueStyle(element, column.value)">
+                        {{ tableValue(element, column.value) }}
+                      </p>
+                    </ng-template>
+                  </td>
+                </ng-container>
+                }
+                <ng-container matColumnDef="expand">
+                  <th
+                    class="!bg-base-200"
+                    mat-header-cell
+                    *matHeaderCellDef
+                    aria-label="row actions"
+                  >
+                    &nbsp;
+                  </th>
+                  <td mat-cell *matCellDef="let element">
+                    <button
+                      mat-icon-button
+                      aria-label="expand row"
+                      (click)="
+                        expandedElement =
+                          expandedElement === element ? null : element;
+                        $event.stopPropagation()
+                      "
+                    >
+                      @if (expandedElement === element) {
+                      <mat-icon>keyboard_arrow_up</mat-icon>
+                      } @else {
+                      <mat-icon>keyboard_arrow_down</mat-icon>
+                      }
+                    </button>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="expandedDetail">
+                  <td
+                    mat-cell
+                    *matCellDef="let element"
+                    [attr.colspan]="getColumnsToDisplayWithExpand().length"
+                  >
+                    <div
+                      class="example-element-detail"
+                      [@detailExpand]="
+                        element == expandedElement ? 'expanded' : 'collapsed'
+                      "
+                      *transloco="let t; read: 'reports.auditTrails.defaults'"
+                    >
+                      <div class="flex flex-col pl-7 space-y-1 p-4">
+                        <p class="text-black text-lg">
+                          {{
+                            AppUtilities.replaceUnderscoreValue(
+                              element["ColumnsName"]
+                            )
+                          }}
+                        </p>
+                        @if (element.Audit_Type === 'Insert') {
+                        <p class="text-black text-xs">
+                          {{ element.NewValues ? t("added") : "" }}
+                          <span class="font-semibold text-green-700">{{
+                            element.NewValues ?? t("blankField")
+                          }}</span>
+                          {{ t("at") }}
+                          {{ tableAuditDate(element) }}
+                        </p>
+                        } @if (element.Audit_Type === 'Update') {
+                        <p class="text-black text-xs">
+                          <span class="font-semibold text-red-700">{{
+                            element.OldValues ?? ""
+                          }}</span>
+                          <=>
+                          <span class="font-semibold text-green-700">{{
+                            element.NewValues ?? ""
+                          }}</span>
+                          {{ t("at") }}
+                          {{ tableAuditDate(element) }}
+                        </p>
+                        }
+                        <p class="text-black text-sm font-semibold p-1">
+                          {{ element.ipAddress }}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </ng-container>
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="getColumnsToDisplayWithExpand()"
+                ></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let element;
+                    columns: getColumnsToDisplayWithExpand()
+                  "
+                  [@listAnimationDesktop]="
+                    getTableDataSource().filteredData.length
+                  "
+                  class="example-element-row"
+                  [class.example-expanded-row]="expandedElement === element"
+                  (click)="
+                    expandedElement =
+                      expandedElement === element ? null : element
+                  "
+                ></tr>
+                <tr
+                  mat-row
+                  *matRowDef="let row; columns: ['expandedDetail']"
+                  class="example-detail-row"
+                ></tr>
+                <tr class="mat-row" *matNoDataRow>
+                  <td
+                    *transloco="let t; read: 'errors'"
+                    class="mat-cell"
+                    [attr.colspan]="getTableDataColumns().length"
+                  >
+                    <p
+                      *ngIf="tableSearch.value && getTableDataList().length > 0"
+                      class="text-xs lg:text-sm py-2 px-4"
+                    >
+                      {{ t("noFilterItemFound") }} "{{ tableSearch.value }}"
+                    </p>
+                    <p
+                      *ngIf="getTableDataList().length <= 0"
+                      class="text-center text-sm tracking-wide pt-3 pb-1"
+                    >
+                      {{ t("noDataFound") }}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+      <mat-paginator
+        #paginator
+        [pageSize]="5"
+        [length]="resultsLength"
+        [pageSizeOptions]="[5, 10, 20]"
+        aria-label="Select page"
+        [showFirstLastButtons]="true"
+      >
+      </mat-paginator>
+    </div>
+  </div>
+</div>

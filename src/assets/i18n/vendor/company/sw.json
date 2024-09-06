@@ -4,6 +4,7 @@
   "addCompanyButton": "Ongeza watumiaji wa muuzaji",
   "failedToRetrieveCompanyUser": "Imeshindwa kupata mtumiaji wa muuzaji.",
   "searchBy": "Tafuta kwa jina la mtumiaji, jina kamili au barua pepe",
+  "resend": "Tuma upya hati za utambulisho",
   "companyTable": [
     {
       "label": "Nambari",
@@ -48,7 +49,17 @@
     "mobileNo": "Namba ya simu",
     "emailId": "Barua pepe",
     "userPosition": "Nafasi ya mtumiaji",
-    "successMessage": "muuzaji imeongezwa kwa mafanikio!",
+    "successMessage": "Muuzaji imeongezwa kwa mafanikio!",
+    "modified": "Muuzaji amebadilishiwa kwa mafanikio!",
+    "resend": {
+      "email": "Barua pepe",
+      "mobile": "Simu",
+      "message": "Chagua barua pepe au simu ya mkononi ili kupokea hati za utambulisho zilizorejeshwa.",
+      "sureResendEmail": "Barua pepe ya hati za utambulisho wa mtumiaji itatumwa kwa mtumiaji.",
+      "sureResendMobile": "Nakala ya SMS ya hati za mtumiaji itatumwa kwa mtumiaji.",
+      "sentSuccessfully": "Hati za utambulisho zimetumwa kwa mafanikio!",
+      "failedToResendCredential": "Imeshindwa kutuma upya hati za utambulisho za mtumiaji. Thibitisha barua pepe na nambari ya simu na jaribu tena."
+    },
     "placeholder": {
       "role": "Chagua jukumu",
       "username": "Ingiza jina la mtumiaji",

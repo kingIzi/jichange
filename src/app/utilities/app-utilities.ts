@@ -262,4 +262,15 @@ export class AppUtilities {
         return '';
     }
   }
+
+  static replaceUnderscoreValue(label: string) {
+    return label
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(
+        (word: string) =>
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      )
+      .join(' ');
+  }
 }

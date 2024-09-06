@@ -269,20 +269,6 @@ export class CustomersListComponent implements OnInit {
     this.tableDataService.setTableColumns(tableColumns);
     this.tableDataService.setTableColumnsObservable(tableColumns);
   }
-  private openAttachCustomerToInvoiceDialog(customerId: number) {
-    let dialogRef = this.dialog.open(InvoiceDetailsDialogComponent, {
-      width: '600px',
-      data: {
-        invid: null,
-        customerId: customerId,
-        userProfile: this.appConfigService.getLoginResponse(),
-      },
-    });
-    dialogRef.componentInstance.addedInvoice.asObservable().subscribe(() => {
-      this.requestCustomerNames();
-      dialogRef.close();
-    });
-  }
   ngOnInit(): void {
     this.buildHeadersForm();
     this.requestCustomerNames();

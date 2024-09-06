@@ -155,6 +155,7 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
     });
   }
   private modifyForm() {
+    console.log(this.companyUser);
     this.pos.setValue(this.companyUser.Userpos);
     this.auname.setValue(this.companyUser.Username),
       this.uname.setValue(this.companyUser.Fullname),
@@ -295,7 +296,9 @@ export class CompanyUsersDialogComponent implements OnInit, AfterViewInit {
         errorMessage
       );
     } else {
-      let msg = this.tr.translate(`company.companyUsersForm.successMessage`);
+      let msg = this.data?.companyUserId
+        ? this.tr.translate(`company.companyUsersForm.modified`)
+        : this.tr.translate(`company.companyUsersForm.successMessage`);
       AppUtilities.showSuccessMessage(
         msg,
         () => {},

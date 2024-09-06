@@ -37,6 +37,19 @@ import { CompanyUserService } from 'src/app/core/services/vendor/company-user.se
 import { InvoiceService } from 'src/app/core/services/vendor/invoice.service';
 import { AppConfigService } from 'src/app/core/services/app-config.service';
 import { VendorLoginResponse } from 'src/app/core/models/login-response';
+import { RoleAct } from 'src/app/core/models/vendors/role-act';
+import { HttpDataResponse } from 'src/app/core/models/http-data-response';
+import { CompanyUser } from 'src/app/core/models/vendors/company-user';
+
+type Header = {
+  name: string;
+  access: string[];
+  dropdowns: {
+    label: string;
+    access: string[];
+    routerLink: string;
+  }[];
+};
 
 @Component({
   selector: 'app-vendor-header',
@@ -62,7 +75,7 @@ export class VendorHeaderComponent implements OnInit {
   public vendor$!: Observable<{ Comp_Mas_Sno: number; Company_Name: string }>;
   public routeLoading: boolean = false;
   public formGroup!: FormGroup;
-  //public userProfile!: LoginResponse;
+  public roleActs: RoleAct[] = [];
   private reportsMap = {
     overview: 0,
     transactionDetails: 1,
@@ -81,13 +94,13 @@ export class VendorHeaderComponent implements OnInit {
     private appConfig: AppConfigService,
     private tr: TranslocoService,
     private loginService: LoginService,
-    //private customerService: CustomerService,
     private invoiceService: InvoiceService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private router: Router,
     private idle: Idle,
-    private keepalive: Keepalive
+    private keepalive: Keepalive,
+    private companyUserService: CompanyUserService
   ) {
     let systemDefaultTimeout = 15 * 60;
     this.idle.setIdle(systemDefaultTimeout);
@@ -146,13 +159,48 @@ export class VendorHeaderComponent implements OnInit {
       }
     });
   }
+  private assignRolesAct(result: HttpDataResponse<number | RoleAct[]>) {
+    let isErrorResult = AppUtilities.hasErrorResult(result);
+    if (isErrorResult) {
+      this.roleActs = [];
+      let message = this.tr.translate(`auth.noRoleActsFound`);
+      AppUtilities.openDisplayMessageBox(
+        this.displayMessageBox,
+        this.tr.translate(`defaults.warning`),
+        message
+      );
+    } else {
+      this.roleActs = result.response as RoleAct[];
+    }
+  }
+  private requestRolesAct() {
+    let vendor = this.appConfig.getLoginResponse() as VendorLoginResponse;
+    let t = from(
+      this.companyUserService.requestRolesAct({ compid: vendor.InstID })
+    );
+    t.subscribe({
+      next: (result) => {
+        this.assignRolesAct(result);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        AppUtilities.requestFailedCatchError(
+          err,
+          this.displayMessageBox,
+          this.tr
+        );
+        this.routeLoading = false;
+        this.cdr.detectChanges();
+        throw err;
+      },
+    });
+  }
   private requestLogout() {
     this.routeLoading = true;
     this.loginService
       .logout({ userid: this.getUserProfile().Usno })
       .then((result) => {
         this.routeLoading = false;
-        //localStorage.clear();
         this.appConfig.clearSessionStorage();
         this.cdr.detectChanges();
         this.router.navigate(['/auth']);
@@ -187,29 +235,30 @@ export class VendorHeaderComponent implements OnInit {
     this.formGroup = this.fb.group({
       headers: this.fb.array([], []),
     });
-    this.tr.selectTranslate('vendorHeaders').subscribe((headers: any[]) => {
-      headers.forEach((header, index) => {
-        let group = this.fb.group({
-          label: this.fb.control(header.name, []),
-          dropdowns: this.fb.array([], []),
-          rootLink: this.fb.control(this.switchRouterLinks(index), []),
-        });
-        (header.dropdowns as any[]).forEach((e, dropdownIndex) => {
-          let dropdown = this.fb.group({
-            label: this.fb.control(e, []),
-            routerLink: this.fb.control(
-              this.getHeaderRouterLink(index, dropdownIndex),
-              []
-            ),
-            isActive: this.fb.control(false, []),
-          });
-          (group.get('dropdowns') as FormArray).push(dropdown);
-          // if (dropdownIndex !== 3) {
-          //   (group.get('dropdowns') as FormArray).push(dropdown);
-          // }
-        });
-        this.headers.push(group);
+  }
+  private isAdmin() {}
+  private navigationBarItems(labels: Header[], companyUser: CompanyUser) {
+    labels.forEach((label, index) => {
+      let group = this.fb.group({
+        label: this.fb.control(label.name, []),
+        dropdowns: this.fb.array([], []),
+        rootLink: this.fb.control(this.switchRouterLinks(index), []),
       });
+      (label.dropdowns as any[]).forEach((dropdown, dropdownIndex) => {
+        let col = this.fb.group({
+          label: this.fb.control(dropdown.label, []),
+          routerLink: this.fb.control(dropdown.routerLink, []),
+          isActive: this.fb.control(false, []),
+        });
+        //(group.get('dropdowns') as FormArray).push(col);
+        let found = this.roleActs.find(
+          (e) => e.Sno === Number(companyUser.Userpos)
+        );
+        if (dropdown?.access?.includes(found?.Description)) {
+          (group.get('dropdowns') as FormArray).push(col);
+        }
+      });
+      this.headers.push(group);
     });
   }
   private getHeaderRouterLink(bankIndex: number, dropdownIndex: number) {
@@ -257,19 +306,37 @@ export class VendorHeaderComponent implements OnInit {
     }
   }
   private buildPage() {
+    let roleActs = from(
+      this.companyUserService.requestRolesAct({
+        compid: this.getUserProfile().InstID,
+      })
+    );
+    let companyUserById = this.companyUserService.getCompanyUsersById({
+      Sno: this.getUserProfile().Usno,
+    });
     let vendorObs = from(
       this.invoiceService.getCompanyS({ compid: this.getUserProfile().InstID })
     );
-    let res = AppUtilities.pipedObservables(zip(vendorObs));
+    let langs = this.tr.selectTranslate('vendorHeaders');
+    let res = AppUtilities.pipedObservables(
+      zip(roleActs, langs, companyUserById, vendorObs)
+    );
     res
       .then((results) => {
-        let [data] = results;
-        if (typeof data.response !== 'string') {
-          let vendor = data.response as {
+        let [roleActs, labels, companyUser, comp] = results;
+        if (!AppUtilities.hasErrorResult(roleActs)) {
+          this.assignRolesAct(roleActs);
+        }
+        if (
+          !AppUtilities.hasErrorResult(comp) &&
+          !AppUtilities.hasErrorResult(companyUser)
+        ) {
+          let vendor = comp.response as {
             Comp_Mas_Sno: number;
             Company_Name: string;
           };
           this.vendor$ = of(vendor);
+          this.navigationBarItems(labels, companyUser.response as CompanyUser);
         }
         this.cdr.detectChanges();
       })

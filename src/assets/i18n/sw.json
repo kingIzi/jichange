@@ -17,7 +17,9 @@
     "success": "Mafanikio",
     "cancel": "Katisha",
     "all": "Yote",
-    "optional": "Hiari"
+    "optional": "Hiari",
+    "pleaseFill": "Tafadhali jaza",
+    "send": "Tuma"
   },
   "forms": {
     "from": "Kutoka",
@@ -139,179 +141,352 @@
   "vendorHeaders": [
     {
       "name": "Wateja",
+      "access": ["Admin", "Manager"],
       "dropdowns": []
     },
     {
       "name": "Watumiaji wa muuzaji",
+      "access": ["Admin", "Manager"],
       "dropdowns": []
     },
     {
-      "name": "Makadirio",
-      "dropdowns": ["Aliumba", "Yameundwa"]
+      "name": "Makaratasi ya malipo",
+      "access": ["Admin", "Manager"],
+      "dropdowns": ["Created", "Generated"]
     },
     {
       "name": "Ripoti",
+      "access": ["Admin", "Manager"],
       "dropdowns": [
-        "Muhtasari",
-        "Maelezo ya Miamala",
-        "Maelezo ya Makadirio",
-        "Maelezo kamili ya Malipo",
-        "Maelezo ya Mageuzi",
-        "Ankara iliyokatishwa"
+        {
+          "label": "Muonekano",
+          "routerLink": "/vendor/reports/overview",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Maelezo ya Malipo",
+          "routerLink": "/vendor/reports/transactions",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Maelezo ya Makaratasi ya Malipo",
+          "routerLink": "/vendor/reports/invoice",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Malipo Yaliyokamilika",
+          "routerLink": "/vendor/reports/payments",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Maelezo ya Marekebisho",
+          "routerLink": "/vendor/reports/amendment",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Makaratasi ya Malipo Yaliyofutwa",
+          "routerLink": "/vendor/reports/cancelled",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Njia za Ukaguzi",
+          "routerLink": "/vendor/reports/audit",
+          "access": ["Admin"]
+        }
       ]
     }
   ],
   "bankHeaders": [
     {
       "name": "Muuzaji",
-      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
+      "access": [
+        "Administrator",
+        "Recruitment Manager",
+        "Customer Support",
+        "Business Management"
+      ],
       "dropdowns": [
         {
           "label": "Muhtasari",
           "routerLink": "/main/company/summary",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Idhini",
           "routerLink": "/main/company/inbox",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         }
       ]
     },
     {
       "name": "Mazingira",
-      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
+      "access": [
+        "Administrator",
+        "Recruitment Manager",
+        "Customer Support",
+        "Business Management"
+      ],
       "dropdowns": [
         {
           "label": "Nchi",
           "routerLink": "/main/setup/country",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Mkoa",
           "routerLink": "/main/setup/region",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Wilaya",
           "routerLink": "/main/setup/district",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Kata",
           "routerLink": "/main/setup/ward",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Sarafu",
           "routerLink": "/main/setup/currency",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Cheo",
           "routerLink": "/main/setup/designation",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Tawi",
           "routerLink": "/main/setup/branch",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "SMTP",
           "routerLink": "/main/setup/smtp",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Barua Pepe",
           "routerLink": "/main/setup/email",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Mtumiaji wa Benki",
           "routerLink": "/main/setup/user",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Akaunti ya Kusubiri",
           "routerLink": "/main/setup/suspense",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Mipangilio ya SMS",
           "routerLink": "/main/setup/sms-settings",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Matini ya SMS",
           "routerLink": "/main/setup/sms-text",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         }
       ]
     },
     {
       "name": "Ripoti",
-      "access": ["Administrator", "Recruitment Manager", "Customer Support"],
+      "access": [
+        "Administrator",
+        "Recruitment Manager",
+        "Customer Support",
+        "Business Management"
+      ],
       "dropdowns": [
         {
           "label": "Muhtasari",
           "routerLink": "/main/reports/overview",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Maelezo ya Malipo",
           "routerLink": "/main/reports/transactions",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "malipo kamili",
           "routerLink": "/main/reports/payment",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Maelezo ya Anuani",
           "routerLink": "/main/reports/invoice",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Ankara iliyokatishwa",
           "routerLink": "/main/reports/cancelled",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Maelezo ya Marekebisho",
           "routerLink": "/main/reports/amendment",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Ripoti ya Wateja",
           "routerLink": "/main/reports/customer",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Ripoti ya Wauzaji",
           "routerLink": "/main/reports/vendors",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Anuani Zilizojumuishwa",
           "routerLink": "/main/reports/invoice-consolidated",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Malipo Yaliyojumuishwa",
           "routerLink": "/main/reports/payment-consolidated",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": [
+            "Administrator",
+            "Recruitment Manager",
+            "Customer Support",
+            "Business Management"
+          ]
         },
         {
           "label": "Ripoti ya Matumizi ya Mtumiaji",
           "routerLink": "/main/reports/userlog",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": ["Administrator"]
         },
         {
           "label": "Mafunzo ya Ukaguzi",
           "routerLink": "/main/reports/audit",
-          "access": ["Administrator", "Recruitment Manager", "Customer Support"]
+          "access": ["Administrator"]
         }
       ]
     }

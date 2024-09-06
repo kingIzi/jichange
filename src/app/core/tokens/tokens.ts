@@ -22,6 +22,7 @@ import { TransactionDetail } from '../models/bank/reports/transaction-detail';
 import { InvoiceConsolidatedReport } from '../models/bank/reports/invoice-consolidated-report';
 import { SmsSetting, SmsSettingsData } from '../models/bank/setup/sms-setting';
 import { SmsText } from '../models/bank/setup/sms-text';
+import { AuditTrailLogData } from '../models/bank/reports/auditTrail';
 
 export const TABLE_DATA_SERVICE = new InjectionToken<
   TableDataService<
@@ -43,6 +44,7 @@ export const TABLE_DATA_SERVICE = new InjectionToken<
     | InvoiceConsolidatedReport
     | SmsSettingsData
     | SmsText
+    | AuditTrailLogData
   >
 >('TABLE_DATA_SERVICE');
 

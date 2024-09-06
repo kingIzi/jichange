@@ -38,4 +38,22 @@ export class CompanyUserService {
     );
     return data;
   }
+  public resendCredentials(body: {
+    resendCredentials: string;
+    companyUserId: number;
+  }) {
+    return this.client.performPost<
+      {
+        resendCredentials: string;
+        companyUserId: number;
+      },
+      HttpDataResponse<number | CompanyUser>
+    >(`/api/CompanyUsers/ResendCredentials`, body);
+  }
+  public getCompanyUsersById(body: { Sno: number }) {
+    return this.client.performPost<
+      { Sno: number },
+      HttpDataResponse<number | CompanyUser>
+    >(`/api/CompanyUsers/EditCompanyUserss`, body);
+  }
 }

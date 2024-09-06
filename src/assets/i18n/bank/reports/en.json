@@ -942,7 +942,19 @@
   "auditTrails": {
     "auditTrails": "Audit Trails",
     "noAuditTrailsFound": "There were no audit trails found for dates specified.",
-    "searchBy": "Search by action type",
+    "searchBy": "Filter by action type",
+    "defaults": {
+      "added": "Added",
+      "update": "Modified",
+      "delete": "Deleted",
+      "at": "At",
+      "blankField": "Field was left blank"
+    },
+    "display": {
+      "insert": "Inserted {column} into {table}",
+      "update": "Modified {column} in {table}",
+      "delete": "Deleted from {table} table"
+    },
     "form": {
       "selectPage": "Select page",
       "company": "Company",
@@ -951,7 +963,8 @@
       "endDate": "End date",
       "placeholders": {
         "all": "All",
-        "pleaseSelect": "Please, select"
+        "pleaseSelect": "Please, select",
+        "action": "Select Action"
       },
       "errors": {
         "selectPage": "Please select a page",
@@ -966,38 +979,18 @@
     },
     "auditTrailsTable": [
       {
-        "label": "No.",
-        "value": "No.",
+        "label": "Title",
+        "value": "Table_Name",
         "desc": ""
       },
       {
         "label": "Type",
-        "value": "atype",
+        "value": "Audit_Type",
         "desc": ""
       },
       {
-        "label": "Column",
-        "value": "colname",
-        "desc": ""
-      },
-      {
-        "label": "Old Value",
-        "value": "ovalue",
-        "desc": ""
-      },
-      {
-        "label": "New Value",
-        "value": "nvalue",
-        "desc": ""
-      },
-      {
-        "label": "Posted by",
-        "value": "aby",
-        "desc": ""
-      },
-      {
-        "label": "Audit date",
-        "value": "adate",
+        "label": "User",
+        "value": "AuditorName",
         "desc": ""
       }
     ]

@@ -529,8 +529,21 @@ export class DashboardComponent implements OnInit {
         company: dcompany,
       },
     });
-    dialogRef.componentInstance.approved.asObservable().subscribe(() => {
+    dialogRef.componentInstance.approved.asObservable().subscribe((compid) => {
       dialogRef.close();
+      let msg = this.tr.translate(`company.inboxApproval.approvedSuccessfully`);
+      let path = '/main/company/summary';
+      let queryParams = {
+        compid: btoa(compid.toString()),
+      };
+      AppUtilities.showSuccessMessage(
+        msg,
+        () =>
+          this.router.navigate([path], {
+            queryParams: queryParams,
+          }),
+        this.tr.translate('actions.view')
+      );
       this.requestInboxApprovals();
     });
   }

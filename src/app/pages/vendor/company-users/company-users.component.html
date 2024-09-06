@@ -108,6 +108,80 @@
                 </p>
               </div>
               <ng-template #actionButtons>
+                <app-submit-message-box
+                  #submitMessageBox
+                ></app-submit-message-box>
+
+                <dialog #resendCredentialsDialog id="my_modal_2" class="modal">
+                  <div class="modal-box">
+                    <div class="flex flex-col space-y-2">
+                      <h3
+                        class="text-lg font-bold text-black lg:text-2xl"
+                        *transloco="let t; read: 'company'"
+                      >
+                        {{ t("resend") }}
+                      </h3>
+                      <p
+                        class="text-xs text-black"
+                        *transloco="
+                          let t;
+                          read: 'company.companyUsersForm.resend'
+                        "
+                      >
+                        {{ t("message") }}
+                      </p>
+                      <mat-radio-group
+                        [formControl]="resendCredentials"
+                        aria-label="Select an option"
+                      >
+                        <mat-radio-button
+                          *transloco="
+                            let y;
+                            read: 'company.companyUsersForm.resend'
+                          "
+                          [value]="'email'"
+                          color="primary"
+                          >{{ y("email") }}</mat-radio-button
+                        >
+                        <mat-radio-button
+                          *transloco="
+                            let y;
+                            read: 'company.companyUsersForm.resend'
+                          "
+                          [value]="'mobile'"
+                          color="primary"
+                          >{{ y("mobile") }}</mat-radio-button
+                        >
+                        @if (resendCredentials && resendCredentials.invalid &&
+                        resendCredentials.touched){
+                        <mat-error *transloco="let t; read: 'defaults'">
+                          {{ t("pleaseFill") }}
+                        </mat-error>
+                        }
+                      </mat-radio-group>
+                      <div class="flex flex-row items-center justify-end">
+                        <button
+                          (click)="
+                            submitResendCredentialsDialog(
+                              element,
+                              submitMessageBox,
+                              resendCredentialsDialog
+                            )
+                          "
+                          *transloco="let t; read: 'defaults'"
+                          type="submit"
+                          form="control-number-form"
+                          class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+                        >
+                          {{ t("send") }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <form method="dialog" class="modal-backdrop">
+                    <button>close</button>
+                  </form>
+                </dialog>
                 <div
                   class="flex flex-row items-center justify-between space-x-2 p-1"
                 >
@@ -115,6 +189,16 @@
                     {{ header.get("label")?.value }}
                   </p>
                   <div class="flex flex-row items-center space-x-2">
+                    <button
+                      *transloco="let t; read: 'company'"
+                      class="btn btn-sm btn-ghost tooltip border-warning-content"
+                      (click)="resendCredentialsDialog.showModal()"
+                      matTooltip="{{ t('resend') }}"
+                    >
+                      <span class="text-lg text-warning-content">
+                        <i class="bi bi-send"></i>
+                      </span>
+                    </button>
                     <button
                       *transloco="let t; read: 'actions'"
                       class="btn btn-sm btn-ghost tooltip border-info tooltip-bottom"
@@ -207,9 +291,96 @@
                     </p>
                   </ng-container>
                   <ng-template #actionTemplate>
+                    <app-submit-message-box
+                      #submitMessageBox
+                    ></app-submit-message-box>
+                    <dialog
+                      #resendCredentialsDialog
+                      id="my_modal_2"
+                      class="modal"
+                    >
+                      <div class="modal-box">
+                        <div class="flex flex-col space-y-2">
+                          <h3
+                            class="text-lg font-bold text-black lg:text-2xl"
+                            *transloco="let t; read: 'company'"
+                          >
+                            {{ t("resend") }}
+                          </h3>
+                          <p
+                            class="text-xs text-black"
+                            *transloco="
+                              let t;
+                              read: 'company.companyUsersForm.resend'
+                            "
+                          >
+                            {{ t("message") }}
+                          </p>
+                          <mat-radio-group
+                            [formControl]="resendCredentials"
+                            aria-label="Select an option"
+                          >
+                            <mat-radio-button
+                              *transloco="
+                                let y;
+                                read: 'company.companyUsersForm.resend'
+                              "
+                              [value]="'email'"
+                              color="primary"
+                              >{{ y("email") }}</mat-radio-button
+                            >
+                            <mat-radio-button
+                              *transloco="
+                                let y;
+                                read: 'company.companyUsersForm.resend'
+                              "
+                              [value]="'mobile'"
+                              color="primary"
+                              >{{ y("mobile") }}</mat-radio-button
+                            >
+                            @if (resendCredentials && resendCredentials.invalid
+                            && resendCredentials.touched){
+                            <mat-error *transloco="let t; read: 'defaults'">
+                              {{ t("pleaseFill") }}
+                            </mat-error>
+                            }
+                          </mat-radio-group>
+                          <div class="flex flex-row items-center justify-end">
+                            <button
+                              (click)="
+                                submitResendCredentialsDialog(
+                                  element,
+                                  submitMessageBox,
+                                  resendCredentialsDialog
+                                )
+                              "
+                              *transloco="let t; read: 'defaults'"
+                              type="submit"
+                              form="control-number-form"
+                              class="btn text-xs font-inter w-24 bg-primary hover:bg-accent text-neutral-50 btn-ghost shadow-4"
+                            >
+                              {{ t("send") }}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <form method="dialog" class="modal-backdrop">
+                        <button>close</button>
+                      </form>
+                    </dialog>
                     <div
                       class="flex flex-row items-center justify-end space-x-2"
                     >
+                      <button
+                        *transloco="let t; read: 'company'"
+                        class="btn btn-sm btn-ghost tooltip border-warning-content"
+                        (click)="resendCredentialsDialog.showModal()"
+                        matTooltip="{{ t('resend') }}"
+                      >
+                        <span class="text-lg text-warning-content">
+                          <i class="bi bi-send"></i>
+                        </span>
+                      </button>
                       <button
                         *transloco="let t; read: 'actions'"
                         class="btn btn-sm btn-ghost tooltip border-info tooltip-left"
