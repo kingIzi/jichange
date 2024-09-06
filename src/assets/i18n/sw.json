@@ -152,7 +152,18 @@
     {
       "name": "Makaratasi ya malipo",
       "access": ["Admin", "Manager"],
-      "dropdowns": ["Created", "Generated"]
+      "dropdowns": [
+        {
+          "label": "Created",
+          "routerLink": "/vendor/invoice/list",
+          "access": ["Admin", "Manager"]
+        },
+        {
+          "label": "Generated",
+          "routerLink": "/vendor/invoice/generated",
+          "access": ["Admin", "Manager"]
+        }
+      ]
     },
     {
       "name": "Ripoti",
